@@ -1,1 +1,1 @@
-web: yarn start-backend
+web: node heroku.js
