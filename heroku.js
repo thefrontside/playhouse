@@ -5,4 +5,4 @@ process.env.POSTGRES_PORT = databaseURL.port;
 process.env.POSTGRES_USER = databaseURL.username;
 process.env.POSTGRES_PASSWORD = databaseURL.password;
 
-require('./packages/backend/dist/main.js');
+require('./packages/backend/dist/index.cjs.js');
