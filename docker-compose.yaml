@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: "postgres:12"
+    container_name: frontside-backstage-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "6432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+volumes:
+  data:
