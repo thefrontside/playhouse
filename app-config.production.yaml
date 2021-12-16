@@ -1,8 +1,8 @@
 app:
   # Should be the same as backend.baseUrl when using the `app-backend` plugin
-  baseUrl: http://localhost:7007
+  baseUrl: https://frontside-backstage-production.herokuapp.com
 
 backend:
-  baseUrl: http://localhost:7007
+  baseUrl: https://frontside-backstage-production.herokuapp.com
   listen:
-    port: 7007
+    port: ${PORT}
