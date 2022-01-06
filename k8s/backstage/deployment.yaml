@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backstage
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: backstage
+  template:
+    metadata:
+      labels:
+        app: backstage
+    spec:
+      containers:
+      - name: backstage
+        image: northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage:test13
+        command: ["node", "packages/backend", "--config", "app-config.yaml"]
+        ports:
+          - name: http
+            containerPort: 7007
+        envFrom:
+          - secretRef:
+              name: postgres-secrets
