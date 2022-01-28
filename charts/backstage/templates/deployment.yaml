@@ -15,11 +15,11 @@ spec:
     spec:
       containers:
       - name: backstage
-        image: northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage:test13
+        image: {{ required "You must provide a Backstage image" .Values.backstageImage }}
         command: ["node", "packages/backend", "--config", "app-config.yaml"]
         ports:
           - name: http
-            containerPort: 7007
+            containerPort: {{ .Values.backstagePort | default 7007 }}
         envFrom:
           - secretRef:
               name: postgres-secrets

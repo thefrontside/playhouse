@@ -1,0 +1,2 @@
+postgresImage: postgres:13.2-alpine
+postgresPort: 5432

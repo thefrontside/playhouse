@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:13.2-alpine
+          image: {{ required "You must specify a postgres docker image" .Values.postgresImage }}
           imagePullPolicy: 'IfNotPresent'
           ports:
-            - containerPort: 5432
+            - containerPort: {{ .Values.postgresPort | default 5432 }}
           envFrom:
             - secretRef:
                 name: postgres-secrets

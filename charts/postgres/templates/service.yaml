@@ -6,4 +6,4 @@ spec:
   selector:
     app: postgres
   ports:
-    - port: 5432
+    - port: {{ .Values.postgresPort | default 5432 }}
