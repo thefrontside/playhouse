@@ -1,0 +1,19 @@
+# https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backstage-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    networking.gke.io/managed-certificates: backstage-managed-cert
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: backstage
+            port:
+              number: {{ .Values.ingressPort | default 80 }}

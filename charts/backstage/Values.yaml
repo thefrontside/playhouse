@@ -1,2 +1,2 @@
 backstagePort: 7007
-loadBalancerPort: 80
+ingressPort: 80

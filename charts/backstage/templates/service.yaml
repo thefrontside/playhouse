@@ -6,6 +6,6 @@ spec:
   selector:
     app: backstage
   ports:
-    - name: http
-      port: {{ .Values.loadBalancerPort | default 80 }}
-      targetPort: http
+    - protocol: TCP
+      port: {{ .Values.ingressPort | default 80 }}
+      targetPort: {{ .Values.backstagePort | default 7007 }}
