@@ -1,8 +1,7 @@
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
-  name: backstage-managed-cert
+  name: managed-cert-backstage-1
 spec:
   domains:
-    - frontside.services
-    - www.frontside.services
+    - backstage.frontside.services

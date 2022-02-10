@@ -22,9 +22,9 @@ spec:
             containerPort: {{ .Values.backstagePort | default 7007 }}
         env:
           - name: APP_CONFIG_app_baseUrl
-            value: http://34.117.17.55
+            value: https://backstage.frontside.services
           - name: APP_CONFIG_backend_baseUrl
-            value: http://34.117.17.55
+            value: https://backstage.frontside.services
         envFrom:
           - secretRef:
               name: postgres-secrets

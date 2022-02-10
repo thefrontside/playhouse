@@ -5,7 +5,7 @@ metadata:
   name: backstage-ingress
   annotations:
     kubernetes.io/ingress.class: "gce"
-    networking.gke.io/managed-certificates: backstage-managed-cert
+    networking.gke.io/managed-certificates: managed-cert-backstage-1
 spec:
   rules:
   - http:
