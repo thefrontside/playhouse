@@ -25,5 +25,7 @@ jobs:
     - name: gcloud sdk
       uses: google-github-actions/setup-gcloud@v0
     - run: yarn && yarn tsc && yarn build
-    - run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
-    - run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"
+    # - run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
+    # - run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"
+    - run: gcloud container clusters get-credentials $CLUSTER --zone $ZONE
+    - run: kubectl get all
