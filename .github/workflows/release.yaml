@@ -2,6 +2,8 @@ name: Backstage Release
 
 on: push
 
+concurrency: ${{ github.ref }}
+
 jobs:
   release:
     name: Cloud Build & Deploy
@@ -17,4 +19,5 @@ jobs:
         service_account: ${{ secrets.CLOUD_SERVICE_ACCOUNT }}
     - name: gcloud sdk
       uses: google-github-actions/setup-gcloud@v0
-    - run: gcloud info
+    - run: yarn && yarn tsc && yarn build
+    - run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_TAG="$(echo $GITHUB_SHA | cut -c 1-6)"
