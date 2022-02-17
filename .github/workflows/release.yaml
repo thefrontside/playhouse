@@ -4,6 +4,11 @@ on: push
 
 concurrency: ${{ github.ref }}
 
+env:
+  IMAGE: "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage"
+  CLUSTER: "backstage-cluster"
+  ZONE: "northamerica-northeast1-a"
+
 jobs:
   release:
     name: Cloud Build & Deploy
@@ -20,4 +25,5 @@ jobs:
     - name: gcloud sdk
       uses: google-github-actions/setup-gcloud@v0
     - run: yarn && yarn tsc && yarn build
-    - run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_TAG="$(echo $GITHUB_SHA | cut -c 1-6)"
+    - run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
+    - run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"

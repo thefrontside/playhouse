@@ -1,7 +1,7 @@
 steps:
 - name: "gcr.io/cloud-builders/docker"
-  args: [ "build", "-t", "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage:${_TAG}", "."]
+  args: [ "build", "-t", "${_IMAGE}", "."]
 options:
   logging: CLOUD_LOGGING_ONLY
 images:
-- "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage:${_TAG}"
+- "${_IMAGE}"
