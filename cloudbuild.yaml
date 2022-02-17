@@ -1,0 +1,7 @@
+steps:
+- name: "gcr.io/cloud-builders/docker"
+  args: [ "build", "-t", "${_IMAGE}", "."]
+options:
+  logging: CLOUD_LOGGING_ONLY
+images:
+- "${_IMAGE}"

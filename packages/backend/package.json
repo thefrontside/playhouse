@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "backstage-cli backend:bundle",
-    "build-image": "docker build ../.. -f Dockerfile --tag backstage",
+    "build-image": "docker build ../.. -f ../../Dockerfile --platform linux/amd64 --tag backstage",
     "start": "backstage-cli backend:dev",
     "lint": "backstage-cli lint",
     "test": "backstage-cli test",

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backstage
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: backstage
+  template:
+    metadata:
+      labels:
+        app: backstage
+    spec:
+      containers:
+      - name: backstage
+        image: {{ required "You must provide a Backstage image" .Values.backstageImage }}
+        command: ["node", "packages/backend", "--config", "app-config.yaml"]
+        ports:
+          - name: http
+            containerPort: {{ .Values.backstagePort | default 7007 }}
+        env:
+          - name: APP_CONFIG_app_baseUrl
+            value: https://backstage.frontside.services
+          - name: APP_CONFIG_backend_baseUrl
+            value: https://backstage.frontside.services
+        envFrom:
+          - secretRef:
+              name: postgres-secrets
