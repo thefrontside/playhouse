@@ -3,8 +3,14 @@ kind: Deployment
 metadata:
   name: backstage
 spec:
-  replicas: 1
-  revisionHistoryLimit: 0
+  replicas: 2
+  progressDeadlineSeconds: 35
+    # 15 initial of startup probe + 15 (5 period x 3) + 5 leeway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: backstage
@@ -20,6 +26,16 @@ spec:
         ports:
           - name: http
             containerPort: {{ .Values.backstagePort | default 7007 }}
+        livenessProbe:
+          httpGet:
+            path: /api/healthcheck
+            port: http
+        startupProbe:
+          httpGet:
+            path: /api/healthcheck
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 5
         env:
           - name: APP_CONFIG_app_baseUrl
             value: {{ .Values.baseUrl }}
