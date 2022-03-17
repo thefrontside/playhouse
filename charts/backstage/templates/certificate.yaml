@@ -1,0 +1,9 @@
+# todo: make this template optional for local development
+
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: managed-cert-backstage-1
+spec:
+  domains:
+    - backstage.frontside.services
