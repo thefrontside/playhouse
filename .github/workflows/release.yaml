@@ -47,3 +47,12 @@ jobs:
 
     - name: Helm Upgrade Backstage (backstage:${{ env.TAG }})
       run: helm upgrade --install min-backstage-chart ./charts/backstage -f ./charts/backstage/Values.yaml --set backstageImage="$IMAGE:$TAG"
+
+    - name: Confirm Deployment Status
+      id: deploy-status
+      continue-on-error: true
+      run: kubectl rollout status deployment/backstage
+
+    - name: Rollback Deployment
+      if: steps.deploy-status.outcome == 'failure'
+      run: helm rollback min-backstage-chart

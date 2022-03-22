@@ -27,6 +27,7 @@ import scaffolder from './plugins/scaffolder';
 import proxy from './plugins/proxy';
 import techdocs from './plugins/techdocs';
 import search from './plugins/search';
+import healthcheck from './plugins/healthcheck';
 import { PluginEnvironment } from './types';
 
 function makeCreateEnv(config: Config) {
@@ -55,6 +56,7 @@ async function main() {
   });
   const createEnv = makeCreateEnv(config);
 
+  const healthcheckEnv = useHotMemoize(module, () => createEnv('healthcheck'));
   const catalogEnv = useHotMemoize(module, () => createEnv('catalog'));
   const scaffolderEnv = useHotMemoize(module, () => createEnv('scaffolder'));
   const authEnv = useHotMemoize(module, () => createEnv('auth'));
@@ -70,6 +72,7 @@ async function main() {
   apiRouter.use('/techdocs', await techdocs(techdocsEnv));
   apiRouter.use('/proxy', await proxy(proxyEnv));
   apiRouter.use('/search', await search(searchEnv));
+  apiRouter.use('/healthcheck', await healthcheck(healthcheckEnv))
   apiRouter.use(notFoundHandler());
 
   const service = createServiceBuilder(module)
