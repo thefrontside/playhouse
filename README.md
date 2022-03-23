@@ -23,7 +23,11 @@ minikube start
 eval $(minikube docker-env)
 minikube image load backstage:$TAG
 
-# 💥 comment out ./backstate/templates/certificate.yaml
+# TODO - need to modify the charts so that the following steps are automated for local development but for now please do the following manually:
+* 💥 comment out ./backstate/templates/certificate.yaml
+* 💥 comment out ./backstage/templates/secrets.yaml
+* 💥 comment out `volumeMounts` and `volumes`
+* 💥 modify container command to exclude `app-config.production.yaml`
 
 helm upgrade --install min-postgres-chart ./charts/postgres \
   -f ./charts/postgres/Values.yaml \
