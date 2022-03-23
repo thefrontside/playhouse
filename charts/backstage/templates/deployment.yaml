@@ -4,8 +4,7 @@ metadata:
   name: backstage
 spec:
   replicas: 2
-  progressDeadlineSeconds: 35
-    # 15 initial of startup probe + 15 (5 period x 3) + 5 leeway
+  progressDeadlineSeconds: 60
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -34,8 +33,8 @@ spec:
           httpGet:
             path: /api/healthcheck
             port: http
-          initialDelaySeconds: 15
-          periodSeconds: 5
+          periodSeconds: 4
+          failureThreshold: 15
         env:
           - name: APP_CONFIG_app_baseUrl
             value: {{ .Values.baseUrl }}
