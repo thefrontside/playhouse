@@ -21,7 +21,7 @@ spec:
       containers:
       - name: backstage
         image: {{ required "You must provide a Backstage image" .Values.backstageImage }}
-        command: ["node", "packages/backend", "--config", "app-config.yaml"]
+        command: ["node", "packages/backend", "--config", "app-config.yaml", "--config", "app-config.production.yaml"]
         ports:
           - name: http
             containerPort: {{ .Values.backstagePort | default 7007 }}
@@ -35,6 +35,14 @@ spec:
             port: http
           periodSeconds: 4
           failureThreshold: 15
+        volumeMounts:
+          - mountPath: "/app/credentials"
+            name: "backstage-app-credentials"
+            readOnly: true
+        volumes:
+          - name: "backstage-app-credentials"
+            secret:
+              secretName: backstage-credentials
         env:
           - name: APP_CONFIG_app_baseUrl
             value: {{ .Values.baseUrl }}
