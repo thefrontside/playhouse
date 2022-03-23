@@ -1,0 +1,5 @@
+integrations:
+  github:
+    - host: github.com
+      apps:
+        - $include: credentials/backstage-app-credentials.yaml
