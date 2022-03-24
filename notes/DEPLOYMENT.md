@@ -1,5 +1,7 @@
 # Backstage Deployment Workflow Overview
 
+The file for this workflow is located [here](https://github.com/thefrontside/backstage/blob/main/.github/workflows/release.yaml).
+
 Runs on commits to the main branch (pull request merge commits):
 
 1. Authenticate workflow runner to GCP
