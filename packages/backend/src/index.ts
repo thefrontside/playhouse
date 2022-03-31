@@ -32,6 +32,7 @@ import search from './plugins/search';
 import healthcheck from './plugins/healthcheck';
 import effectionInspector from './plugins/effection-inspector';
 import humanitec from './plugins/humanitec';
+import graphql from './plugins/graphql';
 import { PluginEnvironment } from './types';
 
 function makeCreateEnv(config: Config) {
@@ -67,6 +68,7 @@ async function main() {
   const createEnv = makeCreateEnv(config);
 
   const effectionInspectorEnv = useHotMemoize(module, () => createEnv('inspector'));
+  const graphqlEnv = useHotMemoize(module, () => createEnv('graphql'));
   const healthcheckEnv = useHotMemoize(module, () => createEnv('healthcheck'));
   const catalogEnv = useHotMemoize(module, () => createEnv('catalog'));
   const scaffolderEnv = useHotMemoize(module, () => createEnv('scaffolder'));
@@ -87,6 +89,7 @@ async function main() {
   apiRouter.use('/healthcheck', await healthcheck(healthcheckEnv));
   apiRouter.use('/effection-inspector', await effectionInspector(effectionInspectorEnv));
   apiRouter.use('/humanitec', await humanitec(humanitecEnv));
+  apiRouter.use('/graphql', await graphql(graphqlEnv));
   apiRouter.use(notFoundHandler());
 
   const service = createServiceBuilder(module)
