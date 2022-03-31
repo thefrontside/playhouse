@@ -1,0 +1,47 @@
+{
+  "name": "@internal/plugin-graphql",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "license": "Apache-2.0",
+  "private": true,
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.cjs.js",
+    "types": "dist/index.d.ts"
+  },
+  "scripts": {
+    "start": "backstage-cli backend:dev",
+    "build": "backstage-cli backend:build",
+    "lint": "backstage-cli lint",
+    "test": "backstage-cli test",
+    "prepack": "backstage-cli prepack",
+    "postpack": "backstage-cli postpack",
+    "clean": "backstage-cli clean"
+  },
+  "dependencies": {
+    "@backstage/backend-common": "^0.9.14",
+    "@backstage/config": "^0.1.8",
+    "@graphql-tools/utils": "^8.6.5",
+    "@types/express": "*",
+    "cross-fetch": "^3.0.6",
+    "express": "^4.17.1",
+    "express-graphql": "^0.12.0",
+    "express-promise-router": "^4.1.0",
+    "graphql": "^16.3.0",
+    "graphql-relay": "^0.10.0",
+    "graphql-ws": "^5.6.4",
+    "winston": "^3.2.1",
+    "yn": "^4.0.0"
+  },
+  "devDependencies": {
+    "@backstage/cli": "^0.10.2",
+    "@types/graphql": "^14.5.0",
+    "@types/supertest": "^2.0.8",
+    "msw": "^0.35.0",
+    "supertest": "^4.0.2"
+  },
+  "files": [
+    "dist"
+  ]
+}
