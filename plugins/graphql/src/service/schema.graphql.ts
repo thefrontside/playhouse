@@ -5,18 +5,18 @@ function graphql(str: TemplateStringsArray) {
 // NOTE This schema will be generated in runtime
 export default graphql`
 interface Node {
-  id: ID! @field(at: "metadata.uid")
+  id: ID! #@field(at: "metadata.uid")
 }
 
 interface Entity {
-  name: String! @field(at: "metadata.name")
-  namespace: String @field(at: "metadata.namespace")
-  title: String @field(at: "metadata.title")
-  description: String @field(at: "metadata.description")
+  name: String! #@field(at: "metadata.name")
+  namespace: String #@field(at: "metadata.namespace")
+  title: String #@field(at: "metadata.title")
+  description: String #@field(at: "metadata.description")
   # labels?: Record<string, string>
   # annotations?: Record<string, string>
-  tags: [String] @field(at: "metadata.tags")
-  links: [EntityLink] @field(at: "metadata.links")
+  tags: [String] #@field(at: "metadata.tags")
+  links: [EntityLink] #@field(at: "metadata.links")
 }
 
 type EntityLink {
@@ -24,6 +24,21 @@ type EntityLink {
   title: String
   icon: String
 }
+
+enum Lifecycle {
+  EXPERIMENTAL
+  PRODUCTION
+  DEPRECATED
+}
+
+union Owner = User | Group
+
+# type:
+# Location - url
+# Component - service, library, website
+# API - openapi, grpc, asyncapi
+# Resource - database
+# Group - team, organization, sub-department, department
 
 # Basic types
 type Component implements Node & Entity {
@@ -35,14 +50,15 @@ type Component implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  type: String! @field(at: "spec.type")
-  lifecycle: String! @field(at: "spec.lifecycle")
-  owner: String! @field(at: "spec.owner")
-  subcomponentOf: String @field(at: "spec.subcomponentOf")
-  providesApis: [String] @field(at: "spec.providesApis")
-  consumesApis: [String] @field(at: "spec.consumesApis")
-  dependsOn: [String] @field(at: "spec.dependsOn")
-  system: String @field(at: "spec.system")
+  type: String! #@field(at: "spec.type")
+  lifecycle: Lifecycle! #@field(at: "spec.lifecycle")
+  owner: Owner! #@field(at: "spec.owner")
+  subcomponentOf: Component #@field(at: "spec.subcomponentOf")
+  components: [Component]
+  providesApis: [API] #@field(at: "spec.providesApis")
+  consumesApis: [API] #@field(at: "spec.consumesApis")
+  dependencies: [Resource] #@field(at: "spec.dependsOn")
+  system: System #@field(at: "spec.system")
 }
 
 type System implements Node & Entity {
@@ -54,8 +70,10 @@ type System implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  owner: String! @field(at: "spec.owner")
-  domain: String @field(at: "spec.domain")
+  owner: Owner! #@field(at: "spec.owner")
+  domain: Domain #@field(at: "spec.domain")
+  components: [Component]
+  resources: [Resource]
 }
 
 type API implements Node & Entity {
@@ -67,12 +85,16 @@ type API implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  type: String! @field(at: "spec.type")
-  lifecycle: String! @field(at: "spec.lifecycle")
-  owner: String! @field(at: "spec.owner")
-  definition: String! @field(at: "spec.definition")
-  system: String @field(at: "spec.system")
+  type: String! #@field(at: "spec.type")
+  lifecycle: Lifecycle! #@field(at: "spec.lifecycle")
+  owner: Owner! #@field(at: "spec.owner")
+  definition: String! #@field(at: "spec.definition")
+  system: System #@field(at: "spec.system")
+  consumers: [Component]
+  providers: [Component]
 }
+
+union Ownable = System | Resource | Component | API | Domain | Template
 
 type Group implements Node & Entity {
   id: ID!
@@ -83,13 +105,14 @@ type Group implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  type: String! @field(at: "spec.type")
-  children: [String]! @field(at: "spec.children")
-  displayName: String @field(at: "spec.profile.displayName")
-  email: String @field(at: "spec.profile.email")
-  picture: String @field(at: "spec.profile.picture")
-  parent: String @field(at: "spec.parent")
-  members: [String] @field(at: "spec.members")
+  type: String! #@field(at: "spec.type")
+  children: [Group]! #@field(at: "spec.children")
+  displayName: String #@field(at: "spec.profile.displayName")
+  email: String #@field(at: "spec.profile.email")
+  picture: String #@field(at: "spec.profile.picture")
+  parent: Group #@field(at: "spec.parent")
+  members: [User] #@field(at: "spec.members")
+  owns: [Ownable]
 }
 
 type User implements Node & Entity {
@@ -101,10 +124,11 @@ type User implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  memberOf: [String]! @field(at: "spec.memberOf")
-  displayName: String @field(at: "spec.profile.displayName")
-  email: String @field(at: "spec.profile.email")
-  picture: String @field(at: "spec.profile.picture")
+  memberOf: [Group]! #@field(at: "spec.memberOf")
+  displayName: String #@field(at: "spec.profile.displayName")
+  email: String #@field(at: "spec.profile.email")
+  picture: String #@field(at: "spec.profile.picture")
+  owns: [Ownable]
 }
 
 type Resource implements Node & Entity {
@@ -116,10 +140,10 @@ type Resource implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  type: String! @field(at: "spec.type")
-  owner: String! @field(at: "spec.owner")
-  dependsOn: [String] @field(at: "spec.dependsOn")
-  system: String @field(at: "spec.system")
+  type: String! #@field(at: "spec.type")
+  owner: Owner! #@field(at: "spec.owner")
+  dependencyOf: [Component]
+  system: System #@field(at: "spec.system")
 }
 
 enum Presence {
@@ -136,10 +160,10 @@ type Location implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  type: String @field(at: "spec.type")
-  target: String @field(at: "spec.target")
-  targets: [String] @field(at: "spec.targets")
-  presence: Presence @field(at: "spec.presence")
+  type: String #@field(at: "spec.type")
+  target: String #@field(at: "spec.target")
+  targets: [String] #@field(at: "spec.targets")
+  presence: Presence #@field(at: "spec.presence")
 }
 
 type Domain implements Node & Entity {
@@ -151,7 +175,7 @@ type Domain implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  owner: String! @field(at: "spec.owner")
+  owner: Owner! #@field(at: "spec.owner")
 }
 
 union StepIf = String | Boolean
@@ -173,14 +197,14 @@ type Template implements Node & Entity {
   tags: [String]
   links: [EntityLink]
 
-  type: String! @field(at: "spec.type")
+  type: String! #@field(at: "spec.type")
   # parameters?: JsonObject | JsonObject[]
-  steps: [Step]! @field(at: "spec.steps")
+  steps: [Step]! #@field(at: "spec.steps")
   # output?: { [name: string]: string }
-  owner: String @field(at: "spec.owner")
+  owner: Owner #@field(at: "spec.owner")
 }
 
-directive @field(at: String = "") on FIELD_DEFINITION
+directive #@field(at: String = "") on FIELD_DEFINITION
 
 type Query {
   node(id: ID!): Node
