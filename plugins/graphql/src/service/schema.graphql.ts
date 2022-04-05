@@ -1,9 +1,4 @@
-function graphql(str: TemplateStringsArray) {
-  return str.join('')
-}
-
-// NOTE This schema will be generated in runtime
-export default graphql`
+export default /* GraphQL */`
 interface Node {
   id: ID! #@field(at: "metadata.uid")
 }
@@ -178,14 +173,14 @@ type Domain implements Node & Entity {
   owner: Owner! #@field(at: "spec.owner")
 }
 
-union StepIf = String | Boolean
+# union StepIf = String | Boolean
 
 type Step {
   id: String
   name: String
   action: String!
   # input?: JsonObject
-  if: StepIf
+  if: String
 }
 
 type Template implements Node & Entity {
@@ -204,7 +199,7 @@ type Template implements Node & Entity {
   owner: Owner #@field(at: "spec.owner")
 }
 
-directive #@field(at: String = "") on FIELD_DEFINITION
+directive @field(at: String = "") on FIELD_DEFINITION
 
 type Query {
   node(id: ID!): Node
