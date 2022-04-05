@@ -30,6 +30,7 @@ import search from './plugins/search';
 import healthcheck from './plugins/healthcheck';
 import graphql from './plugins/graphql';
 import { PluginEnvironment } from './types';
+import { CatalogClient } from '@backstage/catalog-client';
 
 function makeCreateEnv(config: Config) {
   const root = getRootLogger();
@@ -41,12 +42,13 @@ function makeCreateEnv(config: Config) {
   const cacheManager = CacheManager.fromConfig(config);
   const databaseManager = DatabaseManager.fromConfig(config);
   const tokenManager = ServerTokenManager.noop();
+  const catalogClient = new CatalogClient({ discoveryApi: discovery });
 
   return (plugin: string): PluginEnvironment => {
     const logger = root.child({ type: 'plugin', plugin });
     const database = databaseManager.forPlugin(plugin);
     const cache = cacheManager.forPlugin(plugin);
-    return { logger, database, cache, config, reader, discovery, tokenManager };
+    return { logger, database, cache, config, reader, discovery, tokenManager, catalog: catalogClient };
   };
 }
 
