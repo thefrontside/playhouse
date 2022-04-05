@@ -9,6 +9,7 @@ import {
 } from '@backstage/backend-common';
 import { PluginTaskScheduler } from '@backstage/backend-tasks';
 import { PermissionEvaluator } from '@backstage/plugin-permission-common';
+import { CatalogClient } from '@backstage/catalog-client';
 
 export type PluginEnvironment = {
   logger: Logger;
@@ -20,4 +21,5 @@ export type PluginEnvironment = {
   tokenManager: TokenManager;
   scheduler: PluginTaskScheduler;
   permissions: PermissionEvaluator;
+  catalog: CatalogClient
 };

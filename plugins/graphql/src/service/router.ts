@@ -19,45 +19,42 @@ import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { graphqlHTTP } from 'express-graphql';
-import { buildSchema, GraphQLSchema } from 'graphql';
-import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
+// import { buildSchema } from 'graphql';
+// import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
+import { makeExecutableSchema }  from "@graphql-tools/schema";
+import { CatalogClient } from '@backstage/catalog-client';
 
-import schemaSource from './schema.graphql'
+import typeDefs from './schema.graphql';
+import { resolvers } from './resolvers'
 
 export interface RouterOptions {
   logger: Logger;
+  catalog: CatalogClient;
 }
 
-let schema = buildSchema(schemaSource);
-const resolvers = {
-  // Query: {
-  //   user(parent, args, context, info) {
-  //     return users.find(user => user.id === args.id);
-  //   }
-  // }
-};
+// function fieldDirectiveTransformer(s: GraphQLSchema, directiveName: string) {
+//   return mapSchema(s, {
+//     [MapperKind.OBJECT_FIELD]: fieldConfig => {
+//       const fieldDirective = getDirective(s, fieldConfig, directiveName)?.[0];
+//       if (fieldDirective) {
+//         // TODO fieldDirective.at
+//         // const { resolve = defaultFieldResolver } = fieldConfig;
+//         // fieldConfig.resolve = async function newResolve(source, args, context, info) {
+//         //   const result = await resolve(source, args, context, info);
+//         //   if (typeof result === 'string') {
+//         //     return result.toUpperCase();
+//         //   }
+//         //   return result;
+//         // }
+//       }
+//       return fieldConfig;
+//     },
+//   });
+// }
 
-function fieldDirectiveTransformer(s: GraphQLSchema, directiveName: string) {
-  return mapSchema(s, {
-    [MapperKind.OBJECT_FIELD]: (fieldConfig) => {
-      const fieldDirective = getDirective(s, fieldConfig, directiveName)?.[0];
-      if (fieldDirective) {
-        // TODO fieldDirective.at
-        // const { resolve = defaultFieldResolver } = fieldConfig;
-        // fieldConfig.resolve = async function newResolve(source, args, context, info) {
-        //   const result = await resolve(source, args, context, info);
-        //   if (typeof result === 'string') {
-        //     return result.toUpperCase();
-        //   }
-        //   return result;
-        // }
-      }
-      return fieldConfig;
-    },
-  });
-};
+// schema = fieldDirectiveTransformer(schema, 'upper');
 
-schema = fieldDirectiveTransformer(schema, 'upper');
+const schema = makeExecutableSchema({ typeDefs, resolvers })
 
 export async function createRouter(
   options: RouterOptions,
@@ -68,13 +65,17 @@ export async function createRouter(
   router.use(express.json());
   router.use((_, res, next) => {
     res.setHeader('Content-Security-Policy', "'self' http: 'unsafe-inline'");
-    next()
-  })
-  router.use('/', graphqlHTTP({
-    schema,
-    rootValue: resolvers,
-    graphiql: true,
-  }));
+    next();
+  });
+  router.use(
+    '/',
+    graphqlHTTP({
+      schema,
+      // rootValue: resolvers,
+      graphiql: true,
+      context: options,
+    }),
+  );
 
   router.get('/health', (_, response) => {
     logger.info('PONG!');
