@@ -26,7 +26,7 @@ export interface RouterOptions {
   catalog: CatalogClient;
 }
 
-import { schema, createApp } from './app';
+import { schema, createApp } from '../app';
 
 export async function createRouter(
   options: RouterOptions,

@@ -89,7 +89,8 @@ export function createBackstage(options: BackstageOptions = {}): Operation<Graph
 
       return {
         *query(jsonQuery) {
-          let query = jsonToGraphQLQuery(jsonQuery);
+          let query = jsonToGraphQLQuery({ query: jsonQuery });
+
           let result = yield fetch(`${baseUrl}/api/graphql`, {
             headers: {
               "Content-Type": "application/json",
@@ -101,7 +102,7 @@ export function createBackstage(options: BackstageOptions = {}): Operation<Graph
           if (result.errors && result.errors.length > 0) {
             throw new Error(JSON.stringify(result.errors, null, 2));
           }
-          return result.query;
+          return result.data;
         }
       };
     }
