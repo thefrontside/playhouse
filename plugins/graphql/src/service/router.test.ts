@@ -15,6 +15,7 @@
  */
 
 import { getVoidLogger } from '@backstage/backend-common';
+import { CatalogClient } from '@backstage/catalog-client';
 import express from 'express';
 import request from 'supertest';
 
@@ -26,6 +27,11 @@ describe('createRouter', () => {
   beforeAll(async () => {
     const router = await createRouter({
       logger: getVoidLogger(),
+      catalog: new CatalogClient({
+        discoveryApi: {
+          getBaseUrl: () => Promise.resolve('http://localhost:7000'),
+        },
+      }),
     });
     app = express().use(router);
   });

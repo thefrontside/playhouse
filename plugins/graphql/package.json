@@ -21,7 +21,10 @@
   },
   "dependencies": {
     "@backstage/backend-common": "^0.9.14",
+    "@backstage/catalog-client": "^0.5.2",
+    "@backstage/catalog-model": "^0.9.8",
     "@backstage/config": "^0.1.8",
+    "@graphql-tools/schema": "^8.3.6",
     "@graphql-tools/utils": "^8.6.5",
     "@types/express": "*",
     "cross-fetch": "^3.0.6",
