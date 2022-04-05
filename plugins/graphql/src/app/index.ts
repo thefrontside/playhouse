@@ -4,7 +4,7 @@ import { useGraphQLModules } from '@envelop/graphql-modules';
 import { Application, createApplication } from 'graphql-modules';
 import { ResolverContext } from './resolver-context';
 import { Relay } from './modules/relay';
-import { Entities } from './modules/entities';
+import { Entity } from './modules/entity';
 
 export interface App {
   (): ReturnType<GetEnvelopedFn<ResolverContext>>;
@@ -27,6 +27,6 @@ export function createApp(catalog: Catalog): App {
 
 function create(): Application {
   return createApplication({
-    modules: [Relay, Entities],
+    modules: [Relay, Entity],
   });
 }
