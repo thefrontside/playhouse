@@ -3556,6 +3556,11 @@
   dependencies:
     "@envelop/types" "2.2.0"
 
+"@envelop/graphql-modules@^3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@envelop/graphql-modules/-/graphql-modules-3.3.0.tgz#72c474e48dec15d09f014cd952cbcf184b74bfdb"
+  integrity sha512-FTnjRGJGf5FMex6RF2ie1g+HlgL9xK1+vqqcmxcu7K5TwU31wSY2zoX83WXRFVc+j1rbPVkwSkUF53dVQRAmyg==
+
 "@envelop/types@2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@envelop/types/-/types-2.2.0.tgz#95776d9b63ba8974f52b476d4db5bb169febbe32"
