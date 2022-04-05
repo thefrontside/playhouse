@@ -19,47 +19,21 @@ import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { graphqlHTTP } from 'express-graphql';
-// import { buildSchema } from 'graphql';
-// import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
-import { makeExecutableSchema }  from "@graphql-tools/schema";
 import { CatalogClient } from '@backstage/catalog-client';
-
-import typeDefs from './schema.graphql';
-import { resolvers } from './resolvers'
 
 export interface RouterOptions {
   logger: Logger;
   catalog: CatalogClient;
 }
 
-// function fieldDirectiveTransformer(s: GraphQLSchema, directiveName: string) {
-//   return mapSchema(s, {
-//     [MapperKind.OBJECT_FIELD]: fieldConfig => {
-//       const fieldDirective = getDirective(s, fieldConfig, directiveName)?.[0];
-//       if (fieldDirective) {
-//         // TODO fieldDirective.at
-//         // const { resolve = defaultFieldResolver } = fieldConfig;
-//         // fieldConfig.resolve = async function newResolve(source, args, context, info) {
-//         //   const result = await resolve(source, args, context, info);
-//         //   if (typeof result === 'string') {
-//         //     return result.toUpperCase();
-//         //   }
-//         //   return result;
-//         // }
-//       }
-//       return fieldConfig;
-//     },
-//   });
-// }
-
-// schema = fieldDirectiveTransformer(schema, 'upper');
-
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+import { schema, createApp } from './app';
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
   const { logger } = options;
+
+  const app = createApp(options.catalog);
 
   const router = Router();
   router.use(express.json());
@@ -67,15 +41,22 @@ export async function createRouter(
     res.setHeader('Content-Security-Policy', "'self' http: 'unsafe-inline'");
     next();
   });
-  router.use(
-    '/',
-    graphqlHTTP({
+
+  router.use('/',  graphqlHTTP(async () => {
+    const { parse, validate, contextFactory, execute } = app();
+    return {
       schema,
-      // rootValue: resolvers,
       graphiql: true,
-      context: options,
-    }),
-  );
+      customParseFn: parse,
+      customValidateFn: validate,
+      customExecuteFn: async args => {
+        return execute({
+          ...args,
+          contextValue: await contextFactory(),
+        });
+      },
+    };
+  }));
 
   router.get('/health', (_, response) => {
     logger.info('PONG!');
