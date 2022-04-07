@@ -7,6 +7,7 @@ import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import { dirname } from 'path';
 import { knex, Knex } from 'knex';
 import { merge } from 'lodash';
+import { backstageConfig } from './testConfig';
 
 export interface GraphQLAPI {
   query(json: JsonObject): Operation<JsonObject>;
@@ -17,27 +18,11 @@ export interface BackstageOptions {
   config?: JsonObject;
 }
 
-export const config = {
-  backend: {
-    listen: { port: 8800 },
-    database: {
-      prefix: "graphql_tests_",
-      client: 'pg',
-      connection: {
-        host: 'localhost',
-        port: '5432',
-        user: 'postgres',
-        password: 'postgres',
-      },
-    },
-    baseUrl: 'http://localhost:8800',
-  }
-};
-
-export function createBackstage(options: BackstageOptions = {}): Operation<GraphQLAPI> {
-
+export function createBackstage(
+  options: BackstageOptions = {},
+): Operation<GraphQLAPI> {
   const { log = false } = options;
-  const reader = new ConfigReader(merge(config, options.config ?? {}));
+  const reader = new ConfigReader(merge(backstageConfig, options.config ?? {}));
   const baseUrl = reader.getString('backend.baseUrl');
   return {
     name: 'backstage server',
@@ -52,49 +37,54 @@ export function createBackstage(options: BackstageOptions = {}): Operation<Graph
         } as Record<string, string>,
       });
 
-      yield spawn(proc.stdout.lines().forEach(function*(line) {
-        if (line.match(/failed to start/)) {
-          throw new Error(line);
-        }
-      }));
+      yield spawn(
+        proc.stdout.lines().forEach(function* (line) {
+          if (line.match(/failed to start/)) {
+            throw new Error(line);
+          }
+        }),
+      );
 
       if (log) {
         yield spawn({
           name: 'stdout.log',
           expand: false,
-          [Symbol.operation]: proc.stdout.forEach(function*(buffer) {
+          [Symbol.operation]: proc.stdout.forEach(function* (buffer) {
             const data = String(buffer);
             if (log === true) {
               console.log(data);
             } else {
-              yield log.out(data)
+              yield log.out(data);
             }
-          })
+          }),
         });
         yield spawn({
           name: 'stderr.log',
           expand: false,
-          [Symbol.operation]: proc.stderr.forEach(function*(buffer) {
+          [Symbol.operation]: proc.stderr.forEach(function* (buffer) {
             const data = String(buffer);
             if (log === true) {
               console.log(data);
             } else {
-              yield log.out(data)
+              yield log.out(data);
             }
-          })
-        })
+          }),
+        });
       }
 
-      yield proc.stdout.lines().grep(/Listening on/).first();
+      yield proc.stdout
+        .lines()
+        .grep(/Listening on/)
+        .first();
 
       return {
         *query(jsonQuery) {
-          let query = jsonToGraphQLQuery({ query: jsonQuery });
+          const query = jsonToGraphQLQuery({ query: jsonQuery });
 
-          let result = yield fetch(`${baseUrl}/api/graphql`, {
+          const result = yield fetch(`${baseUrl}/api/graphql`, {
             headers: {
-              "Content-Type": "application/json",
-              "Accept": "application/json",
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
             },
             method: 'POST',
             body: JSON.stringify({ query }),
@@ -103,24 +93,30 @@ export function createBackstage(options: BackstageOptions = {}): Operation<Graph
             throw new Error(JSON.stringify(result.errors, null, 2));
           }
           return result.data;
-        }
+        },
       };
-    }
-  }
+    },
+  };
 }
 
-
 function configToEnv(config: Config): Record<string, string> {
-  function collect(data: JsonValue, path: string[] = []): Record<string, string> {
+  function collect(
+    data: JsonValue,
+    path: string[] = [],
+  ): Record<string, string> {
     if (isObject(data)) {
       return Object.entries(data).reduce((env, [key, value]) => {
         return {
           ...env,
-          ...collect(value ?? null, path.concat(key))
-        }
+          ...collect(value ?? null, path.concat(key)),
+        };
       }, {});
     } else if (isPrimitive(data)) {
       return { [`APP_CONFIG_${path.join('_')}`]: String(data) };
+    } else if (Array.isArray(data)) {
+      return {
+        [`APP_CONFIG_${path.join('_')}`]: JSON.stringify(data),
+      };
     }
 
     return {};
@@ -129,10 +125,12 @@ function configToEnv(config: Config): Record<string, string> {
 }
 
 function isPrimitive(json: JsonValue): json is JsonPrimitive {
+  // eslint-disable-next-line eqeqeq
   return json == null || typeof json !== 'object';
 }
 
 function isObject(json: JsonValue): json is JsonObject {
+  // eslint-disable-next-line eqeqeq
   return json != null && !Array.isArray(json) && typeof json === 'object';
 }
 
@@ -146,7 +144,10 @@ export interface ProcessLogOptions {
   path: string;
 }
 
-export function createProcessLog({ name, path }: ProcessLogOptions): Operation<ProcessLog> {
+export function createProcessLog({
+  name,
+  path,
+}: ProcessLogOptions): Operation<ProcessLog> {
   const outFilename = `${path}.out.log`;
   const errFilename = `${path}.err.log`;
 
