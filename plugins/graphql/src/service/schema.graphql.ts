@@ -49,7 +49,7 @@ type Component implements Node & Entity {
   lifecycle: Lifecycle! #@field(at: "spec.lifecycle")
   owner: Owner! #@field(at: "spec.owner")
   subcomponentOf: Component #@field(at: "spec.subcomponentOf")
-  components: [Component]
+  components: ComponentConnection
   providesApis: [API] #@field(at: "spec.providesApis")
   consumesApis: [API] #@field(at: "spec.consumesApis")
   dependencies: [Resource] #@field(at: "spec.dependsOn")
