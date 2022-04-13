@@ -1,7 +1,7 @@
 import { Entity, EntityName } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
 import { Catalog } from './catalog';
-import { Node, Mapper } from './mappers';
+import { Resolver, TypedEntity } from './resolver'
 
 export interface TypedEntityName extends EntityName {
   typename: string;
@@ -15,16 +15,16 @@ export interface Key {
 
 export interface LoaderOptions {
   catalog: Catalog;
-  mapper: Mapper;
+  resolver: Resolver;
 }
 
 export interface Loader {
-  load(id: string): Promise<Node | null>;
-  loadMany(ids: string[]): Promise<Array<Node | null>>;
-  loadEntity<T extends Entity = Entity>(id: string): Promise<T>;
+  load(id: string): Promise<TypedEntity | null>;
+  loadMany(ids: string[]): Promise<Array<TypedEntity | null>>;
+  loadEntity<T extends Entity = Entity>(id: string): Promise<T & TypedEntity>;
 }
 
-export function encodeId(name: TypedEntityName): string {
+export function encodeId(name: TypedEntityName | EntityName): string {
   return Buffer.from(JSON.stringify(name), 'utf-8').toString('base64');
 }
 
@@ -37,7 +37,7 @@ export function decodeId(id: string): Key {
 
 export function createLoader({
   catalog,
-  mapper,
+  resolver,
 }: LoaderOptions): Loader {
   async function fetch(ids: readonly string[]): Promise<Array<Entity | Error>> {
     return Promise.all(
@@ -54,22 +54,22 @@ export function createLoader({
 
   const dataloader = new Dataloader<string, Entity>(fetch);
 
-  async function load(id: string): Promise<Node | null> {
+  async function load(id: string): Promise<TypedEntity | null> {
     const [node] = await loadMany([id]);
     return node;
   }
 
-  async function loadMany(ids: string[]): Promise<Array<Node | null>> {
+  async function loadMany(ids: string[]): Promise<Array<TypedEntity | null>> {
     const entities = await dataloader.loadMany(ids);
-    return entities.map(entity => (entity instanceof Error ? null : mapper.toNode(entity)));
+    return entities.map(entity => (entity instanceof Error ? null : resolver.resolve(entity)));
   }
 
-  async function loadEntity<T extends Entity = Entity>(id: string): Promise<T> {
-    const entity = await dataloader.load(id);
+  async function loadEntity<T extends Entity = Entity>(id: string): Promise<T & TypedEntity> {
+    const entity = await load(id);
     if (entity instanceof Error) {
       throw Error;
     } else {
-      return entity as T;
+      return entity as T & TypedEntity;
     }
   }
 
