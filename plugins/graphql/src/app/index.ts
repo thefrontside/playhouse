@@ -14,6 +14,8 @@ import { Domain } from './modules/domain';
 import { createLoader } from './loaders';
 import { createTypeResolver } from './resolver';
 import { Directives, transformer } from './modules/directives';
+import { Shared } from './modules/shared';
+import { API } from './modules/api';
 
 export interface App {
   (): ReturnType<GetEnvelopedFn<ResolverContext>>;
@@ -41,6 +43,7 @@ function create(): Application {
     schemaBuilder: ({ typeDefs, resolvers }) =>
       transformer(makeExecutableSchema({ typeDefs, resolvers })),
     modules: [
+      Shared,
       Node,
       Entity,
       Component,
@@ -48,6 +51,7 @@ function create(): Application {
       User,
       Resource,
       Domain,
+      API,
       Directives,
     ],
   });
