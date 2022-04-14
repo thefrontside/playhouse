@@ -4,7 +4,7 @@ import {
   MapperKind,
   SchemaMapper,
 } from '@graphql-tools/utils';
-import { GraphQLField, GraphQLFieldMap, GraphQLSchema } from 'graphql';
+import { GraphQLField, GraphQLFieldMap, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLTypeResolver } from 'graphql';
 import { createModule, gql } from 'graphql-modules';
 import { get } from 'lodash';
 import { encodeId } from '../loaders';
@@ -14,37 +14,63 @@ export const Directives = createModule({
   id: 'directives',
   typeDefs: gql`
     directive @field(at: String!) on FIELD_DEFINITION
-    directive @hasOne(type: String!) on FIELD_DEFINITION
+    directive @relation on FIELD_DEFINITION
   `,
 });
 
 const directiveMappers: Array<(
-  objectFieldType: GraphQLField<{ id: string }, ResolverContext>,
-  interfaceFieldType: GraphQLField<{ id: string }, ResolverContext>,
+  objectField: GraphQLField<{ id: string }, ResolverContext>,
+  interfaceField: GraphQLField<{ id: string }, ResolverContext>,
   schema: GraphQLSchema
 ) => void> = [
-  (objectFieldType, interfaceFieldType, schema) => {
-    const fieldDirective = getDirective(schema, interfaceFieldType ?? objectFieldType, 'field')?.[0];
-      if (fieldDirective) {
-        objectFieldType.resolve = async ({ id }, _, { loader }) => {
-          const entity = await loader.load(id);
-          if (!entity) return null;
-          return get(entity, fieldDirective.at);
-        };
-      }
+  (objectField, interfaceField, schema) => {
+    const fieldDirective = getDirective(schema, interfaceField ?? objectField, 'field')?.[0];
+    if (!fieldDirective) return
+
+    const fieldType = (interfaceField ?? objectField).type
+    const isKeyValuePairs = fieldType instanceof GraphQLList
+      && fieldType.ofType instanceof GraphQLObjectType
+      && fieldType.ofType.name === 'KeyValuePair'
+    objectField.resolve = async ({ id }, _, { loader }) => {
+      const entity = await loader.load(id);
+      if (!entity) return null;
+      const fieldValue = get(entity, fieldDirective.at);
+      return isKeyValuePairs && fieldValue ? Object.entries(fieldValue).map(([key, value]) => ({ key, value })) : fieldValue
+    };
   },
-  (objectFieldType, interfaceFieldType, schema) => {
-    const fieldDirective = getDirective(schema, interfaceFieldType ?? objectFieldType, 'hasOne')?.[0];
-      if (fieldDirective) {
-        objectFieldType.resolve = async ({ id }, _, { loader }) => {
-          const { target } = (await loader.load(id))?.relations?.find(({ type }) => type === fieldDirective.type) ?? {}
-          return target ? { id: encodeId(target) } : null
-        };
-      }
-  }
+  (objectField, interfaceField, schema) => {
+    const fieldDirective = getDirective(schema, interfaceField ?? objectField, 'relation')?.[0];
+    if (!fieldDirective) return
+
+    const fieldType = (interfaceField ?? objectField).type
+    const isList = fieldType instanceof GraphQLList
+      || (fieldType instanceof GraphQLNonNull && fieldType.ofType instanceof GraphQLList)
+    objectField.resolve = async ({ id }, _, { loader }) => {
+      const entities = (await loader.load(id))
+        ?.relations
+        ?.filter(({ type }) => type === objectField.name)
+        .map(({ target }) => ({ id: encodeId(target) })) ?? []
+      const [entity = null] = entities
+
+      return isList ? entities : entity
+    };
+  },
 ]
 
-const defineFieldResolvers: SchemaMapper = {
+const resolveType: GraphQLTypeResolver<{ id: string }, ResolverContext> = (async ({ id }, { loader }) => {
+  const entity = await loader.load(id);
+  return (entity ? entity.__typeName : 'Unknown') ?? undefined;
+})
+
+const mappers: SchemaMapper = {
+  [MapperKind.UNION_TYPE]: (unionType) => {
+    unionType.resolveType = unionType.resolveType ?? resolveType
+    return unionType
+  },
+  [MapperKind.INTERFACE_TYPE]: (interfaceType) => {
+    interfaceType.resolveType = interfaceType.resolveType ?? resolveType
+    return interfaceType
+  },
   [MapperKind.OBJECT_TYPE]: (objectType, schema) => {
     const interfaceFields = objectType
       .getInterfaces()
@@ -67,4 +93,4 @@ const defineFieldResolvers: SchemaMapper = {
 };
 
 export const transformer = (schema: GraphQLSchema) =>
-  mapSchema(schema, defineFieldResolvers);
+  mapSchema(schema, mappers);

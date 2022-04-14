@@ -1,21 +1,44 @@
+import { Entity, ResourceEntity } from '@backstage/catalog-model';
 import { createModule, gql } from 'graphql-modules';
+import { pascalCase } from 'pascal-case'
+import { resolverProvider } from '../resolver';
 
 export const Resource = createModule({
   id: `resource`,
   typeDefs: gql`
-    type Resource implements Node & Entity {
+    union Ownable = Database
+    union SystemPart = Database
+    union Dependency = Database
+
+    interface Resource {
+      ownedBy: Owner! @relation
+      dependsOn: [Dependency] @relation
+      dependencyOf: [Dependency] @relation
+      partOf: [System] @relation
+    }
+
+    type Database implements Node & Entity & Resource {
       id: ID!
+
       name: String!
       namespace: String
       title: String
       description: String
-      tags: [String]
-      links: [EntityLink]
+      labels: [KeyValuePair]
+      annotations: [KeyValuePair]
+      tags: [String!]
+      links: [EntityLink!]
 
-      type: String! #@field(at: "spec.type")
-      owner: Owner! #@field(at: "spec.owner")
-      dependencyOf: [Component]
-      system: System #@field(at: "spec.system")
+      ownedBy: Owner!
+      dependsOn: [Dependency]
+      dependencyOf: [Dependency]
+      partOf: [System]
     }
   `,
+  providers: [
+    resolverProvider({
+      accept: (entity: Entity): entity is ResourceEntity => entity.kind === 'Resource',
+      resolve: entity => entity ? ({ __typeName: pascalCase(entity.spec.type), ...entity }) : null,
+    }),
+  ],
 });
