@@ -59,7 +59,7 @@ const directiveMappers: Array<(
 
 const resolveType: GraphQLTypeResolver<{ id: string }, ResolverContext> = (async ({ id }, { loader }) => {
   const entity = await loader.load(id);
-  return (entity ? entity.__typeName : 'Unknown') ?? undefined;
+  return (entity ? entity.__typeName : 'Never') ?? undefined;
 })
 
 const mappers: SchemaMapper = {

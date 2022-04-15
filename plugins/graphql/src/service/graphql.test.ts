@@ -202,6 +202,38 @@ describe('querying the graphql API', () => {
     });
   });
 
+  it.eventually("looks up component's apis", function* () {
+    expect(
+      yield graphql.query({
+        entity: {
+          __args: { kind: 'Component', name: 'wayback-search' },
+          name: true,
+          __on: {
+            __typeName: 'Service',
+            providesApi: {
+              __on: {
+                __typeName: 'Openapi',
+                name: true
+              }
+            },
+            consumesApi: {
+              __on: {
+                __typeName: 'Openapi',
+                name: true
+              }
+            }
+          }
+        },
+      }),
+    ).toMatchObject({
+      entity: {
+        name: 'wayback-search',
+        providesApi: [{ name: 'wayback-search' }],
+        consumesApi: [{ name: 'wayback-archive' }]
+      }
+    });
+  });
+
   it.eventually("looks up component's dependencies", function* () {
     expect(
       yield graphql.query({
@@ -567,7 +599,95 @@ describe('querying the graphql API', () => {
     });
   });
 
-  // TODO APIs
-  // TODO Location
-  // TODO Template
+  it.eventually('can look up a known API', function* () {
+    expect(
+      yield graphql.query({
+        entity: {
+          __args: { kind: 'API', name: 'hello-world' },
+          description: true,
+          __on: {
+            __typeName: 'Grpc',
+            lifecycle: true,
+            apiProvidedBy: {
+              __on: {
+                __typeName: 'Service',
+                name: true,
+                description: true
+              }
+            }
+          },
+        },
+      }),
+    ).toMatchObject({
+      entity: {
+        description: 'Hello World example for gRPC',
+        lifecycle: 'DEPRECATED',
+        apiProvidedBy: [{ name: 'petstore', description: 'The Petstore is an example API used to show features of the OpenAPI spec.' }]
+      }
+    });
+  });
+
+  it.eventually('can look up a known location', function* () {
+    expect(
+      yield graphql.query({
+        entity: {
+          __args: { kind: 'Location', name: 'example-groups' },
+          description: true,
+          __on: {
+            __typeName: 'Location',
+            targets: true,
+            target: true,
+            type: true
+          }
+        },
+      }),
+    ).toMatchObject({
+      entity: {
+        description: 'A collection of all Backstage example Groups',
+        targets: [
+          "./infrastructure-group.yaml",
+          "./boxoffice-group.yaml",
+          "./backstage-group.yaml",
+          "./team-a-group.yaml",
+          "./team-b-group.yaml",
+          "./team-c-group.yaml",
+          "./team-d-group.yaml"
+        ],
+        target: null,
+        type: null
+      }
+    });
+  });
+
+  it.eventually('can look up a known template', function* () {
+    expect(
+      yield graphql.query({
+        entity: {
+          __args: { kind: 'Template', name: 'react-ssr-template' },
+          description: true,
+          __on: {
+            __typeName: 'Website',
+            output: true
+          }
+        },
+      }),
+    ).toMatchObject({
+      entity: {
+        description: 'Create a website powered with Next.js',
+        output: {
+          links: [
+            {
+              title: "Repository",
+              url: "${{ steps.publish.output.remoteUrl }}"
+            },
+            {
+              title: "Open in catalog",
+              icon: "catalog",
+              entityRef: "${{ steps.register.output.entityRef }}"
+            }
+          ]
+        }
+      }
+    });
+  });
 });

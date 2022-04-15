@@ -29,14 +29,8 @@ export const Entity = createModule({
     Query: {
       entity: (
         _: any,
-        {
-          name,
-          kind,
-          namespace = 'default',
-        }: { name: string; kind: string; namespace: string | undefined },
-      ): { id: string } => ({
-        id: encodeId({ typename: 'Entity', name, kind, namespace }),
-      }),
+        { name, kind, namespace = 'default' }: { name: string; kind: string; namespace: string | undefined },
+      ): { id: string } => ({ id: encodeId({ typename: 'Entity', name, kind, namespace }) }),
     },
   },
 });
