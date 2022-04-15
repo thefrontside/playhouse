@@ -23,7 +23,7 @@ export const backstageConfig = {
           'Group',
           'User',
           'Resource',
-          'Location',
+          'Location'
         ],
       },
     ],
@@ -62,14 +62,17 @@ export const backstageConfig = {
         type: 'url',
         target:
           'https://github.com/backstage/software-templates/blob/main/scaffolder-templates/react-ssr-template/template.yaml',
+        rules: [{ allow: ['Template'] }]
       },{
         type: 'url',
         target:
           'https://github.com/backstage/software-templates/blob/main/scaffolder-templates/springboot-grpc-template/template.yaml',
+        rules: [{ allow: ['Template'] }]
       },{
         type: 'url',
         target:
           'https://github.com/backstage/software-templates/blob/main/scaffolder-templates/docs-template/template.yaml',
+        rules: [{ allow: ['Template'] }]
       },
     ],
   },

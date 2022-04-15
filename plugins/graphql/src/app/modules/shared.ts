@@ -13,5 +13,9 @@ export const Shared = createModule({
       key: String!
       value: String!
     }
+
+    type Never implements Node {
+      id: ID!
+    }
   `,
 })
