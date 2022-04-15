@@ -16,6 +16,8 @@ import { createTypeResolver } from './resolver';
 import { Directives, transformer } from './modules/directives';
 import { Shared } from './modules/shared';
 import { API } from './modules/api';
+import { Location } from './modules/location';
+import { Template } from './modules/template';
 
 export interface App {
   (): ReturnType<GetEnvelopedFn<ResolverContext>>;
@@ -52,6 +54,8 @@ function create(): Application {
       Resource,
       Domain,
       API,
+      Location,
+      Template,
       Directives,
     ],
   });
