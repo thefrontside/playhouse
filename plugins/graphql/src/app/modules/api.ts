@@ -10,11 +10,11 @@ export const API = createModule({
 
     interface API {
       lifecycle: Lifecycle! @field(at: "spec.lifecycle")
-      ownedBy: Owner! @relation
+      owner: Owner! @relation(type: "ownedBy")
       definition: String! @field(at: "spec.definition")
-      partOf: System @relation
-      apiConsumedBy: [Component] @relation
-      apiProvidedBy: [Component] @relation
+      system: System @relation(type: "partOf")
+      consumers: [Component] @relation(type: "apiConsumedBy")
+      providers: [Component] @relation(type: "apiProvidedBy")
     }
 
     type Openapi implements Node & Entity & API {
@@ -24,17 +24,15 @@ export const API = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       lifecycle: Lifecycle!
-      ownedBy: Owner!
+      owner: Owner!
       definition: String!
-      partOf: System
-      apiConsumedBy: [Component]
-      apiProvidedBy: [Component]
+      system: System
+      consumers: [Component]
+      providers: [Component]
     }
 
     type Graphql implements Node & Entity & API {
@@ -44,17 +42,15 @@ export const API = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       lifecycle: Lifecycle!
-      ownedBy: Owner!
+      owner: Owner!
       definition: String!
-      partOf: System
-      apiConsumedBy: [Component]
-      apiProvidedBy: [Component]
+      system: System
+      consumers: [Component]
+      providers: [Component]
     }
 
     type Asyncapi implements Node & Entity & API {
@@ -64,17 +60,15 @@ export const API = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       lifecycle: Lifecycle!
-      ownedBy: Owner!
+      owner: Owner!
       definition: String!
-      partOf: System
-      apiConsumedBy: [Component]
-      apiProvidedBy: [Component]
+      system: System
+      consumers: [Component]
+      providers: [Component]
     }
 
     type Grpc implements Node & Entity & API {
@@ -84,17 +78,15 @@ export const API = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       lifecycle: Lifecycle!
-      ownedBy: Owner!
+      owner: Owner!
       definition: String!
-      partOf: System
-      apiConsumedBy: [Component]
-      apiProvidedBy: [Component]
+      system: System
+      consumers: [Component]
+      providers: [Component]
     }
   `,
   providers: [

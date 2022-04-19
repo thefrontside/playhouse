@@ -9,11 +9,6 @@ export const Shared = createModule({
       DEPRECATED
     }
 
-    type KeyValuePair {
-      key: String!
-      value: String!
-    }
-
     type Never implements Node {
       id: ID!
     }
