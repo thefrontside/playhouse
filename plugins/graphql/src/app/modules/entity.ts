@@ -9,8 +9,6 @@ export const Entity = createModule({
       namespace: String @field(at: "metadata.namespace")
       title: String @field(at: "metadata.title")
       description: String @field(at: "metadata.description")
-      labels: [KeyValuePair] @field(at: "metadata.labels")
-      annotations: [KeyValuePair] @field(at: "metadata.annotations")
       tags: [String] @field(at: "metadata.tags")
       links: [EntityLink] @field(at: "metadata.links")
     }

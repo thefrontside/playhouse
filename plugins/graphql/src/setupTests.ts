@@ -3,14 +3,13 @@ import { daemon, Process } from '@effection/process';
 import { Config, ConfigReader } from '@backstage/config';
 import type { JsonObject, JsonValue, JsonPrimitive } from '@backstage/types';
 import { FileHandle, mkdir, open } from 'fs/promises';
-import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import { dirname } from 'path';
 import { knex, Knex } from 'knex';
 import { merge } from 'lodash';
 import { backstageConfig } from './testConfig';
 
 export interface GraphQLAPI {
-  query(json: JsonObject): Operation<JsonObject>;
+  query(query: string): Operation<JsonObject>;
 }
 
 export interface BackstageOptions {
@@ -78,16 +77,14 @@ export function createBackstage(
         .first();
 
       return {
-        *query(jsonQuery) {
-          const query = jsonToGraphQLQuery({ query: jsonQuery });
-
+        *query(query) {
           const result = yield fetch(`${baseUrl}/api/graphql`, {
             headers: {
               'Content-Type': 'application/json',
               Accept: 'application/json',
             },
             method: 'POST',
-            body: JSON.stringify({ query }),
+            body: JSON.stringify({ query: `{${query}}` }),
           }).json();
           if (result.errors && result.errors.length > 0) {
             throw new Error(JSON.stringify(result.errors, null, 2));

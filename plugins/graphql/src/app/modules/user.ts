@@ -9,12 +9,12 @@ export const User = createModule({
     union Owner = User | Team | SubDepartment | Department | Organization
 
     interface Group {
-      parentOf: [Group]! @relation
+      children: [Group]! @relation(type: "parentOf")
       displayName: String @field(at: "spec.profile.displayName")
       email: String @field(at: "spec.profile.email")
       picture: String @field(at: "spec.profile.picture")
-      childOf: Group @relation
-      hasMember: [User] @relation
+      parent: Group @relation(type: "childOf")
+      members: [User] @relation(type: "hasMember")
       ownerOf: [Ownable] @relation
     }
 
@@ -25,17 +25,15 @@ export const User = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String]
       links: [EntityLink]
 
-      parentOf: [Group]!
+      children: [Group]!
       displayName: String
       email: String
       picture: String
-      childOf: SubDepartment
-      hasMember: [User]
+      parent: SubDepartment
+      members: [User]
       ownerOf: [Ownable]
     }
 
@@ -46,17 +44,15 @@ export const User = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String]
       links: [EntityLink]
 
-      parentOf: [Group]!
+      children: [Group]!
       displayName: String
       email: String
       picture: String
-      childOf: Department
-      hasMember: [User]
+      parent: Department
+      members: [User]
       ownerOf: [Ownable]
     }
 
@@ -67,17 +63,15 @@ export const User = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String]
       links: [EntityLink]
 
-      parentOf: [Group]!
+      children: [Group]!
       displayName: String
       email: String
       picture: String
-      childOf: Organization
-      hasMember: [User]
+      parent: Organization
+      members: [User]
       ownerOf: [Ownable]
     }
 
@@ -88,17 +82,15 @@ export const User = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String]
       links: [EntityLink]
 
-      parentOf: [Group]!
+      children: [Group]!
       displayName: String
       email: String
       picture: String
-      childOf: Group
-      hasMember: [User]
+      parent: Group
+      members: [User]
       ownerOf: [Ownable]
     }
 
@@ -108,8 +100,6 @@ export const User = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String]
       links: [EntityLink]
 
