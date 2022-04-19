@@ -23,7 +23,7 @@ export const Template = createModule({
       parameters: JSONObject @field(at: "spec.parameters ")
       steps: [Step]! @field(at: "spec.steps")
       output: JSONObject @field(at: "spec.output")
-      ownedBy: Owner @relation
+      owner: Owner @relation(type: "ownedBy")
     }
 
     type Website implements Node & Entity & Template {
@@ -33,15 +33,13 @@ export const Template = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       parameters: JSONObject
       steps: [Step]!
       output: JSONObject
-      ownedBy: Owner
+      owner: Owner
     }
 
     type Documentation implements Node & Entity & Template {
@@ -51,15 +49,13 @@ export const Template = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       parameters: JSONObject
       steps: [Step]!
       output: JSONObject
-      ownedBy: Owner
+      owner: Owner
     }
 
     type Service implements Node & Entity & Template {
@@ -69,15 +65,13 @@ export const Template = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       parameters: JSONObject
       steps: [Step]!
       output: JSONObject
-      ownedBy: Owner
+      owner: Owner
     }
   `,
   resolvers: {
