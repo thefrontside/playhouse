@@ -6,7 +6,6 @@ export const System = createModule({
   id: `system`,
   typeDefs: gql`
     union Ownable = System
-    union Module = System
 
     type System implements Node & Entity {
       id: ID!
@@ -14,14 +13,13 @@ export const System = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String]
       links: [EntityLink]
 
-      ownedBy: Owner! @relation
-      partOf: Domain @relation
-      hasPart: [SystemPart] @relation
+      owner: Owner! @relation(type: "ownedBy")
+      domain: Domain @relation(type: "partOf")
+      components: [Component] @relation(type: "hasPart", kind: "component")
+      resources: [Resource] @relation(type: "hasPart", kind: "resource")
     }
   `,
   providers: [

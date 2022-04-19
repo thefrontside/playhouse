@@ -6,19 +6,18 @@ import { resolverProvider } from '../resolver';
 export const Component = createModule({
   id: `component`,
   typeDefs: gql`
-    union Module = Website | Service | Library
-    union SystemPart = Website | Service | Library
     union Ownable = Website | Service | Library
     union Dependency = Website | Service | Library
 
     interface Component {
       lifecycle: Lifecycle! @field(at: "spec.lifecycle")
-      ownedBy: Owner! @relation
-      partOf: Module @relation
-      hasPart: [Component] @relation
+      owner: Owner! @relation(type: "ownedBy")
+      system: System @relation(type: "partOf", kind: "system")
+      component: Component @relation(type: "partOf", kind: "component")
+      subComponents: [Component] @relation(type: "hasPart")
       providesApi: [API] @relation
       consumesApi: [API] @relation
-      dependsOn: [Dependency] @relation
+      dependencies: [Dependency] @relation(type: "dependsOn")
     }
 
     type Website implements Node & Entity & Component {
@@ -28,18 +27,17 @@ export const Component = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       lifecycle: Lifecycle!
-      ownedBy: Owner!
-      partOf: Module
-      hasPart: [Component]
+      owner: Owner!
+      system: System
+      component: Component
+      subComponents: [Component]
       providesApi: [API]
       consumesApi: [API]
-      dependsOn: [Dependency]
+      dependencies: [Dependency]
     }
 
     type Service implements Node & Entity & Component {
@@ -49,18 +47,17 @@ export const Component = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       lifecycle: Lifecycle!
-      ownedBy: Owner!
-      partOf: Module
-      hasPart: [Component]
+      owner: Owner!
+      system: System
+      component: Component
+      subComponents: [Component]
       providesApi: [API]
       consumesApi: [API]
-      dependsOn: [Dependency]
+      dependencies: [Dependency]
     }
 
     type Library implements Node & Entity & Component {
@@ -70,18 +67,17 @@ export const Component = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
       lifecycle: Lifecycle!
-      ownedBy: Owner!
-      partOf: Module
-      hasPart: [Component]
+      owner: Owner!
+      system: System
+      component: Component
+      subComponents: [Component]
       providesApi: [API]
       consumesApi: [API]
-      dependsOn: [Dependency]
+      dependencies: [Dependency]
     }
   `,
   resolvers: {

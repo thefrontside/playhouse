@@ -14,7 +14,7 @@ export const Directives = createModule({
   id: 'directives',
   typeDefs: gql`
     directive @field(at: String!) on FIELD_DEFINITION
-    directive @relation on FIELD_DEFINITION
+    directive @relation(type: String, kind: String) on FIELD_DEFINITION
   `,
 });
 
@@ -48,7 +48,10 @@ const directiveMappers: Array<(
     objectField.resolve = async ({ id }, _, { loader }) => {
       const entities = (await loader.load(id))
         ?.relations
-        ?.filter(({ type }) => type === objectField.name)
+        ?.filter(({ type, target }) => (
+          type === (fieldDirective.type ?? objectField.name) &&
+          (fieldDirective.kind ? target.kind === fieldDirective.kind : true)
+        ))
         .map(({ target }) => ({ id: encodeId(target) })) ?? []
       const [entity = null] = entities
 
