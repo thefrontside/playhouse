@@ -13,13 +13,11 @@ export const Domain = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String]
       links: [EntityLink]
 
-      ownedBy: Owner! @relation
-      hasPart: [System] @relation
+      owner: Owner! @relation(type: "ownedBy")
+      systems: [System] @relation(type: "hasPart")
     }
   `,
   providers: [

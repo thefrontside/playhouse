@@ -19,29 +19,22 @@ describe('querying the graphql API', () => {
       namespace: 'default',
     });
     expect(
-      yield graphql.query({
-        node: {
-          __args: { id },
-          id: true,
-        },
-      }),
+
+      yield graphql.query(/* GraphQL */`
+        node(id: "${id}") { id }
+      `),
     ).toMatchObject({ node: { id } });
   });
 
   it.eventually('can look up a known entity by name', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: {
-            kind: 'Component',
-            name: 'backstage',
-            namespace: 'default',
-          },
-          name: true,
-          namespace: true,
-          description: true,
-        },
-      }),
+      yield graphql.query(/* GraphQL */`
+        entity(
+          kind: "Component",
+          name: "backstage",
+          namespace: "default"
+        ) { name, namespace, description }
+      `),
     ).toMatchObject({
       entity: {
         name: 'backstage',
@@ -55,93 +48,49 @@ describe('querying the graphql API', () => {
     'looks up entity in the default namespace if no namespace provided',
     function* () {
       expect(
-        yield graphql.query({
-          entity: {
-            __args: { kind: 'Component', name: 'backstage' },
-            name: true,
-            namespace: true,
-            description: true,
-          },
-        }),
+        yield graphql.query(/* GraphQL */`
+          entity(kind: "Component", name: "backstage") { name, namespace, description }
+        `),
       ).toMatchObject({ entity: { name: 'backstage', namespace: 'default' } });
     },
   );
 
-  it.eventually('looks up entity annotations and labels', function* () {
-    expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Component', name: 'www-artist' },
-          name: true,
-          annotations: { key: true, value: true },
-          labels: { key: true, value: true }
-        },
-      }),
-    ).toMatchObject({
-      entity: {
-        name: 'www-artist',
-        labels: null,
-        annotations: [{
-          key: "backstage.io/managed-by-location",
-          value: "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/components/www-artist-component.yaml"
-        }, {
-          key: "backstage.io/managed-by-origin-location",
-          value: "url:https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-components.yaml"
-        }, {
-          key: "backstage.io/view-url",
-          value: "https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/components/www-artist-component.yaml"
-        }, {
-          key: "backstage.io/edit-url",
-          value: "https://github.com/backstage/backstage/edit/master/packages/catalog-model/examples/components/www-artist-component.yaml"
-        }, {
-          key: "backstage.io/source-location",
-          value: "url:https://github.com/backstage/backstage/tree/master/packages/catalog-model/examples/components/"
-        }]
-      },
-    });
-  });
-
   it.eventually('can look up a known component', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Component', name: 'www-artist' },
-          name: true,
-          __on: {
-            __typeName: 'Website',
-            lifecycle: true,
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Component", name: "www-artist") {
+          name
+          ... on Website {
+            lifecycle
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({ entity: { name: 'www-artist', lifecycle: 'PRODUCTION' } });
   });
 
   it.eventually("can look up a component's owner", function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Component', name: 'www-artist' },
-          name: true,
-          __on: {
-            __typeName: 'Website',
-            lifecycle: true,
-            ownedBy: {
-              __on: {
-                __typeName: 'Team',
-                name: true,
-                email: true,
-                displayName: true,
-                picture: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Component", name: "www-artist") {
+          name
+          ...on Website {
+            lifecycle
+            owner {
+              ...on Team {
+                name
+                email
+                displayName
+                picture
               }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         name: 'www-artist',
         lifecycle: 'PRODUCTION',
-        ownedBy: {
+        owner: {
           name: 'team-a',
           email: 'team-a@example.com',
           displayName: null,
@@ -153,78 +102,64 @@ describe('querying the graphql API', () => {
 
   it.eventually("can look up which system component belongs to", function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Component', name: 'www-artist' },
-          __on: {
-            __typeName: 'Website',
-            lifecycle: true,
-            partOf: {
-              __on: {
-                __typeName: 'System',
-                name: true,
-                description: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Component", name: "www-artist") {
+          ...on Website {
+            lifecycle
+            system {
+              ...on System {
+                name
+                description
               }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         lifecycle: 'PRODUCTION',
-        partOf: { name: 'artist-engagement-portal', description: 'Everything related to artists' }
+        system: { name: 'artist-engagement-portal', description: 'Everything related to artists' }
       }
     });
   });
 
   it.eventually("looks up component's parts", function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Component', name: 'wayback-archive' },
-          name: true,
-          __on: {
-            __typeName: 'Service',
-            hasPart: {
-              __on: {
-                __typeName: 'Service',
-                name: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Component", name: "wayback-archive") {
+          name
+          ...on Service {
+            subComponents {
+              ...on Service {
+                name
               }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         name: 'wayback-archive',
-        hasPart: [{ name: 'wayback-archive-ingestion' }, { name: 'wayback-archive-storage' }]
+        subComponents: [{ name: 'wayback-archive-ingestion' }, { name: 'wayback-archive-storage' }]
       }
     });
   });
 
   it.eventually("looks up component's apis", function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Component', name: 'wayback-search' },
-          name: true,
-          __on: {
-            __typeName: 'Service',
-            providesApi: {
-              __on: {
-                __typeName: 'Openapi',
-                name: true
-              }
-            },
-            consumesApi: {
-              __on: {
-                __typeName: 'Openapi',
-                name: true
-              }
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Component", name: "wayback-search") {
+          name
+          ...on Service {
+            providesApi {
+              ...on Openapi { name }
+            }
+            consumesApi {
+              ...on Openapi { name }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         name: 'wayback-search',
@@ -236,68 +171,58 @@ describe('querying the graphql API', () => {
 
   it.eventually("looks up component's dependencies", function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Component', name: 'artist-lookup' },
-          name: true,
-          __on: {
-            __typeName: 'Service',
-            dependsOn: {
-              __on: {
-                __typeName: 'Database',
-                name: true
-              }
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Component", name: "artist-lookup") {
+          name
+          ...on Service {
+            dependencies {
+              ...on Database { name }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         name: 'artist-lookup',
-        dependsOn: [{ name: 'artists-db' }]
+        dependencies: [{ name: 'artists-db' }]
       }
     });
   });
 
   it.eventually("can look up components hierarchy", function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Component', name: 'wayback-archive-storage' },
-          description: true,
-          __on: {
-            __typeName: 'Service',
-            partOf: {
-              __on: {
-                __typeName: 'Service',
-                name: true,
-                description: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Component", name: "wayback-archive-storage") {
+          description
+          ...on Service {
+            component {
+              ...on Service {
+                name
+                description
               }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         description: 'Storage subsystem of the Wayback Archive',
-        partOf: { name: 'wayback-archive', description: 'Archive of the wayback machine' }
+        component: { name: 'wayback-archive', description: 'Archive of the wayback machine' }
       }
     });
   });
 
   it.eventually('can look up a known user', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'User', name: 'janelle.dawe' },
-          __on: {
-            __typeName: 'User',
-            displayName: true,
-            email: true,
-            picture: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "User", name: "janelle.dawe") {
+          ...on User {
+            displayName
+            email
+            picture
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         displayName: 'Janelle Dawe',
@@ -309,23 +234,20 @@ describe('querying the graphql API', () => {
 
   it.eventually("looks up user's groups", function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'User', name: 'janelle.dawe' },
-          name: true,
-          __on: {
-            __typeName: 'User',
-            memberOf: {
-              __on: {
-                __typeName: 'Team',
-                name: true,
-                displayName: true,
-                email: true,
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "User", name: "janelle.dawe") {
+          name
+          ...on User {
+            memberOf {
+              ...on Team {
+                name
+                displayName
+                email
               }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         name: 'janelle.dawe',
@@ -336,17 +258,15 @@ describe('querying the graphql API', () => {
 
   it.eventually('can look up a known group', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Group', name: 'team-a' },
-          __on: {
-            __typeName: 'Team',
-            displayName: true,
-            email: true,
-            picture: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Group", name: "team-a") {
+          ...on Team {
+            displayName
+            email
+            picture
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         displayName: null,
@@ -358,26 +278,23 @@ describe('querying the graphql API', () => {
 
   it.eventually('looks up group children', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Group', name: 'infrastructure' },
-          name: true,
-          __on: {
-            __typeName: 'Department',
-            parentOf: {
-              __on: {
-                __typeName: 'SubDepartment',
-                name: true,
-                displayName: true,
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Group", name: "infrastructure") {
+          name
+          ...on Department {
+            children {
+              ...on SubDepartment {
+                name
+                displayName
               }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         name: 'infrastructure',
-        parentOf: [{
+        children: [{
           name: 'backstage',
           displayName: 'Backstage'
         }, {
@@ -390,26 +307,23 @@ describe('querying the graphql API', () => {
 
   it.eventually('looks up group members', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Group', name: 'team-a' },
-          name: true,
-          __on: {
-            __typeName: 'Team',
-            hasMember: {
-              __on: {
-                __typeName: 'User',
-                name: true,
-                email: true,
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Group", name: "team-a") {
+          name
+          ...on Team {
+            members {
+              ...on User {
+                name
+                email
               }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         name: 'team-a',
-        hasMember: [{
+        members: [{
           name: 'breanna.davison',
           email: 'breanna-davison@example.com'
         }, {
@@ -428,24 +342,20 @@ describe('querying the graphql API', () => {
 
   it.eventually('looks up group belongings', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Group', name: 'team-a' },
-          name: true,
-          __on: {
-            __typeName: 'Team',
-            ownerOf: {
-              __on: [
-                { __typeName: 'Service', name: true },
-                { __typeName: 'Website', name: true },
-                { __typeName: 'Database', name: true },
-                { __typeName: 'Openapi', name: true },
-                { __typeName: 'System', name: true }
-              ]
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Group", name: "team-a") {
+          name
+          ...on Team {
+            ownerOf {
+              ...on Service { name }
+              ...on Website { name }
+              ...on Database { name }
+              ...on Openapi { name }
+              ...on System { name }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         name: 'team-a',
@@ -467,49 +377,47 @@ describe('querying the graphql API', () => {
 
   it.eventually("can look up a group's parent", function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Group', name: 'team-a' },
-          __on: {
-            __typeName: 'Team',
-            childOf: {
-              displayName: true,
-              email: true,
-              picture: true,
-              childOf: {
-                displayName: true,
-                email: true,
-                picture: true,
-                description: true,
-                childOf: {
-                  displayName: true,
-                  email: true,
-                  picture: true,
-                  childOf: {
-                    displayName: true,
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Group", name: "team-a") {
+          ...on Team {
+            parent {
+              displayName
+              email
+              picture
+              parent {
+                description
+                displayName
+                email
+                picture
+                parent {
+                  displayName
+                  email
+                  picture
+                  parent {
+                    displayName
                   }
                 }
               }
             }
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
-        childOf: {
+        parent: {
           displayName: 'Backstage',
           email: 'backstage@example.com',
           picture: 'https://avatars.dicebear.com/api/identicon/backstage@example.com.svg?background=%23fff&margin=25',
-          childOf: {
+          parent: {
             description: 'The infra department',
             displayName: null,
             email: null,
             picture: null,
-            childOf: {
+            parent: {
               displayName: 'ACME Corp',
               email: 'info@example.com',
               picture: 'https://avatars.dicebear.com/api/identicon/info@example.com.svg?background=%23fff&margin=25',
-              childOf: null
+              parent: null
             }
           }
         }
@@ -519,128 +427,102 @@ describe('querying the graphql API', () => {
 
   it.eventually('can look up a known system', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'System', name: 'artist-engagement-portal' },
-          description: true,
-          __on: {
-            __typeName: 'System',
-            ownedBy: {
-              __on: {
-                __typeName: 'Team',
-                name: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "System", name: "artist-engagement-portal") {
+          description
+          ...on System {
+            owner {
+              ...on Team {
+                name
               }
             }
-          },
-        },
-      }),
-    ).toMatchObject({ entity: { description: 'Everything related to artists', ownedBy: { name: 'team-a' } } });
+          }
+        }
+      `),
+    ).toMatchObject({ entity: { description: 'Everything related to artists', owner: { name: 'team-a' } } });
   });
 
   it.eventually('looks up system parts', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'System', name: 'podcast' },
-          name: true,
-          __on: {
-            __typeName: 'System',
-            hasPart: {
-              __on: [{
-                __typeName: 'Service',
-                name: true
-              }, {
-                __typeName: 'Website',
-                name: true
-              }]
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "System", name: "podcast") {
+          name
+          ...on System {
+            components {
+              ...on Service { name }
+              ...on Website { name }
             }
-          },
-        },
-      }),
-    ).toMatchObject({ entity: { name: 'podcast', hasPart: [{ name: 'podcast-api' }, { name: 'queue-proxy' }] } });
+          }
+        }
+      `),
+    ).toMatchObject({ entity: { name: 'podcast', components: [{ name: 'podcast-api' }, { name: 'queue-proxy' }] } });
   });
 
   it.eventually('can look up a known resource', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Resource', name: 'artists-db' },
-          description: true,
-          __on: {
-            __typeName: 'Database',
-            ownedBy: {
-              __on: {
-                __typeName: 'Team',
-                name: true
-              }
-            },
-            dependencyOf: {
-              __on: {
-                __typeName: 'Service',
-                name: true
-              }
-            },
-            partOf: {
-              __on: {
-                __typeName: 'System',
-                name: true
-              }
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Resource", name: "artists-db") {
+          description
+          ...on Database {
+            owner {
+              ...on Team { name }
             }
-          },
-        },
-      }),
+            dependents {
+              ...on Service { name }
+            }
+            systems {
+              ...on System { name }
+            }
+          }
+        }
+      `),
     ).toMatchObject({
       entity: {
         description: 'Stores artist details',
-        ownedBy: { name: 'team-a' },
-        dependencyOf: [{ name: 'artist-lookup' }],
-        partOf: [{ name: 'artist-engagement-portal' }]
+        owner: { name: 'team-a' },
+        dependents: [{ name: 'artist-lookup' }],
+        systems: [{ name: 'artist-engagement-portal' }]
       }
     });
   });
 
   it.eventually('can look up a known API', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'API', name: 'hello-world' },
-          description: true,
-          __on: {
-            __typeName: 'Grpc',
-            lifecycle: true,
-            apiProvidedBy: {
-              __on: {
-                __typeName: 'Service',
-                name: true,
-                description: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "API", name: "hello-world") {
+          description
+          ...on Grpc {
+            lifecycle
+            providers {
+              ...on Service {
+                name
+                description
               }
             }
-          },
-        },
-      }),
+          }
+        }
+      `),
     ).toMatchObject({
       entity: {
         description: 'Hello World example for gRPC',
         lifecycle: 'DEPRECATED',
-        apiProvidedBy: [{ name: 'petstore', description: 'The Petstore is an example API used to show features of the OpenAPI spec.' }]
+        providers: [{ name: 'petstore', description: 'The Petstore is an example API used to show features of the OpenAPI spec.' }]
       }
     });
   });
 
   it.eventually('can look up a known location', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Location', name: 'example-groups' },
-          description: true,
-          __on: {
-            __typeName: 'Location',
-            targets: true,
-            target: true,
-            type: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Location", name: "example-groups") {
+          description
+          ...on Location {
+            targets
+            target
+            type
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         description: 'A collection of all Backstage example Groups',
@@ -661,16 +543,14 @@ describe('querying the graphql API', () => {
 
   it.eventually('can look up a known template', function* () {
     expect(
-      yield graphql.query({
-        entity: {
-          __args: { kind: 'Template', name: 'react-ssr-template' },
-          description: true,
-          __on: {
-            __typeName: 'Website',
-            output: true
+      yield graphql.query(/* GraphQL */`
+        entity(kind: "Template", name: "react-ssr-template") {
+          description
+          ...on Website {
+            output
           }
-        },
-      }),
+        }
+      `),
     ).toMatchObject({
       entity: {
         description: 'Create a website powered with Next.js',
