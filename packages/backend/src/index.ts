@@ -19,6 +19,7 @@ import {
   UrlReaders,
   ServerTokenManager,
 } from '@backstage/backend-common';
+import { TaskScheduler } from '@backstage/backend-tasks';
 import { Config } from '@backstage/config';
 import app from './plugins/app';
 import auth from './plugins/auth';
@@ -40,12 +41,14 @@ function makeCreateEnv(config: Config) {
   const cacheManager = CacheManager.fromConfig(config);
   const databaseManager = DatabaseManager.fromConfig(config);
   const tokenManager = ServerTokenManager.noop();
+  const taskScheduler = TaskScheduler.fromConfig(config);
 
   return (plugin: string): PluginEnvironment => {
     const logger = root.child({ type: 'plugin', plugin });
     const database = databaseManager.forPlugin(plugin);
     const cache = cacheManager.forPlugin(plugin);
-    return { logger, database, cache, config, reader, discovery, tokenManager };
+    const scheduler = taskScheduler.forPlugin(plugin);
+    return { logger, database, cache, config, reader, discovery, tokenManager, scheduler };
   };
 }
 
