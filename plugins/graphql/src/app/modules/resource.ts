@@ -7,14 +7,13 @@ export const Resource = createModule({
   id: `resource`,
   typeDefs: gql`
     union Ownable = Database
-    union SystemPart = Database
     union Dependency = Database
 
     interface Resource {
-      ownedBy: Owner! @relation
-      dependsOn: [Dependency] @relation
-      dependencyOf: [Dependency] @relation
-      partOf: [System] @relation
+      owner: Owner! @relation(type: "ownedBy")
+      dependencies: [Dependency] @relation(type: "dependsOn")
+      dependents: [Dependency] @relation(type: "dependencyOf")
+      systems: [System] @relation(type: "partOf")
     }
 
     type Database implements Node & Entity & Resource {
@@ -24,15 +23,13 @@ export const Resource = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
-      ownedBy: Owner!
-      dependsOn: [Dependency]
-      dependencyOf: [Dependency]
-      partOf: [System]
+      owner: Owner!
+      dependencies: [Dependency]
+      dependents: [Dependency]
+      systems: [System]
     }
   `,
   providers: [

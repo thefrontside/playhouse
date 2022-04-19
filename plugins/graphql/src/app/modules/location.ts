@@ -12,8 +12,6 @@ export const Location = createModule({
       namespace: String
       title: String
       description: String
-      labels: [KeyValuePair]
-      annotations: [KeyValuePair]
       tags: [String!]
       links: [EntityLink!]
 
