@@ -1,0 +1,16 @@
+union Ownable = System
+
+type System implements Node & Entity {
+  id: ID!
+  name: String!
+  namespace: String
+  title: String
+  description: String
+  tags: [String]
+  links: [EntityLink]
+
+  owner: Owner! @relation(type: "ownedBy")
+  domain: Domain @relation(type: "partOf")
+  components: [Component] @relation(type: "hasPart", kind: "component")
+  resources: [Resource] @relation(type: "hasPart", kind: "resource")
+}
