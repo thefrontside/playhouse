@@ -1,0 +1,14 @@
+union Ownable = Domain
+
+type Domain implements Node & Entity {
+  id: ID!
+  name: String!
+  namespace: String
+  title: String
+  description: String
+  tags: [String]
+  links: [EntityLink]
+
+  owner: Owner! @relation(type: "ownedBy")
+  systems: [System] @relation(type: "hasPart")
+}
