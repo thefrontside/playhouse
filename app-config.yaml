@@ -71,13 +71,3 @@ auth:
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
-
-catalog:
-  # https://backstage.io/docs/features/software-catalog/descriptor-format
-  rules:
-    - allow: [Component, System, API, Group, User, Resource, Location]
-  locations:
-    - type: url
-      target: https://github.com/thefrontside/backstage/blob/main/catalog-info.yaml
-    - type: url
-      target: https://github.com/thefrontside/changes/blob/mk/catalog-info.yaml
