@@ -70,6 +70,7 @@ const mappers: SchemaMapper = {
     unionType.resolveType = unionType.resolveType ?? resolveType
     return unionType
   },
+  // Define providers here
   [MapperKind.INTERFACE_TYPE]: (interfaceType) => {
     interfaceType.resolveType = interfaceType.resolveType ?? resolveType
     return interfaceType
