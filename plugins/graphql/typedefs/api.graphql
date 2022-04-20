@@ -1,0 +1,82 @@
+union Ownable = Openapi | Graphql | Asyncapi | Grpc
+
+interface API {
+  lifecycle: Lifecycle! @field(at: "spec.lifecycle")
+  owner: Owner! @relation(type: "ownedBy")
+  definition: String! @field(at: "spec.definition")
+  system: System @relation(type: "partOf")
+  consumers: [Component] @relation(type: "apiConsumedBy")
+  providers: [Component] @relation(type: "apiProvidedBy")
+}
+
+type Openapi implements Node & Entity & API {
+  id: ID!
+
+  name: String!
+  namespace: String
+  title: String
+  description: String
+  tags: [String!]
+  links: [EntityLink!]
+
+  lifecycle: Lifecycle!
+  owner: Owner!
+  definition: String!
+  system: System
+  consumers: [Component]
+  providers: [Component]
+}
+
+type Graphql implements Node & Entity & API {
+  id: ID!
+
+  name: String!
+  namespace: String
+  title: String
+  description: String
+  tags: [String!]
+  links: [EntityLink!]
+
+  lifecycle: Lifecycle!
+  owner: Owner!
+  definition: String!
+  system: System
+  consumers: [Component]
+  providers: [Component]
+}
+
+type Asyncapi implements Node & Entity & API {
+  id: ID!
+
+  name: String!
+  namespace: String
+  title: String
+  description: String
+  tags: [String!]
+  links: [EntityLink!]
+
+  lifecycle: Lifecycle!
+  owner: Owner!
+  definition: String!
+  system: System
+  consumers: [Component]
+  providers: [Component]
+}
+
+type Grpc implements Node & Entity & API {
+  id: ID!
+
+  name: String!
+  namespace: String
+  title: String
+  description: String
+  tags: [String!]
+  links: [EntityLink!]
+
+  lifecycle: Lifecycle!
+  owner: Owner!
+  definition: String!
+  system: System
+  consumers: [Component]
+  providers: [Component]
+}
