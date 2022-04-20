@@ -1,18 +1,12 @@
-import { createModule, gql } from 'graphql-modules';
+import { resolvePackagePath } from '@backstage/backend-common';
+import { loadFilesSync } from '@graphql-tools/load-files';
+import { createModule } from 'graphql-modules';
 import { encodeId } from '../loaders';
 import { ResolverContext } from '../resolver-context';
 
 export const Node = createModule({
   id: 'node',
-  typeDefs: gql`
-    interface Node {
-      id: ID!
-    }
-
-    type Query {
-      node(id: ID!): Node
-    }
-  `,
+  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'typedefs/node.graphql')),
   resolvers: {
     Node: {
       id: async ({ id }: { id: string }, _: never, { loader }: ResolverContext): Promise<string | null> => {
