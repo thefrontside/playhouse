@@ -1,10 +1,14 @@
-import { Entity, EntityName } from '@backstage/catalog-model';
+import { ApiEntity, ComponentEntity, Entity, EntityName, GroupEntity, ResourceEntity, TemplateEntityV1beta2 } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
+import { pascalCase } from 'pascal-case';
 import { Catalog } from './catalog';
-import { Resolver, TypedEntity } from './resolver'
 
 export interface TypedEntityName extends EntityName {
   typename: string;
+}
+
+export interface TypedEntity extends Entity {
+  __typeName: string;
 }
 
 export interface Key {
@@ -15,13 +19,11 @@ export interface Key {
 
 export interface LoaderOptions {
   catalog: Catalog;
-  resolver: Resolver;
 }
 
 export interface Loader {
   load(id: string): Promise<TypedEntity | null>;
   loadMany(ids: string[]): Promise<Array<TypedEntity | null>>;
-  loadEntity<T extends Entity = Entity>(id: string): Promise<T & TypedEntity>;
 }
 
 export function encodeId(name: TypedEntityName | EntityName): string {
@@ -35,10 +37,18 @@ export function decodeId(id: string): Key {
   return { id, typename, entityname };
 }
 
-export function createLoader({
-  catalog,
-  resolver,
-}: LoaderOptions): Loader {
+export function resolveEntityType(entity: Entity): string {
+  switch (entity.kind) {
+    case 'API': return pascalCase((entity as ApiEntity).spec.type)
+    case 'Component': return pascalCase((entity as ComponentEntity).spec.type)
+    case 'Resource': return pascalCase((entity as ResourceEntity).spec.type)
+    case 'Template': return pascalCase((entity as TemplateEntityV1beta2).spec.type)
+    case 'Group': return pascalCase((entity as GroupEntity).spec.type)
+    default: return entity.kind
+  }
+}
+
+export function createLoader({ catalog }: LoaderOptions): Loader {
   async function fetch(ids: readonly string[]): Promise<Array<Entity | Error>> {
     return Promise.all(
       ids.map(decodeId).map(async ({ entityname, id }) => {
@@ -61,21 +71,17 @@ export function createLoader({
 
   async function loadMany(ids: string[]): Promise<Array<TypedEntity | null>> {
     const entities = await dataloader.loadMany(ids);
-    return entities.map(entity => (entity instanceof Error ? null : resolver.resolve(entity)));
-  }
-
-  async function loadEntity<T extends Entity = Entity>(id: string): Promise<T & TypedEntity> {
-    const entity = await load(id);
-    if (entity instanceof Error) {
-      throw Error;
-    } else {
-      return entity as T & TypedEntity;
-    }
+    return entities.map(entity =>
+      entity instanceof Error
+      ? null
+      : ({
+        __typeName: resolveEntityType(entity),
+        ...entity
+      }));
   }
 
   return {
     load,
     loadMany,
-    loadEntity,
   };
 }
