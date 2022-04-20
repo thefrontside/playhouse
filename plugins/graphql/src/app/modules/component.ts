@@ -1,9 +1,6 @@
 import { resolvePackagePath } from '@backstage/backend-common';
-import { ComponentEntity, Entity } from '@backstage/catalog-model';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { createModule } from 'graphql-modules';
-import { pascalCase } from 'pascal-case'
-import { resolverProvider } from '../resolver';
 
 export const Component = createModule({
   id: `component`,
@@ -15,10 +12,4 @@ export const Component = createModule({
       DEPRECATED: 'deprecated',
     },
   },
-  providers: [
-    resolverProvider({
-      accept: (entity: Entity): entity is ComponentEntity => entity.kind === 'Component',
-      resolve: entity => entity ? ({ __typeName: pascalCase(entity.spec.type), ...entity }) : null,
-    }),
-  ],
 });
