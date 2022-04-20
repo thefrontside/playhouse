@@ -12,7 +12,6 @@ import { User } from './modules/user';
 import { Resource } from './modules/resource';
 import { Domain } from './modules/domain';
 import { createLoader } from './loaders';
-import { createTypeResolver } from './resolver';
 import { Directives, transformer } from './modules/directives';
 import { Shared } from './modules/shared';
 import { API } from './modules/api';
@@ -27,12 +26,11 @@ export const schema = create().schema;
 
 export function createApp(catalog: Catalog): App {
   const application = create();
-  const resolver = createTypeResolver(application);
-  const loader = createLoader({ catalog, resolver });
+  const loader = createLoader({ catalog });
 
   const run = envelop({
     plugins: [
-      useExtendContext(() => ({ catalog, loader, resolver })),
+      useExtendContext(() => ({ catalog, loader })),
       useGraphQLModules(application),
     ],
   });
