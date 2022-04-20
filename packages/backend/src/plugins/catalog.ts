@@ -32,10 +32,14 @@ export default async function createPlugin(
   const { processingEngine, router } = await builder.build();
   await processingEngine.start();
   
-  router.post('/github/webhook', async (_req, res) => {
-    await gitProvider.read();
-    res.end("successfully trigger entity provider read via webhook event");
-  })
+  router.post('/github/webhook', async (req, res) => {
+    const event = req.headers["x-github-event"];
+    if (event == "membership") {
+      await gitProvider.read();
+      res.end("Successfully triggered database update via github webhook event");
+    }
+    // TODO: we should forward requests to smee for local development
+  });
 
   await env.scheduler.scheduleTask({
     id: "githubEntityProvider-scheduledTask",
