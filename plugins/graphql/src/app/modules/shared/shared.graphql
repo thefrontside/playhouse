@@ -1,0 +1,12 @@
+directive @field(at: String!) on FIELD_DEFINITION
+directive @relation(type: String, kind: String) on FIELD_DEFINITION
+
+enum Lifecycle {
+  EXPERIMENTAL
+  PRODUCTION
+  DEPRECATED
+}
+
+type Never implements Node {
+  id: ID!
+}

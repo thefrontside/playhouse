@@ -1,60 +1,67 @@
-import type { Catalog } from './catalog';
-import { GetEnvelopedFn, envelop, useExtendContext } from '@envelop/core';
-import { useGraphQLModules } from '@envelop/graphql-modules';
-import { Application, createApplication } from 'graphql-modules';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { ResolverContext } from './resolver-context';
-import { Node } from './modules/node';
-import { Entity } from './modules/entity';
-import { Component } from './modules/component';
-import { System } from './modules/system';
-import { User } from './modules/user';
-import { Resource } from './modules/resource';
-import { Domain } from './modules/domain';
-import { createLoader } from './loaders';
-import { Directives, transformer } from './modules/directives';
-import { Shared } from './modules/shared';
-import { API } from './modules/api';
-import { Location } from './modules/location';
-import { Template } from './modules/template';
+/*
+ * Copyright 2020 The Backstage Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-export interface App {
-  (): ReturnType<GetEnvelopedFn<ResolverContext>>;
+import { errorHandler } from '@backstage/backend-common';
+import express from 'express';
+import Router from 'express-promise-router';
+import { Logger } from 'winston';
+import { graphqlHTTP } from 'express-graphql';
+import { CatalogClient } from '@backstage/catalog-client';
+
+export interface RouterOptions {
+  logger: Logger;
+  catalog: CatalogClient;
 }
 
-export const schema = create().schema;
+import { schema, createApp } from './app';
 
-export function createApp(catalog: Catalog): App {
-  const application = create();
-  const loader = createLoader({ catalog });
+export async function createRouter(
+  options: RouterOptions,
+): Promise<express.Router> {
+  const { logger } = options;
 
-  const run = envelop({
-    plugins: [
-      useExtendContext(() => ({ catalog, loader })),
-      useGraphQLModules(application),
-    ],
+  const app = createApp(options.catalog);
+
+  const router = Router();
+  router.use(express.json());
+  router.use((_, res, next) => {
+    res.setHeader('Content-Security-Policy', "'self' http: 'unsafe-inline'");
+    next();
   });
 
-  return run;
-}
+  router.use('/',  graphqlHTTP(async () => {
+    const { parse, validate, contextFactory, execute } = app();
+    return {
+      schema,
+      graphiql: true,
+      customParseFn: parse,
+      customValidateFn: validate,
+      customExecuteFn: async args => {
+        return execute({
+          ...args,
+          contextValue: await contextFactory(),
+        });
+      },
+    };
+  }));
 
-function create(): Application {
-  return createApplication({
-    schemaBuilder: ({ typeDefs, resolvers }) =>
-      transformer(makeExecutableSchema({ typeDefs, resolvers })),
-    modules: [
-      Shared,
-      Node,
-      Entity,
-      Component,
-      System,
-      User,
-      Resource,
-      Domain,
-      API,
-      Location,
-      Template,
-      Directives,
-    ],
+  router.get('/health', (_, response) => {
+    logger.info('PONG!');
+    response.send({ status: 'ok' });
   });
+  router.use(errorHandler());
+  return router;
 }

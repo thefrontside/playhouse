@@ -2,7 +2,7 @@
 /* eslint-disable jest/no-standalone-expect */
 import { describe, beforeAll, it } from '@effection/jest';
 import { encodeId } from '../app/loaders';
-import { createBackstage, GraphQLAPI } from '../setupTests';
+import { createBackstage, GraphQLAPI } from './setupTests';
 
 describe('querying the graphql API', () => {
   let graphql: GraphQLAPI;
