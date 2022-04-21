@@ -4,5 +4,5 @@ import { createModule } from "graphql-modules";
 
 export const Location = createModule({
   id: 'location',
-  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'typedefs/location.graphql')),
+  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'src/app/modules/location/location.graphql')),
 })
