@@ -7,6 +7,7 @@ import {
   TokenManager,
   UrlReader,
 } from '@backstage/backend-common';
+import { PluginTaskScheduler } from '@backstage/backend-tasks';
 import { CatalogClient } from '@backstage/catalog-client';
 
 export type PluginEnvironment = {
@@ -17,5 +18,6 @@ export type PluginEnvironment = {
   reader: UrlReader;
   discovery: PluginEndpointDiscovery;
   tokenManager: TokenManager;
+  scheduler: PluginTaskScheduler;
   catalog: CatalogClient
 };
