@@ -4,5 +4,5 @@ import { createModule } from 'graphql-modules';
 
 export const Resource = createModule({
   id: `resource`,
-  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'typedefs/resource.graphql')),
+  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'src/app/modules/resource/resource.graphql')),
 });

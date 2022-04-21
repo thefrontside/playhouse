@@ -4,5 +4,5 @@ import { loadFilesSync } from '@graphql-tools/load-files'
 
 export const API = createModule({
   id: 'API',
-  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'typedefs/api.graphql')),
+  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'src/app/modules/api/api.graphql')),
 })

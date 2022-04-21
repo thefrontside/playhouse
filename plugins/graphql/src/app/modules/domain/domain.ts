@@ -4,5 +4,5 @@ import { createModule } from 'graphql-modules';
 
 export const Domain = createModule({
   id: `domain`,
-  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'typedefs/domain.graphql')),
+  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'src/app/modules/domain/domain.graphql')),
 });
