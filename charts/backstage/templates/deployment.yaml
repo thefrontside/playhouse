@@ -4,7 +4,7 @@ metadata:
   name: backstage
 spec:
   replicas: 2
-  progressDeadlineSeconds: 60
+  progressDeadlineSeconds: 90
   strategy:
     type: RollingUpdate
     rollingUpdate:
