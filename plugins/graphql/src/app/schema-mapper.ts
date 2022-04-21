@@ -5,18 +5,9 @@ import {
   SchemaMapper,
 } from '@graphql-tools/utils';
 import { GraphQLField, GraphQLFieldMap, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLTypeResolver } from 'graphql';
-import { createModule, gql } from 'graphql-modules';
 import { get } from 'lodash';
-import { encodeId } from '../loaders';
-import { ResolverContext } from '../resolver-context';
-
-export const Directives = createModule({
-  id: 'directives',
-  typeDefs: gql`
-    directive @field(at: String!) on FIELD_DEFINITION
-    directive @relation(type: String, kind: String) on FIELD_DEFINITION
-  `,
-});
+import { encodeId } from './loaders';
+import { ResolverContext } from './resolver-context';
 
 const directiveMappers: Array<(
   objectField: GraphQLField<{ id: string }, ResolverContext>,
@@ -96,5 +87,4 @@ const mappers: SchemaMapper = {
   },
 };
 
-export const transformer = (schema: GraphQLSchema) =>
-  mapSchema(schema, mappers);
+export const transform = (schema: GraphQLSchema) => mapSchema(schema, mappers);

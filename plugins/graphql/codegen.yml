@@ -1,18 +1,15 @@
 overwrite: true
-schema: "typedefs/*.graphql"
+schema: "src/app/modules/**/*.graphql"
 documents: null
 generates:
   ./dist/schema.graphql:
     plugins:
      - schema-ast
-  ./graphql.schema.json:
-    plugins:
-      - "introspection"
   ./src/app/modules/:
     preset: graphql-modules
     presetConfig:
-      baseTypesPath: generated/graphql.ts
-      filename: ../generated/types.ts
+      baseTypesPath: ../__generated__/graphql.ts
+      filename: __generated__/types.ts
     plugins:
       - add:
           content: '/* eslint-disable */'
