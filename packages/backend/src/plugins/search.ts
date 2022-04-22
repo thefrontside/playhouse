@@ -1,3 +1,4 @@
+import { Duration } from 'luxon'
 import { useHotCleanup } from '@backstage/backend-common';
 import { createRouter } from '@backstage/plugin-search-backend';
 import {
@@ -5,24 +6,31 @@ import {
   LunrSearchEngine,
 } from '@backstage/plugin-search-backend-node';
 import { PluginEnvironment } from '../types';
-import { DefaultCatalogCollator } from '@backstage/plugin-catalog-backend';
-import { DefaultTechDocsCollator } from '@backstage/plugin-techdocs-backend';
+import { DefaultCatalogCollatorFactory } from '@backstage/plugin-catalog-backend';
+import { DefaultTechDocsCollatorFactory } from '@backstage/plugin-techdocs-backend';
 
 export default async function createPlugin({
   logger,
   discovery,
   config,
   tokenManager,
+  permissions,
+  ...env
 }: PluginEnvironment) {
   // Initialize a connection to a search engine.
   const searchEngine = new LunrSearchEngine({ logger });
   const indexBuilder = new IndexBuilder({ logger, searchEngine });
+  const schedule = env.scheduler.createScheduledTaskRunner({
+      frequency: Duration.fromObject({ minutes: 10 }),
+      timeout: Duration.fromObject({ minutes: 15 }),
+      initialDelay: Duration.fromObject({ seconds: 3 }),
+    });
 
   // Collators are responsible for gathering documents known to plugins. This
   // collator gathers entities from the software catalog.
   indexBuilder.addCollator({
-    defaultRefreshIntervalSeconds: 600,
-    collator: DefaultCatalogCollator.fromConfig(config, {
+    schedule,
+    factory: DefaultCatalogCollatorFactory.fromConfig(config, {
       discovery,
       tokenManager,
     }),
@@ -30,8 +38,8 @@ export default async function createPlugin({
 
   // collator gathers entities from techdocs.
   indexBuilder.addCollator({
-    defaultRefreshIntervalSeconds: 600,
-    collator: DefaultTechDocsCollator.fromConfig(config, {
+    schedule,
+    factory: DefaultTechDocsCollatorFactory.fromConfig(config, {
       discovery,
       logger,
       tokenManager,
@@ -44,11 +52,14 @@ export default async function createPlugin({
 
   // A 3 second delay gives the backend server a chance to initialize before
   // any collators are executed, which may attempt requests against the API.
-  setTimeout(() => scheduler.start(), 3000);
+  scheduler.start();
   useHotCleanup(module, () => scheduler.stop());
 
   return await createRouter({
     engine: indexBuilder.getSearchEngine(),
+    types: indexBuilder.getDocumentTypes(),
+    permissions,
+    config,
     logger,
   });
 }

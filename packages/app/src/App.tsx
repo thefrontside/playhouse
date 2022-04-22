@@ -28,6 +28,7 @@ import { Root } from './components/Root';
 import { AlertDisplay, OAuthRequestDialog } from '@backstage/core-components';
 import { createApp } from '@backstage/app-defaults';
 import { FlatRoutes } from '@backstage/core-app-api';
+import { orgPlugin } from '@backstage/plugin-org';
 
 const app = createApp({
   apis,
@@ -37,10 +38,13 @@ const app = createApp({
       viewTechDoc: techdocsPlugin.routes.docRoot,
     });
     bind(apiDocsPlugin.externalRoutes, {
-      createComponent: scaffolderPlugin.routes.root,
+      registerApi: scaffolderPlugin.routes.root,
     });
     bind(scaffolderPlugin.externalRoutes, {
       registerComponent: catalogImportPlugin.routes.importPage,
+    });
+    bind(orgPlugin.externalRoutes, {
+      catalogIndex: catalogPlugin.routes.catalogIndex,
     });
   },
 });
