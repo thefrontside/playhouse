@@ -20,6 +20,7 @@ import {
   ServerTokenManager,
 } from '@backstage/backend-common';
 import { TaskScheduler } from '@backstage/backend-tasks';
+import { ServerPermissionClient } from '@backstage/plugin-permission-node';
 import { Config } from '@backstage/config';
 import app from './plugins/app';
 import auth from './plugins/auth';
@@ -42,13 +43,17 @@ function makeCreateEnv(config: Config) {
   const databaseManager = DatabaseManager.fromConfig(config);
   const tokenManager = ServerTokenManager.noop();
   const taskScheduler = TaskScheduler.fromConfig(config);
+  const permissions = ServerPermissionClient.fromConfig(config, {
+    discovery,
+    tokenManager,
+  });
 
   return (plugin: string): PluginEnvironment => {
     const logger = root.child({ type: 'plugin', plugin });
     const database = databaseManager.forPlugin(plugin);
     const cache = cacheManager.forPlugin(plugin);
     const scheduler = taskScheduler.forPlugin(plugin);
-    return { logger, database, cache, config, reader, discovery, tokenManager, scheduler };
+    return { logger, database, cache, config, reader, discovery, tokenManager, scheduler, permissions };
   };
 }
 
