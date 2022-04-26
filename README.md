@@ -5,7 +5,7 @@ To start the Backstage app with Postgres via docker compose, run:
 ```sh
 docker-compose up
 yarn install
-POSTGRES_SERVICE_PORT=5432 POSTGRES_USER=postgres POSTGRES_PASSWORD=postgres yarn dev
+yarn dev
 ```
 
 To start Backstage in your local cluster using minikube, run:
