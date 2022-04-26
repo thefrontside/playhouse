@@ -37,6 +37,9 @@
     "lerna": "^4.0.0",
     "prettier": "^2.3.2"
   },
+  "resolutions": {
+    "@shipshapecode/backstage-plugin-graphql-voyager": "./vendor/shipshapecode-backstage-plugin-graphql-voyager-v0.1.0.tgz"
+  },
   "prettier": "@spotify/prettier-config",
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs}": [
