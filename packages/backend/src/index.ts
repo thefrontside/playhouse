@@ -30,7 +30,9 @@ import proxy from './plugins/proxy';
 import techdocs from './plugins/techdocs';
 import search from './plugins/search';
 import healthcheck from './plugins/healthcheck';
+import graphql from './plugins/graphql';
 import { PluginEnvironment } from './types';
+import { CatalogClient } from '@backstage/catalog-client';
 
 function makeCreateEnv(config: Config) {
   const root = getRootLogger();
@@ -47,13 +49,25 @@ function makeCreateEnv(config: Config) {
     discovery,
     tokenManager,
   });
+  const catalogClient = new CatalogClient({ discoveryApi: discovery });
 
   return (plugin: string): PluginEnvironment => {
     const logger = root.child({ type: 'plugin', plugin });
     const database = databaseManager.forPlugin(plugin);
     const cache = cacheManager.forPlugin(plugin);
     const scheduler = taskScheduler.forPlugin(plugin);
-    return { logger, database, cache, config, reader, discovery, tokenManager, scheduler, permissions };
+    return {
+      logger,
+      database,
+      cache,
+      config,
+      reader,
+      discovery,
+      tokenManager,
+      scheduler,
+      permissions,
+      catalog: catalogClient,
+    };
   };
 }
 
@@ -64,6 +78,7 @@ async function main() {
   });
   const createEnv = makeCreateEnv(config);
 
+  const graphqlEnv = useHotMemoize(module, () => createEnv('graphql'));
   const healthcheckEnv = useHotMemoize(module, () => createEnv('healthcheck'));
   const catalogEnv = useHotMemoize(module, () => createEnv('catalog'));
   const scaffolderEnv = useHotMemoize(module, () => createEnv('scaffolder'));
@@ -80,7 +95,8 @@ async function main() {
   apiRouter.use('/techdocs', await techdocs(techdocsEnv));
   apiRouter.use('/proxy', await proxy(proxyEnv));
   apiRouter.use('/search', await search(searchEnv));
-  apiRouter.use('/healthcheck', await healthcheck(healthcheckEnv))
+  apiRouter.use('/healthcheck', await healthcheck(healthcheckEnv));
+  apiRouter.use('/graphql', await graphql(graphqlEnv));
   apiRouter.use(notFoundHandler());
 
   const service = createServiceBuilder(module)
