@@ -1,4 +1,5 @@
-interface Entity {
+interface Entity implements Node {
+  id: ID!
   name: String! @field(at: "metadata.name")
   namespace: String @field(at: "metadata.namespace")
   title: String @field(at: "metadata.title")

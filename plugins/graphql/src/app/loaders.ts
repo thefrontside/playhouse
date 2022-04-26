@@ -1,62 +1,42 @@
-import { ApiEntity, ComponentEntity, Entity, EntityName, GroupEntity, ResourceEntity, TemplateEntityV1beta2 } from '@backstage/catalog-model';
+import { Entity, EntityName, EntityRef, parseEntityName, stringifyEntityRef } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
-import { pascalCase } from 'pascal-case';
+//import { pascalCase } from 'pascal-case';
 import { Catalog } from './catalog';
-
-export interface TypedEntityName extends EntityName {
-  typename: string;
-}
-
-export interface TypedEntity extends Entity {
-  __typeName: string;
-}
-
-export interface Key {
-  id: string;
-  typename: string;
-  entityname: EntityName;
-}
 
 export interface LoaderOptions {
   catalog: Catalog;
 }
 
 export interface Loader {
-  load(id: string): Promise<TypedEntity | null>;
-  loadMany(ids: string[]): Promise<Array<TypedEntity | null>>;
+  load(id: string): Promise<Entity | null>;
+  loadMany(ids: string[]): Promise<Array<Entity | null>>;
 }
 
-export function encodeId(name: TypedEntityName | EntityName): string {
-  return Buffer.from(JSON.stringify(name), 'utf-8').toString('base64');
+export function encodeId(name: string | EntityName): string {
+  if (typeof name === 'string') {
+    return name;
+  } else {
+    return stringifyEntityRef(name);
+  }
 }
 
-export function decodeId(id: string): Key {
-  const { typename, ...entityname } = JSON.parse(
-    Buffer.from(id, 'base64').toString('utf-8'),
-  ) as TypedEntityName;
-  return { id, typename, entityname };
+export function decodeId(id: string): EntityName {
+  return parseEntityName(id);
 }
 
 export function resolveEntityType(entity: Entity): string {
-  switch (entity.kind) {
-    case 'API': return pascalCase((entity as ApiEntity).spec.type)
-    case 'Component': return pascalCase((entity as ComponentEntity).spec.type)
-    case 'Resource': return pascalCase((entity as ResourceEntity).spec.type)
-    case 'Template': return pascalCase((entity as TemplateEntityV1beta2).spec.type)
-    case 'Group': return pascalCase((entity as GroupEntity).spec.type)
-    default: return entity.kind
-  }
+  return entity.kind;
 }
 
 export function createLoader({ catalog }: LoaderOptions): Loader {
   async function fetch(ids: readonly string[]): Promise<Array<Entity | Error>> {
     return Promise.all(
-      ids.map(decodeId).map(async ({ entityname, id }) => {
+      ids.map(decodeId).map(async (entityname) => {
         return catalog.getEntityByName(entityname).then(entity => {
           if (entity) {
             return entity;
           }
-          return new Error(`no such node with id: '${id}'`);
+          return new Error(`no such node with id: '${encodeId(entityname)}'`);
         });
       }),
     );

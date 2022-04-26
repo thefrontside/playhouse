@@ -8,7 +8,7 @@ describe('querying the graphql API', () => {
   let graphql: GraphQLAPI;
 
   beforeAll(function* () {
-    graphql = yield createBackstage({ log: true });
+    graphql = yield createBackstage({ log: false });
   });
 
   it.eventually('can look up a known node by id', function* () {
@@ -60,7 +60,7 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Component", name: "www-artist") {
           name
-          ... on Website {
+          ... on Component {
             lifecycle
           }
         }
@@ -73,10 +73,10 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Component", name: "www-artist") {
           name
-          ...on Website {
+          ...on Component {
             lifecycle
             owner {
-              ...on Team {
+              ...on Group {
                 name
                 email
                 displayName
@@ -104,13 +104,11 @@ describe('querying the graphql API', () => {
     expect(
       yield graphql.query(/* GraphQL */`
         entity(kind: "Component", name: "www-artist") {
-          ...on Website {
+          ...on Component {
             lifecycle
             system {
-              ...on System {
-                name
-                description
-              }
+              name
+              description
             }
           }
         }
@@ -128,11 +126,9 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Component", name: "wayback-archive") {
           name
-          ...on Service {
+          ...on Component {
             subComponents {
-              ...on Service {
-                name
-              }
+              name
             }
           }
         }
@@ -150,12 +146,12 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Component", name: "wayback-search") {
           name
-          ...on Service {
+          ...on Component {
             providesApi {
-              ...on Openapi { name }
+              name
             }
             consumesApi {
-              ...on Openapi { name }
+              name
             }
           }
         }
@@ -174,9 +170,9 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Component", name: "artist-lookup") {
           name
-          ...on Service {
+          ...on Component {
             dependencies {
-              ...on Database { name }
+              ...on Entity { name }
             }
           }
         }
@@ -194,12 +190,10 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Component", name: "wayback-archive-storage") {
           description
-          ...on Service {
+          ...on Component {
             component {
-              ...on Service {
-                name
-                description
-              }
+              name
+              description
             }
           }
         }
@@ -239,11 +233,9 @@ describe('querying the graphql API', () => {
           name
           ...on User {
             memberOf {
-              ...on Team {
-                name
-                displayName
-                email
-              }
+              name
+              displayName
+              email
             }
           }
         }
@@ -260,7 +252,7 @@ describe('querying the graphql API', () => {
     expect(
       yield graphql.query(/* GraphQL */`
         entity(kind: "Group", name: "team-a") {
-          ...on Team {
+          ...on Group {
             displayName
             email
             picture
@@ -281,12 +273,10 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Group", name: "infrastructure") {
           name
-          ...on Department {
+          ...on Group {
             children {
-              ...on SubDepartment {
-                name
-                displayName
-              }
+              name
+              displayName
             }
           }
         }
@@ -310,12 +300,10 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Group", name: "team-a") {
           name
-          ...on Team {
+          ...on Group {
             members {
-              ...on User {
-                name
-                email
-              }
+              name
+              email
             }
           }
         }
@@ -345,13 +333,9 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Group", name: "team-a") {
           name
-          ...on Team {
+          ...on Group {
             ownerOf {
-              ...on Service { name }
-              ...on Website { name }
-              ...on Database { name }
-              ...on Openapi { name }
-              ...on System { name }
+              ...on Entity { name }
             }
           }
         }
@@ -379,7 +363,7 @@ describe('querying the graphql API', () => {
     expect(
       yield graphql.query(/* GraphQL */`
         entity(kind: "Group", name: "team-a") {
-          ...on Team {
+          ...on Group {
             parent {
               displayName
               email
@@ -432,7 +416,7 @@ describe('querying the graphql API', () => {
           description
           ...on System {
             owner {
-              ...on Team {
+              ...on Entity {
                 name
               }
             }
@@ -449,8 +433,7 @@ describe('querying the graphql API', () => {
           name
           ...on System {
             components {
-              ...on Service { name }
-              ...on Website { name }
+              name
             }
           }
         }
@@ -463,15 +446,15 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Resource", name: "artists-db") {
           description
-          ...on Database {
+          ...on Resource {
             owner {
-              ...on Team { name }
+              ...on Entity { name }
             }
             dependents {
-              ...on Service { name }
+              ...on Entity { name }
             }
             systems {
-              ...on System { name }
+              name
             }
           }
         }
@@ -491,13 +474,11 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "API", name: "hello-world") {
           description
-          ...on Grpc {
+          ...on API {
             lifecycle
             providers {
-              ...on Service {
-                name
-                description
-              }
+              name
+              description
             }
           }
         }
@@ -546,7 +527,7 @@ describe('querying the graphql API', () => {
       yield graphql.query(/* GraphQL */`
         entity(kind: "Template", name: "react-ssr-template") {
           description
-          ...on Website {
+          ...on Template {
             output
           }
         }

@@ -1,6 +1,15 @@
-union Owner = User | Team | SubDepartment | Department | Organization
+union Owner = User | Group
 
-interface Group {
+type Group implements Node & Entity {
+  id: ID!
+
+  name: String!
+  namespace: String
+  title: String
+  description: String
+  tags: [String]
+  links: [EntityLink]
+
   children: [Group]! @relation(type: "parentOf")
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
@@ -8,82 +17,6 @@ interface Group {
   parent: Group @relation(type: "childOf")
   members: [User] @relation(type: "hasMember")
   ownerOf: [Ownable] @relation
-}
-
-type Team implements Node & Entity & Group {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
-
-  children: [Group]!
-  displayName: String
-  email: String
-  picture: String
-  parent: SubDepartment
-  members: [User]
-  ownerOf: [Ownable]
-}
-
-type SubDepartment implements Node & Entity & Group {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
-
-  children: [Group]!
-  displayName: String
-  email: String
-  picture: String
-  parent: Department
-  members: [User]
-  ownerOf: [Ownable]
-}
-
-type Department implements Node & Entity & Group {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
-
-  children: [Group]!
-  displayName: String
-  email: String
-  picture: String
-  parent: Organization
-  members: [User]
-  ownerOf: [Ownable]
-}
-
-type Organization implements Node & Entity & Group {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
-
-  children: [Group]!
-  displayName: String
-  email: String
-  picture: String
-  parent: Group
-  members: [User]
-  ownerOf: [Ownable]
 }
 
 type User implements Node & Entity {
@@ -101,3 +34,79 @@ type User implements Node & Entity {
   picture: String @field(at: "spec.profile.picture")
   ownerOf: [Ownable] @relation
 }
+
+# type Team implements Node & Entity & Group {
+#   id: ID!
+
+#   name: String!
+#   namespace: String
+#   title: String
+#   description: String
+#   tags: [String]
+#   links: [EntityLink]
+
+#   children: [Group]!
+#   displayName: String
+#   email: String
+#   picture: String
+#   parent: SubDepartment
+#   members: [User]
+#   ownerOf: [Ownable]
+# }
+
+# type SubDepartment implements Node & Entity & Group {
+#   id: ID!
+
+#   name: String!
+#   namespace: String
+#   title: String
+#   description: String
+#   tags: [String]
+#   links: [EntityLink]
+
+#   children: [Group]!
+#   displayName: String
+#   email: String
+#   picture: String
+#   parent: Department
+#   members: [User]
+#   ownerOf: [Ownable]
+# }
+
+# type Department implements Node & Entity & Group {
+#   id: ID!
+
+#   name: String!
+#   namespace: String
+#   title: String
+#   description: String
+#   tags: [String]
+#   links: [EntityLink]
+
+#   children: [Group]!
+#   displayName: String
+#   email: String
+#   picture: String
+#   parent: Organization
+#   members: [User]
+#   ownerOf: [Ownable]
+# }
+
+# type Organization implements Node & Entity & Group {
+#   id: ID!
+
+#   name: String!
+#   namespace: String
+#   title: String
+#   description: String
+#   tags: [String]
+#   links: [EntityLink]
+
+#   children: [Group]!
+#   displayName: String
+#   email: String
+#   picture: String
+#   parent: Group
+#   members: [User]
+#   ownerOf: [Ownable]
+# }
