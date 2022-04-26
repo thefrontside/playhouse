@@ -1,4 +1,4 @@
-import { ApiEntity, ComponentEntity, Entity, EntityName, GroupEntity, ResourceEntity, TemplateEntityV1beta2 } from '@backstage/catalog-model';
+import { Entity, EntityName } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
 import { pascalCase } from 'pascal-case';
 import { Catalog } from './catalog';
@@ -38,13 +38,10 @@ export function decodeId(id: string): Key {
 }
 
 export function resolveEntityType(entity: Entity): string {
-  switch (entity.kind) {
-    case 'API': return pascalCase((entity as ApiEntity).spec.type)
-    case 'Component': return pascalCase((entity as ComponentEntity).spec.type)
-    case 'Resource': return pascalCase((entity as ResourceEntity).spec.type)
-    case 'Template': return pascalCase((entity as TemplateEntityV1beta2).spec.type)
-    case 'Group': return pascalCase((entity as GroupEntity).spec.type)
-    default: return entity.kind
+  if (entity.spec && entity.spec.type) {
+    return pascalCase(String(entity.spec.type));
+  } else {
+    return entity.kind;
   }
 }
 
