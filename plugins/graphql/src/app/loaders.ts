@@ -1,6 +1,6 @@
 import { Entity, EntityName } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
-import { pascalCase } from 'pascal-case';
+//import { pascalCase } from 'pascal-case';
 import { Catalog } from './catalog';
 
 export interface TypedEntityName extends EntityName {
@@ -38,11 +38,7 @@ export function decodeId(id: string): Key {
 }
 
 export function resolveEntityType(entity: Entity): string {
-  if (entity.spec && entity.spec.type) {
-    return pascalCase(String(entity.spec.type));
-  } else {
-    return entity.kind;
-  }
+  return entity.kind;
 }
 
 export function createLoader({ catalog }: LoaderOptions): Loader {
