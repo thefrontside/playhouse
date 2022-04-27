@@ -1,4 +1,4 @@
-import { Entity, EntityName, EntityRef, parseEntityName, stringifyEntityRef } from '@backstage/catalog-model';
+import { Entity, EntityName, parseEntityName, stringifyEntityRef } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
 //import { pascalCase } from 'pascal-case';
 import { Catalog } from './catalog';
@@ -7,12 +7,23 @@ export interface LoaderOptions {
   catalog: Catalog;
 }
 
-export interface Loader {
-  load(id: string): Promise<Entity | null>;
-  loadMany(ids: string[]): Promise<Array<Entity | null>>;
+export interface GraphQLEntity extends Entity {
+  id: string;
+  __typeName: string;
 }
 
-export function encodeId(name: string | EntityName): string {
+export interface Loader {
+  load(id: string): Promise<GraphQLEntity | null>;
+  loadMany(ids: string[]): Promise<Array<GraphQLEntity | null>>;
+}
+
+type Ref = {
+    kind: string;
+    namespace: string | undefined;
+    name: string;
+}
+
+export function encodeId(name: string | Ref | Entity): string {
   if (typeof name === 'string') {
     return name;
   } else {
@@ -44,19 +55,20 @@ export function createLoader({ catalog }: LoaderOptions): Loader {
 
   const dataloader = new Dataloader<string, Entity>(fetch);
 
-  async function load(id: string): Promise<TypedEntity | null> {
+  async function load(id: string): Promise<GraphQLEntity | null> {
     const [node] = await loadMany([id]);
     return node;
   }
 
-  async function loadMany(ids: string[]): Promise<Array<TypedEntity | null>> {
+  async function loadMany(ids: string[]): Promise<Array<GraphQLEntity | null>> {
     const entities = await dataloader.loadMany(ids);
-    return entities.map(entity =>
+    return entities.map((entity, i) =>
       entity instanceof Error
       ? null
       : ({
         __typeName: resolveEntityType(entity),
-        ...entity
+        ...entity,
+        id: ids[i],
       }));
   }
 
