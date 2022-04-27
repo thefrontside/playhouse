@@ -10,6 +10,8 @@ generates:
     presetConfig:
       baseTypesPath: ../__generated__/graphql.ts
       filename: __generated__/types.ts
+    config:
+      contextType: ../resolver-context#ResolverContext
     plugins:
       - add:
           content: '/* eslint-disable */'
