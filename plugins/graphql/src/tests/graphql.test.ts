@@ -13,7 +13,6 @@ describe('querying the graphql API', () => {
 
   it.eventually('can look up a known node by id', function* () {
     const id = encodeId({
-      typename: 'Website',
       kind: 'Component',
       name: 'backstage',
       namespace: 'default',
