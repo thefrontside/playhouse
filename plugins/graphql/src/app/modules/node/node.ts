@@ -12,8 +12,8 @@ export const Node = createModule({
       id: async ({ id }: { id: string }, _: never, { loader }: ResolverContext): Promise<string | null> => {
         const entity = await loader.load(id);
         if (!entity) return null;
-        const { __typeName, kind, metadata: { namespace = 'default', name } } = entity;
-        return encodeId({ typename: __typeName, kind, name, namespace });
+        const { kind, metadata: { namespace = 'default', name } } = entity;
+        return encodeId({ kind, name, namespace });
       },
     },
     Query: {

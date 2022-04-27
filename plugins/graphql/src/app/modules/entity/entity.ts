@@ -11,7 +11,7 @@ export const Entity = createModule({
       entity: (
         _: any,
         { name, kind, namespace = 'default' }: { name: string; kind: string; namespace: string | undefined },
-      ): { id: string } => ({ id: encodeId({ typename: 'Entity', name, kind, namespace }) }),
+      ): { id: string } => ({ id: encodeId({ name, kind, namespace }) })
     },
   },
 });
