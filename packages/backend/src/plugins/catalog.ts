@@ -34,7 +34,7 @@ export default async function createPlugin(
   
   router.post('/github/webhook', async (req, _res) => {
     const event = req.headers["x-github-event"];
-    if (event == "membership") {
+    if (event == "membership" || event == "organization") {
       await gitProvider.read();
       env.logger.info("Successfully triggered database update via github webhook event");
     }
