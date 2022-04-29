@@ -1,0 +1,19 @@
+name: Publish Previews
+
+on: pull_request
+
+jobs:
+  preview:
+    name: Publish Previews
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-node@v2
+      with:
+        registry-url: https://registry.npmjs.org
+    - uses: thefrontside/actions/publish-pr-preview@v2
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
