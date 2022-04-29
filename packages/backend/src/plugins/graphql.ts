@@ -1,4 +1,4 @@
-import { createRouter } from '@internal/plugin-graphql';
+import { createRouter } from '@frontside/backstage-plugin-graphql';
 import { Router } from 'express';
 import { PluginEnvironment } from '../types';
 

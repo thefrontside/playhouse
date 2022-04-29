@@ -4,5 +4,5 @@ import { createModule } from 'graphql-modules';
 
 export const Shared = createModule({
   id: 'shared',
-  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'src/app/modules/shared/shared.graphql')),
+  typeDefs: loadFilesSync(resolvePackagePath('@frontside/backstage-plugin-graphql', 'src/app/modules/shared/shared.graphql')),
 })

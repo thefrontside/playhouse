@@ -4,7 +4,7 @@ import { createModule } from 'graphql-modules';
 
 export const Component = createModule({
   id: `component`,
-  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'src/app/modules/component/component.graphql')),
+  typeDefs: loadFilesSync(resolvePackagePath('@frontside/backstage-plugin-graphql', 'src/app/modules/component/component.graphql')),
   resolvers: {
     Lifecycle: {
       EXPERIMENTAL: 'experimental',
