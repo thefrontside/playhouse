@@ -1,0 +1,20 @@
+name: Publish Releases
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Publish Releases
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/step-node@v2
+      with:
+        registry-url: https://registry.npmjs.org
+    - uses: thefrontside/actions/synchronize-with-npm@v2
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
