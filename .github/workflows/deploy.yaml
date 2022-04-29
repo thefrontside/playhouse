@@ -1,4 +1,4 @@
-name: Backstage Release
+name: Backstage Deploy
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
   ZONE: "northamerica-northeast1-a"
 
 jobs:
-  release:
+  deploy:
     name: Cloud Build & Deploy
     runs-on: ubuntu-latest
     permissions:
