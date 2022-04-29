@@ -17,6 +17,7 @@ import { API } from './modules/api/api';
 import { Location } from './modules/location/location';
 import { Template } from './modules/template/template';
 import { transform } from './schema-mapper';
+import { MyModule } from "./modules/my-module/my-module";
 
 export interface App {
   (): ReturnType<GetEnvelopedFn<ResolverContext>>;
@@ -54,6 +55,7 @@ function create(): Application {
       API,
       Location,
       Template,
+      MyModule,
     ],
   });
 }

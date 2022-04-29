@@ -1,0 +1,5 @@
+{
+  "watch": ["plugins/graphql"],
+  "ext": "graphql",
+  "exec": "yarn start-backend"
+}

@@ -1,0 +1,10 @@
+extend type Resource {
+  host: String @field(at: "spec.host")
+  protocol: String @field(at: "spec.protocol")
+  environments: [Environment]
+}
+
+type Environment {
+  name: String
+  resources: [Resource]
+}

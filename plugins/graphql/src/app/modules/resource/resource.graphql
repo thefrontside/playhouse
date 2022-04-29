@@ -16,19 +16,3 @@ type Resource implements Node & Entity {
   dependents: [Dependency] @relation(type: "dependencyOf")
   systems: [System] @relation(type: "partOf")
 }
-
-# type Database implements Node & Entity & Resource {
-#   id: ID!
-
-#   name: String!
-#   namespace: String
-#   title: String
-#   description: String
-#   tags: [String!]
-#   links: [EntityLink!]
-
-#   owner: Owner!
-#   dependencies: [Dependency]
-#   dependents: [Dependency]
-#   systems: [System]
-# }

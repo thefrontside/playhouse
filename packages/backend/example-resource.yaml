@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: artists-db
+  description: Stores artist details
+spec:
+  protocol: postgres
+  host: aws
+  type: database
+  owner: team-a
+  system: artist-engagement-portal

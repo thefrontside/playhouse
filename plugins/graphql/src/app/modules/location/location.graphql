@@ -12,3 +12,8 @@ type Location implements Node & Entity {
   target: String @field(at: "spec.target")
   targets: [String] @field(at: "spec.targets")
 }
+
+extend type Component {
+  version: String @field(at: "apiVersion")
+  etag: String @field(at: "metadata.etag")
+}
