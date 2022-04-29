@@ -37,5 +37,3 @@ site
 
 # Sensitive credentials
 *-credentials.yaml
-
-notes
