@@ -5,7 +5,7 @@ import { encodeId } from '../../loaders';
 
 export const Entity = createModule({
   id: 'entity',
-  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'src/app/modules/entity/entity.graphql')),
+  typeDefs: loadFilesSync(resolvePackagePath('@frontside/backstage-plugin-graphql', 'src/app/modules/entity/entity.graphql')),
   resolvers: {
     Query: {
       entity: (
