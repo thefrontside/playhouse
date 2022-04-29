@@ -1,0 +1,60 @@
+name: Backstage Deploy
+
+on:
+  push:
+    branches: main
+
+concurrency: ${{ github.ref }}
+
+env:
+  IMAGE: "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage"
+  CLUSTER: "backstage-cluster"
+  ZONE: "northamerica-northeast1-a"
+
+jobs:
+  deploy:
+    name: Cloud Build & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Google Cloud Workload Identity Federation
+      uses: google-github-actions/auth@v0
+      with:
+        workload_identity_provider: ${{ secrets.CLOUD_WORKLOAD_PROVIDER}}
+        service_account: ${{ secrets.CLOUD_SERVICE_ACCOUNT }}
+
+    - name: Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0
+
+    - name: Install/Build Backstage
+      run: yarn && yarn tsc && yarn build
+
+    - name: Set Tag with SHA
+      run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
+
+    - name: Cloud Build & Push to Artifacts Registry
+      run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"
+
+    - name: Authenticate to GKE Cluster
+      run: gcloud container clusters get-credentials $CLUSTER --zone $ZONE
+
+    - name: Helm Upgrade Postgres
+      run: helm upgrade --install min-postgres-chart ./charts/postgres -f ./charts/postgres/Values.yaml --set postgresUsername=${{ secrets.POSTGRES_USER }} --set postgresPassword=${{ secrets.POSTGRES_PASSWORD }}
+
+    - name: Helm Upgrade Backstage (backstage:${{ env.TAG }})
+      run: helm upgrade --install min-backstage-chart ./charts/backstage -f ./charts/backstage/Values.yaml --set backstageImage="$IMAGE:$TAG" --set backstageGithubCredentials="$CREDENTIALS"
+      env:
+        CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
+
+    - name: Confirm Deployment Status
+      id: deploy-status
+      continue-on-error: true
+      run: kubectl rollout status deployment/backstage
+
+    - name: Rollback Deployment
+      if: steps.deploy-status.outcome == 'failure'
+      run: helm rollback min-backstage-chart
