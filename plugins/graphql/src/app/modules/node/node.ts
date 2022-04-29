@@ -6,7 +6,7 @@ import { ResolverContext } from '../../resolver-context';
 
 export const Node = createModule({
   id: 'node',
-  typeDefs: loadFilesSync(resolvePackagePath('@internal/plugin-graphql', 'src/app/modules/node/node.graphql')),
+  typeDefs: loadFilesSync(resolvePackagePath('@frontside/backstage-plugin-graphql', 'src/app/modules/node/node.graphql')),
   resolvers: {
     Node: {
       id: async ({ id }: { id: string }, _: never, { loader }: ResolverContext): Promise<string | null> => {
