@@ -1,3 +1,4 @@
+import { parseEntityRef } from '@backstage/catalog-model';
 import {
   mapSchema,
   getDirective,
@@ -6,7 +7,6 @@ import {
 } from '@graphql-tools/utils';
 import { GraphQLField, GraphQLFieldMap, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLTypeResolver } from 'graphql';
 import { get } from 'lodash';
-import { encodeId } from './loaders';
 import { ResolverContext } from './resolver-context';
 
 const directiveMappers: Array<(
@@ -39,11 +39,14 @@ const directiveMappers: Array<(
     objectField.resolve = async ({ id }, _, { loader }) => {
       const entities = (await loader.load(id))
         ?.relations
-        ?.filter(({ type, target }) => (
-          type === (fieldDirective.type ?? objectField.name) &&
-          (fieldDirective.kind ? target.kind === fieldDirective.kind : true)
-        ))
-        .map(({ target }) => ({ id: encodeId(target) })) ?? []
+        ?.filter(({ type, targetRef }) => {
+          const { kind } = parseEntityRef(targetRef)
+          return (
+            type === (fieldDirective.type ?? objectField.name) &&
+            (fieldDirective.kind ? kind === fieldDirective.kind : true)
+          )
+        })
+        .map(({ targetRef }) => ({ id: targetRef })) ?? []
       const [entity = null] = entities
 
       return isList ? entities : entity

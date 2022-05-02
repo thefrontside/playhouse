@@ -1,7 +1,7 @@
 /* eslint-disable func-names */
 /* eslint-disable jest/no-standalone-expect */
+import { stringifyEntityRef } from '@backstage/catalog-model';
 import { describe, beforeAll, it } from '@effection/jest';
-import { encodeId } from '../app/loaders';
 import { createBackstage, GraphQLAPI } from './setupTests';
 
 describe('querying the graphql API', () => {
@@ -12,8 +12,7 @@ describe('querying the graphql API', () => {
   });
 
   it.eventually('can look up a known node by id', function* () {
-    const id = encodeId({
-      typename: 'Website',
+    const id = stringifyEntityRef({
       kind: 'Component',
       name: 'backstage',
       namespace: 'default',
