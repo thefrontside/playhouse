@@ -13,7 +13,7 @@ export const InspectorPage = inspectorPlugin.provide(
   createRoutableExtension({
     name: 'InspectorPage',
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import('./components/InspectorPage').then(m => m.InspectorPage),
     mountPoint: rootRouteRef,
   }),
 );
