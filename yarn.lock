@@ -2847,7 +2847,7 @@
   dependencies:
     "@date-io/core" "^1.3.13"
 
-"@effection/atom@2.0.4":
+"@effection/atom@2.0.4", "@effection/atom@^2.0.4":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@effection/atom/-/atom-2.0.4.tgz#903755ec13673c38a6b3c8286c5832aa3da7e0b8"
   integrity sha512-mnflhIUK5zWt5ViJPWpZpA9NW8QO5ipV2493sQnOCKZp9mlYRmGhew76tRGydZgLlhO/SADwRVYgTDBrLm+joA==
@@ -2928,6 +2928,11 @@
     "@effection/core" "2.2.0"
     cross-fetch "3.1.5"
 
+"@effection/inspect-ui@^2.1.5":
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/@effection/inspect-ui/-/inspect-ui-2.1.5.tgz#0990c0945e5540ba557c4ab1a9b5aae37d848be7"
+  integrity sha512-s1+ESkC4jPW/SobFFrMm6jiO0voUXIAlSsYNdIkbHs3fII2jqLKDQ924qAHZ8xW7DC/XtRocrbmwg8BUrP94LA==
+
 "@effection/inspect-utils@^2.1.4":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@effection/inspect-utils/-/inspect-utils-2.1.4.tgz#2aa430ee068a4cbd1670a9a280095f26f7f2103b"
@@ -2954,6 +2959,13 @@
     "@effection/core" "2.2.0"
     chalk "^4.1.2"
     stacktrace-parser "^0.1.10"
+
+"@effection/react@^2.1.4":
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/@effection/react/-/react-2.1.4.tgz#35f74adfd89d79ef937e0c18db7e7736f843ee5c"
+  integrity sha512-OymNdy//jDGBsifV6mnCdti45RINZ7DlopXKToZiG6AlSzyi7F/HpKcB00Au02j2gQfpXiHWudqAbevw2sAs0Q==
+  dependencies:
+    effection "^2.0.0"
 
 "@effection/stream@2.0.1":
   version "2.0.1"
@@ -9277,7 +9289,7 @@ effection@2.0.1:
     "@effection/stream" "2.0.1"
     "@effection/subscription" "2.0.1"
 
-effection@2.0.4, effection@^2.0.4:
+effection@2.0.4, effection@^2.0.0, effection@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/effection/-/effection-2.0.4.tgz#2ca9defcebfa75b408f83f6a16ae10ec6c70b48a"
   integrity sha512-8haobRaTJbwNM32GeSS5Do0WHB/Xev94SukFtQHEli+3TTDxYwW+NQcp0lAb8J4ISzvKjL+OyodGPMEyegbjog==

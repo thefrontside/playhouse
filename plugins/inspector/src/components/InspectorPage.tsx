@@ -1,34 +1,42 @@
 import React from 'react';
-import { Typography, Grid } from '@material-ui/core';
+
 import {
-  InfoCard,
   Header,
   Page,
-  Content,
-  ContentHeader,
-  HeaderLabel,
-  SupportButton,
+  Content
 } from '@backstage/core-components';
+import { useApi } from '@backstage/core-plugin-api';
+import { inspectorApiRef } from "../api/inspector-api";
+import { useResource } from '../hooks/use-resource';
+import { TaskTree } from '@effection/inspect-ui';
+import { useSlice } from '@effection/react';
+import type { Slice } from '@effection/atom';
+import type { InspectState } from '@effection/inspect-utils';
 
-export const InspectorPage = () => (
-  <Page themeId="tool">
-    <Header title="Welcome to inspector!" subtitle="Optional subtitle">
-      <HeaderLabel label="Owner" value="Team X" />
-      <HeaderLabel label="Lifecycle" value="Alpha" />
-    </Header>
-    <Content>
-      <ContentHeader title="Backstage Inspector">
-        <SupportButton>A description of your plugin goes here.</SupportButton>
-      </ContentHeader>
-      <Grid container spacing={3} direction="column">
-        <Grid item>
-          <InfoCard title="Information card">
-            <Typography variant="body1">
-              All content should be wrapped in a card like this.
-            </Typography>
-          </InfoCard>
-        </Grid>
-      </Grid>
-    </Content>
+export const InspectorPage = () => {
+
+  return (
+    <Page themeId="tool">
+    <Header title="Backstage Inspector" subtitle="backstage server runtime insights"/>
+    <Content><Inspector/></Content>
   </Page>
-);
+  );
+}
+
+function Inspector() {
+  const inspector = useApi(inspectorApiRef);
+  const slice = useResource(inspector.inspectState(), [inspector]);
+
+  if (slice.type === 'pending') {
+    return <p>Loading</p>;
+  } else if (slice.type === 'rejected') {
+    return <p>{slice.error.toString()}</p>;
+  } else {
+    return <TreeRoot slice={slice.value}/>
+  }
+}
+
+function TreeRoot({ slice }: { slice: Slice<InspectState> }) {
+  const task = useSlice(slice);
+  return <TaskTree task={task}/>
+}
