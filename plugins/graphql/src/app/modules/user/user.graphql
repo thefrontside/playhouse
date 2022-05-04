@@ -1,6 +1,6 @@
 union Owner = User | Team | SubDepartment | Department | Organization
 
-interface Group {
+type Group @include(type: "Entity") @resolve(by: "spec.type") {
   children: [Group]! @relation(type: "parentOf")
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
@@ -10,91 +10,26 @@ interface Group {
   ownerOf: [Ownable] @relation
 }
 
-type Team implements Node & Entity & Group {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
-
-  children: [Group]!
-  displayName: String
-  email: String
-  picture: String
-  parent: SubDepartment
-  members: [User]
-  ownerOf: [Ownable]
-}
-
-type SubDepartment implements Node & Entity & Group {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
-
-  children: [Group]!
-  displayName: String
-  email: String
-  picture: String
-  parent: Department
-  members: [User]
-  ownerOf: [Ownable]
-}
-
-type Department implements Node & Entity & Group {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
-
-  children: [Group]!
-  displayName: String
-  email: String
-  picture: String
-  parent: Organization
-  members: [User]
-  ownerOf: [Ownable]
-}
-
-type Organization implements Node & Entity & Group {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
-
-  children: [Group]!
-  displayName: String
-  email: String
-  picture: String
+type Team @include(type: "Group") {
+  # parent: SubDepartment
   parent: Group
-  members: [User]
-  ownerOf: [Ownable]
 }
 
-type User implements Node & Entity {
-  id: ID!
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String]
-  links: [EntityLink]
+type SubDepartment @include(type: "Group") {
+  # parent: Department
+  parent: Group
+}
 
+type Department @include(type: "Group") {
+  # parent: Organization
+  parent: Group
+}
+
+type Organization @include(type: "Group") {
+  parent: Group
+}
+
+type User @include(type: "Entity") {
   memberOf: [Group]! @relation
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")

@@ -1,13 +1,4 @@
-type Location implements Node & Entity {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String!]
-  links: [EntityLink!]
-
+type Location @include(type: "Entity") {
   type: String @field(at: "spec.type")
   target: String @field(at: "spec.target")
   targets: [String] @field(at: "spec.targets")

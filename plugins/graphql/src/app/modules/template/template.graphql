@@ -10,57 +10,15 @@ type Step {
   if: JSON
 }
 
-interface Template {
+type Template @include(type: "Entity") @resolve(by: "spec.type") {
   parameters: JSONObject @field(at: "spec.parameters ")
   steps: [Step]! @field(at: "spec.steps")
   output: JSONObject @field(at: "spec.output")
   owner: Owner @relation(type: "ownedBy")
 }
 
-type Website implements Node & Entity & Template {
-  id: ID!
+type Website @include(type: "Template") { id: ID! }
 
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String!]
-  links: [EntityLink!]
+type Documentation @include(type: "Template") { id: ID! }
 
-  parameters: JSONObject
-  steps: [Step]!
-  output: JSONObject
-  owner: Owner
-}
-
-type Documentation implements Node & Entity & Template {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String!]
-  links: [EntityLink!]
-
-  parameters: JSONObject
-  steps: [Step]!
-  output: JSONObject
-  owner: Owner
-}
-
-type Service implements Node & Entity & Template {
-  id: ID!
-
-  name: String!
-  namespace: String
-  title: String
-  description: String
-  tags: [String!]
-  links: [EntityLink!]
-
-  parameters: JSONObject
-  steps: [Step]!
-  output: JSONObject
-  owner: Owner
-}
+type Service @include(type: "Template") { id: ID! }
