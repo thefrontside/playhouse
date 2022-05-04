@@ -1,33 +1,17 @@
-import { ApiEntity, ComponentEntity, Entity, GroupEntity, ResourceEntity, CompoundEntityRef } from '@backstage/catalog-model';
-import { TemplateEntityV1beta3 } from '@backstage/plugin-scaffolder-common'
+import { Entity, CompoundEntityRef } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
-import { pascalCase } from 'pascal-case';
 import { Catalog } from './catalog';
 
 type EntityRef = string | CompoundEntityRef
 
-export interface TypedEntity extends Entity {
-  __typeName: string;
-}
 
 export interface LoaderOptions {
   catalog: Catalog;
 }
 
 export interface Loader {
-  load(id: string): Promise<TypedEntity | null>;
-  loadMany(ids: string[]): Promise<Array<TypedEntity | null>>;
-}
-
-export function resolveEntityType(entity: Entity): string {
-  switch (entity.kind) {
-    case 'API': return pascalCase((entity as ApiEntity).spec.type)
-    case 'Component': return pascalCase((entity as ComponentEntity).spec.type)
-    case 'Resource': return pascalCase((entity as ResourceEntity).spec.type)
-    case 'Template': return pascalCase((entity as TemplateEntityV1beta3).spec.type)
-    case 'Group': return pascalCase((entity as GroupEntity).spec.type)
-    default: return entity.kind
-  }
+  load(id: string): Promise<Entity | null>;
+  loadMany(ids: string[]): Promise<Array<Entity | null>>;
 }
 
 export function createLoader({ catalog }: LoaderOptions): Loader {
@@ -46,20 +30,14 @@ export function createLoader({ catalog }: LoaderOptions): Loader {
 
   const dataloader = new Dataloader<EntityRef, Entity>(fetch);
 
-  async function load(ref: EntityRef): Promise<TypedEntity | null> {
+  async function load(ref: EntityRef): Promise<Entity | null> {
     const [node] = await loadMany([ref]);
     return node;
   }
 
-  async function loadMany(refs: EntityRef[]): Promise<Array<TypedEntity | null>> {
+  async function loadMany(refs: EntityRef[]): Promise<Array<Entity | null>> {
     const entities = await dataloader.loadMany(refs);
-    return entities.map(entity =>
-      entity instanceof Error
-      ? null
-      : ({
-        __typeName: resolveEntityType(entity),
-        ...entity
-      }));
+    return entities.map(entity => entity instanceof Error ? null : entity);
   }
 
   return {
