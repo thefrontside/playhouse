@@ -1,6 +1,6 @@
-union Ownable = Openapi | Graphql | Asyncapi | Grpc
+union Ownable = Api
 
-type API @include(type: "Entity") @resolve(by: "spec.type") {
+type Api @extend(type: "Entity") @resolve(by: "spec.type") {
   lifecycle: Lifecycle! @field(at: "spec.lifecycle")
   owner: Owner! @relation(type: "ownedBy")
   definition: String! @field(at: "spec.definition")
@@ -9,10 +9,10 @@ type API @include(type: "Entity") @resolve(by: "spec.type") {
   providers: [Component] @relation(type: "apiProvidedBy")
 }
 
-type Openapi @include(type: "API") { id: ID! }
+type OpenApi @extend(type: "Api") { id: ID! }
 
-type Graphql @include(type: "API") { id: ID! }
+type GraphqlApi @extend(type: "Api") { id: ID! }
 
-type Asyncapi @include(type: "API") { id: ID! }
+type AsyncApi @extend(type: "Api") { id: ID! }
 
-type Grpc @include(type: "API") { id: ID! }
+type GrpcApi @extend(type: "Api") { id: ID! }

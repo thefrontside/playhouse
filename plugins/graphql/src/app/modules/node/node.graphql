@@ -1,4 +1,4 @@
-type Node {
+type Node @resolve(by: "kind") {
   id: ID!
 }
 
