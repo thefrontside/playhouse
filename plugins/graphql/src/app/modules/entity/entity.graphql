@@ -1,5 +1,5 @@
 
-type Entity @include(type: "Node") {
+type Entity @extend(type: "Node") @resolve(by: "kind") {
   name: String! @field(at: "metadata.name")
   namespace: String @field(at: "metadata.namespace")
   title: String @field(at: "metadata.title")

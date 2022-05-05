@@ -1,19 +1,19 @@
-union Ownable = Website | Service | Library
-union Dependency = Website | Service | Library
+union Ownable = Component
+union Dependency = Component
 
-type Component @include(type: "Entity") @resolve(by: "spec.type") {
+type Component @extend(type: "Entity") @resolve(by: "spec.type") {
   lifecycle: Lifecycle! @field(at: "spec.lifecycle")
   owner: Owner! @relation(type: "ownedBy")
   system: System @relation(type: "partOf", kind: "system")
   component: Component @relation(type: "partOf", kind: "component")
   subComponents: [Component] @relation(type: "hasPart")
-  providesApi: [API] @relation
-  consumesApi: [API] @relation
+  providesApi: [Api] @relation
+  consumesApi: [Api] @relation
   dependencies: [Dependency] @relation(type: "dependsOn")
 }
 
-type Website @include(type: "Component") { id: ID! }
+type WebsiteComponent @extend(type: "Component") { id: ID! }
 
-type Service @include(type: "Component") { id: ID! }
+type ServiceComponent @extend(type: "Component") { id: ID! }
 
-type Library @include(type: "Component") { id: ID! }
+type LibraryComponent @extend(type: "Component") { id: ID! }
