@@ -1,6 +1,6 @@
 union Ownable = Domain
 
-type Domain @include(type: "Entity") {
+type Domain @extend(type: "Entity") {
   owner: Owner! @relation(type: "ownedBy")
   systems: [System] @relation(type: "hasPart")
 }

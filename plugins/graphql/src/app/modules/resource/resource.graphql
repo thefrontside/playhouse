@@ -1,11 +1,11 @@
-union Ownable = Database
-union Dependency = Database
+union Ownable = Resource
+union Dependency = Resource
 
-type Resource @include(type: "Entity") @resolve(by: "spec.type") {
+type Resource @extend(type: "Entity") @resolve(by: "spec.type") {
   owner: Owner! @relation(type: "ownedBy")
   dependencies: [Dependency] @relation(type: "dependsOn")
   dependents: [Dependency] @relation(type: "dependencyOf")
   system: System @relation(type: "partOf")
 }
 
-type Database @include(type: "Resource") { id: ID! }
+type DatabaseResource @extend(type: "Resource") { id: ID! }

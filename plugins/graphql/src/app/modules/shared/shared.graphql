@@ -1,6 +1,6 @@
 directive @field(at: String!) on FIELD_DEFINITION
 directive @relation(type: String, kind: String) on FIELD_DEFINITION
-directive @include(type: String!) on OBJECT
+directive @extend(type: String!) on OBJECT
 directive @resolve(by: String!) on OBJECT
 directive @interface(name: String) on OBJECT
 
@@ -10,6 +10,6 @@ enum Lifecycle {
   DEPRECATED
 }
 
-type Never implements Node {
+type Never @extend(type: "Node") {
   id: ID!
 }
