@@ -1,4 +1,4 @@
-type Location @include(type: "Entity") {
+type Location @extend(type: "Entity") {
   type: String @field(at: "spec.type")
   target: String @field(at: "spec.target")
   targets: [String] @field(at: "spec.targets")

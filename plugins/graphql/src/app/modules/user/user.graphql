@@ -1,6 +1,6 @@
-union Owner = User | Team | SubDepartment | Department | Organization
+union Owner = User | Group
 
-type Group @include(type: "Entity") @resolve(by: "spec.type") {
+type Group @extend(type: "Entity") @resolve(by: "spec.type") {
   children: [Group]! @relation(type: "parentOf")
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
@@ -10,26 +10,23 @@ type Group @include(type: "Entity") @resolve(by: "spec.type") {
   ownerOf: [Ownable] @relation
 }
 
-type Team @include(type: "Group") {
-  # parent: SubDepartment
+type TeamGroup @extend(type: "Group") {
+  parent: SubDepartmentGroup
+}
+
+type SubDepartmentGroup @extend(type: "Group") {
+  parent: DepartmentGroup
+}
+
+type DepartmentGroup @extend(type: "Group") {
+  parent: OrganizationGroup
+}
+
+type OrganizationGroup @extend(type: "Group") {
   parent: Group
 }
 
-type SubDepartment @include(type: "Group") {
-  # parent: Department
-  parent: Group
-}
-
-type Department @include(type: "Group") {
-  # parent: Organization
-  parent: Group
-}
-
-type Organization @include(type: "Group") {
-  parent: Group
-}
-
-type User @include(type: "Entity") {
+type User @extend(type: "Entity") {
   memberOf: [Group]! @relation
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
