@@ -25,6 +25,7 @@ import {
   isListType,
   isNonNullType,
   isObjectType,
+  printSchema,
 } from 'graphql';
 import { pascalCase } from 'pascal-case'
 import { get } from 'lodash';
@@ -236,8 +237,10 @@ export const transform = (schema: GraphQLSchema) => {
     }
   })
 
-  return addTypes(
+  const a = addTypes(
     mapSchema(mapSchema(schema, objectMapper), unionMapper),
     [...extendInterfaces.values()].map(({ interfaceType: interfaceType }) => interfaceType)
   )
+  console.log(printSchema(a))
+  return a
 };
