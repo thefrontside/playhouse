@@ -1,0 +1,98 @@
+scalar JSON
+scalar JSONObject
+
+union Ownable = Api | Component | Domain | Resource | System | Template
+union Dependency = Component | Resource
+union Owner = User | Group
+
+type Api @extend(type: "Entity") @resolve(by: "spec.type") {
+  lifecycle: Lifecycle! @field(at: "spec.lifecycle")
+  owner: Owner! @relation(type: "ownedBy")
+  definition: String! @field(at: "spec.definition")
+  system: System @relation(type: "partOf")
+  consumers: [Component] @relation(type: "apiConsumedBy")
+  providers: [Component] @relation(type: "apiProvidedBy")
+}
+
+type OpenApi @extend(type: "Api") { id: ID! }
+type GraphqlApi @extend(type: "Api") { id: ID! }
+type AsyncApi @extend(type: "Api") { id: ID! }
+type GrpcApi @extend(type: "Api") { id: ID! }
+
+type Component @extend(type: "Entity") @resolve(by: "spec.type") {
+  lifecycle: Lifecycle! @field(at: "spec.lifecycle")
+  owner: Owner! @relation(type: "ownedBy")
+  system: System @relation(type: "partOf", kind: "system")
+  component: Component @relation(type: "partOf", kind: "component")
+  subComponents: [Component] @relation(type: "hasPart")
+  providesApi: [Api] @relation
+  consumesApi: [Api] @relation
+  dependencies: [Dependency] @relation(type: "dependsOn")
+}
+
+type WebsiteComponent @extend(type: "Component") { id: ID! }
+type ServiceComponent @extend(type: "Component") { id: ID! }
+type LibraryComponent @extend(type: "Component") { id: ID! }
+
+type Domain @extend(type: "Entity") {
+  owner: Owner! @relation(type: "ownedBy")
+  systems: [System] @relation(type: "hasPart")
+}
+
+type Resource @extend(type: "Entity") @resolve(by: "spec.type") {
+  owner: Owner! @relation(type: "ownedBy")
+  dependencies: [Dependency] @relation(type: "dependsOn")
+  dependents: [Dependency] @relation(type: "dependencyOf")
+  system: System @relation(type: "partOf")
+}
+
+type DatabaseResource @extend(type: "Resource") { id: ID! }
+
+type System @extend(type: "Entity") {
+  owner: Owner! @relation(type: "ownedBy")
+  domain: Domain @relation(type: "partOf")
+  components: [Component] @relation(type: "hasPart", kind: "component")
+  resources: [Resource] @relation(type: "hasPart", kind: "resource")
+}
+
+type Step {
+  id: String
+  name: String
+  action: String!
+  input: JSONObject
+  if: JSON
+}
+
+type Template @extend(type: "Entity") @resolve(by: "spec.type") {
+  parameters: JSONObject @field(at: "spec.parameters ")
+  steps: [Step]! @field(at: "spec.steps")
+  output: JSONObject @field(at: "spec.output")
+  owner: Owner @relation(type: "ownedBy")
+}
+
+type WebsiteTemplate @extend(type: "Template") { id: ID! }
+type DocumentationTemplate @extend(type: "Template") { id: ID! }
+type ServiceTemplate @extend(type: "Template") { id: ID! }
+
+type Group @extend(type: "Entity") @resolve(by: "spec.type") {
+  children: [Group]! @relation(type: "parentOf")
+  displayName: String @field(at: "spec.profile.displayName")
+  email: String @field(at: "spec.profile.email")
+  picture: String @field(at: "spec.profile.picture")
+  parent: Group @relation(type: "childOf")
+  members: [User] @relation(type: "hasMember")
+  ownerOf: [Ownable] @relation
+}
+
+type TeamGroup @extend(type: "Group") { parent: SubDepartmentGroup }
+type SubDepartmentGroup @extend(type: "Group") { parent: DepartmentGroup }
+type DepartmentGroup @extend(type: "Group") { parent: OrganizationGroup }
+type OrganizationGroup @extend(type: "Group") { parent: Group }
+
+type User @extend(type: "Entity") {
+  memberOf: [Group]! @relation
+  displayName: String @field(at: "spec.profile.displayName")
+  email: String @field(at: "spec.profile.email")
+  picture: String @field(at: "spec.profile.picture")
+  ownerOf: [Ownable] @relation
+}
