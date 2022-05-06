@@ -1,6 +1,0 @@
-union Ownable = Domain
-
-type Domain @extend(type: "Entity") {
-  owner: Owner! @relation(type: "ownedBy")
-  systems: [System] @relation(type: "hasPart")
-}

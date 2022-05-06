@@ -1,21 +1,12 @@
-import type { Catalog } from './catalog';
+import { CatalogApi } from '@backstage/catalog-client';
 import { GetEnvelopedFn, envelop, useExtendContext } from '@envelop/core';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { Application, createApplication } from 'graphql-modules';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { ResolverContext } from './resolver-context';
-import { Node } from './modules/node/node';
-import { Entity } from './modules/entity/entity';
-import { Component } from './modules/component/component';
-import { System } from './modules/system/system';
-import { User } from './modules/user/user';
-import { Resource } from './modules/resource/resource';
-import { Domain } from './modules/domain/domain';
 import { createLoader } from './loaders';
-import { Shared } from './modules/shared/shared';
-import { API } from './modules/api/api';
-import { Location } from './modules/location/location';
-import { Template } from './modules/template/template';
+import { Catalog } from './modules/catalog/catalog';
+import { Core } from './modules/core/core';
 import { transform } from './schema-mapper';
 
 export interface App {
@@ -24,7 +15,7 @@ export interface App {
 
 export const schema = create().schema;
 
-export function createApp(catalog: Catalog): App {
+export function createApp(catalog: CatalogApi): App {
   const application = create();
   const loader = createLoader({ catalog });
 
@@ -42,18 +33,6 @@ function create(): Application {
   return createApplication({
     schemaBuilder: ({ typeDefs, resolvers }) =>
       transform(makeExecutableSchema({ typeDefs, resolvers })),
-    modules: [
-      Shared,
-      Node,
-      Entity,
-      Component,
-      System,
-      User,
-      Resource,
-      Domain,
-      API,
-      Location,
-      Template,
-    ],
+    modules: [Core, Catalog],
   });
 }

@@ -1,12 +1,12 @@
+import { CatalogApi } from '@backstage/catalog-client';
 import { Entity, CompoundEntityRef } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
-import { Catalog } from './catalog';
 
 type EntityRef = string | CompoundEntityRef
 
 
 export interface LoaderOptions {
-  catalog: Catalog;
+  catalog: CatalogApi;
 }
 
 export interface Loader {
@@ -22,7 +22,7 @@ export function createLoader({ catalog }: LoaderOptions): Loader {
           if (entity) {
             return entity;
           }
-          return new Error(`no such node with id: '${ref}'`);
+          return new Error(`no such node with ref: '${ref}'`);
         });
       }),
     );
