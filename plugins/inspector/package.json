@@ -1,5 +1,5 @@
 {
-  "name": "@internal/plugin-inspector",
+  "name": "@frontside/backstage-plugin-inspector",
   "version": "0.1.0",
   "main": "src/index.ts",
   "types": "src/index.ts",

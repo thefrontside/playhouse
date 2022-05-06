@@ -1,4 +1,4 @@
-import { createRouter } from '@internal/plugin-inspector-backend';
+import { createRouter } from '@frontside/backstage-plugin-inspector-backend';
 import { Router } from 'express';
 import { PluginEnvironment } from '../types';
 
