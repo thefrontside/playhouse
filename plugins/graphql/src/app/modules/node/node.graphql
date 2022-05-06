@@ -1,7 +1,0 @@
-type Node @resolve(by: "kind") {
-  id: ID!
-}
-
-type Query {
-  node(id: ID!): Node
-}
