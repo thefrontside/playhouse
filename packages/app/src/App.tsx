@@ -29,7 +29,7 @@ import { AlertDisplay, OAuthRequestDialog } from '@backstage/core-components';
 import { createApp } from '@backstage/app-defaults';
 import { FlatRoutes } from '@backstage/core-app-api';
 import { orgPlugin } from '@backstage/plugin-org';
-import { InspectorPage } from '@frontside/backstage-plugin-inspector';
+import { InspectorPage } from '@frontside/backstage-plugin-effection-inspector';
 
 const app = createApp({
   apis,
@@ -81,7 +81,7 @@ const routes = (
       {searchPage}
     </Route>
     <Route path="/settings" element={<UserSettingsPage />} />
-    <Route path="/inspector" element={<InspectorPage />}/>
+    <Route path="/effection-inspector" element={<InspectorPage />}/>
   </FlatRoutes>
 );
 

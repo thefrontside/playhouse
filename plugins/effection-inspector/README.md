@@ -60,7 +60,7 @@ Create a file called `effection-inspector.ts` inside
 
 ``` typescript
 // In packages/backend/src/plugins/effection-inspector.ts
-import { createRouter } from '@frontside/backstage-plugin-inspector-backend';
+import { createRouter } from '@frontside/backstage-plugin-effection-inspector-backend';
 import type { Router } from 'express';
 import type { PluginEnvironment } from '../types';
 

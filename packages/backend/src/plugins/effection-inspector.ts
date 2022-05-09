@@ -1,4 +1,4 @@
-import { createRouter } from '@frontside/backstage-plugin-inspector-backend';
+import { createRouter } from '@frontside/backstage-plugin-effection-inspector-backend';
 import type { Router } from 'express';
 import { PluginEnvironment } from '../types';
 
