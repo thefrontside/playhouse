@@ -1,0 +1,24 @@
+name: Test GraphQL Plugin
+
+on:
+  push:
+    paths-ignore:
+      - 'plugins/graphql/**'
+
+jobs:
+  test:
+    name: Test GraphQL Plugin
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-node@v2
+      with:
+        registry-url: https://registry.npmjs.org
+    - name: Install Dependencies
+      run: yarn
+    - name: Start Postgres
+      run: docker-compose up &
+    - name: Run tests
+      run: yarn workspace @frontside/backstage-plugin-graphql test
