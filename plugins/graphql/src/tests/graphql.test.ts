@@ -19,7 +19,7 @@ describe('querying the graphql API', () => {
     });
     expect(
       yield graphql.query(/* GraphQL */`
-        node(id: "${id}") { id }
+        node(id: "${id}") { ...on Component { id } }
       `),
     ).toMatchObject({ node: { id } });
   });
@@ -31,7 +31,7 @@ describe('querying the graphql API', () => {
           kind: "Component",
           name: "backstage",
           namespace: "default"
-        ) { name, namespace, description }
+        ) { ...on Component { name, namespace, description } }
       `),
     ).toMatchObject({
       entity: {
@@ -47,7 +47,9 @@ describe('querying the graphql API', () => {
     function* () {
       expect(
         yield graphql.query(/* GraphQL */`
-          entity(kind: "Component", name: "backstage") { name, namespace, description }
+          entity(kind: "Component", name: "backstage") {
+            ...on Component { name, namespace, description }
+          }
         `),
       ).toMatchObject({ entity: { name: 'backstage', namespace: 'default' } });
     },
