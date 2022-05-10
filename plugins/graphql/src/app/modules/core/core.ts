@@ -1,19 +1,14 @@
 import { resolvePackagePath } from '@backstage/backend-common';
-import { CompoundEntityRef, stringifyEntityRef } from '@backstage/catalog-model';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { createModule } from 'graphql-modules';
-import { ResolverContext } from '../../resolver-context';
+import { ResolverContext, resolveType } from '../../resolver';
 
 export const Core = createModule({
   id: 'core',
   typeDefs: loadFilesSync(resolvePackagePath('@frontside/backstage-plugin-graphql', 'src/app/modules/core/core.graphql')),
   resolvers: {
-    Lifecycle: {
-      EXPERIMENTAL: 'experimental',
-      PRODUCTION: 'production',
-      DEPRECATED: 'deprecated',
-    },
     Node: {
+      __resolveType: resolveType,
       id: async ({ id }: { id: string }, _: never, { loader }: ResolverContext): Promise<string | null> => {
         const entity = await loader.load(id);
         if (!entity) return null;
@@ -22,10 +17,6 @@ export const Core = createModule({
     },
     Query: {
       node: (_: any, { id }: { id: string }): { id: string } => ({ id }),
-      entity: (
-        _: any,
-        { name, kind, namespace = 'default' }: CompoundEntityRef,
-      ): { id: string } => ({ id: stringifyEntityRef({ name, kind, namespace }) }),
     },
   },
 });
