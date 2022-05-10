@@ -4,12 +4,8 @@ import {
   getDirective,
   MapperKind,
   SchemaMapper,
-  addTypes,
-  getImplementingTypes,
 } from '@graphql-tools/utils';
 import {
-  GraphQLAbstractType,
-  GraphQLEnumType,
   GraphQLField,
   GraphQLFieldConfigMap,
   GraphQLFieldMap,
@@ -17,19 +13,11 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
-  GraphQLOutputType,
-  GraphQLResolveInfo,
-  GraphQLScalarType,
   GraphQLSchema,
-  GraphQLUnionType,
-  isListType,
-  isNonNullType,
-  isObjectType,
-  printSchema,
+  isInterfaceType,
 } from 'graphql';
-import { pascalCase } from 'pascal-case'
 import { get } from 'lodash';
-import { ResolverContext } from './resolver-context';
+import { ResolverContext } from './resolver';
 
 const resolveMappers: Array<(
   objectField: GraphQLField<{ id: string }, ResolverContext>,
@@ -76,15 +64,9 @@ const resolveMappers: Array<(
   },
 ]
 
-interface ExtendConfig {
-  interfaceType: GraphQLInterfaceType;
-  extenders: string[];
-}
-const extendInterfaces = new Map<string, ExtendConfig>()
 const objectMapper: SchemaMapper = {
   [MapperKind.OBJECT_TYPE]: (objectType, schema) => {
-    const extenders = traverseExtends(objectType, schema)
-    const interfaces = extenders.map(type => extendInterfaces.get(type)?.interfaceType as GraphQLInterfaceType).filter(Boolean)
+    const interfaces = traverseExtends(objectType, schema)
     const typeConfig = objectType.toConfig()
     const fieldsConfig: GraphQLFieldConfigMap<any, any> = {
       ...interfaces.reduce((fields, interfaceType) => ({
@@ -93,13 +75,6 @@ const objectMapper: SchemaMapper = {
       }), {}),
       ...typeConfig.fields,
     }
-    Object.values(fieldsConfig).forEach((fieldConfig) => {
-      const [fieldType, recreateType] = resolveFieldType(fieldConfig.type)
-      const { interfaceType } = extendInterfaces.get(fieldType.name) ?? {}
-      if (interfaceType) {
-        fieldConfig.type = recreateType(interfaceType)
-      }
-    })
     const newObjectType = new GraphQLObjectType({
       ...typeConfig,
       fields: fieldsConfig,
@@ -123,124 +98,21 @@ const objectMapper: SchemaMapper = {
     return newObjectType;
   },
 };
-const unionMapper: SchemaMapper = {
-  [MapperKind.UNION_TYPE]: (unionType, schema) => {
-    if (unionType.resolveType) return unionType
-    const implementedTypes = new Set<string>()
-    const commonTypes = unionType.getTypes().reduce((types: null | string[], objectType) => {
-      const extenders = traverseExtends(objectType, schema)
-      const interfaceName = extendInterfaces.get(objectType.name)?.interfaceType.name
-      if (interfaceName) getImplementingTypes(interfaceName, schema).forEach(typeName => implementedTypes.add(typeName))
-      if (!types) return extenders
-      return extenders.filter(type => types.includes(type))
-    }, null)
-    if (!commonTypes || commonTypes.length === 0) return unionType
-    const { resolveType } = extendInterfaces.get(commonTypes[0])?.interfaceType ?? {}
-    const unionTypeConfig = unionType.toConfig()
-    const resolvedTypes = [...implementedTypes.values()].map(typeName => schema.getType(typeName) as GraphQLObjectType)
-    return new GraphQLUnionType({
-      ...unionTypeConfig,
-      resolveType,
-      types: [...new Set([...unionTypeConfig.types, ...resolvedTypes])]
-    })
-  }
-}
 
-function resolveFieldType(fieldType: GraphQLOutputType): [GraphQLScalarType | GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType | GraphQLEnumType, (type: GraphQLOutputType) => GraphQLOutputType] {
-  if (isNonNullType(fieldType)) {
-    const [resolvedType, recreateType] = resolveFieldType(fieldType.ofType)
-    return [resolvedType, (type) => new GraphQLNonNull(recreateType(type))]
-  }
-  if (isListType(fieldType)) {
-    const [resolvedType, recreateType] = resolveFieldType(fieldType.ofType)
-    return [resolvedType, (type) => new GraphQLList(recreateType(type))]
-  }
-  return [fieldType, (type) => type]
-}
-
-function createExtendConfig(
-  extendType: GraphQLObjectType,
-  extenders: string[],
-  schema: GraphQLSchema
-) {
-  const interfaceDirective = getDirective(schema, extendType, 'interface')?.[0];
-  const interfaceName = interfaceDirective?.name ?? `I${extendType.name}`
-  const fields = extendType.toConfig().fields
-  const interfaceType = new GraphQLInterfaceType({
-    name: interfaceName,
-    fields: () => {
-      Object.values(fields).forEach((fieldConfig) => {
-        const [fieldType, recreateType] = resolveFieldType(fieldConfig.type)
-        const { interfaceType: ifaceType } = extendInterfaces.get(fieldType.name) ?? {}
-        if (ifaceType) {
-          fieldConfig.type = recreateType(ifaceType)
-        }
-      })
-      return fields
-    },
-    resolveType: getResolveTypeBy(extendType, schema)
-  })
-  const extendConfig = {
-    interfaceType,
-    extenders,
-  }
-  extendInterfaces.set(extendType.name, extendConfig)
-  return extendConfig
-}
-
-function traverseExtends(objectType: GraphQLObjectType, schema: GraphQLSchema): string[] {
-  const extendDirective = getDirective(schema, objectType, 'extend')?.[0];
+function traverseExtends(type: GraphQLObjectType | GraphQLInterfaceType, schema: GraphQLSchema): GraphQLInterfaceType[] {
+  const extendDirective = getDirective(schema, type, 'extend')?.[0];
+  const interfaces = []
   if (extendDirective) {
-    let extendConfig = extendInterfaces.get(extendDirective.type)
-    if (!extendConfig) {
-      const extendType = schema.getType(extendDirective.type)
-      if (!isObjectType(extendType)) throw new Error(`The type "${extendDirective.type}" described in @extend directive for "${objectType.name}" isn't object type or doesn't exist`)
-
-      extendConfig = createExtendConfig(extendType, traverseExtends(extendType, schema), schema)
+    const extendType = schema.getType(extendDirective.type)
+    if (!isInterfaceType(extendType)) {
+      throw new Error(`The interface "${extendDirective.type}" described in @extend directive for "${type.name}" isn't abstract type or doesn't exist`)
     }
-    return [...extendConfig.extenders, objectType.name]
-  }
-  return [objectType.name]
-}
 
-function getResolveTypeBy(objectType: GraphQLObjectType, schema: GraphQLSchema) {
-  const resolveDirective = getDirective(schema, objectType, 'resolve')?.[0];
-  if (!resolveDirective) return undefined;
-  return async (
-    { id, parentName = objectType.name }: { id: string, parentName?: string },
-    context: ResolverContext,
-    info: GraphQLResolveInfo,
-    abstractType: GraphQLAbstractType
-  ) => {
-    const normalizedParentName = parentName === 'Entity' || parentName === 'Node' ? '' : parentName
-    const entity = await context.loader.load(id);
-    const typeName = pascalCase(get(entity, resolveDirective.by) ?? 'Never').replace(new RegExp(`${normalizedParentName}$`, 'gi'), '')
-    const resolvedType = await extendInterfaces
-    .get(typeName)
-    ?.interfaceType
-    .resolveType
-    ?.({ id, parentName: typeName }, context, info, abstractType)
-    return resolvedType ?? `${typeName}${normalizedParentName}`
+    interfaces.push(...traverseExtends(extendType, schema))
   }
+  return isInterfaceType(type) ? [...interfaces, type] : interfaces
 }
 
 export const transform = (schema: GraphQLSchema) => {
-  // NOTE Traverse through all `@extend` directives and create necessary interfaces
-  mapSchema(schema, {
-    [MapperKind.OBJECT_TYPE]: (objectType) => {
-      const extenders = traverseExtends(objectType, schema)
-      const interfaceDirective = getDirective(schema, objectType, 'interface')?.[0];
-      if (interfaceDirective) {
-        createExtendConfig(objectType, extenders, schema)
-      }
-      return objectType
-    }
-  })
-
-  const a = addTypes(
-    mapSchema(mapSchema(schema, objectMapper), unionMapper),
-    [...extendInterfaces.values()].map(({ interfaceType: interfaceType }) => interfaceType)
-  )
-  console.log(printSchema(a))
-  return a
+  return mapSchema(schema, objectMapper)
 };

@@ -1,45 +1,9 @@
 directive @field(at: String!) on FIELD_DEFINITION
 directive @relation(type: String, kind: String) on FIELD_DEFINITION
-directive @extend(type: String!) on OBJECT
-directive @resolve(by: String!) on OBJECT
-directive @interface(name: String) on OBJECT
+directive @extend(type: String!) on OBJECT | INTERFACE
 
-enum Lifecycle {
-  EXPERIMENTAL
-  PRODUCTION
-  DEPRECATED
-}
-
-type Never @extend(type: "Node") {
-  id: ID!
-}
-
-type Node @resolve(by: "kind") {
-  id: ID!
-}
-
-type Entity @extend(type: "Node") @resolve(by: "kind") {
-  name: String! @field(at: "metadata.name")
-  namespace: String @field(at: "metadata.namespace")
-  title: String @field(at: "metadata.title")
-  description: String @field(at: "metadata.description")
-  tags: [String] @field(at: "metadata.tags")
-  links: [EntityLink] @field(at: "metadata.links")
-}
-
-type EntityLink {
-  url: String!
-  title: String
-  icon: String
-}
-
-type Location @extend(type: "Entity") {
-  type: String @field(at: "spec.type")
-  target: String @field(at: "spec.target")
-  targets: [String] @field(at: "spec.targets")
-}
+interface Node { id: ID! }
 
 type Query {
   node(id: ID!): Node
-  entity(kind: String!, name: String!, namespace: String): Entity
 }
