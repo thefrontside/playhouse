@@ -17,7 +17,7 @@ export const InspectorPage = () => {
 
   return (
     <Page themeId="tool">
-    <Header title="Backstage Inspector" subtitle="backstage server runtime insights"/>
+    <Header title="Effection Inspector" subtitle="server runtime visualization"/>
     <Content><Inspector/></Content>
   </Page>
   );
