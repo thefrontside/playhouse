@@ -30,6 +30,7 @@ import proxy from './plugins/proxy';
 import techdocs from './plugins/techdocs';
 import search from './plugins/search';
 import healthcheck from './plugins/healthcheck';
+import effectionInspector from './plugins/effection-inspector';
 import { PluginEnvironment } from './types';
 
 function makeCreateEnv(config: Config) {
@@ -64,6 +65,7 @@ async function main() {
   });
   const createEnv = makeCreateEnv(config);
 
+  const effectionInspectorEnv = useHotMemoize(module, () => createEnv('inspector'));
   const healthcheckEnv = useHotMemoize(module, () => createEnv('healthcheck'));
   const catalogEnv = useHotMemoize(module, () => createEnv('catalog'));
   const scaffolderEnv = useHotMemoize(module, () => createEnv('scaffolder'));
@@ -80,7 +82,8 @@ async function main() {
   apiRouter.use('/techdocs', await techdocs(techdocsEnv));
   apiRouter.use('/proxy', await proxy(proxyEnv));
   apiRouter.use('/search', await search(searchEnv));
-  apiRouter.use('/healthcheck', await healthcheck(healthcheckEnv))
+  apiRouter.use('/healthcheck', await healthcheck(healthcheckEnv));
+  apiRouter.use('/effection-inspector', await effectionInspector(effectionInspectorEnv));
   apiRouter.use(notFoundHandler());
 
   const service = createServiceBuilder(module)
