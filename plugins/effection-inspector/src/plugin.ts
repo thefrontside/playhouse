@@ -14,6 +14,7 @@ export const inspectorPlugin = createPlugin({
       factory({ discoveryApi,  }) {
         return {
           inspectState: () => ({
+            name: 'InspectorState',
             *init(scope) {
               let url: string = yield discoveryApi.getBaseUrl('effection-inspector');
               let source = new EventSource(url, { withCredentials: true });
