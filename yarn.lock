@@ -2928,10 +2928,10 @@
     "@effection/core" "2.2.0"
     cross-fetch "3.1.5"
 
-"@effection/inspect-ui@^2.1.5":
-  version "2.1.5"
-  resolved "https://registry.yarnpkg.com/@effection/inspect-ui/-/inspect-ui-2.1.5.tgz#0990c0945e5540ba557c4ab1a9b5aae37d848be7"
-  integrity sha512-s1+ESkC4jPW/SobFFrMm6jiO0voUXIAlSsYNdIkbHs3fII2jqLKDQ924qAHZ8xW7DC/XtRocrbmwg8BUrP94LA==
+"@effection/inspect-ui@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@effection/inspect-ui/-/inspect-ui-2.2.0.tgz#f7b5f25fa224e49e9253670370200e4dba100e58"
+  integrity sha512-yjxH7TlTPSN31VQrKw15S2CWEsP50omQdXKBXju951RlfwHOMQ7l4To5LEawb3gXl5+DCJjyps/xFUf/Ya7diQ==
 
 "@effection/inspect-utils@^2.1.4":
   version "2.1.4"
@@ -6394,7 +6394,7 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     "@backstage/plugin-techdocs" "^1.1.0"
     "@backstage/plugin-user-settings" "^0.4.3"
     "@backstage/theme" "^0.2.15"
-    "@internal/plugin-inspector" "^0.1.0"
+    "@frontside/backstage-plugin-effection-inspector" "^0.1.0"
     "@material-ui/core" "^4.12.2"
     "@material-ui/icons" "^4.9.1"
     history "^5.0.0"
