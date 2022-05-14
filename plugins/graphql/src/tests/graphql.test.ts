@@ -8,7 +8,7 @@ describe('querying the graphql API', () => {
   let graphql: GraphQLAPI;
 
   beforeAll(function* () {
-    graphql = yield createBackstage({ log: true });
+    graphql = yield createBackstage({ log: false });
   });
 
   it.eventually('can look up a known node by id', function* () {
