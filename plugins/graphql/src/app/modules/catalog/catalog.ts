@@ -6,7 +6,7 @@ import GraphQLJSON, { GraphQLJSONObject } from "graphql-type-json";
 import { resolveType } from "../../resolver";
 
 export const Catalog = createModule({
-  id: 'Catalog',
+  id: 'catalog',
   typeDefs: loadFilesSync(resolvePackagePath('@frontside/backstage-plugin-graphql', 'src/app/modules/catalog/catalog.graphql')),
   resolvers: {
     Entity: { __resolveType: resolveType },
