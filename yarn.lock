@@ -1747,6 +1747,31 @@
     react-router-dom "6.0.0-beta.0"
     zen-observable "^0.8.15"
 
+"@backstage/dev-utils@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@backstage/dev-utils/-/dev-utils-1.0.1.tgz#42c8c8cd2521c7908ad4f60769709a56ae173a2c"
+  integrity sha512-f3AYmGkqgKLUgWlAX9vKLjl7C86UGQlsJvYACCR4sU35TOfaL9L8uJ/Tr9jxkGT6warpaTWzpa/pyg6FGFgIOw==
+  dependencies:
+    "@backstage/app-defaults" "^1.0.1"
+    "@backstage/catalog-model" "^1.0.1"
+    "@backstage/core-app-api" "^1.0.1"
+    "@backstage/core-components" "^0.9.3"
+    "@backstage/core-plugin-api" "^1.0.1"
+    "@backstage/integration-react" "^1.0.1"
+    "@backstage/plugin-catalog-react" "^1.0.1"
+    "@backstage/test-utils" "^1.0.1"
+    "@backstage/theme" "^0.2.15"
+    "@material-ui/core" "^4.12.2"
+    "@material-ui/icons" "^4.9.1"
+    "@testing-library/jest-dom" "^5.10.1"
+    "@testing-library/react" "^12.1.3"
+    "@testing-library/user-event" "^14.0.0"
+    react-hot-loader "^4.13.0"
+    react-router "6.0.0-beta.0"
+    react-router-dom "6.0.0-beta.0"
+    react-use "^17.2.4"
+    zen-observable "^0.8.15"
+
 "@backstage/errors@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@backstage/errors/-/errors-1.0.0.tgz#08ebf53afdeaca32362955ea8551e8ffa0bb3cd7"
@@ -3028,6 +3053,25 @@
   dependencies:
     "@date-io/core" "^1.3.13"
 
+"@effection/atom@2.0.4", "@effection/atom@^2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@effection/atom/-/atom-2.0.4.tgz#903755ec13673c38a6b3c8286c5832aa3da7e0b8"
+  integrity sha512-mnflhIUK5zWt5ViJPWpZpA9NW8QO5ipV2493sQnOCKZp9mlYRmGhew76tRGydZgLlhO/SADwRVYgTDBrLm+joA==
+  dependencies:
+    assert-ts "^0.2.2"
+    effection "2.0.4"
+    fp-ts "^2.8.2"
+    monocle-ts "^2.3.3"
+
+"@effection/channel@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@effection/channel/-/channel-2.0.1.tgz#69d03ab16b5a0e70537c9db781dc10062f29b781"
+  integrity sha512-oyGTskv5qSD6k2fo4w9m3L1d4OdLxBvlRfDpXu96yPVatEo4z+i25hEYE2oGXdBjsnIK/PMd50Ehaw/q4QakxA==
+  dependencies:
+    "@effection/core" "2.0.1"
+    "@effection/events" "2.0.1"
+    "@effection/stream" "2.0.1"
+
 "@effection/channel@2.0.3":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@effection/channel/-/channel-2.0.3.tgz#825ade1a4a09b860efdf7077fc02f81d6c7614bb"
@@ -3037,12 +3081,32 @@
     "@effection/events" "2.0.3"
     "@effection/stream" "2.0.3"
 
+"@effection/core@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@effection/core/-/core-2.0.1.tgz#f200e4df020666ec5dc232da3057bafb63aa19af"
+  integrity sha512-Bl2pfu9gbTwlieTgcEhFOwz70QDPXpyVRuOiOqccGVBvZpa3/mzepH6LFZSCyothnc7YO0b31xXV551POiLEow==
+
 "@effection/core@2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@effection/core/-/core-2.2.0.tgz#4d11d7948144aecd70a26daf8abaa29ee89bc259"
   integrity sha512-1RBMrDS0Ya02NEM0TQQRwzlGDSZmwoHhuD3qmWp9NLjZowhO1gJBZ16fQL2NbKvcpS71xho+oZsDedId+C1q8Q==
   dependencies:
     abort-controller "^3.0.0"
+
+"@effection/dispatch@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@effection/dispatch/-/dispatch-2.0.1.tgz#aa16dc34517a84462a42307420243aa10a17a2ba"
+  integrity sha512-22EIHjEGlxl/5r+kTxLKHyWTt3D341os5LiDgV2RqElZnD1F7ki5JwYfqg3chm7M4Usl2Xj5mdgb8g7DiV/tnA==
+  dependencies:
+    effection "2.0.1"
+
+"@effection/events@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@effection/events/-/events-2.0.1.tgz#9eaaed36270c0d0d4ee06c2657e819b22c52f1ac"
+  integrity sha512-ufaYE8srITlbt1kuJv5vn12HobQPTot5MJZC7tHcNDGqvF+/ewTuVaxKGD5Vq4JP5H29GAZfjjUrkQaopBdjTw==
+  dependencies:
+    "@effection/core" "2.0.1"
+    "@effection/stream" "2.0.1"
 
 "@effection/events@2.0.3":
   version "2.0.3"
@@ -3052,6 +3116,16 @@
     "@effection/core" "2.2.0"
     "@effection/stream" "2.0.3"
 
+"@effection/fetch@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@effection/fetch/-/fetch-2.0.1.tgz#f67a307ef6b4450007bbf2207c6be00c143d4ce2"
+  integrity sha512-doIE8g3ljm8YUJp+JJQr2i9PKLo/bWCtXjUbI+8wtVqAM5ifDElGWRH++o57JRDwNuHLPj9TdLfdwWxrTRM2Fw==
+  dependencies:
+    "@effection/core" "2.0.1"
+    abort-controller "^3.0.0"
+    cross-fetch "^3.0.4"
+    node-fetch "^2.6.1"
+
 "@effection/fetch@2.0.4":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@effection/fetch/-/fetch-2.0.4.tgz#8f76f0b630b3974ef267bd8803599448db956cda"
@@ -3060,6 +3134,20 @@
     "@effection/core" "2.2.0"
     cross-fetch "3.1.5"
 
+"@effection/inspect-ui@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@effection/inspect-ui/-/inspect-ui-2.2.0.tgz#f7b5f25fa224e49e9253670370200e4dba100e58"
+  integrity sha512-yjxH7TlTPSN31VQrKw15S2CWEsP50omQdXKBXju951RlfwHOMQ7l4To5LEawb3gXl5+DCJjyps/xFUf/Ya7diQ==
+
+"@effection/inspect-utils@^2.1.4":
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/@effection/inspect-utils/-/inspect-utils-2.1.4.tgz#2aa430ee068a4cbd1670a9a280095f26f7f2103b"
+  integrity sha512-zXt2Uef2IJSkrMAnJyU9iN66VxkFJuU86dJeOQTP0jRY38sdjVkaBXQNjWu5zZkY+7LKs4KQRTxfqlV+yYvwOQ==
+  dependencies:
+    "@effection/atom" "2.0.4"
+    "@effection/dispatch" "2.0.1"
+    effection "2.0.4"
+
 "@effection/jest@^2.0.2":
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@effection/jest/-/jest-2.0.2.tgz#3bc3ce670e3766d3b4f1928ca967dd6080bf1e22"
@@ -3067,6 +3155,15 @@
   dependencies:
     assert-ts "^0.3.4"
     effection "2.0.4"
+
+"@effection/main@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@effection/main/-/main-2.0.1.tgz#becbaf0b28665e401b05e429d4cad8c2c5c84ee2"
+  integrity sha512-HIoK7cf4dCzCLvDuXO2YTIly7cJVU3vB47M58bqILCyGeMwcfW1iQU92SeykUZRCxfPTrQbU4vDWAS1hSvE0ow==
+  dependencies:
+    "@effection/core" "2.0.1"
+    chalk "^4.1.2"
+    stacktrace-parser "^0.1.10"
 
 "@effection/main@2.0.3":
   version "2.0.3"
@@ -3087,6 +3184,21 @@
     effection "2.0.4"
     shellwords "^0.1.1"
 
+"@effection/react@^2.1.4":
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/@effection/react/-/react-2.1.4.tgz#35f74adfd89d79ef937e0c18db7e7736f843ee5c"
+  integrity sha512-OymNdy//jDGBsifV6mnCdti45RINZ7DlopXKToZiG6AlSzyi7F/HpKcB00Au02j2gQfpXiHWudqAbevw2sAs0Q==
+  dependencies:
+    effection "^2.0.0"
+
+"@effection/stream@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@effection/stream/-/stream-2.0.1.tgz#f0a7b9f63135f7cefb74a9898b386a86aa48f23d"
+  integrity sha512-GZ65WAK5npuJVET4Cgx50G3ruKzb7LoihpyKHBSzOOmXIIJIhJ5yf1hYf9/EPh8KRzBDG3yGDZ2JpUINpElgng==
+  dependencies:
+    "@effection/core" "2.0.1"
+    "@effection/subscription" "2.0.1"
+
 "@effection/stream@2.0.3":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@effection/stream/-/stream-2.0.3.tgz#c1610c63dfe6d10b0b6aeda6969fea24018364b0"
@@ -3094,6 +3206,13 @@
   dependencies:
     "@effection/core" "2.2.0"
     "@effection/subscription" "2.0.3"
+
+"@effection/subscription@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@effection/subscription/-/subscription-2.0.1.tgz#677cfdaa21a0a16f5aee4834e9da10afbfb5678b"
+  integrity sha512-cU54UzXhQ7EX2TC6lejDIO1dV4pdRmQ3ev7hS9EVAsxg0XP0UGdCNE/ddfWYoSHoOVKgkbeOjZkvaKvjvs4G0A==
+  dependencies:
+    "@effection/core" "2.0.1"
 
 "@effection/subscription@2.0.3":
   version "2.0.3"
@@ -7075,6 +7194,7 @@ anymatch@^3.0.3, anymatch@~3.1.2:
     "@backstage/plugin-techdocs" "^1.1.0"
     "@backstage/plugin-user-settings" "^0.4.3"
     "@backstage/theme" "^0.2.15"
+    "@frontside/backstage-plugin-effection-inspector" "^0.1.0"
     "@material-ui/core" "^4.12.2"
     "@material-ui/icons" "^4.9.1"
     history "^5.0.0"
@@ -7326,6 +7446,11 @@ assert-plus@1.0.0, assert-plus@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/assert-plus/-/assert-plus-1.0.0.tgz#f12e0f3c5d77b0b1cdd9146942e4e96c1e4dd525"
   integrity sha1-8S4PPF13sLHN2RRpQuTpbB5N1SU=
+
+assert-ts@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/assert-ts/-/assert-ts-0.2.2.tgz#afaa987cce8ef8c653d07032f562f8350ec9723f"
+  integrity sha512-aoktTqvPejI9G0+wNOomh44acAJ/KMp4YAw5yW3tM1MESxEBuAlWdBG3Q9QGV6YMv7pEfzor8822B5WinXcmPg==
 
 assert-ts@^0.3.4:
   version "0.3.4"
@@ -9188,7 +9313,7 @@ cross-env@^7.0.0:
   dependencies:
     cross-spawn "^7.0.1"
 
-cross-fetch@3.1.5, cross-fetch@^3.1.5:
+cross-fetch@3.1.5, cross-fetch@^3.0.4, cross-fetch@^3.1.5:
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.5.tgz#e1389f44d9e7ba767907f7af8454787952ab534f"
   integrity sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==
@@ -10228,7 +10353,20 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
-effection@2.0.4, effection@^2.0.4:
+effection@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/effection/-/effection-2.0.1.tgz#6063a17afb0bdaee30cc4c94cdffdb2a6cab08af"
+  integrity sha512-KV5P1FZ7nZlSar9Li/cTj88D/0A1Ac+dv+QVDcK7hGBh2OLHtns//54trublT6L0PBP/0RYa5yPUixDdzMSDug==
+  dependencies:
+    "@effection/channel" "2.0.1"
+    "@effection/core" "2.0.1"
+    "@effection/events" "2.0.1"
+    "@effection/fetch" "2.0.1"
+    "@effection/main" "2.0.1"
+    "@effection/stream" "2.0.1"
+    "@effection/subscription" "2.0.1"
+
+effection@2.0.4, effection@^2.0.0, effection@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/effection/-/effection-2.0.4.tgz#2ca9defcebfa75b408f83f6a16ae10ec6c70b48a"
   integrity sha512-8haobRaTJbwNM32GeSS5Do0WHB/Xev94SukFtQHEli+3TTDxYwW+NQcp0lAb8J4ISzvKjL+OyodGPMEyegbjog==
@@ -11580,6 +11718,11 @@ forwarded@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.2.0.tgz#2269936428aad4c15c7ebe9779a84bf0b2a81811"
   integrity sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==
+
+fp-ts@^2.8.2:
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.12.1.tgz#e389488bfd1507af06bd5965e97367edcd4fabad"
+  integrity sha512-oxvgqUYR6O9VkKXrxkJ0NOyU0FrE705MeqgBUMEPWyTu6Pwn768cJbHChw2XOBlgFLKfIHxjr2OOBFpv2mUGZw==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -16219,6 +16362,11 @@ moment-timezone@^0.5.x:
   version "2.29.2"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
   integrity sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==
+
+monocle-ts@^2.3.3:
+  version "2.3.13"
+  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-2.3.13.tgz#7c8af489613cd5175df2ea3c02c57c6151995e5d"
+  integrity sha512-D5Ygd3oulEoAm3KuGO0eeJIrhFf1jlQIoEVV2DYsZUMz42j4tGxgct97Aq68+F8w4w4geEnwFa8HayTS/7lpKQ==
 
 morgan@^1.10.0, morgan@^1.9.1:
   version "1.10.0"
