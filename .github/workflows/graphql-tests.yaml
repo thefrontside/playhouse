@@ -20,7 +20,6 @@ jobs:
       run: yarn
     - name: Start Postgres
       run: docker-compose up &
-    - uses: mxschmitt/action-tmate@v3
     - name: Run tests
       run: yarn workspace @frontside/backstage-plugin-graphql test
 
