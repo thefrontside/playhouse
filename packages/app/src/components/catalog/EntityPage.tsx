@@ -54,7 +54,7 @@ import {
 } from '@backstage/plugin-org';
 import { EntityTechdocsContent } from '@backstage/plugin-techdocs';
 import { EmptyState } from '@backstage/core-components';
-import { ExampleFetchComponent } from '@internal/plugin-humanitec/src/components/ExampleFetchComponent';
+import { HumanitecCardComponent } from '@internal/plugin-humanitec';
 
 const cicdContent = (
   // This is an example of how you can implement your company's logic in entity page.
@@ -113,7 +113,7 @@ const overviewContent = (
       <EntityLinksCard />
     </Grid>
     <Grid item md={6}>
-      <ExampleFetchComponent />
+      <HumanitecCardComponent />
     </Grid>
     <Grid item md={8} xs={12}>
       <EntityHasSubcomponentsCard variant="gridItem" />
