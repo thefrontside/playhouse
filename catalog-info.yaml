@@ -11,3 +11,23 @@ spec:
   type: website
   owner: john@example.com
   lifecycle: experimental
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: sample-app
+  description: Sample app for Humanitec demo
+spec:
+  type: website
+  owner: john@example.com
+  lifecycle: experimental
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: sample-service
+  description: Sample service for Humanitec demo
+spec:
+  type: service
+  owner: john@example.com
+  lifecycle: experimental
