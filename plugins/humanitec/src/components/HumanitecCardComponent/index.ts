@@ -1,1 +1,1 @@
-export { ExampleFetchComponent } from './ExampleFetchComponent';
+export { HumanitecCardComponent } from './HumanitecCardComponent';
