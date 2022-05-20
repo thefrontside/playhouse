@@ -72,3 +72,8 @@ auth:
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
+
+catalog:
+  locations:
+    - type: file
+      target: ../../catalog-info.yaml
