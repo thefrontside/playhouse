@@ -13,7 +13,7 @@ export const HumanitecPage = humanitecPlugin.provide(
   createRoutableExtension({
     name: 'HumanitecPage',
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import('./components/HumanitecCardComponent').then(m => m.HumanitecCardComponent),
     mountPoint: rootRouteRef,
   }),
 );

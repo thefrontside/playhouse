@@ -15,19 +15,52 @@ type HumanitecAnnotationedEntity = {
   }
 } & Entity;
 
-export const HumanitecCard = ({ environments }: { environments: HumanitecEnvironment[] }) => {
+export const HumanitecCard = ({ environments }: { environments: HumanitecEnvironmentAndRunTime[] }) => {
+  console.log(environments)
   return (
     <>
       <h4>Humanitect Environments</h4>
       <ul>
-        {environments.map(env => <li key={env.id}>{env.id}</li>)}
+        {environments.map(env => {
+          return (
+          <li key={env.id}>{env.id}
+          </li>
+          )
+        })}
       </ul>
     </>
   )
 }
 
+type HumanitecEnvironmentAndRunTime = HumanitecEnvironment & {
+  runtime: HumanitecRuntimeInfo;
+}
+
 interface HumanitecEnvironment {
   id: string;
+  name: string;
+  namespace?: string;
+  type: string;
+}
+
+interface HumanitecControllerPods {
+  containerStatuses: Record<string, any>[];
+  phase: string;
+  podName: string;
+  revision: number;
+  status: string;
+}
+
+interface HumanitecControllerResponse {
+  kind: string;
+  replicas: number;
+  status: string;
+  pods: HumanitecControllerPods[]
+}
+
+interface HumanitecRuntimeInfo {
+  modules: Record<string, Record<string, HumanitecControllerResponse>>
+  namespace: string;
 }
 
 export const HumanitecCardComponent = () => {
@@ -36,11 +69,28 @@ export const HumanitecCardComponent = () => {
   const appId = entity.metadata.annotations['humanitec.com/appId'];
   const orgId = entity.metadata.annotations['humanitec.com/orgId'];
 
-  const { value, loading, error } = useAsync(async (): Promise<HumanitecEnvironment[]> => {
+  const { value, loading, error } = useAsync(async () => {
     const baseUrl = config.getString('backend.baseUrl');
-    const response = await fetch(`${baseUrl}/api/proxy/humanitec/orgs/${orgId}/apps/${appId}/envs`);
-    const data = await response.json();
-    return data;
+
+    async function fetchEnvironments() {
+      const response = await fetch(`${baseUrl}/api/proxy/humanitec/orgs/${orgId}/apps/${appId}/envs`);
+      const data = await response.json() as HumanitecEnvironment[];
+      return data;
+    }
+
+    async function fetchRuntimeInfo(envId: string) {
+      const response = await fetch(`${baseUrl}/api/proxy/humanitec/orgs/${orgId}/apps/${appId}/envs/${envId}/runtime`);
+      const data = await response.json() as HumanitecRuntimeInfo;
+      return data;
+    }
+
+    const environments = await fetchEnvironments();
+    return Promise.all(environments.map(async ({ id, name, type }) => ({
+      id,
+      name,
+      type,
+      runtime: await fetchRuntimeInfo(id)
+    })));
   }, [appId, orgId]);
 
   if (loading) {
