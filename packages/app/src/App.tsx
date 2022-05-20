@@ -30,6 +30,7 @@ import { createApp } from '@backstage/app-defaults';
 import { FlatRoutes } from '@backstage/core-app-api';
 import { orgPlugin } from '@backstage/plugin-org';
 import { InspectorPage } from '@frontside/backstage-plugin-effection-inspector';
+import { HumanitecPage } from '@internal/plugin-humanitec';
 
 const app = createApp({
   apis,
@@ -82,6 +83,7 @@ const routes = (
     </Route>
     <Route path="/settings" element={<UserSettingsPage />} />
     <Route path="/effection-inspector" element={<InspectorPage />}/>
+    <Route path="/humanitec" element={<HumanitecPage />}/>
   </FlatRoutes>
 );
 
