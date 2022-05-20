@@ -17,6 +17,9 @@ kind: Component
 metadata:
   name: sample-app
   description: Sample app for Humanitec demo
+  annotations:
+    "humanitec.com/orgId": "the-frontside-software-inc"
+    "humanitec.com/appId": "humanitec-sample"
 spec:
   type: website
   owner: john@example.com
@@ -27,6 +30,9 @@ kind: Component
 metadata:
   name: sample-service
   description: Sample service for Humanitec demo
+  annotations:
+    "humanitec.com/orgId": "the-frontside-software-inc"
+    "humanitec.com/appId": "humanitec-sample"
 spec:
   type: service
   owner: john@example.com
