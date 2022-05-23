@@ -54,7 +54,7 @@ import {
 } from '@backstage/plugin-org';
 import { EntityTechdocsContent } from '@backstage/plugin-techdocs';
 import { EmptyState } from '@backstage/core-components';
-import { HumanitecCardComponent } from '@internal/plugin-humanitec';
+import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 const cicdContent = (
   // This is an example of how you can implement your company's logic in entity page.
