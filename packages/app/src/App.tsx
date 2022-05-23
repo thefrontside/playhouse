@@ -30,7 +30,7 @@ import { createApp } from '@backstage/app-defaults';
 import { FlatRoutes } from '@backstage/core-app-api';
 import { orgPlugin } from '@backstage/plugin-org';
 import { InspectorPage } from '@frontside/backstage-plugin-effection-inspector';
-import { HumanitecPage } from '@internal/plugin-humanitec';
+import { HumanitecPage } from '@frontside/backstage-plugin-humanitec';
 
 const app = createApp({
   apis,
