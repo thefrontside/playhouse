@@ -81,3 +81,7 @@ catalog:
   locations:
     - type: file
       target: ../../catalog-info.yaml
+    - type: file
+      target: ../../templates/podinfo/template.yaml
+      rules:
+        - allow: [Template]

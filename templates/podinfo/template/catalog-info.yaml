@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{values.name | dump}}
+  description: Sample service for Humanitec demo
+  annotations:
+    "humanitec.com/orgId": ${{values.orgId | dump}}
+    "humanitec.com/appId": ${{values.appId | dump}}
+spec:
+  type: service
+  owner: john@example.com
+  lifecycle: experimental
