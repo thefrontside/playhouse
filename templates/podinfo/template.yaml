@@ -1,0 +1,67 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: Template-Podiasdfnfo
+  title: Template for Podinfo
+  description: scaffold dockerfile and github actions workflow
+spec:
+  owner: john@example.com
+  type: service
+
+  parameters:
+    # - title: Configure Your New Application
+    #   required:
+    #     - repoUrl
+    #     - workload
+    #   properties:
+    #     repoUrl:
+    #       title: Repository Location
+    #       type: string
+    #       ui:field: RepoUrlPicker
+    #       ui:options:
+    #         allowedHosts:
+    #           - github.com
+    #     workload:
+    #       title: Workload Name
+    #       type: string
+    #       description: Name of the humanitec workload
+    #       ui:autofocus: true
+    #       ui:options:
+    #         rows: 5
+  steps:
+    # - name: Fetch Podinfo Template Base
+    #   id: fetch-base
+    #   action: fetch:template
+    #   input:
+    #     url: ../../templates/podinfo/template
+    #     copyWithoutRender: ["**/build-upload.yml"]
+    #     cookiecutterCompat: true
+    #     values:
+    #       name: ${{ parameters.workload }} # catalog info
+    #       orgId: 'the-frontside-software-inc' # catalog info
+    #       appId: 'humanitec-sample' # catalog info
+    # - name: Create Repository on Github
+    #   id: publish
+    #   action: publish:github
+    #   input:
+    #     allowedHosts: ['github.com']
+    #     description: This is ${{ parameters.workload }}
+    #     repoUrl: ${{ parameters.repoUrl }}
+    # - name: Build and Upload Container to Google Cloud Artifact Registry
+    #   id: build-and-upload
+    #   action: frontside:build-push
+    #   input:
+    #     githubOrg: 'minkimcello'
+    #     repo: ${{ parameters.workload }}
+    - name: Create and Trigger Humanitec Deployment
+      id: deploy-humanitec
+      action: frontside:humanitec
+      input:
+        # image_tag: ${{ steps.build-and-upload.output.run_id }}
+        image_tag: hello
+    # - id: register
+    #   name: Register Component to Catalog
+    #   action: catalog:register
+    #   input:
+    #     repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+    #     catalogInfoPath: '/catalog-info.yaml'
