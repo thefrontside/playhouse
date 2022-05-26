@@ -1,39 +1,39 @@
-apiVersion: backstage.io/v1alpha1
-kind: Component
-metadata:
-  name: backstage
-  description: An example of a Backstage application.
-  # Example for optional annotations
-  # annotations:
-  #   github.com/project-slug: backstage/backstage
-  #   backstage.io/techdocs-ref: dir:.
-spec:
-  type: website
-  owner: john@example.com
-  lifecycle: experimental
----
-apiVersion: backstage.io/v1alpha1
-kind: Component
-metadata:
-  name: sample-app
-  description: Sample app for Humanitec demo
-  annotations:
-    "humanitec.com/orgId": "the-frontside-software-inc"
-    "humanitec.com/appId": "humanitec-sample"
-spec:
-  type: website
-  owner: john@example.com
-  lifecycle: experimental
----
-apiVersion: backstage.io/v1alpha1
-kind: Component
-metadata:
-  name: sample-service
-  description: Sample service for Humanitec demo
-  annotations:
-    "humanitec.com/orgId": "the-frontside-software-inc"
-    "humanitec.com/appId": "humanitec-sample"
-spec:
-  type: service
-  owner: john@example.com
-  lifecycle: experimental
+# apiVersion: backstage.io/v1alpha1
+# kind: Component
+# metadata:
+#   name: backstage
+#   description: An example of a Backstage application.
+#   # Example for optional annotations
+#   # annotations:
+#   #   github.com/project-slug: backstage/backstage
+#   #   backstage.io/techdocs-ref: dir:.
+# spec:
+#   type: website
+#   owner: john@example.com
+#   lifecycle: experimental
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: Component
+# metadata:
+#   name: sample-app
+#   description: Sample app for Humanitec demo
+#   annotations:
+#     "humanitec.com/orgId": "the-frontside-software-inc"
+#     "humanitec.com/appId": "humanitec-sample"
+# spec:
+#   type: website
+#   owner: john@example.com
+#   lifecycle: experimental
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: Component
+# metadata:
+#   name: sample-service
+#   description: Sample service for Humanitec demo
+#   annotations:
+#     "humanitec.com/orgId": "the-frontside-software-inc"
+#     "humanitec.com/appId": "humanitec-sample"
+# spec:
+#   type: service
+#   owner: john@example.com
+#   lifecycle: experimental
