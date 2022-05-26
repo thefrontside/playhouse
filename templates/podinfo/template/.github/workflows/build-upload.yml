@@ -24,8 +24,8 @@ jobs:
       - name: Google Cloud Workload Identity Federation
         uses: google-github-actions/auth@v0
         with:
-          workload_identity_provider: ${{ secrets.CLOUD_WORKLOAD_PROVIDER}}
-          service_account: ${{ secrets.CLOUD_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ secrets.HUMAN_CLOUD_PROVIDER }} # 🚨 cloud_workload_provider
+          service_account: ${{ secrets.HUMAN_CLOUD_SERVICE }} # 🚨 cloud_service_account
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
       - name: Authenticate to Artifacts Registry
@@ -35,4 +35,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: $DOCKER/$AR_PATH:${{ github.event.inputs.id }}
+          tags: ${{ env.DOCKER }}/${{ env.AR_PATH }}:${{ github.event.inputs.id }}
