@@ -5,7 +5,7 @@ import { GetResponseDataTypeFromEndpointMethod } from "@octokit/types";
 import { waitUntil } from 'async-wait-until';
 
 export const buildAndPushAction = (integrations: ScmIntegrations) => {
-  return createTemplateAction<{ githubOrg: string; repo: string }>({
+  return createTemplateAction<{ githubOrg: string; repo: string; }>({
     id: 'frontside:build-push',
     schema: {
       input: {
@@ -14,20 +14,16 @@ export const buildAndPushAction = (integrations: ScmIntegrations) => {
         properties: {
           githubOrg: {
             type: 'string',
-            title: 'Contents',
-            description: 'Github organization',
           },
           repo: {
             type: 'string',
-            title: 'Contents',
-            description: 'The new repository',
           },
         },
       },
       output: {
         type: 'object',
         properties: {
-          run_id: {
+          runId: {
             type: 'string'
           }
         }
@@ -48,21 +44,37 @@ export const buildAndPushAction = (integrations: ScmIntegrations) => {
       });
 
       type OctokitResponseData = GetResponseDataTypeFromEndpointMethod<typeof octo.actions.listRepoWorkflows>
-      const { data }: { data: OctokitResponseData} = await octo.rest.actions.listRepoWorkflows({ owner, repo });
-      const { id } = data.workflows.find(workflow => workflow.name == workflow_name) || { id: "" };
-      const runid = Date.now().toString();
-      
+      let workflow_id: number = 0;
+      try {
+        await waitUntil(async () => {
+          try {
+            const { data }: { data: OctokitResponseData} = await octo.rest.actions.listRepoWorkflows({ owner, repo });
+            workflow_id = data.workflows.find(workflow => workflow.name == workflow_name)?.id || 0;
+          } catch (e) {
+            return false;
+          }
+          if (workflow_id !== 0) {
+            return true;
+          } else {
+            return false;
+          }
+        }, { timeout: 30_000 })
+      } catch (e) {
+        throw e;
+      }
+
+      const runId = Date.now().toString();
       await octo.rest.actions.createWorkflowDispatch({
         owner,
         repo,
-        workflow_id: id,
-        ref: "main",
+        workflow_id,
+        ref: "master",
         inputs: {
-          id: runid
+          id: runId
         }
       });
 
-      let confirmed_runid: number;
+      let confirmed_runId: number;
       try {
         let foundWorkflow: number | undefined;
         await waitUntil(async () => {
@@ -70,7 +82,7 @@ export const buildAndPushAction = (integrations: ScmIntegrations) => {
             const fiveLatestRuns = await octo.rest.actions.listWorkflowRuns({
               owner,
               repo,
-              workflow_id: id,
+              workflow_id,
               page: 1,
               per_page: 5
             });
@@ -83,7 +95,7 @@ export const buildAndPushAction = (integrations: ScmIntegrations) => {
               const findMatchingStep = getJobs.data.jobs
               .find(job => job.name === job_name)
               ?.steps?.find(step => {
-                return step.name == runid;
+                return step.name == runId;
               });
               if(findMatchingStep){
                 return run_id;
@@ -91,44 +103,47 @@ export const buildAndPushAction = (integrations: ScmIntegrations) => {
                 return;
               }
             }));
-            foundWorkflow = checkEachWorkflow.find(runid => runid);
+            foundWorkflow = checkEachWorkflow.find(runId => runId);
           } catch (e) {
             return false;
           }
           if (foundWorkflow) {
-            confirmed_runid = foundWorkflow;
+            confirmed_runId = foundWorkflow;
             return true;
           } else {
             return false;
           }
-        }, { timeout: 45_000 });
+        }, { timeout: 60_000 });
       } catch (e) {
         throw e;
       }
 
       try {
+        let workflow_run;
         await waitUntil(async () => {
-          let workflow_run_status;
           try {
-            workflow_run_status = await octo.rest.actions.getWorkflowRun({
+            workflow_run = await octo.rest.actions.getWorkflowRun({
               owner,
               repo,
-              run_id: confirmed_runid,
+              run_id: confirmed_runId,
             });
           } catch (e) {
             return false
           };
-          if (workflow_run_status.data.status == 'completed') {
+          if (workflow_run.data.conclusion == 'success') {
             return true;
+          } else if (workflow_run.data.conclusion == 'failure') {
+            throw "Github actions workflow run failed";
+            // see status options: https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-repository
           } else {
             return false;
           }
-        }, { timeout: 45_000 });
+        }, { timeout: 75_000 });
       } catch (e) {
         throw e;
       }
-      
-      ctx.output("run_id", runid)
+      console.log("runId", runId, typeof runId)
+      ctx.output("runId", `${runId}`);
     },
   });
 };
