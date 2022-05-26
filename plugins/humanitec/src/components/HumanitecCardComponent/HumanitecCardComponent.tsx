@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
 import { Progress } from '../Progress';
-import { Entity } from '@backstage/catalog-model';
 import {
   Card,
   CardContent,
@@ -13,15 +12,14 @@ import {
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { useApi, configApiRef } from '@backstage/core-plugin-api';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
-
-type HumanitecAnnotationedEntity = {
-  metadata: {
-    annotations: {
-      "humanitec.com/appId": string
-      "humanitec.com/orgId": string;
-    }
-  }
-} & Entity;
+import {
+  HumanitecAnnotationedEntity,
+  HumanitecEnvironmentAndRunTime,
+  HumanitecEnvironment,
+  HumanitecControllerPods,
+  HumanitecRuntimeInfo,
+  HumanitecEnvironmentResources,
+} from "./types";
 
 const useStyles = makeStyles({
   cardClass: {
@@ -176,54 +174,6 @@ export const HumanitecCard = ({ environments, retry, loading, name }: { environm
       </CardContent>
     </Card>
   )
-}
-
-type HumanitecEnvironmentAndRunTime = HumanitecEnvironment & {
-  module: Record<string, HumanitecControllerResponse>;
-  resources: HumanitecEnvironmentResources[];
-}
-
-interface HumanitecEnvironment {
-  id: string;
-  name: string;
-  namespace: string;
-  type: string;
-}
-
-interface HumanitecControllerPods {
-  containerStatuses: Record<string, any>[];
-  phase: string;
-  podName: string;
-  revision: number;
-  status: string;
-}
-
-interface HumanitecControllerResponse {
-  kind: string;
-  replicas: number;
-  status: string;
-  pods: HumanitecControllerPods[]
-}
-
-type HumanitecRuntimeInfoModules = Record<string, Record<string, HumanitecControllerResponse>>;
-
-interface HumanitecRuntimeInfo {
-  modules: HumanitecRuntimeInfoModules;
-  namespace: string;
-}
-
-interface HumanitecEnvironmentResources {
-  app_id: string;
-  def_id: string;
-  env_id: string;
-  env_type: string;
-  org_id: string;
-  resource: Record<string, string>;
-  data: Record<string, string>;
-  res_id: string;
-  type: string;
-  status: string;
-  updated_at: string;
 }
 
 export const HumanitecCardComponent = () => {
