@@ -51,6 +51,7 @@ export const buildAndPushAction = (integrations: ScmIntegrations) => {
             const { data }: { data: OctokitResponseData} = await octo.rest.actions.listRepoWorkflows({ owner, repo });
             workflow_id = data.workflows.find(workflow => workflow.name == workflow_name)?.id || 0;
           } catch (e) {
+            console.log(e)
             return false;
           }
           if (workflow_id !== 0) {
