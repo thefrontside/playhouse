@@ -24,7 +24,9 @@ export default async function createPlugin({
   const actions = [
     ...builtInActions,
     buildAndPushAction(integrations),
-    deployHumanitec()
+    deployHumanitec({
+      humanitecApiEndpoint: `${await discovery.getBaseUrl('proxy')}/humanitec`
+    })
   ];
   return await createRouter({
     logger,

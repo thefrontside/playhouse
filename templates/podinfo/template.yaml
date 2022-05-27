@@ -2,8 +2,8 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: humanitec-app
-  title: Scaffold Humanitec App
-  description: Build, upload, and deploy app template with Humanitec
+  title: Standard Microservice
+  description: Microservice project that uses Docker and deploys to Humanitec
 spec:
   owner: john@example.com
   type: website
