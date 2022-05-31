@@ -1,10 +1,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: {{ cookiecutter.name }}
+  name: {{ parameters.componentName }}
   description: Sample service for Humanitec demo
   annotations:
-    "humanitec.com/appId": "{{ cookiecutter.appId }}"
+    "humanitec.com/appId": "{{ parameters.appId }}"
 spec:
   type: service
   owner: john@example.com
