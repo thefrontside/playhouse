@@ -33,8 +33,7 @@ spec:
       action: fetch:template
       input:
         url: ../../templates/standard-microservice/template
-        copyWithoutRender: ["**/build-upload.yml"]
-        cookiecutterCompat: true
+        copyWithoutRender: ["**/build-push.yaml"]
         values:
           name: ${{ parameters.componentName }}
           appId: ${{ parameters.componentName }}
@@ -45,7 +44,7 @@ spec:
         allowedHosts: ['github.com']
         description: Created from a Standard Microservice template
         repoUrl: ${{ parameters.repoUrl }}
-    - name: Create Humanitec Deployment
+    - name: Create Humanitec App
       id: humanitec-create-app
       action: humanitec:create_app
       input:
