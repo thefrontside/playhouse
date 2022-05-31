@@ -4,7 +4,6 @@ metadata:
   name: {{ cookiecutter.name }}
   description: Sample service for Humanitec demo
   annotations:
-    "humanitec.com/orgId": "{{ cookiecutter.orgId }}"
     "humanitec.com/appId": "{{ cookiecutter.appId }}"
 spec:
   type: service
