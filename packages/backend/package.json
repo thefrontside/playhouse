@@ -36,6 +36,7 @@
     "@backstage/plugin-search-backend-node": "^0.6.0",
     "@backstage/plugin-techdocs-backend": "^1.1.0",
     "@frontside/backstage-plugin-effection-inspector-backend": "0.1.1",
+    "@frontside/backstage-plugin-humanitec-backend": "0.1.0",
     "@gitbeaker/node": "^34.6.0",
     "@internal/plugin-healthcheck": "0.1.0",
     "@octokit/rest": "^18.5.3",

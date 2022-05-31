@@ -1970,7 +1970,7 @@
     yn "^4.0.0"
     yup "^0.32.9"
 
-"@backstage/plugin-scaffolder-backend@^1.1.0":
+"@backstage/plugin-scaffolder-backend@1.1.0", "@backstage/plugin-scaffolder-backend@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@backstage/plugin-scaffolder-backend/-/plugin-scaffolder-backend-1.1.0.tgz#6ae9dd3aaa0d3872567217174b80b8e2ed7e24d0"
   integrity sha512-Jt1TthxzxxfxOGh46ZkmHFmdGl48tyObgO5MCqntoITzp5Plbm0/Kx4jwAJ3CFfLonulJ+tA91g63MBOYueugw==

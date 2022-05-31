@@ -6,7 +6,7 @@ interface HumanitecCreateApp {
   appId: string;
 }
 
-export const deployHumanitec = ({ api, appId }: HumanitecCreateApp) => {
+export function createHumanitecApp({ api, appId }: HumanitecCreateApp) {
   return createTemplateAction<{ imageTag: string; orgId: string; appId: string; }>({
     id: 'humanitec:create_app',
     schema: {
@@ -50,4 +50,4 @@ export const deployHumanitec = ({ api, appId }: HumanitecCreateApp) => {
       await createNewApplication();
     },
   });
-};
+}
