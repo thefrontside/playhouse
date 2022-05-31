@@ -3,7 +3,6 @@ import { createBuiltinActions, createRouter } from '@backstage/plugin-scaffolder
 import { Router } from 'express';
 import type { PluginEnvironment } from '../types';
 import { ScmIntegrations } from '@backstage/integration';
-import { buildAndPushAction } from "./scaffolder/action/build-and-upload";
 import { deployHumanitec } from "./scaffolder/action/deploy-humanitec";
 
 export default async function createPlugin({
@@ -23,9 +22,9 @@ export default async function createPlugin({
   });
   const actions = [
     ...builtInActions,
-    buildAndPushAction(integrations),
     deployHumanitec({
-      humanitecApiEndpoint: `${await discovery.getBaseUrl('proxy')}/humanitec`
+      appId: config.getString('humanitec.appId'),
+      api: `${await discovery.getBaseUrl('proxy')}/humanitec`
     })
   ];
   return await createRouter({
