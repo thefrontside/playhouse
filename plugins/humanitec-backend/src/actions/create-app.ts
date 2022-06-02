@@ -3,23 +3,17 @@ import fetch from "cross-fetch";
 
 interface HumanitecCreateApp {
   api: string;
-  appId: string;
+  orgId: string;
 }
 
-export function createHumanitecApp({ api, appId }: HumanitecCreateApp) {
-  return createTemplateAction<{ imageTag: string; orgId: string; appId: string; }>({
+export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
+  return createTemplateAction<{ appId: string; }>({
     id: 'humanitec:create_app',
     schema: {
       input: {
-        required: ['orgId', 'appId'],
+        required: ['appId'],
         type: 'object',
         properties: {
-          imageTag: {
-            type: 'string',
-          },
-          orgId: {
-            type: 'string',
-          },
           appId: {
             type: 'string',
           },
@@ -27,7 +21,7 @@ export function createHumanitecApp({ api, appId }: HumanitecCreateApp) {
       }
     },
     async handler(ctx) {
-      const orgId = ctx.input.orgId;
+      const appId = ctx.input.appId;
 
       async function createNewApplication() {
         const response = await fetch(`${api}/orgs/${orgId}/apps`, {

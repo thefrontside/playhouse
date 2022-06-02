@@ -1,7 +1,7 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: microservice
+  name: standard-microservice
   title: Standard Microservice
   description: A microservices that uses Docker, CI and deploys to Humanitec
 spec:
@@ -16,7 +16,7 @@ spec:
         componentName: # for catalog metadata, description of the repo, used for "repo" of octokit (must match what goes into repourl)
           title: Component Name
           type: string
-          description: 
+          description: This will be the name of the component and application in Humanitec
           ui:autofocus: true
           ui:options:
             rows: 5
@@ -35,7 +35,7 @@ spec:
         url: ../../templates/standard-microservice/template
         copyWithoutRender: ["**/build-push.yaml"]
         values:
-          name: ${{ parameters.componentName }}
+          componentName: ${{ parameters.componentName }}
           appId: ${{ parameters.componentName }}
     - name: Create Repository on Github
       id: publish
