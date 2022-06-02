@@ -3,15 +3,15 @@ metadata:
   env_id: development
 
 modules:
-  "${{parameters.appId}}":
+  ${{values.componentName | dump}}:
     externals:
       http:
         type: dns
     profile: humanitec/default-module
     spec:
       containers:
-        "${{parameters.appId}}":
-          id: "${{parameters.appId}}"
+        ${{values.componentName | dump}}:
+          id: ${{values.componentName | dump}}
           resources:
             limits:
               cpu: 0.25

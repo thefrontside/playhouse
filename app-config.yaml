@@ -82,7 +82,7 @@ catalog:
     - type: file
       target: ../../catalog-info.yaml
     - type: file
-      target: ../../templates/podinfo/template.yaml
+      target: ../../templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]
 

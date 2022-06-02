@@ -23,7 +23,7 @@ export default async function createPlugin({
   const actions = [
     ...builtInActions,
     createHumanitecApp({
-      appId: config.getString('humanitec.appId'),
+      orgId: config.getString('humanitec.orgId'),
       api: `${await discovery.getBaseUrl('proxy')}/humanitec`
     })
   ];

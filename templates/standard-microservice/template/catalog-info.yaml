@@ -1,10 +1,11 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: {{ parameters.componentName }}
+  name: ${{values.componentName | dump}}
   description: Sample service for Humanitec demo
   annotations:
-    "humanitec.com/appId": "{{ parameters.appId }}"
+    "humanitec.com/appId": ${{values.appId | dump}}
+    "humanitec.com/containerRegistryUrl": ${{values.containerRegistryUrl | dump}}
 spec:
   type: service
   owner: john@example.com
