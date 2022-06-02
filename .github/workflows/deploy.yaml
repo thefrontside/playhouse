@@ -48,8 +48,8 @@ jobs:
           --data-raw '{
               "branch": "'$GITHUB_BRANCH'",
               "commit": "'$GITHUB_SHA'",
-              "image": "'$IMAGE:$GITHUB_SHA'",
-              "tags": ["'$GITHUB_SHA'"]
+              "image": "'$IMAGE:$TAG'",
+              "tags": ["'$TAG'"]
           }'
 
     # - name: Authenticate to GKE Cluster
