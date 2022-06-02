@@ -23,25 +23,28 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
     async handler(ctx) {
       const appId = ctx.input.appId;
 
-      async function createNewApplication() {
-        const response = await fetch(`${api}/orgs/${orgId}/apps`, {
-          method: 'POST',
-          body: JSON.stringify({ "id": appId, "name": appId }),
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-        if (response.ok) {
-          // let data = await response.json();
-          // 🟡 https://api-docs.humanitec.com/#tag/Application/paths/~1orgs~1{orgId}~1apps/post
-          // return data;
-          return;
-        }
-        console.log({ response });
-        throw new Error('Could not create an application');
+      try {
+        await createNewApplication({ api, orgId, appId });
+        console.log('Created new application in Humanitec');
+      } catch (e) {
+        console.error(e)
       }
-
-      await createNewApplication();
     },
   });
+}
+
+async function createNewApplication({ api, orgId, appId }: { api: string, orgId: string, appId: string }) {
+  const response = await fetch(`${api}/orgs/${orgId}/apps`, {
+    method: 'POST',
+    body: JSON.stringify({ "id": appId, "name": appId }),
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+
+  if (response.ok) {
+    return await response.json();
+  }
+
+  throw new Error(`Could not create an application: ${response.body}`);
 }
