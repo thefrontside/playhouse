@@ -5,7 +5,6 @@ metadata:
   description: Sample service for Humanitec demo
   annotations:
     "humanitec.com/appId": ${{values.appId | dump}}
-    "humanitec.com/containerRegistryUrl": ${{values.containerRegistryUrl | dump}}
 spec:
   type: service
   owner: john@example.com

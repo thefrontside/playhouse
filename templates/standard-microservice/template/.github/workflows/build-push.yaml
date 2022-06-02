@@ -1,3 +1,4 @@
+{% raw %}
 name: Build and Push Image
 
 on:
@@ -11,44 +12,45 @@ jobs:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
+    env:
+{% endraw %}
+      HUMANITEC_ORG: ${{ values.orgId | dump }}
+      COMPONENT_NAME: ${{ values.componentName | dump }}
+      IMAGE: ${{ values.registryUrl }}/${{ values.componentName }}
+{% raw %}
+
     steps:
       - uses: actions/checkout@v3
-      - name: Get component name
-        id: componentName
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq '.metadata.name' ./catalog-info.yaml
-      - name: Get container registry url
-        id: containerRegistryUrl
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq '.metadata.annotations."humanitec.com/containerRegistryUrl"' catalog-info.yaml
+
       - name: Google Cloud Workload Identity Federation
         uses: google-github-actions/auth@v0
         with:
           workload_identity_provider: ${{ secrets.HUMAN_CLOUD_PROVIDER }} # 🚨 cloud_workload_provider
           service_account: ${{ secrets.HUMAN_CLOUD_SERVICE }} # 🚨 cloud_service_account
+
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
+
       - name: Authenticate to Artifacts Registry
         run: gcloud auth configure-docker ${{ secrets.DOCKER_HOST }}
+
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: ${{steps.containerRegistryUrl.outputs.result}}:${{ github.event.inputs.id }}
+          tags: {% endraw %}${{ values.registryUrl }}/${{ values.componentName }}{% raw %}:${{github.sha}}
+
       - name: Notify Humanitec
         run: |
           curl \
-            --request POST "https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID }}/images/${{steps.componentName.outputs.result}}/builds" \
-            --header "Authorization: Bearer ${HUMANITEC_TOKEN}" \
+            --request POST "https://api.humanitec.io/orgs/$HUMANITEC_ORG/images/$COMPONENT_NAME/builds" \
+            --header "Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN }}" \
             --header "Content-Type: application/json" \
             --data-raw '{ 
                 "branch": "'${{github.ref_name}}'",
                 "commit": "'${{github.sha}}'",
-                "image": "'${{steps.containerRegistryUrl.outputs.result}}'",
-                "tags": ["'latest'"]
+                "image": "'$IMAGE:${{github.sha}}'",
+                "tags": ["'${{github.sha}}'"]
             }'
-
-
+{% endraw %}

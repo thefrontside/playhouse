@@ -28,15 +28,19 @@ spec:
             allowedHosts:
               - github.com
   steps:
+    - name: Read Environment
+      id: environment
+      action: backend:get-environment
     - name: Fetch App Template
       id: fetch-base
       action: fetch:template
       input:
         url: ../../templates/standard-microservice/template
-        copyWithoutRender: ["**/build-push.yaml"]
         values:
           componentName: ${{ parameters.componentName }}
+          orgId: ${{ steps.environment.output.orgId }}
           appId: ${{ parameters.componentName }}
+          registryUrl: ${{ steps.environment.output.registryUrl }}
     - name: Create Repository on Github
       id: publish
       action: publish:github
