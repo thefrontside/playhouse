@@ -22,8 +22,8 @@ const Environment = object({
     profile: string(),
     spec: object({
       containers: record(object({
-        id: string().optional(),
-        image: string().optional(),
+        id: string(),
+        image: string(),
         resources: object({
           limits: Resource.optional(),
           requests: Resource.optional(),
