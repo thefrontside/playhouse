@@ -1,5 +1,39 @@
-import { object, record, string, array, boolean, infer as inferZ } from 'zod';
-import { Module } from './module';
+import { object, record, string, array, boolean, number, infer as inferZ } from 'zod';
+
+const Resource = object({
+  cpu: number(),
+  memory: string()
+});
+
+const IngressRule = object({
+  port: number(),
+  type: string()
+});
+
+export const Module = object({
+  externals: record(object({
+    type: string()
+  })).optional(),
+  profile: string(),
+  spec: object({
+    containers: record(object({
+      id: string(),
+      image: string(),
+      resources: object({
+        limits: Resource.optional(),
+        requests: Resource.optional(),
+      }).optional(),
+      variables: object({}),
+      volume_mounts: object({}),
+      files: object({})
+    })).optional(),
+    ingress: object({
+      rules: record(object({
+        http: record(IngressRule).optional()
+      }))
+    }).optional()
+  })
+});
 
 const CreateEnvironment = object({
   metadata: object({
@@ -29,4 +63,5 @@ const SetupDocument = object({
   automations: record(array(Automation)).optional()
 });
 
-export const SetupFileSchema = array(SetupDocument)
+export const SetupFileSchema = array(SetupDocument);
+
