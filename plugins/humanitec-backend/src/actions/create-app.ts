@@ -56,6 +56,22 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
           for (const key in app.environments) {
             if (Object.prototype.hasOwnProperty.call(app.environments, key)) {
               const env = app.environments[key];
+
+              for (const module of Object.values(env.modules)) {
+                if (module.spec.containers) {
+                  for (const container of Object.values(module.spec.containers)) {
+                    let imageName: string;
+                    try {
+                      imageName = getImageName(container.image);
+                      await client.notifyOfImage(imageName, { image: container.image })
+                    } catch (e) {
+                      logger.error(`Could not notify about container image ${container.image} in container:${container.id}`);
+                      logger.debug(e);
+                    }
+                  }
+                }
+              }
+
               let delta: { id: string };
               try {
                 delta = await client.createDelta(_app.id, env);
@@ -71,6 +87,16 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
       }
     },
   });
+}
+
+function getImageName(url: string = '') {
+  const segments = url.split('/');
+  const last = segments[segments.length - 1];
+  if (last) {
+    const [name] = last.split(':')
+    return name;
+  }
+  throw new Error(`Could not extract image name from ${url}`);
 }
 
 async function loadSetupFile(filePath: string) {
@@ -110,6 +136,9 @@ function createHumanitecClient({ api, orgId }: { api: string, orgId: string }) {
     },
     createDelta(appId: string, payload: EnvironmentType) {
       return _fetch<{ id: string }>('POST', `apps/${appId}/deltas`, payload);
+    },
+    notifyOfImage(image: string, payload: { image: string }) {
+      return _fetch<unknown>('POST', `images/${image}/builds`, payload);
     }
   }
 }
