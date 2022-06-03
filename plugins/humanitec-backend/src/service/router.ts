@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-import { errorHandler } from '@backstage/backend-common';
+import { Config } from '@backstage/config';
+import { errorHandler, PluginEndpointDiscovery } from '@backstage/backend-common';
 import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
+import { createHumanitecClient } from '../clients/humanitec';
 
 export interface RouterOptions {
   logger: Logger;
+  config: Config;
+  discovery: PluginEndpointDiscovery
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger } = options;
+  const { logger, config, discovery } = options;
+  const proxyPath = config.getString('humanitec.proxyPath');
+  const api = `${await discovery.getBaseUrl('proxy')}${proxyPath}`;
 
   const router = Router();
   router.use(express.json());
@@ -35,6 +41,27 @@ export async function createRouter(
     logger.info('PONG!');
     response.send({ status: 'ok' });
   });
+
+  router.get('/deployment-status', (request, response) => {
+
+    // Mandatory headers and http status to keep connection open
+    response.writeHead(200, {
+      'Connection': 'keep-alive',
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'text/event-stream',
+    });
+
+    let { appId, orgId } = request.query as { appId: string; orgId: string };
+
+    if (!orgId) {
+      orgId = config.getString('humanitec.orgId');
+    }
+
+    const client = createHumanitecClient({ api, orgId });
+
+
+  });
+
   router.use(errorHandler());
   return router;
 }

@@ -1,9 +1,9 @@
 import { createTemplateAction } from '@backstage/plugin-scaffolder-backend';
-import fetch from "cross-fetch";
 import { stat, readFile } from 'fs/promises';
 import { join, resolve } from 'path';
 import { loadAll } from 'js-yaml';
-import { SetupFileSchema, EnvironmentType, AutomationType } from '../schemas/create-config';
+import { SetupFileSchema } from '../schemas/create-config';
+import { createHumanitecClient } from '../clients/humanitec';
 
 interface HumanitecCreateApp {
   api: string;
@@ -57,7 +57,6 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
             if (Object.prototype.hasOwnProperty.call(app.environments, key)) {
               const env = app.environments[key];
 
-              let delta: { id: string };
               const payload = {
                 metadata: env.metadata,
                 modules: {
@@ -68,7 +67,7 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
               };
 
               try {
-                delta = await client.createDelta(_app.id, payload);
+                const delta = await client.createDelta(_app.id, payload);
 
                 const url = client.buildUrl({
                   resource: 'DELTA',
@@ -79,6 +78,18 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
 
                 logger.info(`Created delta ${url}`);
                 logger.debug(`Delta payload: ${JSON.stringify(payload)}`);
+
+                try {
+                  const deployment = await client.deployDelta(_app.id, delta.metadata.env_id, {
+                    delta_id: delta.id,
+                    comment: `Initial deployment of delta ${delta.id}`
+                  });
+                  logger.info(`Created deployment: ${deployment.id}`);
+                } catch (e) {
+                  logger.error(`Could not create deployment for ${delta.id}`);
+                  logger.debug(e);
+                }
+
               } catch (e) {
                 logger.error(`Could not create delta for ${_app.id}`);
                 logger.debug(e);
@@ -120,60 +131,4 @@ async function loadSetupFile(filePath: string) {
     }
   }
   return null;
-}
-
-function createHumanitecClient({ api, orgId }: { api: string, orgId: string }) {
-  async function _fetch<R = unknown, P = unknown>(method: 'POST' | 'GET', url: string, payload: P): Promise<R> {
-    const response = await fetch(`${api}/orgs/${orgId}/${url}`, {
-      method,
-      body: JSON.stringify(payload),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-
-    if (response.ok) {
-      return await response.json();
-    }
-
-    throw new Error(`${method}: ${url} - failed due to ${response.status}: ${response.statusText}`);
-  }
-
-  return {
-    createApplication(payload: { id: string, name: string }) {
-      return _fetch<{ id: string, name: string }>('POST', 'apps', payload);
-    },
-    createDelta(appId: string, payload: CreateDeltaPayload) {
-      return _fetch<{ id: string }>('POST', `apps/${appId}/deltas`, payload);
-    },
-    notifyOfImage(image: string, payload: { image: string }) {
-      return _fetch<unknown>('POST', `images/${image}/builds`, payload);
-    },
-    deployDelta(appId: string, environment: string, payload: { delta_id: string, comment: string }) {
-      return _fetch<{ id: string }>('POST', `apps/${appId}/envs/${environment}/deploys`, payload);
-    },
-    createAutomation(appId: string, envId: string, payload: AutomationType) {
-      return _fetch<{ id: string; createdAt: string, update_to: string } & AutomationType>('POST', `apps/${appId}/envs/${envId}/rules`, payload)
-    },
-    buildUrl(params: URLs) {
-      const baseUrl = `https://app.humanitec.io/orgs/${orgId}`;
-      switch (params.resource) {
-        case 'DELTA':
-          return `${baseUrl}/apps/${params.app_id}/envs/${params.env_id}/draft/${params.delta_id}/workloads`;
-        default:
-          return ''
-      }
-    }
-  }
-}
-
-type URLs = { resource: 'DELTA', env_id: string, delta_id: string, app_id: string }
-
-interface CreateDeltaPayload {
-  metadata: EnvironmentType['metadata'],
-  modules: {
-    add: EnvironmentType['modules'],
-    update: EnvironmentType['modules'],
-    remove: string[]
-  }
 }
