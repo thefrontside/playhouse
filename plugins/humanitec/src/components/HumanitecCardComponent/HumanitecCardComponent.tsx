@@ -214,8 +214,6 @@ export const HumanitecCardComponent = () => {
     })));
   }, [appId, orgId]);
 
-  console.log(environments);
-
   const deployedEnvironments = useMemo(() => {
     if (environments) {
       return environments

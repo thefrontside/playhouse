@@ -16,7 +16,6 @@ jobs:
 {% endraw %}
       HUMANITEC_ORG: ${{ values.orgId | dump }}
       COMPONENT_NAME: ${{ values.componentName | dump }}
-      IMAGE: ${{ values.registryUrl }}/${{ values.componentName }}
 {% raw %}
 
     steps:
@@ -50,7 +49,7 @@ jobs:
             --data-raw '{ 
                 "branch": "'${{github.ref_name}}'",
                 "commit": "'${{github.sha}}'",
-                "image": "'$IMAGE:${{github.sha}}'",
+                "image": "'{% endraw %}${{ values.registryUrl }}/${{ values.componentName }}{% raw %}:${{github.sha}}'",
                 "tags": ["'${{github.sha}}'"]
             }'
 {% endraw %}

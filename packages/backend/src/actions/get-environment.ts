@@ -14,6 +14,9 @@ export function createGetEnvironmentAction({ registryUrl, orgId }: EnvironmentAc
         properties: {
           registryUrl: {
             type: 'string'
+          },
+          orgId: {
+            type: 'string'
           }
         }
       }
