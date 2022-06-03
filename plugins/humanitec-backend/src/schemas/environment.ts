@@ -1,4 +1,4 @@
-import { array, object, string, infer as inferZ } from 'zod';
+import { array, object, string } from 'zod';
 import { Deployment } from './deployment';
 
 export const Environment = object({
@@ -12,6 +12,4 @@ export const Environment = object({
   type: string()
 });
 
-export const EnvironmentsPayload = array(Environment);
-
-export type EnvironmentsPayloadType = inferZ<typeof EnvironmentsPayload>;
+export const EnvironmentsResponsePayload = array(Environment);

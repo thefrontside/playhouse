@@ -19,7 +19,7 @@ import { errorHandler, PluginEndpointDiscovery } from '@backstage/backend-common
 import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
-import { createHumanitecClient } from '../clients/humanitec';
+import { createHumanitecClient, HumanitecClient } from '../clients/humanitec';
 
 export interface RouterOptions {
   logger: Logger;
@@ -42,7 +42,7 @@ export async function createRouter(
     response.send({ status: 'ok' });
   });
 
-  router.get('/deployment-status', (request, response) => {
+  router.get('/deployment-status', async (request, response) => {
 
     // Mandatory headers and http status to keep connection open
     response.writeHead(200, {
@@ -51,6 +51,7 @@ export async function createRouter(
       'Content-Type': 'text/event-stream',
     });
 
+    // eslint-disable-next-line prefer-const
     let { appId, orgId } = request.query as { appId: string; orgId: string };
 
     if (!orgId) {
@@ -59,9 +60,43 @@ export async function createRouter(
 
     const client = createHumanitecClient({ api, orgId });
 
+    let timeout: NodeJS.Timeout;
+
+    function scheduleUpdate(interval: number) {
+      async function update() {
+        const result = await fetchAppInfo({ client }, appId);
+        const data = JSON.stringify(result);
+        response.write(`data: ${data}\n\n`);
+      }
+      update()
+        .then(() => {
+          timeout = setTimeout(() => scheduleUpdate(interval), interval);
+        })
+    }
+
+    request.on('close', () => clearTimeout(timeout));
+
+    scheduleUpdate(1000);
 
   });
 
   router.use(errorHandler());
   return router;
+}
+
+async function fetchAppInfo({ client }: { client: HumanitecClient }, appId: string) {
+  const environments = await client.getEnvironments(appId);
+
+  return await Promise.all(environments.map(async env => {
+    const [runtime, resources] = await Promise.all([
+      client.getRuntimeInfo(appId, env.id),
+      client.getActiveEnvironmentResources(appId, env.id),
+    ]);
+
+    return {
+      ...env,
+      runtime,
+      resources
+    }
+  }));
 }

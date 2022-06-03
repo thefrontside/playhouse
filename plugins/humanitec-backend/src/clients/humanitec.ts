@@ -1,7 +1,9 @@
 import fetch from "cross-fetch";
 import { AutomationType } from '../schemas/create-app';
 import { CreateEnvironmentType } from '../schemas/create-app';
-import { EnvironmentsPayloadType } from "../schemas/environment";
+import { EnvironmentsResponsePayload } from "../schemas/environment";
+import { ResourcesResponsePayload } from "../schemas/resources";
+import { RuntimeResponsePayload } from '../schemas/runtime';
 
 export interface CreateDeltaPayload {
   metadata: CreateEnvironmentType['metadata'],
@@ -13,6 +15,8 @@ export interface CreateDeltaPayload {
 }
 
 export type URLs = { resource: 'DELTA', env_id: string, delta_id: string, app_id: string }
+
+export type HumanitecClient = ReturnType<typeof createHumanitecClient>
 
 export function createHumanitecClient({ api, orgId }: { api: string; orgId: string; }) {
   return {
@@ -31,8 +35,17 @@ export function createHumanitecClient({ api, orgId }: { api: string; orgId: stri
     createAutomation(appId: string, envId: string, payload: AutomationType) {
       return _fetch<{ id: string; createdAt: string; update_to: string; } & AutomationType>('POST', `apps/${appId}/envs/${envId}/rules`, payload);
     },
-    getEnvironments(appId: string) {
-      return _fetch<EnvironmentsPayloadType>('GET', `apps/${appId}/envs`, {});
+    async getEnvironments(appId: string) {
+      const result = await _fetch('GET', `apps/${appId}/envs`, {});
+      return EnvironmentsResponsePayload.parse(result);
+    },
+    async getRuntimeInfo(appId: string, envId: string) {
+      const result = await _fetch('GET', `apps/${appId}/envs/${envId}/runtime`, {});
+      return RuntimeResponsePayload.parse(result);
+    },
+    async getActiveEnvironmentResources(appId: string, envId: string) {
+      const result = await _fetch('GET', `apps/${appId}/envs/${envId}/resources`, {});
+      return ResourcesResponsePayload.parse(result);
     },
     buildUrl(params: URLs) {
       const baseUrl = `https://app.humanitec.io/orgs/${orgId}`;
