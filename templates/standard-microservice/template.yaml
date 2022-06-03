@@ -41,21 +41,21 @@ spec:
           orgId: ${{ steps.environment.output.orgId }}
           appId: ${{ parameters.componentName }}
           registryUrl: ${{ steps.environment.output.registryUrl }}
-    # - name: Create Repository on Github
-    #   id: publish
-    #   action: publish:github
-    #   input:
-    #     allowedHosts: ['github.com']
-    #     description: Created from a Standard Microservice template
-    #     repoUrl: ${{ parameters.repoUrl }}
+    - name: Create Repository on Github
+      id: publish
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: Created from a Standard Microservice template
+        repoUrl: ${{ parameters.repoUrl }}
     - name: Create Humanitec App
       id: humanitec-create-app
       action: humanitec:create-app
       input:
         appId: ${{ parameters.componentName }}
-    # - name: Register Component in Backstage
-    #   id: register
-    #   action: catalog:register
-    #   input:
-    #     repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
-    #     catalogInfoPath: '/catalog-info.yaml'
+    - name: Register Component in Backstage
+      id: register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'

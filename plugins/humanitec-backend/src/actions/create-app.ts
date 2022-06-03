@@ -3,7 +3,7 @@ import fetch from "cross-fetch";
 import { stat, readFile } from 'fs/promises';
 import { join, resolve } from 'path';
 import { loadAll } from 'js-yaml';
-import { SetupFileSchema, EnvironmentType } from '../schemas/create-config';
+import { SetupFileSchema, EnvironmentType, AutomationType } from '../schemas/create-config';
 
 interface HumanitecCreateApp {
   api: string;
@@ -86,6 +86,23 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
             }
           }
         }
+
+        if (app.automations) {
+          for (const env_id in app.automations) {
+            if (Object.prototype.hasOwnProperty.call(app.automations, env_id)) {
+              for (const automation of app.automations[env_id]) {
+                try {
+                  const created = await client.createAutomation(_app.id, env_id, automation);
+                  logger.info(`Created automation[id: ${created.id}]`);
+                  logger.debug(`Automation payload: ${JSON.stringify(automation)}`);
+                } catch (e) {
+                  logger.error(`Failed to create automation`)
+                  logger.debug(e);
+                }
+              }
+            }
+          }
+        }
       }
     },
   });
@@ -133,7 +150,10 @@ function createHumanitecClient({ api, orgId }: { api: string, orgId: string }) {
       return _fetch<unknown>('POST', `images/${image}/builds`, payload);
     },
     deployDelta(appId: string, environment: string, payload: { delta_id: string, comment: string }) {
-      return _fetch<{ id: string }>('POST', `apps/${appId}/envs/${environment}/deploys`, payload)
+      return _fetch<{ id: string }>('POST', `apps/${appId}/envs/${environment}/deploys`, payload);
+    },
+    createAutomation(appId: string, envId: string, payload: AutomationType) {
+      return _fetch<{ id: string; createdAt: string, update_to: string } & AutomationType>('POST', `apps/${appId}/envs/${envId}/rules`, payload)
     },
     buildUrl(params: URLs) {
       const baseUrl = `https://app.humanitec.io/orgs/${orgId}`;
