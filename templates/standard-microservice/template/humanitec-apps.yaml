@@ -17,7 +17,8 @@ environments:
         spec:
           containers:
             ${{values.componentName | dump}}:
-              image: ${{values.componentName}}:dummy
+              id: ${{values.componentName}}
+              image: ${{values.registryUrl}}/${{values.componentName}}:dummy
               resources:
                 limits:
                   cpu: 0.25
