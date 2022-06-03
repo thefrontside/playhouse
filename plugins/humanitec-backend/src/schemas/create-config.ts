@@ -12,19 +12,25 @@ const IngressRule = object({
 
 const Environment = object({
   metadata: object({
-    env_id: string()
+    env_id: string(),
+    name: string()
   }),
   modules: record(object({
-    externals: record(object({})).optional(),
+    externals: record(object({
+      type: string()
+    })).optional(),
     profile: string(),
     spec: object({
       containers: record(object({
-        id: string(),
-        image: string(),
+        id: string().optional(),
+        image: string().optional(),
         resources: object({
           limits: Resource.optional(),
-          memory: Resource.optional(),
-        }).optional()
+          requests: Resource.optional(),
+        }).optional(),
+        variables: object({}),
+        volume_mounts: object({}),
+        files: object({})
       })).optional(),
       ingress: object({
         rules: record(object({
