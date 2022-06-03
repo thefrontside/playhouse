@@ -43,7 +43,6 @@ automations:
     - active: true
       exclude_images_filter: false
       images_filter: []
-      match: main
       type: update
       update_to: branch
 

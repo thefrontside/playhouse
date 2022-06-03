@@ -41,19 +41,24 @@ const Environment = object({
   }))
 });
 
-export type EnvironmentType = inferZ<typeof Environment>
+export type EnvironmentType = inferZ<typeof Environment>;
+
+const Automation = object({
+  images_filter: array(string()),
+  type: string(),
+  update_to: string(),
+  active: boolean().optional(),
+  exclude_images_filter: boolean().optional(),
+  match: string().optional(),
+});
+
+export type AutomationType = inferZ<typeof Automation>;
 
 const SetupDocument = object({
   id: string(),
   name: string(),
   environments: record(Environment).optional(),
-  automations: record(array(object({
-    active: boolean(),
-    exclude_images_filter: boolean(),
-    images_filter: array(string()),
-    match: string(),
-    update_to: string()
-  }))).optional()
+  automations: record(array(Automation)).optional()
 });
 
 export const SetupFileSchema = array(SetupDocument)
