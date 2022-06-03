@@ -66,10 +66,19 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
                   remove: []
                 },
               };
+
               try {
                 delta = await client.createDelta(_app.id, payload);
-                logger.info(`Delta ${delta.id} created for ${_app.id}`);
-                logger.debug(`Delta payload: ${JSON.stringify(payload)}`)
+
+                const url = client.buildUrl({
+                  resource: 'DELTA',
+                  env_id: env.metadata.env_id,
+                  delta_id: delta.id,
+                  app_id: _app.id
+                });
+
+                logger.info(`Created delta ${url}`);
+                logger.debug(`Delta payload: ${JSON.stringify(payload)}`);
               } catch (e) {
                 logger.error(`Could not create delta for ${_app.id}`);
                 logger.debug(e);
@@ -122,9 +131,23 @@ function createHumanitecClient({ api, orgId }: { api: string, orgId: string }) {
     },
     notifyOfImage(image: string, payload: { image: string }) {
       return _fetch<unknown>('POST', `images/${image}/builds`, payload);
+    },
+    deployDelta(appId: string, environment: string, payload: { delta_id: string, comment: string }) {
+      return _fetch<{ id: string }>('POST', `apps/${appId}/envs/${environment}/deploys`, payload)
+    },
+    buildUrl(params: URLs) {
+      const baseUrl = `https://app.humanitec.io/orgs/${orgId}`;
+      switch (params.resource) {
+        case 'DELTA':
+          return `${baseUrl}/apps/${params.app_id}/envs/${params.env_id}/draft/${params.delta_id}/workloads`;
+        default:
+          return ''
+      }
     }
   }
 }
+
+type URLs = { resource: 'DELTA', env_id: string, delta_id: string, app_id: string }
 
 interface CreateDeltaPayload {
   metadata: EnvironmentType['metadata'],
