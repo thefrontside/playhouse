@@ -7,7 +7,7 @@ const ActiveResource = object({
   env_type: string(),
   org_id: string(),
   res_id: string(),
-  resource: object({}),
+  resource: object({}).optional().nullable(),
   status: string(),
   type: string(),
   updated_at: string(),
