@@ -36,15 +36,15 @@ export function createHumanitecClient({ api, orgId }: { api: string; orgId: stri
       return _fetch<{ id: string; createdAt: string; update_to: string; } & AutomationType>('POST', `apps/${appId}/envs/${envId}/rules`, payload);
     },
     async getEnvironments(appId: string) {
-      const result = await _fetch('GET', `apps/${appId}/envs`, {});
+      const result = await _fetch('GET', `apps/${appId}/envs`);
       return EnvironmentsResponsePayload.parse(result);
     },
     async getRuntimeInfo(appId: string, envId: string) {
-      const result = await _fetch('GET', `apps/${appId}/envs/${envId}/runtime`, {});
+      const result = await _fetch('GET', `apps/${appId}/envs/${envId}/runtime`);
       return RuntimeResponsePayload.parse(result);
     },
     async getActiveEnvironmentResources(appId: string, envId: string) {
-      const result = await _fetch('GET', `apps/${appId}/envs/${envId}/resources`, {});
+      const result = await _fetch('GET', `apps/${appId}/envs/${envId}/resources`);
       return ResourcesResponsePayload.parse(result);
     },
     buildUrl(params: URLs) {
@@ -58,10 +58,16 @@ export function createHumanitecClient({ api, orgId }: { api: string; orgId: stri
     }
   };
 
-  async function _fetch<R = unknown, P = unknown>(method: 'POST' | 'GET', url: string, payload: P): Promise<R> {
+  async function _fetch<R = unknown>(method: 'POST' | 'GET', url: string, payload: unknown = undefined): Promise<R> {
+
+    let body = undefined;
+    if (payload !== undefined) {
+      body = JSON.stringify(payload);
+    }
+
     const response = await fetch(`${api}/orgs/${orgId}/${url}`, {
       method,
-      body: JSON.stringify(payload),
+      body,
       headers: {
         'Content-Type': 'application/json',
       }

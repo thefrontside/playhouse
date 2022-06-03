@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
-import { Progress } from '../Progress';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,14 +9,11 @@ import {
   Typography
 } from '@material-ui/core';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { useApi, configApiRef } from '@backstage/core-plugin-api';
-import useAsyncRetry from 'react-use/lib/useAsyncRetry';
+import { useApi, configApiRef, discoveryApiRef } from '@backstage/core-plugin-api';
 import {
   HumanitecAnnotationedEntity,
   HumanitecEnvironmentAndRunTime,
-  HumanitecEnvironment,
   HumanitecControllerPods,
-  HumanitecRuntimeInfo,
   HumanitecEnvironmentResources,
 } from "./types";
 
@@ -48,6 +44,20 @@ const useStyles = makeStyles({
     wordBreak: 'break-word',
   }
 });
+
+const ValueCard = ({ label, value }: { label?: string, value?: string | JSX.Element }) => {
+  const classes = useStyles();
+  return (
+    <>
+      <Typography variant="h2" className={classes.label}>
+        {label}
+      </Typography>
+      <Typography variant="body2" className={classes.value}>
+        {value}
+      </Typography>
+    </>
+  )
+}
 
 const ResourcesCard = ({ label, resources }: {label: string, resources: HumanitecEnvironmentResources[]}) => {
   return (
@@ -99,22 +109,8 @@ const PodsCard = ({ label, pods }: {label: string, pods: HumanitecControllerPods
  )
 }
 
-const ValueCard = ({ label, value }: { label?: string, value?: string | JSX.Element }) => {
-  const classes = useStyles();
-  return (
-    <>
-      <Typography variant="h2" className={classes.label}>
-        {label}
-      </Typography>
-      <Typography variant="body2" className={classes.value}>
-        {value}
-      </Typography>
-    </>
-  )
-}
-
 const EnvironmentCard = ({ env = undefined, name }: {env: HumanitecEnvironmentAndRunTime | undefined | any, name: string }) => {
-  let status = env.module[name].status == "Success"
+  const status = env.module[name].status === "Success"
     ? <span style={{ color: "green" }}><b>Success</b></span>
     : <span style={{ color: "yellow" }}><b>Pending</b></span>
   return (
@@ -140,36 +136,20 @@ const EnvironmentCard = ({ env = undefined, name }: {env: HumanitecEnvironmentAn
   )
 }
 
-export const HumanitecCard = ({ environments, retry, loading, name }: { environments: HumanitecEnvironmentAndRunTime[], retry: () => void, loading: boolean, name: string }) => {
+export const HumanitecCard = ({ environments, name }: { environments: HumanitecEnvironmentAndRunTime[], retry: () => void, loading: boolean, name: string }) => {
   const classes = useStyles();
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    
-    function scheduleRetry() {
-      timeout = setTimeout(() => {
-        retry();
-        scheduleRetry();
-      }, 1000);
-    }
-
-    !loading && scheduleRetry()
-    return () => timeout && clearTimeout(timeout);
-  }, [loading, retry])
 
   return (
     <Card className={classes.cardClass}>
       <CardHeader
-        title={<>
-          Humanitec Environments {loading && <Progress size={14} thickness={7} style={{ margin: 4 }}/>}
-        </>}
+        title="Humanitec Environments"
       />
       <Divider />
       <CardContent className={classes.gridItemCardContent}>
         {
           environments.length
             ? environments.map(env => <EnvironmentCard env={env} name={name} key={name} />)
-            : <div>There are no active deployments</div>
+            : <div>No information available</div>
         }
       </CardContent>
     </Card>
@@ -178,61 +158,47 @@ export const HumanitecCard = ({ environments, retry, loading, name }: { environm
 
 export const HumanitecCardComponent = () => {
   const config = useApi(configApiRef);
+  const discovery = useApi(discoveryApiRef);
+
   const { entity } = useEntity<HumanitecAnnotationedEntity>();
-  const appId = entity.metadata.annotations['humanitec.com/appId'];
-  const orgId = entity.metadata.annotations['humanitec.com/orgId'];
+  const [data, setData] = useState();
 
-  const { value: environments, loading, retry } = useAsyncRetry(async () => {
-    const baseUrl = config.getString('backend.baseUrl');
 
-    async function fetchEnvironments() {
-      const response = await fetch(`${baseUrl}/api/proxy/humanitec/orgs/${orgId}/apps/${appId}/envs`);
-      const data = await response.json() as HumanitecEnvironment[];
-      return data;
+  useEffect(() => {
+    let source: EventSource;
+
+    const appId = entity.metadata.annotations['humanitec.com/appId'];
+    const orgId = entity.metadata.annotations['humanitec.com/orgId'];
+
+    (async () => {
+      const url = `${await discovery.getBaseUrl('humanitec')}/environments`;
+      const params = new URLSearchParams({
+        appId,
+        orgId
+      });
+      return `${url}?${params}`;
+    })().then((url) => {
+      source = new EventSource(url);
+
+      source.onmessage = (message) => {
+        try {
+          setData(JSON.parse(message.data));
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        }
+      }
+    })
+
+    return () => {
+      if (source) {
+        source.close();
+      }
     }
+  }, [config, discovery, entity.metadata.annotations]);
 
-    async function fetchRuntimeInfo(envId: string) {
-      const response = await fetch(`${baseUrl}/api/proxy/humanitec/orgs/${orgId}/apps/${appId}/envs/${envId}/runtime`);
-      const data = await response.json() as HumanitecRuntimeInfo;
-      return data;
-    }
+  console.log(data); 
 
-    async function fetchActiveEnvironmentResources(envId: string) {
-      const response = await fetch(`${baseUrl}/api/proxy/humanitec/orgs/${orgId}/apps/${appId}/envs/${envId}/resources`);
-      const data = await response.json() as HumanitecEnvironmentResources[];
-      return data;
-    }
-
-    const environments = await fetchEnvironments();
-    return Promise.all(environments.map(async ({ id, name, type, namespace }) => ({
-      id,
-      name,
-      type,
-      namespace,
-      runtime: await fetchRuntimeInfo(id),
-      resources: await fetchActiveEnvironmentResources(id),
-    })));
-  }, [appId, orgId]);
-
-  const deployedEnvironments = useMemo(() => {
-    if (environments) {
-      return environments
-        .filter((environment) => Object.keys(environment.runtime.modules).includes(entity.metadata.name))
-        .map(({ name, namespace, id, runtime, type, resources }) => ({
-          name,
-          namespace,
-          id,
-          type,
-          module: runtime.modules[entity.metadata.name],
-          resources: resources.filter(resource => {
-            const externalResourceFormat = new RegExp(`modules.${entity.metadata.name}.externals.(.*)`)
-            return resource.res_id.match(externalResourceFormat);
-          }),
-        }))
-    }
-
-    return [];
-  }, [environments, entity]);
-
-  return <HumanitecCard environments={deployedEnvironments} loading={loading} retry={retry} name={entity.metadata.name} />;
+  return <></>;
+  // return <HumanitecCard environments={deployedEnvironments} loading={loading} retry={retry} name={entity.metadata.name} />;
 };

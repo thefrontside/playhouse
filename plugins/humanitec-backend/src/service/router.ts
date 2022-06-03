@@ -31,7 +31,7 @@ export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
   const { logger, config, discovery } = options;
-  const proxyPath = config.getString('humanitec.proxyPath');
+  const proxyPath = config.getOptionalString('humanitec.proxyPath') ?? '/humanitec';
   const api = `${await discovery.getBaseUrl('proxy')}${proxyPath}`;
 
   const router = Router();
@@ -42,7 +42,7 @@ export async function createRouter(
     response.send({ status: 'ok' });
   });
 
-  router.get('/deployment-status', async (request, response) => {
+  router.get('/environments', async (request, response) => {
 
     // Mandatory headers and http status to keep connection open
     response.writeHead(200, {
@@ -67,10 +67,16 @@ export async function createRouter(
         const result = await fetchAppInfo({ client }, appId);
         const data = JSON.stringify(result);
         response.write(`data: ${data}\n\n`);
+        flush(response);
       }
       update()
         .then(() => {
           timeout = setTimeout(() => scheduleUpdate(interval), interval);
+        })
+        .catch((e) => {
+          logger.error(`Error encountered trying to update environment`);
+          logger.debug(e);
+          response.end()
         })
     }
 
@@ -99,4 +105,11 @@ async function fetchAppInfo({ client }: { client: HumanitecClient }, appId: stri
       resources
     }
   }));
+}
+
+function flush(response: express.Response) {
+  const flushable = response as unknown as { flush: Function };
+  if (typeof flushable.flush === 'function') {
+    flushable.flush();
+  }
 }

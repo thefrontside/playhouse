@@ -31,6 +31,7 @@ import techdocs from './plugins/techdocs';
 import search from './plugins/search';
 import healthcheck from './plugins/healthcheck';
 import effectionInspector from './plugins/effection-inspector';
+import humanitec from './plugins/humanitec';
 import { PluginEnvironment } from './types';
 
 function makeCreateEnv(config: Config) {
@@ -74,6 +75,7 @@ async function main() {
   const techdocsEnv = useHotMemoize(module, () => createEnv('techdocs'));
   const searchEnv = useHotMemoize(module, () => createEnv('search'));
   const appEnv = useHotMemoize(module, () => createEnv('app'));
+  const humanitecEnv = useHotMemoize(module, () => createEnv('humanitec'));
 
   const apiRouter = Router();
   apiRouter.use('/catalog', await catalog(catalogEnv));
@@ -84,6 +86,7 @@ async function main() {
   apiRouter.use('/search', await search(searchEnv));
   apiRouter.use('/healthcheck', await healthcheck(healthcheckEnv));
   apiRouter.use('/effection-inspector', await effectionInspector(effectionInspectorEnv));
+  apiRouter.use('/humanitec', await humanitec(humanitecEnv));
   apiRouter.use(notFoundHandler());
 
   const service = createServiceBuilder(module)
