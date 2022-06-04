@@ -1,48 +1,32 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Box,
-  IconButton,
-  Typography
+  Typography,
 } from '@material-ui/core';
 import type { FetchAppInfoEnvironment } from '@frontside/backstage-plugin-humanitec-backend';
 import { useStyles } from '../hooks/useStyles';
-import { HumanitecLogoIcon } from './HumanitecLogoIcon';
+import { DeploymentStatus } from './DeploymentStatus';
 
 interface EnvironmentCardProps {
   env: FetchAppInfoEnvironment;
-  appUrl: string;
+  active: boolean;
+  onClick: (envId: string) => void
 }
 
-export function EnvironmentCard({ env, appUrl }: EnvironmentCardProps) {
+export function EnvironmentCard({ env, onClick, active }: EnvironmentCardProps) {
   const classes = useStyles();
 
+  const _onClick = useCallback(() => {
+    onClick(env.id);
+  }, [env, onClick])
+
   return (
-    <Box className={classes.environmentCard}>
+    <Box role="button" className={`${classes.miniCard} ${active && classes.environmentCardActive}`} onClick={_onClick}>
       <Box className={classes.environmentTitleContainer}>
-        <Typography className={classes.environmentName} variant="h6">{env.name}</Typography>
-        <IconButton className={classes.environmentButton} component='a' href={`${appUrl}/envs/${env.id}`}>
-          <HumanitecLogoIcon />
-        </IconButton>
+        <Typography className={classes.miniCardTitle} variant="h6">{env.name}</Typography>
       </Box>
-      <Typography className={classes.environmentId} variant="subtitle1">{env.id}</Typography>
+      <Typography className={classes.miniCardSubTitle} variant="subtitle1">{env.id}</Typography>
       <DeploymentStatus env={env} />
     </Box>
   )
-}
-
-function DeploymentStatus({ env }: { env: FetchAppInfoEnvironment }) {
-  const classes = useStyles();
-
-  switch (env.last_deploy?.status) {
-    case 'succeeded':
-      return (<Typography className={`${classes.deploymentStatus} ${classes.deploymentSucceededStatus}`}>Succeeded</Typography>)
-    case 'pending':
-      return (<Typography className={`${classes.deploymentStatus}`} color="primary">Pending</Typography>)
-    case 'in progress':
-      return (<Typography className={`${classes.deploymentStatus} ${classes.deploymentInProgressStatus}`} color="secondary">In Progress</Typography>)
-    case 'failed':
-      return (<Typography className={`${classes.deploymentStatus} ${classes.deploymentFailedStatus}`}>Failed</Typography>)
-    default:
-      return (<Typography className={`${classes.deploymentStatus} ${classes.deploymentNeverDeployedStatus}`}>Never deployed</Typography>)
-  }
 }
