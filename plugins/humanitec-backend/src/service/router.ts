@@ -19,7 +19,8 @@ import { errorHandler, PluginEndpointDiscovery } from '@backstage/backend-common
 import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
-import { createHumanitecClient, HumanitecClient } from '../clients/humanitec';
+import { createHumanitecClient } from '../clients/humanitec';
+import { fetchAppInfo } from '../clients/fetch-app-info';
 
 export interface RouterOptions {
   logger: Logger;
@@ -76,7 +77,7 @@ export async function createRouter(
         .catch((e) => {
           logger.error(`Error encountered trying to update environment`);
           logger.debug(e);
-          response.end()
+          response.end();
         })
     }
 
@@ -88,23 +89,6 @@ export async function createRouter(
 
   router.use(errorHandler());
   return router;
-}
-
-async function fetchAppInfo({ client }: { client: HumanitecClient }, appId: string) {
-  const environments = await client.getEnvironments(appId);
-
-  return await Promise.all(environments.map(async env => {
-    const [runtime, resources] = await Promise.all([
-      client.getRuntimeInfo(appId, env.id),
-      client.getActiveEnvironmentResources(appId, env.id),
-    ]);
-
-    return {
-      ...env,
-      runtime,
-      resources
-    }
-  }));
 }
 
 function flush(response: express.Response) {

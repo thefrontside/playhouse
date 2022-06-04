@@ -1,9 +1,9 @@
 import fetch from "cross-fetch";
-import { AutomationType } from '../schemas/create-app';
-import { CreateEnvironmentType } from '../schemas/create-app';
-import { EnvironmentsResponsePayload } from "../schemas/environment";
-import { ResourcesResponsePayload } from "../schemas/resources";
-import { RuntimeResponsePayload } from '../schemas/runtime';
+import { AutomationType } from '../types/create-app';
+import { CreateEnvironmentType } from '../types/create-app';
+import { EnvironmentsResponsePayload } from "../types/environment";
+import { ResourcesResponsePayload } from "../types/resources";
+import { RuntimeResponsePayload } from '../types/runtime';
 
 export interface CreateDeltaPayload {
   metadata: CreateEnvironmentType['metadata'],

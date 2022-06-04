@@ -36,6 +36,7 @@
     "react": "^16.13.1 || ^17.0.0"
   },
   "devDependencies": {
+    "@frontside/backstage-plugin-humanitec-backend": "0.1.0",
     "@backstage/cli": "^0.17.0",
     "@backstage/core-app-api": "^1.0.1",
     "@backstage/dev-utils": "^1.0.1",
