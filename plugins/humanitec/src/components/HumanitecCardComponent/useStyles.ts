@@ -29,8 +29,17 @@ export const useStyles = makeStyles(styles => {
       padding: styles.spacing(1),
       marginRight: styles.spacing(1)
     },
+    environmentTitleContainer: {
+      display: 'flex',
+      flexDirection: 'row'
+    },
     environmentName: {
-      fontSize: "1.1em"
+      fontSize: "1.1em",
+      flexGrow: 1,
+      paddingRight: styles.spacing(1)
+    },
+    environmentButton: {
+      padding: 1
     },
     environmentId: {
       fontSize: "0.9em"

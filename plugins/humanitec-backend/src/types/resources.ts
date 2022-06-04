@@ -1,4 +1,4 @@
-import { array, string, object } from 'zod';
+import { array, string, record, unknown, object } from 'zod';
 
 const ActiveResource = object({
   app_id: string(),
@@ -7,7 +7,7 @@ const ActiveResource = object({
   env_type: string(),
   org_id: string(),
   res_id: string(),
-  resource: object({}).optional().nullable(),
+  resource: record(unknown()).optional().nullable(),
   status: string(),
   type: string(),
   updated_at: string(),
