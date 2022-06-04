@@ -1,10 +1,8 @@
 import React from 'react';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import {
-  HumanitecAnnotationedEntity,
-} from "./types";
 import { HumanitecCard } from './HumanitecCard';
-import { useAppInfo } from '../../hooks/useAppInfo';
+import { useAppInfo } from '../hooks/useAppInfo';
+import { HumanitecAnnotationedEntity } from '../types';
 
 interface HumanitecCardComponentProps {
   title?: string;

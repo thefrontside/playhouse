@@ -7,7 +7,7 @@ import {
   Box,
   Typography
 } from '@material-ui/core';
-import { useStyles } from './useStyles';
+import { useStyles } from '../hooks/useStyles';
 import { EnvironmentCard } from "./EnvironmentCard";
 import type { FetchAppInfoResponse } from '@frontside/backstage-plugin-humanitec-backend';
 

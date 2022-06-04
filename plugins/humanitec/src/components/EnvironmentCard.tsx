@@ -4,9 +4,9 @@ import {
   IconButton,
   Typography
 } from '@material-ui/core';
-import LinkIcon from '@material-ui/icons/Link';
 import type { FetchAppInfoEnvironment } from '@frontside/backstage-plugin-humanitec-backend';
-import { useStyles } from './useStyles';
+import { useStyles } from '../hooks/useStyles';
+import { HumanitecLogoIcon } from './HumanitecLogoIcon';
 
 interface EnvironmentCardProps {
   env: FetchAppInfoEnvironment;
@@ -21,7 +21,7 @@ export function EnvironmentCard({ env, appUrl }: EnvironmentCardProps) {
       <Box className={classes.environmentTitleContainer}>
         <Typography className={classes.environmentName} variant="h6">{env.name}</Typography>
         <IconButton className={classes.environmentButton} component='a' href={`${appUrl}/envs/${env.id}`}>
-          <LinkIcon />
+          <HumanitecLogoIcon />
         </IconButton>
       </Box>
       <Typography className={classes.environmentId} variant="subtitle1">{env.id}</Typography>

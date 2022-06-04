@@ -1,1 +1,0 @@
-export { HumanitecCardComponent } from './HumanitecCardComponent';
