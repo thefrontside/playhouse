@@ -1,7 +1,7 @@
-import { object, record, string, number, array } from 'zod';
+import { object, record, string, number, array, unknown } from 'zod';
 
 export const Pod = object({
-  containerStatuses: array(object({})),
+  containerStatuses: array(record(unknown())),
   phase: string(),
   podName: string(),
   revision: number(),

@@ -35,7 +35,7 @@ environments:
                 http:
                   "/":
                     port: 9898
-                    type: default
+                    type: prefix
 
 # automations that will be created
 # see https://api-docs.humanitec.com/#tag/AutomationRule/paths/~1orgs~1{orgId}~1apps~1{appId}~1envs~1{envId}~1rules/post

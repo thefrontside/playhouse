@@ -14,11 +14,13 @@ import type { FetchAppInfoResponse } from '@frontside/backstage-plugin-humanitec
 interface HumanitecCardProps {
   title: string;
   environments: FetchAppInfoResponse;
+  appUrl: string;
 }
 
 export function HumanitecCard({
   title,
-  environments
+  environments,
+  appUrl
 }: HumanitecCardProps) {
   const classes = useStyles();
 
@@ -31,7 +33,7 @@ export function HumanitecCard({
       <Divider />
       <CardContent className={classes.gridItemCardContent}>
         <Box className={classes.environmentsContainer}>
-          {environments.length ? environments.map(env => <EnvironmentCard key={env.id} env={env} />) : <Typography>Retrieving environment information...</Typography>}
+          {environments.length ? environments.map(env => <EnvironmentCard key={env.id} env={env} appUrl={appUrl} />) : <Typography>Retrieving environment information...</Typography>}
         </Box>
       </CardContent>
     </Card>
