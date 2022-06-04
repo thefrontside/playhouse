@@ -16,3 +16,4 @@
 
 export * from './service/router';
 export { createHumanitecApp } from './actions/create-app';
+export type { FetchAppInfoResponse, FetchAppInfoEnvironment } from './clients/fetch-app-info';
