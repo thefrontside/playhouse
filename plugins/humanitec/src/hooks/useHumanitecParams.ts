@@ -3,10 +3,12 @@ import { useQueryParamState } from '@backstage/core-components';
 
 export interface HumanitecParams {
   envId?: string;
+  workloadId?: string;
 }
 
 export interface HumanitecParamsActions {
   showEnvironment: (envId: string) => void
+  showWorkload: (id: string) => void
 }
 
 export function useHumanitecParams(): [HumanitecParams | undefined, HumanitecParamsActions] {
@@ -14,11 +16,20 @@ export function useHumanitecParams(): [HumanitecParams | undefined, HumanitecPar
 
   const showEnvironment = useCallback((envId: string) => {
     setQueryParams({
-      envId
+      envId,
+      workloadId: params?.workloadId
     })
-  }, [setQueryParams]);
+  }, [params?.workloadId, setQueryParams]);
+
+  const showWorkload = useCallback((workloadId: string) => {
+    setQueryParams({
+      envId: params?.envId,
+      workloadId
+    })
+  }, [params?.envId, setQueryParams]);
 
   return [params, {
-    showEnvironment
+    showEnvironment,
+    showWorkload
   }]
 }

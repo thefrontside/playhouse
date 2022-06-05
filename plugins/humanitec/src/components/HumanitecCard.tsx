@@ -20,13 +20,15 @@ interface HumanitecCardProps {
   appUrl: string;
   actions: HumanitecParamsActions;
   selectedEnv?: string;
+  selectedWorkload?: string;
 }
 
 export function HumanitecCard({
   header,
   environments,
   actions,
-  selectedEnv
+  selectedEnv,
+  selectedWorkload
 }: HumanitecCardProps) {
   const classes = useStyles();
 
@@ -66,7 +68,12 @@ export function HumanitecCard({
                 }))
                 .flatMap(
                   item => item.workloads
-                    .map(workload => <WorkloadCard key={workload.id} workload={workload} />)
+                    .map(workload => (<WorkloadCard
+                      active={workload.id === selectedWorkload}
+                      key={workload.id}
+                      workload={workload}
+                      onClick={actions.showWorkload}
+                    />))
                 )
               }
             </CardContainer>
