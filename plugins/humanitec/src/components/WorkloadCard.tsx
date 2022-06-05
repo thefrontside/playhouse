@@ -31,8 +31,21 @@ export function WorkloadCard({ workload, onClick, active }: WorkloadCardProps) {
       </Box>
       <Box>
         <Typography component="span" color="textSecondary" className={classes.miniCardSubTitle}>status: </Typography>
-        <Typography component="span" color="textPrimary" className={classes.miniCardSubTitle}>{workload.status}</Typography>
+        <WorkloadStatus status={workload.status} />
       </Box>
     </Box>
   )
+}
+
+function WorkloadStatus({ status }: { status: string }) {
+  const classes = useStyles();
+
+  switch (status) {
+    case 'Success':
+      return <Typography component="span" className={`${classes.miniCardSubTitle} ${classes.successColor}`}>Success</Typography>
+    case 'Warming':
+      return <Typography component="span" className={`${classes.miniCardSubTitle} ${classes.pendingColor}`}>Warming</Typography>
+    default:
+      return <Typography component="span" className={`${classes.miniCardSubTitle} ${classes.unknownColor}`}>{status}</Typography>
+  }
 }

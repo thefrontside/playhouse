@@ -66,7 +66,7 @@ export const useStyles = makeStyles(theme => {
       fontSize: "0.9em"
     },
     deploymentStatus: {
-      fontSize: "0.75em"
+      fontSize: "0.9em"
     },
     failColor: {
       color: theme.palette.error.main
