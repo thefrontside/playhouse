@@ -33,7 +33,8 @@ export const useStyles = makeStyles(theme => {
       display: 'flex',
       flexDirection: 'row',
       marginBottom: theme.spacing(1.5),
-      minHeight: "5.5em"
+      minHeight: "5.5em",
+      overflow: 'auto',
     },
     miniCard: {
       minWidth: "12em",
@@ -51,7 +52,7 @@ export const useStyles = makeStyles(theme => {
     environmentCardActive: {
       borderColor: theme.palette.primary.main
     },
-    environmentTitleContainer: {
+    miniCardTitleContainer: {
       display: 'flex',
       flexDirection: 'row',
     },
@@ -67,19 +68,19 @@ export const useStyles = makeStyles(theme => {
     deploymentStatus: {
       fontSize: "0.75em"
     },
-    deploymentFailedStatus: {
+    failColor: {
       color: theme.palette.error.main
     },
-    deploymentSucceededStatus: {
+    successColor: {
       color: theme.palette.success.main
     },
-    deploymentInProgressStatus: {
+    inProgressColor: {
       color: theme.palette.info.main
     },
-    deploymentPendingStatus: {
+    pendingColor: {
       color: theme.palette.primary.main
     },
-    deploymentNeverDeployedStatus: {
+    unknownColor: {
       color: theme.palette.text.secondary
     }
   }

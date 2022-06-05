@@ -13,6 +13,7 @@ import { HumanitecParamsActions } from '../hooks/useHumanitecParams';
 import get from 'lodash.get';
 import { CardContainer } from './CardContainer';
 import { WorkloadCard } from './WorkloadCard';
+import { ResourceCard } from './ResourceCard';
 
 interface HumanitecCardProps {
   header: ReactNode;
@@ -32,7 +33,11 @@ export function HumanitecCard({
 }: HumanitecCardProps) {
   const classes = useStyles();
 
-  const visible = environments.find(env => env.id === selectedEnv);
+  const env = environments.find(e => e.id === selectedEnv);
+  const resources = selectedWorkload && env?.resources.filter(resource => resource.res_id.startsWith(`modules.${selectedWorkload}`)) || [];
+  const workloads = env?.resources.filter(resource => resource.type === "workload") || []
+
+  console.log(resources);
 
   return (
     <Card className={classes.cardClass}>
@@ -41,22 +46,21 @@ export function HumanitecCard({
       <CardContent className={classes.gridItemCardContent}>
         <Typography className={classes.label} variant="h4">Environments</Typography>
         <CardContainer>
-          {environments.length ? environments.map(env => (<EnvironmentCard
-            key={env.id}
-            env={env}
+          {environments.length ? environments.map(e => (<EnvironmentCard
+            key={e.id}
+            env={e}
             onClick={actions.showEnvironment}
-            active={env.id === selectedEnv}
+            active={e.id === selectedEnv}
           />)) : <LinearProgress className={classes.progress} />}
         </CardContainer>
         {environments.length > 0 ? selectedEnv && (
           <>
             <Typography className={classes.label} variant="h4">Workloads</Typography>
             <CardContainer>
-              {visible && visible.resources
-                .filter(resource => resource.type === "workload")
+              {env && workloads
                 .map(resource => ({
                   resource,
-                  workloads: get(visible.runtime, resource.res_id) ?? {}
+                  workloads: get(env.runtime, resource.res_id) ?? {}
                 }))
                 .map(item => ({
                   ...item,
@@ -76,6 +80,23 @@ export function HumanitecCard({
                     />))
                 )
               }
+              {env && workloads.length === 0 && <Typography className={classes.unknownColor}>No workloads reported.</Typography>}
+            </CardContainer>
+          </>
+        ) : null}
+        {selectedWorkload && workloads.length > 0 ? (
+          <>
+            <Typography className={classes.label} variant="h4">Resources</Typography>
+            <CardContainer>
+              {resources
+                .filter(resource => resource.type !== 'workload')
+                .map(resource => (
+                  <ResourceCard
+                    id={resource.res_id.substring(`modules.${selectedWorkload}.`.length)}
+                    key={`${resource.res_id}:${resource.type}`}
+                    resource={resource}
+                  />
+                ))}
             </CardContainer>
           </>
         ) : null}

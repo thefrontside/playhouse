@@ -28,8 +28,6 @@ export function HumanitecCardComponent({ }: HumanitecCardComponentProps) {
 
   const classes = useStyles();
 
-  console.log(data);
-
   return (<HumanitecCard
     header={
       <CardHeader

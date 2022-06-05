@@ -1,4 +1,4 @@
-import { array, string, record, unknown, object } from 'zod';
+import { array, string, record, unknown, object, enum as zEnum } from 'zod';
 
 const ActiveResource = object({
   app_id: string(),
@@ -8,7 +8,7 @@ const ActiveResource = object({
   org_id: string(),
   res_id: string(),
   resource: record(unknown()).optional().nullable(),
-  status: string(),
+  status: zEnum(['pending', 'active', 'deleting']),
   type: string(),
   updated_at: string(),
 })
