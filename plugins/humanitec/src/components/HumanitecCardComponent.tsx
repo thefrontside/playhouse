@@ -10,10 +10,9 @@ import { Button } from '@material-ui/core';
 import { HumanitecLogoIcon } from './HumanitecLogoIcon';
 
 interface HumanitecCardComponentProps {
-  title?: string;
 }
 
-export function HumanitecCardComponent({ title = "Deployments" }: HumanitecCardComponentProps) {
+export function HumanitecCardComponent({ }: HumanitecCardComponentProps) {
   const { entity } = useEntity<HumanitecAnnotationedEntity>();
 
   const appId = entity.metadata.annotations['humanitec.com/appId'];
@@ -47,6 +46,7 @@ export function HumanitecCardComponent({ title = "Deployments" }: HumanitecCardC
     environments={data}
     appUrl={appUrl}
     selectedEnv={params?.envId}
+    selectedWorkload={params?.workloadId}
     actions={actions}
   />)
 }
