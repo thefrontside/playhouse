@@ -16,6 +16,7 @@ import { WorkloadCard } from './WorkloadCard';
 import { ResourceCard } from './ResourceCard';
 
 interface HumanitecCardProps {
+  variant: 'gridItem';
   header: ReactNode;
   environments: FetchAppInfoResponse;
   appUrl: string;
@@ -29,7 +30,8 @@ export function HumanitecCard({
   environments,
   actions,
   selectedEnv,
-  selectedWorkload
+  selectedWorkload,
+  variant
 }: HumanitecCardProps) {
   const classes = useStyles();
 
@@ -37,10 +39,13 @@ export function HumanitecCard({
   const resources = selectedWorkload && env?.resources.filter(resource => resource.res_id.startsWith(`modules.${selectedWorkload}`)) || [];
   const workloads = env?.resources.filter(resource => resource.type === "workload") || []
 
-  console.log(resources);
+  let cardContentClass = '';
+  if (variant === 'gridItem') {
+    cardContentClass = classes.gridItemCardContent;
+  }
 
   return (
-    <Card className={classes.cardClass}>
+    <Card className={`${classes.cardClass} ${cardContentClass}`} >
       {header}
       <Divider />
       <CardContent className={classes.gridItemCardContent}>
