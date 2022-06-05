@@ -14,19 +14,42 @@ export interface HumanitecParamsActions {
 export function useHumanitecParams(): [HumanitecParams | undefined, HumanitecParamsActions] {
   const [params, setQueryParams] = useQueryParamState<HumanitecParams>('humanitec');
 
-  const showEnvironment = useCallback((envId: string) => {
-    setQueryParams({
-      envId,
-      workloadId: params?.workloadId
-    })
-  }, [params?.workloadId, setQueryParams]);
+  const showEnvironment = useCallback((id: string) => {
+    if (params) {
+      const { envId, workloadId, ...rest } = params;
+      if (id === params.envId) {
+        setQueryParams(rest)
+      } else {
+        setQueryParams({
+          ...params,
+          envId: id
+        })
+      }
+    } else {
+      setQueryParams({
+        envId: id,
+      })
+    }
 
-  const showWorkload = useCallback((workloadId: string) => {
-    setQueryParams({
-      envId: params?.envId,
-      workloadId
-    })
-  }, [params?.envId, setQueryParams]);
+  }, [params, setQueryParams]);
+
+  const showWorkload = useCallback((id: string) => {
+    if (params) {
+      const { workloadId, ...rest } = params;
+      if (id === workloadId) {
+        setQueryParams(rest)
+      } else {
+        setQueryParams({
+          ...params,
+          workloadId: id
+        })
+      }
+    } else {
+      setQueryParams({
+        workloadId: id
+      })
+    }
+  }, [params, setQueryParams]);
 
   return [params, {
     showEnvironment,

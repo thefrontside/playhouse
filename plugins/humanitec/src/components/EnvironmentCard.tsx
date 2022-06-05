@@ -22,7 +22,7 @@ export function EnvironmentCard({ env, onClick, active }: EnvironmentCardProps) 
 
   return (
     <Box role="button" className={`${classes.miniCard} ${active && classes.environmentCardActive}`} onClick={_onClick}>
-      <Box className={classes.environmentTitleContainer}>
+      <Box className={classes.miniCardTitleContainer}>
         <Typography className={classes.miniCardTitle} variant="h6">{env.name}</Typography>
       </Box>
       <Typography className={classes.miniCardSubTitle} variant="subtitle1">{env.id}</Typography>
