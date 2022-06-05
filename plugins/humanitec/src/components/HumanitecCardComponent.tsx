@@ -10,9 +10,10 @@ import { Button } from '@material-ui/core';
 import { HumanitecLogoIcon } from './HumanitecLogoIcon';
 
 interface HumanitecCardComponentProps {
+  variant: 'gridItem'
 }
 
-export function HumanitecCardComponent({ }: HumanitecCardComponentProps) {
+export function HumanitecCardComponent({ variant }: HumanitecCardComponentProps) {
   const { entity } = useEntity<HumanitecAnnotationedEntity>();
 
   const appId = entity.metadata.annotations['humanitec.com/appId'];
@@ -29,6 +30,7 @@ export function HumanitecCardComponent({ }: HumanitecCardComponentProps) {
   const classes = useStyles();
 
   return (<HumanitecCard
+    variant={variant}
     header={
       <CardHeader
         action={
