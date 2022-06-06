@@ -1,8 +1,8 @@
 name: Backstage Deploy
 
-on: push
-  # push:
-  #   branches: main
+on:
+  push:
+    branches: main
 
 concurrency: ${{ github.ref }}
 
@@ -52,22 +52,22 @@ jobs:
               "tags": ["'$TAG'"]
           }'
 
-    # - name: Authenticate to GKE Cluster
-    #   run: gcloud container clusters get-credentials $CLUSTER --zone $ZONE
+    - name: Authenticate to GKE Cluster
+      run: gcloud container clusters get-credentials $CLUSTER --zone $ZONE
 
-    # - name: Helm Upgrade Postgres
-    #   run: helm upgrade --install min-postgres-chart ./charts/postgres -f ./charts/postgres/Values.yaml --set postgresUsername=${{ secrets.POSTGRES_USER }} --set postgresPassword=${{ secrets.POSTGRES_PASSWORD }}
+    - name: Helm Upgrade Postgres
+      run: helm upgrade --install min-postgres-chart ./charts/postgres -f ./charts/postgres/Values.yaml --set postgresUsername=${{ secrets.POSTGRES_USER }} --set postgresPassword=${{ secrets.POSTGRES_PASSWORD }}
 
-    # - name: Helm Upgrade Backstage (backstage:${{ env.TAG }})
-    #   run: helm upgrade --install min-backstage-chart ./charts/backstage -f ./charts/backstage/Values.yaml --set backstageImage="$IMAGE:$TAG" --set backstageGithubCredentials="$CREDENTIALS"
-    #   env:
-    #     CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
+    - name: Helm Upgrade Backstage (backstage:${{ env.TAG }})
+      run: helm upgrade --install min-backstage-chart ./charts/backstage -f ./charts/backstage/Values.yaml --set backstageImage="$IMAGE:$TAG" --set backstageGithubCredentials="$CREDENTIALS"
+      env:
+        CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
 
-    # - name: Confirm Deployment Status
-    #   id: deploy-status
-    #   continue-on-error: true
-    #   run: kubectl rollout status deployment/backstage
+    - name: Confirm Deployment Status
+      id: deploy-status
+      continue-on-error: true
+      run: kubectl rollout status deployment/backstage
 
-    # - name: Rollback Deployment
-    #   if: steps.deploy-status.outcome == 'failure'
-    #   run: helm rollback min-backstage-chart
+    - name: Rollback Deployment
+      if: steps.deploy-status.outcome == 'failure'
+      run: helm rollback min-backstage-chart
