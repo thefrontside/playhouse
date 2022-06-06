@@ -43,8 +43,8 @@ function WorkloadStatus({ status }: { status: string }) {
   switch (status) {
     case 'Success':
       return <Typography component="span" className={`${classes.miniCardSubTitle} ${classes.successColor}`}>Success</Typography>
-    case 'Warming':
-      return <Typography component="span" className={`${classes.miniCardSubTitle} ${classes.pendingColor}`}>Warming</Typography>
+    case 'Warning':
+      return <Typography component="span" className={`${classes.miniCardSubTitle} ${classes.pendingColor}`}>Warning</Typography>
     default:
       return <Typography component="span" className={`${classes.miniCardSubTitle} ${classes.unknownColor}`}>{status}</Typography>
   }
