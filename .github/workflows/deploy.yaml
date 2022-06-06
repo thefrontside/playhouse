@@ -39,6 +39,19 @@ jobs:
     - name: Cloud Build & Push to Artifacts Registry
       run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"
 
+    - name: Inform Humanitec
+      run: |-
+        curl \
+          --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID }}/images/backstage/builds' \
+          --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN }}' \
+          --header 'Content-Type: application/json' \
+          --data-raw '{
+              "branch": "'$GITHUB_BRANCH'",
+              "commit": "'$GITHUB_SHA'",
+              "image": "'$IMAGE:$TAG'",
+              "tags": ["'$TAG'"]
+          }'
+
     - name: Authenticate to GKE Cluster
       run: gcloud container clusters get-credentials $CLUSTER --zone $ZONE
 
