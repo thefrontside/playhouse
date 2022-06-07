@@ -63,7 +63,7 @@ jobs:
         helm upgrade --install min-backstage-chart ./charts/backstage \
           -f ./charts/backstage/Values.yaml \
           --set backstageImage="$IMAGE:$TAG" \
-          --set backstageGithubCredentials="$CREDENTIALS"
+          --set backstageGithubCredentials="$CREDENTIALS" \
           --set humanitecToken="$HUMANITEC_TOKEN"
       env:
         CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
