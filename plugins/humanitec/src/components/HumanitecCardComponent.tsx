@@ -12,10 +12,9 @@ import { HumanitecCardContent } from './HumanitecCardContent';
 import { HumanitecAnnotationsEmptyState } from './HumanitecAnnotationsEmptyState';
 
 interface HumanitecCardComponentProps {
-  variant: 'gridItem'
 }
 
-export function HumanitecCardComponent({ variant }: HumanitecCardComponentProps) {
+export function HumanitecCardComponent({ }: HumanitecCardComponentProps) {
   const { entity } = useEntity<HumanitecAnnotationedEntity>();
 
   const orgId = entity.metadata.annotations[HUMANITEC_ORG_ID_ANNOTATION];
@@ -30,11 +29,6 @@ export function HumanitecCardComponent({ variant }: HumanitecCardComponentProps)
   const [params, actions] = useHumanitecParams();
 
   const classes = useStyles();
-
-  let cardContentClass = '';
-  if (variant === 'gridItem') {
-    cardContentClass = classes.gridItemCardContent;
-  }
 
   let content: ReactNode = null;
   if (Array.isArray(data)) {
@@ -61,7 +55,7 @@ export function HumanitecCardComponent({ variant }: HumanitecCardComponentProps)
   }
 
   return (
-    <Card className={`${classes.cardClass} ${cardContentClass}`} >
+    <Card className={`${classes.cardClass}`} >
       <CardHeader
         action={action}
         className={classes.cardHeader}

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { createServiceBuilder } from '@backstage/backend-common';
+import { createServiceBuilder, PluginEndpointDiscovery } from '@backstage/backend-common';
 import { Server } from 'http';
 import { Logger } from 'winston';
+import { Config } from '@backstage/config';
 import { createRouter } from './router';
 
 export interface ServerOptions {
   port: number;
   enableCors: boolean;
   logger: Logger;
+  config: Config;
+  discovery: PluginEndpointDiscovery;
 }
 
 export async function startStandaloneServer(
@@ -30,7 +33,10 @@ export async function startStandaloneServer(
 ): Promise<Server> {
   const logger = options.logger.child({ service: 'humanitec-backend-backend' });
   logger.debug('Starting application server...');
+
   const router = await createRouter({
+    config: options.config,
+    discovery: options.discovery,
     logger,
   });
 

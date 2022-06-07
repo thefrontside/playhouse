@@ -110,7 +110,7 @@ const overviewContent = (
       <EntityAboutCard variant="gridItem" />
     </Grid>
     <Grid item md={6}>
-      <HumanitecCardComponent variant="gridItem" />
+      <HumanitecCardComponent />
     </Grid>
     <Grid item md={4} xs={12}>
       <EntityLinksCard />
