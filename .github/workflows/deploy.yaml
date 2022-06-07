@@ -1,8 +1,8 @@
 name: Backstage Deploy
 
-on:
-  push:
-    branches: main
+on: push
+  # push:
+  #   branches: main
 
 concurrency: ${{ github.ref }}
 
@@ -59,9 +59,15 @@ jobs:
       run: helm upgrade --install min-postgres-chart ./charts/postgres -f ./charts/postgres/Values.yaml --set postgresUsername=${{ secrets.POSTGRES_USER }} --set postgresPassword=${{ secrets.POSTGRES_PASSWORD }}
 
     - name: Helm Upgrade Backstage (backstage:${{ env.TAG }})
-      run: helm upgrade --install min-backstage-chart ./charts/backstage -f ./charts/backstage/Values.yaml --set backstageImage="$IMAGE:$TAG" --set backstageGithubCredentials="$CREDENTIALS"
+      run: |-
+        helm upgrade --install min-backstage-chart ./charts/backstage \
+          -f ./charts/backstage/Values.yaml \
+          --set backstageImage="$IMAGE:$TAG" \
+          --set backstageGithubCredentials="$CREDENTIALS"
+          --set humanitecToken="$HUMANITEC_TOKEN"
       env:
         CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
+        HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_TOKEN }}
 
     - name: Confirm Deployment Status
       id: deploy-status

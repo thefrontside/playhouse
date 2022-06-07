@@ -46,7 +46,9 @@ spec:
             value: {{ .Values.baseUrl }}
         envFrom:
           - secretRef:
-              name: postgres-secrets
+            name: postgres-secrets
+          - secretRef:
+            name: backstage-secrets
       volumes:
         - name: "backstage-app-credentials"
           secret:

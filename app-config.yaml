@@ -57,7 +57,7 @@ proxy:
   '/humanitec':
     target: 'https://api.humanitec.io'
     headers:
-      Authorization: ${HUMANITEC_TOKEN}
+      Authorization: Bearer ${HUMANITEC_TOKEN}
 
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs
