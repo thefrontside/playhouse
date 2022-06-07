@@ -54,6 +54,10 @@ proxy:
   '/test':
     target: 'https://example.com'
     changeOrigin: true
+  '/humanitec':
+    target: 'https://api.humanitec.io'
+    headers:
+      Authorization: Bearer ${HUMANITEC_TOKEN}
 
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs
@@ -72,3 +76,17 @@ auth:
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
+
+catalog:
+  locations:
+    - type: file
+      target: https://github.com/thefrontside/backstage/blob/main/catalog-info.yaml
+    - type: file
+      target: https://github.com/thefrontside/backstage/blob/main/templates/standard-microservice/template.yaml
+      rules:
+        - allow: [Template]
+
+humanitec:
+  orgId: the-frontside-software-inc
+  registryUrl: "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts"
+  "proxyPath": "/humanitec"

@@ -47,6 +47,8 @@ spec:
         envFrom:
           - secretRef:
               name: postgres-secrets
+          - secretRef:
+              name: backstage-secrets
       volumes:
         - name: "backstage-app-credentials"
           secret:

@@ -54,6 +54,7 @@ import {
 } from '@backstage/plugin-org';
 import { EntityTechdocsContent } from '@backstage/plugin-techdocs';
 import { EmptyState } from '@backstage/core-components';
+import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 const cicdContent = (
   // This is an example of how you can implement your company's logic in entity page.
@@ -107,6 +108,9 @@ const overviewContent = (
     {entityWarningContent}
     <Grid item md={6}>
       <EntityAboutCard variant="gridItem" />
+    </Grid>
+    <Grid item md={6}>
+      <HumanitecCardComponent />
     </Grid>
     <Grid item md={4} xs={12}>
       <EntityLinksCard />

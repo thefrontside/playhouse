@@ -1,0 +1,61 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: standard-microservice
+  title: Standard Microservice
+  description: A microservices that uses Docker, CI and deploys to Humanitec
+spec:
+  owner: john@example.com
+  type: service
+  parameters:
+    - title: New Standard Microservice
+      required:
+        - repoUrl
+        - componentName
+      properties:
+        componentName: # for catalog metadata, description of the repo, used for "repo" of octokit (must match what goes into repourl)
+          title: Component Name
+          type: string
+          description: This will be the name of the component and application in Humanitec
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        repoUrl: # creating github repo and for registering catalog component
+          title: Repository
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+  steps:
+    - name: Read Environment
+      id: environment
+      action: backend:get-environment
+    - name: Fetch App Template
+      id: fetch-base
+      action: fetch:template
+      input:
+        url: ../../templates/standard-microservice/template
+        values:
+          componentName: ${{ parameters.componentName }}
+          orgId: ${{ steps.environment.output.orgId }}
+          appId: ${{ parameters.componentName }}
+          registryUrl: ${{ steps.environment.output.registryUrl }}
+    - name: Create Repository on Github
+      id: publish
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: Created from a Standard Microservice template
+        repoUrl: ${{ parameters.repoUrl }}
+    - name: Create Humanitec App
+      id: humanitec-create-app
+      action: humanitec:create-app
+      input:
+        appId: ${{ parameters.componentName }}
+    - name: Register Component in Backstage
+      id: register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
