@@ -1,8 +1,8 @@
 name: Backstage Deploy
 
-on: push
-  # push:
-  #   branches: main
+on:
+  push:
+    branches: main
 
 concurrency: ${{ github.ref }}
 

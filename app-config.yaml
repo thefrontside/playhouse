@@ -80,9 +80,9 @@ scaffolder:
 catalog:
   locations:
     - type: file
-      target: ../../catalog-info.yaml
+      target: https://github.com/thefrontside/backstage/blob/main/catalog-info.yaml
     - type: file
-      target: ../../templates/standard-microservice/template.yaml
+      target: https://github.com/thefrontside/backstage/blob/main/templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]
 
