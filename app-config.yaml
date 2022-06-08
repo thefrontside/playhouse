@@ -54,10 +54,6 @@ proxy:
   '/test':
     target: 'https://example.com'
     changeOrigin: true
-  '/humanitec':
-    target: 'https://api.humanitec.io'
-    headers:
-      Authorization: Bearer ${HUMANITEC_TOKEN}
 
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs
@@ -89,4 +85,4 @@ catalog:
 humanitec:
   orgId: the-frontside-software-inc
   registryUrl: "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts"
-  "proxyPath": "/humanitec"
+  token: ${HUMANITEC_TOKEN}

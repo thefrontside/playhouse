@@ -25,15 +25,13 @@ import { fetchAppInfo } from '../clients/fetch-app-info';
 export interface RouterOptions {
   logger: Logger;
   config: Config;
-  discovery: PluginEndpointDiscovery
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger, config, discovery } = options;
-  const proxyPath = config.getOptionalString('humanitec.proxyPath') ?? '/humanitec';
-  const api = `${await discovery.getBaseUrl('proxy')}${proxyPath}`;
+  const { logger, config } = options;
+  const token = config.getString('humanitec.token');
 
   const router = Router();
   router.use(express.json());
@@ -59,7 +57,7 @@ export async function createRouter(
       orgId = config.getString('humanitec.orgId');
     }
 
-    const client = createHumanitecClient({ api, orgId });
+    const client = createHumanitecClient({ token, orgId });
 
     let timeout: NodeJS.Timeout;
 
@@ -67,14 +65,17 @@ export async function createRouter(
       async function update() {
         const result = await fetchAppInfo({ client }, appId);
         const data = JSON.stringify(result);
-        response.write(`data: ${data}\n\n`);
+        response.write(`event: update-success\ndata: ${data}\n\n`);
         flush(response);
       }
+
       update()
         .then(() => {
           timeout = setTimeout(() => scheduleUpdate(interval), interval);
         })
         .catch((e) => {
+          response.write(`event: update-failure\ndata: ${e.message}\n\n`);
+          flush(response);
           logger.error(`Error encountered trying to update environment`);
           logger.debug(e);
           response.end();

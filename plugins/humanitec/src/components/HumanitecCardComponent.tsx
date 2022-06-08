@@ -10,6 +10,7 @@ import { HumanitecLogoIcon } from './HumanitecLogoIcon';
 import { HUMANITEC_APP_ID_ANNOTATION, HUMANITEC_MISSING_ANNOTATION_ERROR, HUMANITEC_ORG_ID_ANNOTATION } from '../annotations';
 import { HumanitecCardContent } from './HumanitecCardContent';
 import { HumanitecAnnotationsEmptyState } from './HumanitecAnnotationsEmptyState';
+import { HumanitecErrorState } from './HumanitecErrorState';
 
 interface HumanitecCardComponentProps {
 }
@@ -30,6 +31,8 @@ export function HumanitecCardComponent({ }: HumanitecCardComponentProps) {
 
   const classes = useStyles();
 
+  console.log(data)
+
   let content: ReactNode = null;
   if (Array.isArray(data)) {
     content = (
@@ -43,6 +46,8 @@ export function HumanitecCardComponent({ }: HumanitecCardComponentProps) {
     )
   } else if (data instanceof Error && data.message === HUMANITEC_MISSING_ANNOTATION_ERROR) {
     content = (<HumanitecAnnotationsEmptyState />)
+  } else {
+    content = (<HumanitecErrorState error={data} />)
   }
 
   let action: ReactNode = null;

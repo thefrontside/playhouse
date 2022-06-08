@@ -6,11 +6,11 @@ import { SetupFileSchema } from '../types/create-app';
 import { createHumanitecClient } from '../clients/humanitec';
 
 interface HumanitecCreateApp {
-  api: string;
   orgId: string;
+  token: string;
 }
 
-export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
+export function createHumanitecApp({ token, orgId }: HumanitecCreateApp) {
   return createTemplateAction<{ appId: string; setupFile: string; }>({
     id: 'humanitec:create-app',
     schema: {
@@ -25,7 +25,7 @@ export function createHumanitecApp({ api, orgId }: HumanitecCreateApp) {
       }
     },
     async handler({ logger, input, workspacePath }) {
-      const client = createHumanitecClient({ api, orgId });
+      const client = createHumanitecClient({ orgId, token });
 
       const setupFile = input.setupFile ?? 'humanitec-apps.yaml';
       const setupFilePath = resolve(join(workspacePath, setupFile));
