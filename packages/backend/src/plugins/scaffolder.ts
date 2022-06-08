@@ -29,7 +29,7 @@ export default async function createPlugin({
     }),
     createHumanitecApp({
       orgId: config.getString('humanitec.orgId'),
-      api: `${await discovery.getBaseUrl('proxy')}/humanitec`
+      token: config.getString('humanitec.token')
     })
   ];
   return await createRouter({

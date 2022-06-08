@@ -4,6 +4,7 @@ import { CreateEnvironmentType } from '../types/create-app';
 import { EnvironmentsResponsePayload } from "../types/environment";
 import { ResourcesResponsePayload } from "../types/resources";
 import { RuntimeResponsePayload } from '../types/runtime';
+import { backOff } from "exponential-backoff";
 
 export interface CreateDeltaPayload {
   metadata: CreateEnvironmentType['metadata'],
@@ -18,7 +19,19 @@ export type URLs = { resource: 'DELTA', env_id: string, delta_id: string, app_id
 
 export type HumanitecClient = ReturnType<typeof createHumanitecClient>
 
-export function createHumanitecClient({ api, orgId }: { api: string; orgId: string; }) {
+class FetchError extends Error {
+  status: number;
+  statusText: string;
+  constructor(message: string, { status, statusText }: { status: number; statusText: string }) {
+    super(message);
+    this.status = status;
+    this.statusText = statusText;
+  }
+}
+
+export function createHumanitecClient({ orgId, token }: { token: string; orgId: string; }) {
+  const api = `https://api.humanitec.io`;
+
   return {
     createApplication(payload: { id: string; name: string; }) {
       return _fetch<{ id: string; name: string; }>('POST', 'apps', payload);
@@ -59,24 +72,29 @@ export function createHumanitecClient({ api, orgId }: { api: string; orgId: stri
   };
 
   async function _fetch<R = unknown>(method: 'POST' | 'GET', url: string, payload: unknown = undefined): Promise<R> {
-
-    let body = undefined;
-    if (payload !== undefined) {
-      body = JSON.stringify(payload);
-    }
-
-    const response = await fetch(`${api}/orgs/${orgId}/${url}`, {
+    const options: RequestInit = {
       method,
-      body,
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       }
-    });
+    };
 
-    if (response.ok) {
-      return await response.json();
+    if (payload) {
+      options.body = JSON.stringify(payload);
     }
 
-    throw new Error(`${method}: ${url} - failed due to ${response.status}: ${response.statusText}`);
+    return await backOff<R>(async () => {
+      const r = await fetch(`${api}/orgs/${orgId}/${url}`, options)
+
+      if (r.ok) {
+        return await r.json() as R;
+      }
+
+      throw new FetchError(`Fetch ${method} to ${url} failed.`, r);
+    }, {
+      // 403 may mean we encountered bug in Humanitec API
+      retry: async (e: FetchError) => e.status === 403
+    });
   }
 }

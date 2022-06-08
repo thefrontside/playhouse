@@ -15,14 +15,18 @@ export function useAppInfo({ appId, orgId }: { appId: string; orgId: string }) {
       createUrl().then((url) => {
         source = new EventSource(url);
 
-        source.onmessage = (message) => {
+        source.addEventListener('update-success', (message) => {
           try {
             setData(JSON.parse(message.data));
           } catch (e) {
             // eslint-disable-next-line no-console
             console.error(e);
           }
-        };
+        });
+
+        source.addEventListener('update-failure', (message) => {
+          setData(new Error(message.data))
+        })
       });
     } else {
       setData(new Error(HUMANITEC_MISSING_ANNOTATION_ERROR))
