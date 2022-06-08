@@ -46,7 +46,7 @@ jobs:
           --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN }}' \
           --header 'Content-Type: application/json' \
           --data-raw '{
-              "branch": "'$GITHUB_BRANCH'",
+              "branch": "'$GITHUB_REF_NAME'",
               "commit": "'$GITHUB_SHA'",
               "image": "'$IMAGE:$TAG'",
               "tags": ["'$TAG'"]
