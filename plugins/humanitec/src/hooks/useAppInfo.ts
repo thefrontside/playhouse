@@ -17,7 +17,9 @@ export function useAppInfo({ appId, orgId }: { appId: string; orgId: string }) {
 
         source.addEventListener('update-success', (message) => {
           try {
-            setData(JSON.parse(message.data));
+            if (message instanceof MessageEvent) {
+              setData(JSON.parse(message.data));
+            }
           } catch (e) {
             // eslint-disable-next-line no-console
             console.error(e);
@@ -25,7 +27,9 @@ export function useAppInfo({ appId, orgId }: { appId: string; orgId: string }) {
         });
 
         source.addEventListener('update-failure', (message) => {
-          setData(new Error(message.data))
+          if (message instanceof MessageEvent) {
+            setData(new Error(message.data))
+          }
         })
       });
     } else {
