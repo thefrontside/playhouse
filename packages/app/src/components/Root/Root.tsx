@@ -27,6 +27,7 @@ import { NavLink } from 'react-router-dom';
 import { Settings as SidebarSettings } from '@backstage/plugin-user-settings';
 import { SidebarSearchModal } from '@backstage/plugin-search'
 import { SearchContextProvider } from '@backstage/plugin-search-react';
+import { GraphiQLIcon } from '@backstage/plugin-graphiql';
 import {
   Sidebar,
   SidebarPage,
@@ -88,6 +89,7 @@ export const Root = ({ children }: PropsWithChildren<{}>) => (
       <SidebarDivider />
       <SidebarScrollWrapper>
         <SidebarItem icon={MapIcon} to="tech-radar" text="Tech Radar" />
+        <SidebarItem icon={GraphiQLIcon} to="graphiql" text="GraphiQL" />
       </SidebarScrollWrapper>
       <SidebarSpace />
       <SidebarDivider />

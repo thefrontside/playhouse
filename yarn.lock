@@ -1893,6 +1893,22 @@
     react-router-dom "6.0.0-beta.0"
     react-use "^17.2.4"
 
+"@backstage/plugin-graphiql@^0.2.37":
+  version "0.2.37"
+  resolved "https://registry.yarnpkg.com/@backstage/plugin-graphiql/-/plugin-graphiql-0.2.37.tgz#a65050fc9aa3a4a4ed55d7df901235eafff895aa"
+  integrity sha512-hojeIKa4ZTVGBku7rtdd7bynWxvgFmKDy8Hzqqoh7SskGw79RZsWv6k0RdhgrkjL8Z9HOkD1H5H6sjIZQGSsUw==
+  dependencies:
+    "@backstage/core-components" "^0.9.4"
+    "@backstage/core-plugin-api" "^1.0.2"
+    "@backstage/theme" "^0.2.15"
+    "@material-ui/core" "^4.12.2"
+    "@material-ui/icons" "^4.9.1"
+    "@material-ui/lab" "4.0.0-alpha.57"
+    graphiql "^1.5.12"
+    graphql "^16.0.0"
+    graphql-ws "^5.4.1"
+    react-use "^17.2.4"
+
 "@backstage/plugin-org@^0.5.4":
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/@backstage/plugin-org/-/plugin-org-0.5.4.tgz#aeb574b2478f0580c0e24e5daab3978ca84c2cac"
