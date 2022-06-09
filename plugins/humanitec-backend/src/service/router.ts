@@ -84,7 +84,7 @@ export async function createRouter(
 
     request.on('close', () => clearTimeout(timeout));
 
-    scheduleUpdate(1000);
+    scheduleUpdate(10000);
 
   });
 

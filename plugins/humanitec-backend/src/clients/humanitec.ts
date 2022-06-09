@@ -93,6 +93,7 @@ export function createHumanitecClient({ orgId, token }: { token: string; orgId: 
 
       throw new FetchError(`Fetch ${method} to ${url} failed.`, r);
     }, {
+      numOfAttempts: 3,
       // 403 may mean we encountered bug in Humanitec API
       retry: async (e: FetchError) => e.status === 403
     });
