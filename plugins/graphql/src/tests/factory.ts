@@ -33,7 +33,7 @@ export function createFactory(seed: string = 'factory'): Factory {
                   name: faker.lorem.slug(),
                   description: faker.lorem.lines(1),
                   type: 'website',
-                  lifecycle: 'PRODUCTION',
+                  lifecycle: 'production',
                   owner: 'developers'
                 } as ComponentData;
               }
