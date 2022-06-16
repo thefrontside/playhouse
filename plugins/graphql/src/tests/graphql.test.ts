@@ -6,26 +6,21 @@ import { createGraphQLAPI, GraphQLHarness } from './setupTests';
 
 describe('querying the graphql API', () => {
   let harness: GraphQLHarness;
-
+  let backstageId: string;
   beforeAll(function* () {
     harness = createGraphQLAPI();
-    harness.createComponent({
+    backstageId = harness.createComponent({
       name: "backstage",
       description: "An example of a Backstage application."
     })
   });
 
   it('can look up a known node by id', function* () {
-    const id = stringifyEntityRef({
-      kind: 'Component',
-      name: 'backstage',
-      namespace: 'default',
-    });
     expect(
       yield harness.query(/* GraphQL */`
-        node(id: "${id}") { ...on Component { id } }
+        node(id: "${backstageId}") { ...on Component { id } }
       `),
-    ).toMatchObject({ node: { id } });
+    ).toMatchObject({ node: { id: backstageId } });
   });
 
   it('can look up a known entity by name', function* () {
