@@ -1,3 +1,5 @@
+import type { ResolverContext } from './types';
+
 import { parseEntityRef } from '@backstage/catalog-model';
 import {
   mapSchema,
@@ -17,7 +19,6 @@ import {
   isInterfaceType,
 } from 'graphql';
 import { get } from 'lodash';
-import { ResolverContext } from './resolver';
 
 const resolveMappers: Array<(
   objectField: GraphQLField<{ id: string }, ResolverContext>,

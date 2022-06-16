@@ -1,9 +1,8 @@
-import { CatalogApi } from '@backstage/catalog-client';
+import type { CatalogApi, ResolverContext } from './types';
 import { GetEnvelopedFn, envelop, useExtendContext } from '@envelop/core';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { Application, createApplication } from 'graphql-modules';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { ResolverContext } from './resolver';
 import { createLoader } from './loaders';
 import { Catalog } from './modules/catalog/catalog';
 import { Core } from './modules/core/core';
