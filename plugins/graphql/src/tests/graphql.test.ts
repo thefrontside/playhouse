@@ -54,18 +54,6 @@ describe('querying the graphql API', () => {
     },
   );
 
-  it.skip('can look up a known component', function* () {
-    expect(
-      yield harness.query(/* GraphQL */`
-        entity(kind: "Component", name: "www-artist") {
-          name
-          ...on Component {
-            lifecycle
-          }
-        }
-      `),
-    ).toMatchObject({ entity: { name: 'www-artist', lifecycle: 'PRODUCTION' } });
-  });
 
   it.skip("can look up a component's owner", function* () {
     expect(
