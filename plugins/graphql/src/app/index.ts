@@ -12,6 +12,8 @@ export interface RouterOptions {
 
 import { schema, createApp } from './app';
 
+export * from './app';
+
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {

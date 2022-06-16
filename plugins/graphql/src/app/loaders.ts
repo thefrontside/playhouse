@@ -1,17 +1,11 @@
-import { CatalogApi } from '@backstage/catalog-client';
+import type { CatalogApi, Loader } from './types';
 import { Entity, CompoundEntityRef } from '@backstage/catalog-model';
 import Dataloader from 'dataloader';
 
 type EntityRef = string | CompoundEntityRef
 
-
 export interface LoaderOptions {
   catalog: CatalogApi;
-}
-
-export interface Loader {
-  load(id: string): Promise<Entity | null>;
-  loadMany(ids: string[]): Promise<Array<Entity | null>>;
 }
 
 export function createLoader({ catalog }: LoaderOptions): Loader {
