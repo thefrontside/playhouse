@@ -3,6 +3,8 @@ import type { CatalogApi } from '../app/types';
 import type { JsonObject } from '@backstage/types';
 import type { Operation } from 'effection';
 
+import assert from 'assert/strict';
+
 import { PromiseOrValue } from '@envelop/core';
 import { createApp } from '..';
 
@@ -56,7 +58,7 @@ export function createSimulatedCatalog(graph: Graph): CatalogApi {
         });
 
         if (ref === cmp) {
-          return {
+          let entity = {
             kind: vertex.type,
             apiVersion: 'backstage.io/v1beta1',
             metadata: {
@@ -64,12 +66,43 @@ export function createSimulatedCatalog(graph: Graph): CatalogApi {
               namespace: 'default',
               description: data.description,
             },
-            spec: {
-              type: data.type,
-              lifecycle: data.lifecycle,
-              owner: data.owner,
-            },
-          } as Entity
+          } as Entity;
+          if (entity.kind === 'Component') {
+            let [ownerEdge] = (graph.from[vertex.id] ?? []);
+            assert(ownerEdge, "every Component must have an owner");
+            let ownerVertex = graph.vertices[ownerEdge.to];
+            assert(ownerVertex, "every Component must have an owner");
+
+            let ownerData = ownerVertex.data;
+
+            return {
+              ...entity,
+              spec: {
+                type: data.type,
+                lifecycle: data.lifecycle,
+              },
+              relations: [{
+                type: 'ownedBy',
+                targetRef: stringifyEntityRef({
+                  kind: ownerVertex.type,
+                  name: ownerData.name,
+                }),
+              }]
+            }
+          } else if (entity.kind === 'Group') {
+            return {
+              ...entity,
+              spec: {
+                profile: {
+                  displayName: vertex.data.displayName,
+                  email: vertex.data.email,
+                  picture: vertex.data.picture,
+                }
+              }
+            }
+          } else {
+            return entity;
+          }
         }
       }
       return void 0;

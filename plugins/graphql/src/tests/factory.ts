@@ -1,5 +1,5 @@
 import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
-import { createVertex, Graph, Seed, Vertex } from '@frontside/graphgen';
+import { createVertex, Graph, Seed, Vertex, constant, seedrandom } from '@frontside/graphgen';
 
 
 import { faker as globalFaker, Faker } from '@faker-js/faker';
@@ -8,7 +8,7 @@ import { createGraph } from '@frontside/graphgen';
 export interface Factory {
   graph: Graph
   entities: Iterable<Entity>;
-  createComponent(preset: Partial<ComponentData>): string;
+  createComponent(preset: Partial<ComponentData> & {['Component.owner']: Record<string, unknown> }): string;
 }
 
 export interface ComponentData {
@@ -16,10 +16,9 @@ export interface ComponentData {
   description: string;
   type: string;
   lifecycle: string;
-  owner: string;
 }
 
-export function createFactory(): Factory {
+export function createFactory(seed: string = 'factory'): Factory {
   let graph = createGraph({
     types: {
       vertex: [
@@ -40,11 +39,43 @@ export function createFactory(): Factory {
               }
             }
           },
-          relationships: []
+          relationships: [{
+            type: 'Component.owner',
+            direction: 'from',
+            size: constant(1),
+            affinity: 0.05,
+          }]
+        }, {
+          name: 'Group',
+          data() {
+            return {
+              description: 'create a group',
+              sample(seed) {
+                let faker = createFaker(seed);
+                let department = faker.commerce.department();
+
+                return {
+                  name: `${department.toLocaleLowerCase()}-department`,
+                  description: `${department} Department`,
+                  displayName: `${department} Department`,
+                  email: `${department.toLowerCase()}@acme.com`,
+                  picture: faker.image.business(void 0, void 0, true),
+                }
+              }
+            }
+          },
+          relationships: [],
+        }
+      ],
+      edge: [
+        {
+          name: 'Component.owner',
+          from: 'Component',
+          to: 'Group'
         }
       ]
     },
-    seed: () => Math.random()
+    seed: seedrandom(seed),
   });
   return {
     graph,
