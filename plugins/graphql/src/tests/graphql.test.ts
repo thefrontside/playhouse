@@ -11,7 +11,13 @@ describe('querying the graphql API', () => {
     harness = createGraphQLAPI();
     backstageId = harness.createComponent({
       name: "backstage",
-      description: "An example of a Backstage application."
+      description: "An example of a Backstage application.",
+      'Component.owner': {
+        name: 'computer-department',
+        email: 'computer@frontside.com',
+        displayName: 'Computer Department',
+        picture: 'https://frontside.com/computers/logo.svg',
+      }
     })
   });
 
@@ -57,10 +63,10 @@ describe('querying the graphql API', () => {
   it.todo("returns null for a node that cannot be found");
   it.todo("returns null for an entity that cannot be found");
 
-  it.skip("can look up a component's owner", function* () {
+  it("can look up a component's owner", function* () {
     expect(
       yield harness.query(/* GraphQL */`
-        entity(kind: "Component", name: "www-artist") {
+        entity(kind: "Component", name: "backstage") {
           name
           ...on Component {
             lifecycle
@@ -77,13 +83,13 @@ describe('querying the graphql API', () => {
       `),
     ).toMatchObject({
       entity: {
-        name: 'www-artist',
+        name: 'backstage',
         lifecycle: 'PRODUCTION',
         owner: {
-          name: 'team-a',
-          email: 'team-a@example.com',
-          displayName: null,
-          picture: 'https://avatars.dicebear.com/api/identicon/team-a@example.com.svg?background=%23fff&margin=25'
+          name: 'computer-department',
+          email: 'computer@frontside.com',
+          displayName: 'Computer Department',
+          picture: 'https://frontside.com/computers/logo.svg'
         }
       }
     });
