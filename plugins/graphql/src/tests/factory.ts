@@ -1,4 +1,4 @@
-import type { ComponentEntity, Entity } from '@backstage/catalog-model';
+import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
 import { createVertex, Graph, Seed, Vertex } from '@frontside/graphgen';
 
 
@@ -8,7 +8,7 @@ import { createGraph } from '@frontside/graphgen';
 export interface Factory {
   graph: Graph
   entities: Iterable<Entity>;
-  createComponent(preset: Partial<ComponentData>): ComponentEntity;
+  createComponent(preset: Partial<ComponentData>): string;
 }
 
 export interface ComponentData {
@@ -34,7 +34,7 @@ export function createFactory(): Factory {
                   name: faker.lorem.slug(),
                   description: faker.lorem.lines(1),
                   type: 'website',
-                  lifecycle: 'production',
+                  lifecycle: 'PRODUCTION',
                   owner: 'developers'
                 } as ComponentData;
               }
@@ -51,21 +51,7 @@ export function createFactory(): Factory {
     entities: [],
     createComponent(preset) {
       let vertex: Vertex<ComponentData> = createVertex(graph, 'Component', preset);
-      let { data } = vertex;
-      return {
-        kind: 'Component',
-        apiVersion: 'backstage.io/v1beta1',
-        metadata: {
-          name: data.name,
-          namespace: 'default',
-          description: data.description,
-        },
-        spec: {
-          type: data.type,
-          lifecycle: data.lifecycle,
-          owner: data.owner
-        }
-      }
+      return stringifyEntityRef({ kind: 'Component', name: vertex.data.name });
     }
   };
 }
