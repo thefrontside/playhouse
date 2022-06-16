@@ -54,6 +54,8 @@ describe('querying the graphql API', () => {
     },
   );
 
+  it.todo("returns null for a node that cannot be found");
+  it.todo("returns null for an entity that cannot be found");
 
   it.skip("can look up a component's owner", function* () {
     expect(
