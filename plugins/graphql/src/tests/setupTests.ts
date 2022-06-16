@@ -1,199 +1,90 @@
-import { Operation, spawn, ensure, fetch, Symbol } from 'effection';
-import { daemon, Process } from '@effection/process';
-import { Config, ConfigReader } from '@backstage/config';
-import type { JsonObject, JsonValue, JsonPrimitive } from '@backstage/types';
-import { FileHandle, mkdir, open } from 'fs/promises';
-import { dirname } from 'path';
-import { knex, Knex } from 'knex';
-import { merge } from 'lodash';
-import { backstageConfig } from './testConfig';
+import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
+import type { CatalogApi } from '../app/types';
+import type { JsonObject } from '@backstage/types';
+import type { Operation } from 'effection';
+
+import { PromiseOrValue } from '@envelop/core';
+import { createApp } from '..';
+
+import { Graph, Factory, createFactory } from './factory';
+
+export type { Graph } from './factory';
 
 export interface GraphQLAPI {
   query(query: string): Operation<JsonObject>;
 }
 
-export interface BackstageOptions {
-  log?: boolean | ProcessLog;
-  config?: JsonObject;
-}
+export type GraphQLHarness = GraphQLAPI & Factory;
 
-export function createBackstage(
-  options: BackstageOptions = {},
-): Operation<GraphQLAPI> {
-  const { log = false } = options;
-  const reader = new ConfigReader(merge(backstageConfig, options.config ?? {}));
-  const baseUrl = reader.getString('backend.baseUrl');
-  return {
-    name: 'backstage server',
-    labels: { baseUrl },
-    *init() {
-      const { JEST_WORKER_ID, ...env } = process.env;
-      const proc: Process = yield daemon('yarn --cwd ../.. start-backend', {
-        env: {
-          ...env,
-          NODE_ENV: 'development',
-          ...configToEnv(reader),
-        } as Record<string, string>,
-      });
+export function createGraphQLAPI(): GraphQLHarness {
+  let factory = createFactory();
+  let app = createApp(createSimulatedCatalog(factory.graph));
 
-      yield spawn(
-        proc.stdout.lines().forEach(function* (line) {
-          if (line.match(/failed to start/)) {
-            throw new Error(line);
-          }
-        }),
-      );
-
-      if (log) {
-        yield spawn({
-          name: 'stdout.log',
-          expand: false,
-          [Symbol.operation]: proc.stdout.forEach(function* (buffer) {
-            const data = String(buffer);
-            if (log === true) {
-              console.log(data);
-            } else {
-              yield log.out(data);
-            }
-          }),
-        });
-        yield spawn({
-          name: 'stderr.log',
-          expand: false,
-          [Symbol.operation]: proc.stderr.forEach(function* (buffer) {
-            const data = String(buffer);
-            if (log === true) {
-              console.log(data);
-            } else {
-              yield log.out(data);
-            }
-          }),
-        });
+  function query(query: string): Operation<JsonObject> {
+    return function* Query() {
+      const { parse, validate, contextFactory, execute, schema } = app();
+      let document = parse(`{ ${query} }`);
+      let errors = validate(schema, document);
+      if (errors.length) {
+        throw errors[0];
       }
+      let contextValue = yield* unwrap(contextFactory());
 
-      yield proc.stdout
-        .lines()
-        .grep(/Listening on/)
-        .first();
-
-      return {
-        *query(query) {
-          const result = yield fetch(`${baseUrl}/api/graphql`, {
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            method: 'POST',
-            body: JSON.stringify({ query: `{${query}}` }),
-          }).json();
-          if (result.errors && result.errors.length > 0) {
-            throw new Error(JSON.stringify(result.errors, null, 2));
-          }
-          return result.data;
-        },
-      };
-    },
-  };
-}
-
-function configToEnv(config: Config): Record<string, string> {
-  function collect(
-    data: JsonValue,
-    path: string[] = [],
-  ): Record<string, string> {
-    if (isObject(data)) {
-      return Object.entries(data).reduce((env, [key, value]) => {
-        return {
-          ...env,
-          ...collect(value ?? null, path.concat(key)),
-        };
-      }, {});
-    } else if (isPrimitive(data)) {
-      return { [`APP_CONFIG_${path.join('_')}`]: String(data) };
-    } else if (Array.isArray(data)) {
-      return {
-        [`APP_CONFIG_${path.join('_')}`]: JSON.stringify(data),
-      };
+      let result = yield* unwrap(execute({
+        schema,
+        document,
+        contextValue,
+      }));
+      if (result.errors) {
+        throw result.errors[0];
+      } else {
+        return result.data as JsonObject
+      }
     }
-
-    return {};
   }
-  return collect(config.get());
+  return { ...factory, query };
 }
 
-function isPrimitive(json: JsonValue): json is JsonPrimitive {
-  // eslint-disable-next-line eqeqeq
-  return json == null || typeof json !== 'object';
-}
-
-function isObject(json: JsonValue): json is JsonObject {
-  // eslint-disable-next-line eqeqeq
-  return json != null && !Array.isArray(json) && typeof json === 'object';
-}
-
-export interface ProcessLog {
-  out(data: string): Operation<void>;
-  err(data: string): Operation<void>;
-}
-
-export interface ProcessLogOptions {
-  name?: string;
-  path: string;
-}
-
-export function createProcessLog({
-  name,
-  path,
-}: ProcessLogOptions): Operation<ProcessLog> {
-  const outFilename = `${path}.out.log`;
-  const errFilename = `${path}.err.log`;
-
+export function createSimulatedCatalog(graph: Graph): CatalogApi {
   return {
-    name: name ?? 'Process Log',
-    labels: { path, out: outFilename, err: errFilename, expand: false },
-    *init() {
-      yield mkdir(dirname(path), { recursive: true });
-      const out: FileHandle = yield open(outFilename, 'w');
-      yield ensure(() => out.close());
+    async getEntityByRef(ref: string) {
+      for (let vertex of Object.values(graph.vertices)) {
+        const { data } = vertex;
+        let cmp = stringifyEntityRef({
+          kind: vertex.type,
+          name: data.name
+        });
 
-      const err: FileHandle = yield open(errFilename, 'w');
-      yield ensure(() => err.close());
-
-      return {
-        out: data => out.write(data).then(() => undefined),
-        err: data => err.write(data).then(() => undefined),
-      };
-    },
+        if (ref === cmp) {
+          return {
+            kind: vertex.type,
+            apiVersion: 'backstage.io/v1beta1',
+            metadata: {
+              name: data.name,
+              namespace: 'default',
+              description: data.description,
+            },
+            spec: {
+              type: data.type,
+              lifecycle: data.lifecycle,
+              owner: data.owner,
+            },
+          } as Entity
+        }
+      }
+      return void 0;
+    }
   };
 }
 
-export function createTestLog(): Operation<ProcessLog> {
-  const test = expect.getState().currentTestName;
-  return createProcessLog({
-    name: 'Test Log',
-    path: `logs/${filenamify(test)}`,
-  });
+function isPromise<T>(x: PromiseOrValue<T>): x is Promise<T> {
+  return typeof (x as Promise<T>).then === 'function';
 }
 
-function filenamify(unsafe: string): string {
-  return unsafe.replace(/\s/g, '-');
-}
-
-export function* clearTestDatabases(config: JsonObject): Operation<void> {
-  const reader = new ConfigReader(config);
-  const dbconfig = reader.get('backend.database');
-  const prefix = reader.getString('backend.database.prefix');
-  const connection = knex(dbconfig as Knex.Config);
-  try {
-    const result = yield connection.raw(`
-SELECT datname
-FROM pg_catalog.pg_database
-WHERE datname LIKE '${prefix}%'
-`);
-    for (const row of result.rows) {
-      yield connection.raw(`DROP DATABASE "${row.datname}"`);
-    }
-  } finally {
-    yield connection.destroy();
+function* unwrap<T>(promiseOrValue: PromiseOrValue<T> | Operation<T>): {[Symbol.iterator](): Iterator<Operation<T>, T, any> } {
+  if (isPromise(promiseOrValue)) {
+    return yield promiseOrValue;
+  } else {
+    return promiseOrValue;
   }
 }
