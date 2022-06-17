@@ -1,4 +1,4 @@
-import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
+import { Entity, EntityRelation, stringifyEntityRef } from '@backstage/catalog-model';
 import type { CatalogApi } from '../app/types';
 import type { JsonObject } from '@backstage/types';
 import type { Operation } from 'effection';
@@ -9,6 +9,7 @@ import { PromiseOrValue } from '@envelop/core';
 import { createApp } from '..';
 
 import { Graph, Factory, createFactory } from './factory';
+import { Vertex } from '@frontside/graphgen';
 
 export type { Graph } from './factory';
 
@@ -81,13 +82,10 @@ export function createSimulatedCatalog(graph: Graph): CatalogApi {
                 type: data.type,
                 lifecycle: data.lifecycle,
               },
-              relations: [{
-                type: 'ownedBy',
-                targetRef: stringifyEntityRef({
-                  kind: ownerVertex.type,
-                  name: ownerData.name,
-                }),
-              }]
+              relations: [
+                relation('Component.owner', 'from', 'ownedBy', vertex, graph),
+                relation('Component.system', 'from', 'partOf', vertex, graph),
+              ],
             }
           } else if (entity.kind === 'Group') {
             return {
@@ -108,6 +106,22 @@ export function createSimulatedCatalog(graph: Graph): CatalogApi {
       return void 0;
     }
   };
+}
+
+function relation(name: string, direction: 'from' | 'to', type: string, vertex: Vertex, graph: Graph): EntityRelation {
+  let [edge] = (graph[direction][vertex.id] ?? []).filter((edge) => edge.type === name);
+  assert(edge, `unable to find edge ${direction} ${vertex.type}`);
+
+  let target = graph.vertices[edge[direction === 'from' ? 'to' : 'from']];
+  assert(target, "dangling edge");
+
+  return {
+    type,
+    targetRef: stringifyEntityRef({
+      kind: target.type,
+      name: target.data.name,
+    })
+  }
 }
 
 function isPromise<T>(x: PromiseOrValue<T>): x is Promise<T> {

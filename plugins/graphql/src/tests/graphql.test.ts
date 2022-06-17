@@ -1,6 +1,6 @@
 /* eslint-disable func-names */
 /* eslint-disable jest/no-standalone-expect */
-import { stringifyEntityRef } from '@backstage/catalog-model';
+
 import { describe, beforeAll, it } from '@effection/jest';
 import { createGraphQLAPI, GraphQLHarness } from './setupTests';
 
@@ -17,6 +17,9 @@ describe('querying the graphql API', () => {
         email: 'computer@frontside.com',
         displayName: 'Computer Department',
         picture: 'https://frontside.com/computers/logo.svg',
+      },
+      'Component.system': {
+        name: 'oriental-plastic-tuna',
       }
     })
   });
@@ -95,10 +98,10 @@ describe('querying the graphql API', () => {
     });
   });
 
-  it.skip("can look up which system component belongs to", function* () {
+  it("can look up which system component belongs to", function* () {
     expect(
       yield harness.query(/* GraphQL */`
-        entity(kind: "Component", name: "www-artist") {
+        entity(kind: "Component", name: "backstage") {
           ...on Component {
             lifecycle
             system {
@@ -111,7 +114,7 @@ describe('querying the graphql API', () => {
     ).toMatchObject({
       entity: {
         lifecycle: 'PRODUCTION',
-        system: { name: 'artist-engagement-portal', description: 'Everything related to artists' }
+        system: { name: 'oriental-plastic-tuna', description: 'Everything related to Oriental Plastic Tuna' }
       }
     });
   });
