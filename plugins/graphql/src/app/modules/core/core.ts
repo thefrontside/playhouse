@@ -1,7 +1,8 @@
 import { resolvePackagePath } from '@backstage/backend-common';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { createModule } from 'graphql-modules';
-import { ResolverContext, resolveType } from '../../resolver';
+import { resolveType } from '../../resolver';
+import type { ResolverContext } from '../../types';
 
 export const Core = createModule({
   id: 'core',
