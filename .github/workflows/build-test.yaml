@@ -11,15 +11,5 @@ jobs:
       with:
         cache: 'yarn'
     - run: yarn install --frozen-lockfile # optional, --immutable
-  
-  build:
-    needs: install
-    runs-on: ubuntu-latest
-    steps:
     - run: yarn build
-  
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
     - run: yarn test
