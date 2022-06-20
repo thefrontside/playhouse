@@ -3,7 +3,7 @@ import type { CatalogApi } from '../app/types';
 import type { JsonObject } from '@backstage/types';
 import type { Operation } from 'effection';
 
-import assert from 'assert/strict';
+import { strict as assert } from 'assert';
 
 import { PromiseOrValue } from '@envelop/core';
 import { createApp } from '..';
@@ -73,8 +73,6 @@ export function createSimulatedCatalog(graph: Graph): CatalogApi {
             assert(ownerEdge, "every Component must have an owner");
             let ownerVertex = graph.vertices[ownerEdge.to];
             assert(ownerVertex, "every Component must have an owner");
-
-            let ownerData = ownerVertex.data;
 
             return {
               ...entity,
