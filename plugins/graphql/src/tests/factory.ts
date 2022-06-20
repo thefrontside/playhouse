@@ -35,7 +35,7 @@ export function createFactory(seed: string = 'factory'): Factory {
                   type: 'website',
                   lifecycle: 'production',
                   owner: 'developers'
-                } as ComponentData;
+                };
               }
             }
           },
