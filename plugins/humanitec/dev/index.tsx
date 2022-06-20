@@ -1,11 +1,11 @@
 import React from 'react';
 import { createDevApp } from '@backstage/dev-utils';
-import { humanitecPlugin, HumanitecPage } from '../src/plugin';
+import { humanitecPlugin } from '../src/plugin';
 
 createDevApp()
   .registerPlugin(humanitecPlugin)
   .addPage({
-    element: <HumanitecPage />,
+    element: <></>,
     title: 'Root Page',
     path: '/humanitec'
   })
