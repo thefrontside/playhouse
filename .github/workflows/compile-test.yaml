@@ -1,4 +1,4 @@
-name: Build and Test
+name: Compile and Test
 
 on: push
 
@@ -11,5 +11,5 @@ jobs:
       with:
         cache: 'yarn'
     - run: yarn install --frozen-lockfile # optional, --immutable
-    - run: yarn build
+    - run: yarn tsc
     - run: yarn test
