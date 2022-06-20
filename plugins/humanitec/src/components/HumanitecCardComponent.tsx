@@ -31,8 +31,6 @@ export function HumanitecCardComponent({ }: HumanitecCardComponentProps) {
 
   const classes = useStyles();
 
-  console.log(data)
-
   let content: ReactNode = null;
   if (Array.isArray(data)) {
     content = (
