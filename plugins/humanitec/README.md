@@ -1,43 +1,38 @@
 # @frontside/backstage-plugin-humanitec
 
-`@frontside/backstage-plugin-humanitec` is a work-in-progress plugin for the backstage frontend. It will display all of the different environments plus its pods and external dependencies of the workloads you specify.
+`@frontside/backstage-plugin-humanitec` is a plugin for the Backstage frontend app. It shows information about environments, workloads and resources on an entity page.
+
+![screenshot](./screenshot.png)
+
+## Requirements
+
+This plugin requires `@frontside/backstage-plugin-humanitec-backend` because it connects to the backend to make requests to the Humanitec API.
 
 ## Installation
 
-First install the plugin to your backstage app:
-```
-yarn workspace app @frontside/backstage-plugin-humanitec
-```
+First, install the plugin to your backstage app:
 
-Import `HumanitecPage` and add it as a route (`./packages/app/src/App.tsx`):
-```diff
-+ import { HumanitecPage } from '@frontside/backstage-plugin-humanitec';
-...
-const routes = (
-  <FlatRoutes>
-    ...
-+   <Route path="/humanitec" element={<HumanitecPage />}/>
-  </FlatRoutes>
-)
+```bash
+yarn workspace app add @frontside/backstage-plugin-humanitec
 ```
 
 Then in your Entity Page (`./packages/app/src/components/catalog/EntityPage.tsx`) add the `HumanitecCardComponent`:
+
 ```diff
 + import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 ...
 const overviewContent = (
   <Grid container>
     ...
-+   <Grid item>
++   <Grid item md={6}>
 +     <HumanitecCardComponent />
 +   </Grid>
   </Grid>
 )
 ```
 
-> This will create a Humanitec section for all of your Backstage `Components`. This is just a temporary solution; we'll eventually create a separate page for Humanitec components.
+Add annotations to types that have Humanitec apps display:
 
-Create a yaml file to specify the workloads you want to display:
 ```yaml
 # ./catalog-humanitec-workloads.yaml
 apiVersion: backstage.io/v1alpha1
@@ -54,17 +49,12 @@ spec:
   lifecycle: experimental
 ```
 
-Lastly in your `./app-config.yaml`, add the proxy for `humanitec` and create a new catalog locations entry for the file you just created:
+Lastly in your `./app-config.yaml`, add configuration to `humanitec`:
+
 ```diff
-proxy:
-+  '/humanitec':
-+    target: 'https://api.humanitec.io'
-+    headers:
-+      Authorization: ${HUMANITEC_TOKEN}
-catalog:
-  locations:
-+    - type: file
-+      target: ../../catalog-humanitec-workloads.yaml
+humanitec:
+  orgId: my-humanitec-organization
+  token: ${HUMANITEC_TOKEN} # without Bearer
 ```
 
 When you start your backstage app be sure to pass in `HUMANITEC_TOKEN` that you must generate from your Humanitec dashboard.

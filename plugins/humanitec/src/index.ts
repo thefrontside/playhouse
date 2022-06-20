@@ -1,2 +1,2 @@
-export { humanitecPlugin, HumanitecPage } from './plugin';
+export { humanitecPlugin } from './plugin';
 export { HumanitecCardComponent } from './components/HumanitecCardComponent';
