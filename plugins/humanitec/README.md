@@ -4,6 +4,10 @@
 
 ![screenshot](./screenshot.png)
 
+## Requirements
+
+This plugin requires `@frontside/backstage-plugin-humanitec-backend` because it connects to the backend to make requests to the Humanitec API.
+
 ## Installation
 
 First, install the plugin to your backstage app:
