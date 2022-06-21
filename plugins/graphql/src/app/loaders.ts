@@ -8,24 +8,10 @@ export interface LoaderOptions {
 }
 
 export function createLoader({ catalog }: LoaderOptions): Loader {
-  return new DataLoader<EntityRef, Entity>(async function fetch(refs): Promise<Array<Entity | Error>> {
-    let entities: (Entity | Error)[] = [];
-
-    for (let ref of refs) {
-      try {
-        let entity = await catalog.getEntityByRef(ref);
-        if (entity) {
-          entities.push(entity);
-          continue;
-        }
-        entities.push(new EnvelopError(`no such node with ref: '${ref}'`))
-      } catch (e) {
-        if (e instanceof Error) {
-          entities.push(e);
-        }
-      }
-    }
-
-    return entities;
+  return new DataLoader<EntityRef, Entity>(function fetch(refs): Promise<Array<Entity | Error>> {
+    return Promise.all(refs.map(async ref => {
+      let entity = await catalog.getEntityByRef(ref);
+      return entity ?? new EnvelopError(`no such node with ref: '${ref}'`);
+    }));
   });
 }
