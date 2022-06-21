@@ -1,41 +1,31 @@
-import type { CatalogApi, Loader } from './types';
-import { Entity, CompoundEntityRef } from '@backstage/catalog-model';
-import Dataloader from 'dataloader';
-
-type EntityRef = string | CompoundEntityRef
+import type { CatalogApi, EntityRef, Loader } from './types';
+import { Entity } from '@backstage/catalog-model';
+import DataLoader from 'dataloader';
+import { EnvelopError } from '@envelop/core';
 
 export interface LoaderOptions {
   catalog: CatalogApi;
 }
 
 export function createLoader({ catalog }: LoaderOptions): Loader {
-  async function fetch(refs: readonly EntityRef[]): Promise<Array<Entity | Error>> {
-    return Promise.all(
-      refs.map(async (ref) => {
-        return catalog.getEntityByRef(ref).then(entity => {
-          if (entity) {
-            return entity;
-          }
-          return new Error(`no such node with ref: '${ref}'`);
-        });
-      }),
-    );
-  }
+  return new DataLoader<EntityRef, Entity>(async function fetch(refs): Promise<Array<Entity | Error>> {
+    let entities: (Entity | Error)[] = [];
 
-  const dataloader = new Dataloader<EntityRef, Entity>(fetch);
+    for (let ref of refs) {
+      try {
+        let entity = await catalog.getEntityByRef(ref);
+        if (entity) {
+          entities.push(entity);
+          continue;
+        }
+        entities.push(new EnvelopError(`no such node with ref: '${ref}'`))
+      } catch (e) {
+        if (e instanceof Error) {
+          entities.push(e);
+        }
+      }
+    }
 
-  async function load(ref: EntityRef): Promise<Entity | null> {
-    const [node] = await loadMany([ref]);
-    return node;
-  }
-
-  async function loadMany(refs: EntityRef[]): Promise<Array<Entity | null>> {
-    const entities = await dataloader.loadMany(refs);
-    return entities.map(entity => entity instanceof Error ? null : entity);
-  }
-
-  return {
-    load,
-    loadMany,
-  };
+    return entities;
+  });
 }
