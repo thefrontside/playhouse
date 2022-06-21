@@ -1,14 +1,14 @@
 import type { CatalogApi as Client } from '@backstage/catalog-client';
-import type { Entity } from '@backstage/catalog-model';
+import type { CompoundEntityRef, Entity } from '@backstage/catalog-model';
+import DataLoader from 'dataloader';
+
+export type EntityRef = string | CompoundEntityRef
+
+export type Loader = DataLoader<EntityRef, Entity>;
 
 export interface ResolverContext {
   loader: Loader
   catalog: CatalogApi
-}
-
-export interface Loader {
-  load(id: string): Promise<Entity | null>;
-  loadMany(ids: string[]): Promise<Array<Entity | null>>;
 }
 
 export type CatalogApi = Pick<Client, "getEntityByRef">;
