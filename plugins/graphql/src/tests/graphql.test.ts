@@ -20,7 +20,10 @@ describe('querying the graphql API', () => {
       },
       'Component.system': {
         name: 'oriental-plastic-tuna',
-      }
+      },
+      'Component.subComponents': [{
+        name: 'lighting'
+      }]
     })
   });
 
@@ -119,10 +122,10 @@ describe('querying the graphql API', () => {
     });
   });
 
-  it.skip("looks up component's parts", function* () {
+  it("looks up component's parts", function* () {
     expect(
       yield harness.query(/* GraphQL */`
-        entity(kind: "Component", name: "wayback-archive") {
+        entity(kind: "Component", name: "backstage") {
           name
           ...on Component {
             subComponents { name }
@@ -131,16 +134,16 @@ describe('querying the graphql API', () => {
       `),
     ).toMatchObject({
       entity: {
-        name: 'wayback-archive',
-        subComponents: [{ name: 'wayback-archive-ingestion' }, { name: 'wayback-archive-storage' }]
+        name: 'backstage',
+        subComponents: [{ name: 'lighting' }]
       }
     });
   });
 
-  it.skip("looks up component's apis", function* () {
+  it("looks up component's apis", function* () {
     expect(
       yield harness.query(/* GraphQL */`
-        entity(kind: "Component", name: "wayback-search") {
+        entity(kind: "Component", name: "backstage") {
           name
           ...on Component {
             providesApi { name }
@@ -150,9 +153,9 @@ describe('querying the graphql API', () => {
       `),
     ).toMatchObject({
       entity: {
-        name: 'wayback-search',
-        providesApi: [{ name: 'wayback-search' }],
-        consumesApi: [{ name: 'wayback-archive' }]
+        name: 'backstage',
+        providesApi: [{ name: 'rerum-fugiat' }],
+        consumesApi: [{ name: 'repellat-sed' }]
       }
     });
   });
