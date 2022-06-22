@@ -83,6 +83,9 @@ export function createSimulatedCatalog(graph: Graph): CatalogApi {
               relations: [
                 relation('Component.owner', 'from', 'ownedBy', vertex, graph),
                 relation('Component.system', 'from', 'partOf', vertex, graph),
+                relation('Component.subComponents', 'from', 'hasPart', vertex, graph),
+                relation('Component.consumes', 'from', 'consumesApi', vertex, graph),
+                relation('Component.provides', 'from', 'providesApi', vertex, graph),
               ],
             }
           } else if (entity.kind === 'Group') {
@@ -95,6 +98,14 @@ export function createSimulatedCatalog(graph: Graph): CatalogApi {
                   picture: vertex.data.picture,
                 }
               }
+            }
+          } else if (entity.kind === 'API') {
+            return {
+              ...entity,
+              relations: [
+                relation('Component.consumes', 'to', 'apiConsumedBy', vertex, graph),
+                relation('Component.provides', 'to', 'apiProvidedBy', vertex, graph),
+              ]
             }
           } else {
             return entity;
