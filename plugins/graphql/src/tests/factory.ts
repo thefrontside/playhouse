@@ -1,5 +1,5 @@
 import { stringifyEntityRef } from '@backstage/catalog-model';
-import { createVertex, Graph, Seed, Vertex, constant, seedrandom } from '@frontside/graphgen';
+import { createVertex, Graph, Seed, Vertex, constant, seedrandom, normal } from '@frontside/graphgen';
 
 import { faker as globalFaker, Faker } from '@faker-js/faker';
 import { createGraph } from '@frontside/graphgen';
@@ -16,6 +16,13 @@ export interface ComponentData {
   lifecycle: string;
   ['Component.owner']: Record<string, unknown>;
   ['Component.system']: Record<string, unknown>;
+  ['Component.subComponents']: Partial<ComponentData>[];
+  ['Component.consumes']: Partial<APIData>[];
+  ['Component.provides']: Partial<APIData>[];
+}
+
+export interface APIData {
+  name: string;
 }
 
 export function createFactory(seed: string = 'factory'): Factory {
@@ -49,6 +56,19 @@ export function createFactory(seed: string = 'factory'): Factory {
             direction: 'from',
             size: constant(1),
             affinity: 0.2,
+          }, {
+            type: 'Component.subComponents',
+            direction: 'from',
+            size: normal({ min: 0, max: 3, standardDeviation: 1, mean: 2 }),
+            affinity: 0.2
+          }, {
+            type: 'Component.provides',
+            direction: 'from',
+            size: normal({ min: 0, max: 3, standardDeviation: 1, mean: 2 }),
+          }, {
+            type: 'Component.consumes',
+            direction: 'from',
+            size: normal({ min: 0, max: 3, standardDeviation: 1, mean: 2 }),
           }]
         }, {
           name: 'Group',
@@ -88,6 +108,30 @@ export function createFactory(seed: string = 'factory'): Factory {
             }
           },
           relationships: [],
+        }, {
+          name: 'API',
+          data() {
+            return {
+              description: 'create an API',
+              sample(seed) {
+                let faker = createFaker(seed);
+                return {
+                  name: faker.lorem.slug(2)
+                }
+              }
+            }
+          },
+          relationships: [{
+            type: 'Component.consumes',
+            direction: 'to',
+            size: normal({ min: 0, max: 3, standardDeviation: 1, mean: 2 }),
+            affinity: 0.2
+          }, {
+            type: 'Component.provides',
+            direction: 'to',
+            size: normal({ min: 0, max: 3, standardDeviation: 1, mean: 2 }),
+            affinity: 0.2
+          }]
         }
       ],
       edge: [
@@ -99,6 +143,18 @@ export function createFactory(seed: string = 'factory'): Factory {
           name: 'Component.system',
           from: 'Component',
           to: 'System',
+        }, {
+          name: 'Component.subComponents',
+          from: 'Component',
+          to: 'Component'
+        }, {
+          name: 'Component.provides',
+          from: 'Component',
+          to: 'API',
+        }, {
+          name: 'Component.consumes',
+          from: 'Component',
+          to: 'API',
         }
       ]
     },
