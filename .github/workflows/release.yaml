@@ -15,6 +15,8 @@ jobs:
       with:
         registry-url: https://registry.npmjs.org
     - uses: thefrontside/actions/synchronize-with-npm@v2
+      with:
+        INSTALL_SCRIPT: yarn install --frozen-lockfile && yarn tsc && yarn build
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
