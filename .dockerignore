@@ -12,4 +12,7 @@ packages/backend/package.json
 packages/backend/readme.md
 packages/backend/.eslintrc.js
 
+packages/*/src
+packages/*/node_modules
 plugins
+*.local.yaml

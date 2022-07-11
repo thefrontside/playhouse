@@ -1,4 +1,3 @@
-import { Duration } from 'luxon'
 import { useHotCleanup } from '@backstage/backend-common';
 import { createRouter } from '@backstage/plugin-search-backend';
 import {
@@ -21,9 +20,9 @@ export default async function createPlugin({
   const searchEngine = new LunrSearchEngine({ logger });
   const indexBuilder = new IndexBuilder({ logger, searchEngine });
   const schedule = env.scheduler.createScheduledTaskRunner({
-      frequency: Duration.fromObject({ minutes: 10 }),
-      timeout: Duration.fromObject({ minutes: 15 }),
-      initialDelay: Duration.fromObject({ seconds: 3 }),
+    frequency: { minutes: 10 },
+    timeout: { minutes: 15 },
+    initialDelay: { seconds: 3 },
     });
 
   // Collators are responsible for gathering documents known to plugins. This
