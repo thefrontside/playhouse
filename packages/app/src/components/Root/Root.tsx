@@ -32,7 +32,6 @@ import {
   Sidebar,
   SidebarPage,
   sidebarConfig,
-  SidebarContext,
   SidebarItem,
   SidebarDivider,
   SidebarSpace,
