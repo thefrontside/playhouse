@@ -57,7 +57,7 @@ const useSidebarLogoStyles = makeStyles({
 
 const SidebarLogo = () => {
   const classes = useSidebarLogoStyles();
-  const { isOpen } = useSidebarOpenState;
+  const { isOpen } = useSidebarOpenState();
 
   return (
     <div className={classes.root}>
