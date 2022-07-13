@@ -1,0 +1,7 @@
+# @frontside/backstage-plugin-humanitec-common
+
+## 0.1.1
+
+### Patch Changes
+
+- 0fc9f4f: Introducing a @frontside/backstage-plugin-humanitec-common package
