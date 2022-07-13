@@ -1,10 +1,10 @@
 import { CatalogClient } from '@backstage/catalog-client';
-import { createBuiltinActions, createRouter } from '@backstage/plugin-scaffolder-backend';
-import { Router } from 'express';
-import type { PluginEnvironment } from '../types';
 import { ScmIntegrations } from '@backstage/integration';
+import { createBuiltinActions, createRouter } from '@backstage/plugin-scaffolder-backend';
 import { createHumanitecApp } from "@frontside/backstage-plugin-humanitec-backend";
+import { Router } from 'express';
 import { createGetEnvironmentAction } from '../actions/get-environment';
+import type { PluginEnvironment } from '../types';
 
 export default async function createPlugin({
   logger,

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useApi, configApiRef, discoveryApiRef } from '@backstage/core-plugin-api';
+import { configApiRef, discoveryApiRef, useApi } from '@backstage/core-plugin-api';
 import type { FetchAppInfoResponse } from '@frontside/backstage-plugin-humanitec-common';
+import { useEffect, useState } from 'react';
 import { HUMANITEC_MISSING_ANNOTATION_ERROR } from '../annotations';
 
 export function useAppInfo({ appId, orgId }: { appId: string; orgId: string }) {

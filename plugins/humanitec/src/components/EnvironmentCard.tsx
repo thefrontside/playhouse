@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
+import type { FetchAppInfoEnvironment } from '@frontside/backstage-plugin-humanitec-common';
 import {
   Box,
-  Typography,
+  Typography
 } from '@material-ui/core';
-import type { FetchAppInfoEnvironment } from '@frontside/backstage-plugin-humanitec-backend';
+import React, { useCallback } from 'react';
 import { useStyles } from '../hooks/useStyles';
 import { DeploymentStatus } from './DeploymentStatus';
 

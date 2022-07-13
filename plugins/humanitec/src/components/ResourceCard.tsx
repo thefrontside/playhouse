@@ -1,7 +1,7 @@
-import React from 'react';
+import type { FetchAppInfoEnvironment } from '@frontside/backstage-plugin-humanitec-common';
 import { Box, Typography } from '@material-ui/core';
+import React from 'react';
 import { useStyles } from '../hooks/useStyles';
-import type { FetchAppInfoEnvironment } from '@frontside/backstage-plugin-humanitec-backend';
 
 type Resource = FetchAppInfoEnvironment['resources'][0];
 interface ResourceCardProps {

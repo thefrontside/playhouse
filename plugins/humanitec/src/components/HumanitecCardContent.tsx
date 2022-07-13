@@ -1,16 +1,15 @@
-import React from 'react';
+import type { FetchAppInfoResponse } from '@frontside/backstage-plugin-humanitec-common';
 import {
-  Typography,
-  LinearProgress
+  LinearProgress, Typography
 } from '@material-ui/core';
 import get from 'lodash.get';
-import { CardContainer } from './CardContainer';
-import { WorkloadCard } from './WorkloadCard';
-import { ResourceCard } from './ResourceCard';
-import type { FetchAppInfoResponse } from '@frontside/backstage-plugin-humanitec-backend';
+import React from 'react';
 import { HumanitecParamsActions } from '../hooks/useHumanitecParams';
 import { useStyles } from '../hooks/useStyles';
+import { CardContainer } from './CardContainer';
 import { EnvironmentCard } from './EnvironmentCard';
+import { ResourceCard } from './ResourceCard';
+import { WorkloadCard } from './WorkloadCard';
 
 interface HumanitecCardContentProps {
   environments: FetchAppInfoResponse;

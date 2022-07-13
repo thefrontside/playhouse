@@ -1,6 +1,6 @@
-import React from 'react';
+import type { FetchAppInfoEnvironment } from '@frontside/backstage-plugin-humanitec-common';
 import { Typography } from '@material-ui/core';
-import type { FetchAppInfoEnvironment } from '@frontside/backstage-plugin-humanitec-backend';
+import React from 'react';
 import { useStyles } from '../hooks/useStyles';
 
 export function DeploymentStatus({ env }: { env: FetchAppInfoEnvironment; }) {

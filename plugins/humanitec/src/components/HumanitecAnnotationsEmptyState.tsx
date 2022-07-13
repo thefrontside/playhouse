@@ -1,7 +1,7 @@
+import { CodeSnippet } from '@backstage/core-components';
 import { BackstageTheme } from '@backstage/theme';
 import { makeStyles, Typography } from '@material-ui/core';
 import React from 'react';
-import { CodeSnippet } from '@backstage/core-components';
 import { HUMANITEC_APP_ID_ANNOTATION, HUMANITEC_ORG_ID_ANNOTATION } from '../annotations';
 
 const ENTITY_YAML = `metadata:

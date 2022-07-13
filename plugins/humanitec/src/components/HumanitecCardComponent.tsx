@@ -1,16 +1,16 @@
-import React, { ReactNode } from 'react';
 import { useEntity } from '@backstage/plugin-catalog-react';
+import { Button, Card, CardContent, Divider } from '@material-ui/core';
+import CardHeader from '@material-ui/core/CardHeader';
+import React, { ReactNode } from 'react';
+import { HUMANITEC_APP_ID_ANNOTATION, HUMANITEC_MISSING_ANNOTATION_ERROR, HUMANITEC_ORG_ID_ANNOTATION } from '../annotations';
 import { useAppInfo } from '../hooks/useAppInfo';
-import { HumanitecAnnotationedEntity } from '../types';
 import { useHumanitecParams } from '../hooks/useHumanitecParams';
 import { useStyles } from '../hooks/useStyles';
-import CardHeader from '@material-ui/core/CardHeader';
-import { Button, Card, CardContent, Divider } from '@material-ui/core';
-import { HumanitecLogoIcon } from './HumanitecLogoIcon';
-import { HUMANITEC_APP_ID_ANNOTATION, HUMANITEC_MISSING_ANNOTATION_ERROR, HUMANITEC_ORG_ID_ANNOTATION } from '../annotations';
-import { HumanitecCardContent } from './HumanitecCardContent';
+import { HumanitecAnnotationedEntity } from '../types';
 import { HumanitecAnnotationsEmptyState } from './HumanitecAnnotationsEmptyState';
+import { HumanitecCardContent } from './HumanitecCardContent';
 import { HumanitecErrorState } from './HumanitecErrorState';
+import { HumanitecLogoIcon } from './HumanitecLogoIcon';
 
 interface HumanitecCardComponentProps {
 }
