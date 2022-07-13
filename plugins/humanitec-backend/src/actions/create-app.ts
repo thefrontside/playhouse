@@ -2,8 +2,7 @@ import { createTemplateAction } from '@backstage/plugin-scaffolder-backend';
 import { stat, readFile } from 'fs/promises';
 import { join, resolve } from 'path';
 import { loadAll } from 'js-yaml';
-import { SetupFileSchema } from '../types/create-app';
-import { createHumanitecClient } from '../clients/humanitec';
+import { SetupFileSchema, createHumanitecClient } from '@frontside/backstage-plugin-humanitec-common';
 
 interface HumanitecCreateApp {
   orgId: string;

@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
 import { useQueryParamState } from '@backstage/core-components';
+import { useCallback } from 'react';
 
 export interface HumanitecParams {
   envId?: string;
