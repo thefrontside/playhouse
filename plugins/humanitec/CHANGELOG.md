@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec
 
+## 0.2.2
+
+### Patch Changes
+
+- 3ee04fe: Nothing changed, just experimenting with preview publish
+
 ## 0.2.1
 
 ### Patch Changes
