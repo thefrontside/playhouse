@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.2.2
+
+### Patch Changes
+
+- 3ee04fe: Nothing changed, just experimenting with preview publish
+- Updated dependencies [3ee04fe]
+  - @frontside/backstage-plugin-humanitec-common@0.1.2
+
 ## 0.2.1
 
 ### Patch Changes
