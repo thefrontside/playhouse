@@ -15,7 +15,7 @@ jobs:
         registry-url: https://registry.npmjs.org
     - uses: thefrontside/actions/publish-pr-preview@tm/change-versions-in-topological-order
       with:
-        INSTALL_SCRIPT: ls
+        INSTALL_SCRIPT: "ls && yarn install --frozen-lockfile && yarn tsc && yarn build"
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
