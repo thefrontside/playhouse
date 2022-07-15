@@ -13,9 +13,10 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         registry-url: https://registry.npmjs.org
+    - uses: mxschmitt/action-tmate@v3
     - uses: thefrontside/actions/publish-pr-preview@tm/change-versions-in-topological-order
       with:
-        INSTALL_SCRIPT: yarn install --frozen-lockfile && yarn tsc && yarn build && ls
+        INSTALL_SCRIPT: yarn install --frozen-lockfile && yarn tsc && yarn build
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
