@@ -9,7 +9,7 @@ import { strict as assert } from 'assert';
 import { PromiseOrValue } from '@envelop/core';
 import { createApp } from '..';
 
-import { Factory, World, createFactory, Component } from './factory';
+import { Factory, World, createFactory, Component, UnionOfWorld } from './factory';
 
 export interface GraphQLAPI {
   query(query: string): Operation<JsonObject>;
@@ -74,10 +74,10 @@ function *concat<T>(...iterables: Iterable<T>[]): Iterable<T> {
   }
 }
 
-export function nodeToEntity(node: Node & World[keyof World]): Entity {
-  let { name, __typename: kind } = node;
+export function nodeToEntity(node: Node & UnionOfWorld): Entity {
+  let { name } = node;
   let entity = {
-    kind,
+    kind: node.__typename,
     apiVersion: 'backstage.io/v1beta1',
     metadata: {
       name,
@@ -86,22 +86,20 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
     }
   } as Entity;
   if (node.__typename === "Component") {
-      let component = node as Node & Component;
-      let { type, lifecycle } = component;
+      let { type, lifecycle } = node;
       return {
         ...entity,
         spec: { type, lifecycle },
         relations: relations({
-          ownedBy: component.owner,
-          partOf: component.system,
-          subComponents: component.subComponents,
-          consumesApi: component.consumes,
-          providesApi: component.provides,
+          ownedBy: node.owner,
+          partOf: node.system,
+          subComponents: node.subComponents,
+          consumesApi: node.consumes,
+          providesApi: node.provides,
         }),
       }
-  } else if (kind === "Group") {
-      let group = node as World["Group"];
-      let { displayName, email, picture } = group;
+  } else if (node.__typename === "Group") {
+      let { displayName, email, picture } = node;
       return {
         ...entity,
         spec: {
@@ -112,7 +110,7 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
           }
         }
       }
-  } else if (kind === "API") {
+  } else if (node.__typename === "API") {
     let api = node as World["API"];
     return {
       ...entity,
@@ -121,10 +119,11 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
         apiProvidedBy: api.providedBy,
       })
     };
-  } else if (kind === "System") {
+  } else if (node.__typename === "System") {
     return entity;
   } else {
-    throw new Error(`don't know how to convert node: '${kind}/${node.id}' into an Entity`);
+    const { __typename: kind, id } = node as Node;
+    throw new Error(`don't know how to convert node: '${kind}/${id}' into an Entity`);
   }
 }
 

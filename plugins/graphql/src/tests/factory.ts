@@ -43,6 +43,12 @@ export interface World {
   API: API
 }
 
+export type UnionOfWorld = {
+  [K in keyof World]: {
+    __typename: K,
+  } & World[K]
+}[keyof World]
+
 export type Factory = GraphGen<World>;
 
 export function createFactory(seedName = 'factory'): Factory {
