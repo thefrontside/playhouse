@@ -1,0 +1,33 @@
+type Group {
+  name: String! @computed
+  department: String! @gen(with: "@faker/commerce.department")
+  description: String! @computed
+  displayName: String! @computed
+  email: String! @computed
+  picture: String! @gen(with: "@faker/image.business", args: [null, null, true])
+}
+
+type Component {
+  name: String @gen(with: "@faker/lorem.slug")
+  description: String! @gen(with: "@faker/lorem.lines", args: [1])
+  type: String! @computed
+  lifecycle: String! @gen(with: "@backstage/component.lifecycle")
+  owner: Group;
+  system: System;
+  subComponents: Component[];
+  consumes: API[];
+  provides: API[];
+}
+
+type System {
+  name: String! @computed
+  description: String! @computed
+  displayName: String! @gen(with: "@faker/commerce.productName")
+}
+
+type API {
+  name: String! @gen(with: "@faker/lorem.slug", args: [2])
+  description: String!
+  consumedBy: [Component] @inverse(of: "Component.consumes")
+  providedBy: Component @inverse(of: "Component.provides")
+}
