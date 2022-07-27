@@ -9,19 +9,19 @@ describe('querying the graphql API', () => {
   let backstageId: string;
   beforeAll(function* () {
     harness = createGraphQLAPI();
-    backstageId = harness.createComponent({
+    backstageId = harness.create("Component", {
       name: "backstage",
       description: "An example of a Backstage application.",
-      'Component.owner': {
+      owner: {
         name: 'computer-department',
         email: 'computer@frontside.com',
         displayName: 'Computer Department',
         picture: 'https://frontside.com/computers/logo.svg',
       },
-      'Component.system': {
+      system: {
         name: 'oriental-plastic-tuna',
       },
-      'Component.subComponents': [{
+      subComponents: [{
         name: 'lighting'
       }]
     })
