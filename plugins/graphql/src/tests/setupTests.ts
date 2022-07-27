@@ -2,16 +2,14 @@ import { Entity, EntityRelation, stringifyEntityRef } from '@backstage/catalog-m
 import type { CatalogApi } from '../app/types';
 import type { JsonObject } from '@backstage/types';
 import type { Operation } from 'effection';
+import type { Node } from '@frontside/graphgen';
 
 import { strict as assert } from 'assert';
 
 import { PromiseOrValue } from '@envelop/core';
 import { createApp } from '..';
 
-import { Graph, Factory, createFactory } from './factory';
-import { Vertex } from '@frontside/graphgen';
-
-export type { Graph } from './factory';
+import { Factory, World, createFactory, Component } from './factory';
 
 export interface GraphQLAPI {
   query(query: string): Operation<JsonObject>;
@@ -21,7 +19,7 @@ export type GraphQLHarness = GraphQLAPI & Factory;
 
 export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
-  let app = createApp(createSimulatedCatalog(factory.graph));
+  let app = createApp(createSimulatedCatalog(factory));
 
   function query(query: string): Operation<JsonObject> {
     return function* Query() {
@@ -48,89 +46,96 @@ export function createGraphQLAPI(): GraphQLHarness {
   return { ...factory, query };
 }
 
-export function createSimulatedCatalog(graph: Graph): CatalogApi {
+export function createSimulatedCatalog(factory: Factory): CatalogApi {
   return {
     async getEntityByRef(ref: string) {
-      for (let vertex of Object.values(graph.vertices)) {
-        const { data } = vertex;
-        let cmp = stringifyEntityRef({
-          kind: vertex.type,
-          name: data.name
-        });
+      let all = concat(
+        factory.all('Group'),
+        factory.all('Component'),
+        factory.all('System'),
+        factory.all('API'),
+      );
+      for (let node of all) {
+        let { __typename: kind, name } = node;
 
+        let cmp = stringifyEntityRef({ kind, name });
         if (ref === cmp) {
-          let entity = {
-            kind: vertex.type,
-            apiVersion: 'backstage.io/v1beta1',
-            metadata: {
-              name: data.name,
-              namespace: 'default',
-              description: data.description,
-            },
-          } as Entity;
-          if (entity.kind === 'Component') {
-            let [ownerEdge] = (graph.from[vertex.id] ?? []);
-            assert(ownerEdge, "every Component must have an owner");
-            let ownerVertex = graph.vertices[ownerEdge.to];
-            assert(ownerVertex, "every Component must have an owner");
-
-            return {
-              ...entity,
-              spec: {
-                type: data.type,
-                lifecycle: data.lifecycle,
-              },
-              relations: [
-                relation('Component.owner', 'from', 'ownedBy', vertex, graph),
-                relation('Component.system', 'from', 'partOf', vertex, graph),
-                relation('Component.subComponents', 'from', 'hasPart', vertex, graph),
-                relation('Component.consumes', 'from', 'consumesApi', vertex, graph),
-                relation('Component.provides', 'from', 'providesApi', vertex, graph),
-              ],
-            }
-          } else if (entity.kind === 'Group') {
-            return {
-              ...entity,
-              spec: {
-                profile: {
-                  displayName: vertex.data.displayName,
-                  email: vertex.data.email,
-                  picture: vertex.data.picture,
-                }
-              }
-            }
-          } else if (entity.kind === 'API') {
-            return {
-              ...entity,
-              relations: [
-                relation('Component.consumes', 'to', 'apiConsumedBy', vertex, graph),
-                relation('Component.provides', 'to', 'apiProvidedBy', vertex, graph),
-              ]
-            }
-          } else {
-            return entity;
-          }
+          return nodeToEntity(node);
         }
       }
       return void 0;
     }
-  };
+  }
 }
 
-function relation(name: string, direction: 'from' | 'to', type: string, vertex: Vertex, graph: Graph): EntityRelation {
-  let [edge] = (graph[direction][vertex.id] ?? []).filter((edge) => edge.type === name);
-  assert(edge, `unable to find edge ${direction} ${vertex.type}`);
-
-  let target = graph.vertices[edge[direction === 'from' ? 'to' : 'from']];
-  assert(target, "dangling edge");
-
-  return {
-    type,
-    targetRef: stringifyEntityRef({
-      kind: target.type,
-      name: target.data.name,
-    })
+function *concat<T>(...iterables: Iterable<T>[]): Iterable<T> {
+  for (let iterable of iterables) {
+    yield* iterable;
   }
+}
+
+export function nodeToEntity(node: Node & World[keyof World]): Entity {
+  let { name, __typename: kind } = node;
+  let entity = {
+    kind,
+    apiVersion: 'backstage.io/v1beta1',
+    metadata: {
+      name,
+      namepsace: 'default',
+      description: node.description,
+    }
+  } as Entity;
+  if (node.__typename === "Component") {
+      let component = node as Node & Component;
+      let { type, lifecycle } = component;
+      return {
+        ...entity,
+        spec: { type, lifecycle },
+        relations: relations({
+          ownedBy: component.owner,
+          partOf: component.system,
+          subComponents: component.subComponents,
+          consumesApi: component.consumes,
+          providesApi: component.provides,
+        }),
+      }
+  } else if (kind === "Group") {
+      let group = node as World["Group"];
+      let { displayName, email, picture } = group;
+      return {
+        ...entity,
+        spec: {
+          profile: {
+            displayName,
+            email,
+            picture,
+          }
+        }
+      }
+  } else if (kind === "API") {
+    let api = node as World["API"];
+    return {
+      ...entity,
+      relations: relations({
+        apiConsumedBy: api.consumedBy,
+        apiProvidedBy: api.providedBy,
+      })
+    };
+  } else if (kind === "System") {
+    return entity;
+  } else {
+    throw new Error(`don't know how to convert node: '${kind}/${node.id}' into an Entity`);
+  }
+}
+
+export function relations(map: Record<string, World[keyof World] | World[keyof World][]>): EntityRelation[] {
+  return Object.entries(map).reduce((relations, [type, content]) => {
+    let targets = Array.isArray(content) ? content : [content];
+    return relations.concat(targets.map(node => ({
+      type,
+      targetRef: stringifyEntityRef(nodeToEntity(node as Node & World[keyof World]))
+    })));
+  }, [] as EntityRelation[]);
 }
 
 function isPromise<T>(x: PromiseOrValue<T>): x is Promise<T> {
@@ -141,6 +146,6 @@ function* unwrap<T>(promiseOrValue: PromiseOrValue<T> | Operation<T>): {[Symbol.
   if (isPromise(promiseOrValue)) {
     return yield promiseOrValue;
   } else {
-    return promiseOrValue;
+    return promiseOrValue as T;
   }
 }
