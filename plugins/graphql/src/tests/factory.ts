@@ -6,6 +6,7 @@ import { fakergen } from './fakergen';
 import { resolvePackagePath } from '@backstage/backend-common';
 
 export interface Group {
+  __typename: "Group";
   name: string;
   description: string;
   displayName: string;
@@ -14,6 +15,7 @@ export interface Group {
 }
 
 export interface Component {
+  __typename: "Component";
   name: string;
   description: string;
   type: string;
@@ -26,12 +28,14 @@ export interface Component {
 }
 
 export interface System {
+  __typename: "System";
   name: string;
   description: string;
   displayName: string;
 }
 
 export interface API {
+  __typename: "API";
   name: string;
   description: string;
   consumedBy: Component[];
