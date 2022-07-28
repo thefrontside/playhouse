@@ -140,7 +140,11 @@ export function relations(map: Record<string, World[keyof World] | World[keyof W
     let targets = Array.isArray(content) ? content : [content];
     return relations.concat(targets.map(node => ({
       type,
-      targetRef: stringifyEntityRef(nodeToEntity(node as Node & World[keyof World]))
+      targetRef: stringifyEntityRef({
+        kind: node.__typename,
+        namespace: 'default',
+        name: node.name,
+      })
     })));
   }, [] as EntityRelation[]);
 }
