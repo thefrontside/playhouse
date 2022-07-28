@@ -1,14 +1,13 @@
-import { stringifyEntityRef } from '@backstage/catalog-model';
+import { createGraphGen, GraphGen, seedrandom } from '@frontside/graphgen';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { createGraphGen, GraphGen, seedrandom } from '@frontside/graphgen';
 import { fakergen } from './fakergen';
-import { resolvePackagePath } from '@backstage/backend-common';
 
 export interface Group {
   __typename: "Group";
   name: string;
   description: string;
+  department: string;
   displayName: string;
   email: string;
   picture: string,
@@ -54,8 +53,20 @@ export type Factory = GraphGen<World>;
 export function createFactory(seedName = 'factory'): Factory {
   return createGraphGen<World>({
     seed: seedrandom(seedName),
-    source: String(readFileSync(resolvePackagePath('@frontside/backstage-package-plugin', 'src/tests/world.graphql'))),
+    // eslint-disable-next-line no-restricted-syntax
+    source: String(readFileSync(join(__dirname, 'world.graphql'))),
     generate: fakergen,
+    compute: {
+      "Group.name": ({ department }) => `${department.toLocaleLowerCase()}-department`,
+      "Group.description": ({ department }) => `${department} Department`,
+      "Group.displayName": ({ department }) => `${department} Department`,
+      "Group.email": ({ department }) => `${department.toLowerCase()}@acme.com`,
+
+      "Component.type": () => "website",
+
+      "System.name": ({ displayName }) => displayName.toLocaleLowerCase().replace(/\s+/g, '-'),
+      "System.description": ({ displayName }) => `Everything related to ${displayName}`,
+    },
   });
 }
 

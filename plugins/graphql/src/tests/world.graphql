@@ -12,11 +12,11 @@ type Component {
   description: String! @gen(with: "@faker/lorem.lines", args: [1])
   type: String! @computed
   lifecycle: String! @gen(with: "@backstage/component.lifecycle")
-  owner: Group;
-  system: System;
-  subComponents: Component[];
-  consumes: API[];
-  provides: API[];
+  owner: Group
+  system: System
+  subComponents: [Component] @affinity(of: 0.5)
+  consumes: [API] @affinity(of: 0.5)
+  provides: [API] @affinity(of: 0.5)
 }
 
 type System {
@@ -28,6 +28,6 @@ type System {
 type API {
   name: String! @gen(with: "@faker/lorem.slug", args: [2])
   description: String!
-  consumedBy: [Component] @inverse(of: "Component.consumes")
-  providedBy: Component @inverse(of: "Component.provides")
+  consumedBy: [Component] @inverse(of: "Component.consumes") @affinity(of: 0.5)
+  providedBy: Component @inverse(of: "Component.provides") @affinity(of: 0.5)
 }
