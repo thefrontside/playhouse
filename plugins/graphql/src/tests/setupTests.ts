@@ -96,22 +96,20 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
     }
   } as Entity;
   if (node.__typename === "Component") {
-      let component = node as Node & Component;
-      let { type, lifecycle } = component;
+      let { type, lifecycle } = node;
       return {
         ...entity,
         spec: { type, lifecycle },
         relations: relations({
-          ownedBy: component.owner,
-          partOf: component.system,
-          subComponents: component.subComponents,
-          consumesApi: component.consumes,
-          providesApi: component.provides,
+          ownedBy: node.owner,
+          partOf: node.system,
+          subComponents: node.subComponents,
+          consumesApi: node.consumes,
+          providesApi: node.provides,
         }),
       }
-  } else if (kind === "Group") {
-      let group = node as World["Group"];
-      let { displayName, email, picture } = group;
+  } else if (node.__typename === "Group") {
+      let { displayName, email, picture } = node;
       return {
         ...entity,
         spec: {
@@ -122,13 +120,12 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
           }
         }
       }
-  } else if (kind === "API") {
-    let api = node as World["API"];
+  } else if (node.__typename === "API") {
     return {
       ...entity,
       relations: relations({
-        apiConsumedBy: api.consumedBy,
-        apiProvidedBy: api.providedBy,
+        apiConsumedBy: node.consumedBy,
+        apiProvidedBy: node.providedBy,
       })
     };
   } else if (kind === "System") {
