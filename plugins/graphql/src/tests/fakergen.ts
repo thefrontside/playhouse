@@ -12,7 +12,9 @@ const methods = Object.entries(globalFaker).reduce((methods, [name, mod]) => {
     for (const [fn, value] of Object.entries(mod)) {
       if (typeof value === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        methods[`@faker/${name}.${fn}`] = ({ faker }: any, args: unknown[]) => faker[name][fn](...args);
+        methods[`@faker/${name}.${fn}`] = ({ faker }: any, args: unknown[]) => {
+          return faker[name][fn](...args);
+        };
       }
     }
   }
