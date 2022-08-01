@@ -7,16 +7,19 @@ type Group {
   picture: String! @gen(with: "@faker/image.business", args: [null, null, true])
 }
 
+union Container = Component | System
+
 type Component {
-  name: String @gen(with: "@faker/lorem.slug")
+  name: String! @gen(with: "@faker/lorem.slug")
   description: String! @gen(with: "@faker/lorem.lines", args: [1])
   type: String! @computed
   lifecycle: String! @gen(with: "@backstage/component.lifecycle")
-  owner: Group
-  system: System
-  subComponents: [Component] @affinity(of: 0.5)
-  consumes: [API] @affinity(of: 0.5)
-  provides: [API] @affinity(of: 0.5)
+  owner: Group!
+  partOf: [Container] @affinity(of: 0.25) @size(mean: 0.25)
+  subComponents: [Component] @affinity(of: 0.25) @size(mean: 0)
+  consumes: [API] @affinity(of: 0.1) @size(mean: 1)
+  provides: [API] @affinity(of: 0.1) @size(mean: 1)
+  dependencies: [Resource] @affinity(of: 0.1) @size(mean: 1)
 }
 
 type System {
@@ -27,7 +30,11 @@ type System {
 
 type API {
   name: String! @gen(with: "@faker/lorem.slug", args: [2])
-  description: String!
-  consumedBy: [Component] @inverse(of: "Component.consumes") @affinity(of: 0.5)
-  providedBy: Component @inverse(of: "Component.provides") @affinity(of: 0.5)
+  description: String! @gen(with: "@faker/lorem.words", args: [20])
+  consumedBy: [Component] @inverse(of: "Component.consumes") @affinity(of: 0.1) @size(mean: 3)
+  providedBy: Component! @inverse(of: "Component.provides") @affinity(of: 0.1)
+}
+
+type Resource {
+  name: String! @gen(with: "@faker/lorem.slug", args: [2])
 }

@@ -18,11 +18,22 @@ describe('querying the graphql API', () => {
         displayName: 'Computer Department',
         picture: 'https://frontside.com/computers/logo.svg',
       },
-      system: {
-        name: 'oriental-plastic-tuna',
-      },
+      partOf: [{
+        displayName: 'Oriental Plastic Tuna',
+      }, {
+        displayName: "The Internet",
+      }],
       subComponents: [{
         name: 'lighting'
+      }],
+      consumes: [{
+        name: 'github-enterprise',
+      }],
+      provides: [{
+        name: 'backstage-backend-api',
+      }],
+      dependencies: [{
+        name: 'artists-db',
       }]
     })
   });
@@ -117,7 +128,7 @@ describe('querying the graphql API', () => {
     ).toMatchObject({
       entity: {
         lifecycle: 'PRODUCTION',
-        system: { name: 'oriental-plastic-tuna', description: 'Everything related to Oriental Plastic Tuna' }
+        system: { name: 'the-internet', description: 'Everything related to The Internet' }
       }
     });
   });
@@ -154,16 +165,20 @@ describe('querying the graphql API', () => {
     ).toMatchObject({
       entity: {
         name: 'backstage',
-        providesApi: [{ name: 'rerum-fugiat' }],
-        consumesApi: [{ name: 'repellat-sed' }]
+        providesApi: expect.arrayContaining([{
+          name: 'backstage-backend-api',
+        }]),
+        consumesApi: expect.arrayContaining([{
+          name: 'github-enterprise',
+        }])
       }
     });
   });
 
-  it.skip("looks up component's dependencies", function* () {
+  it("looks up component's dependencies", function* () {
     expect(
       yield harness.query(/* GraphQL */`
-        entity(kind: "Component", name: "artist-lookup") {
+        entity(kind: "Component", name: "backstage") {
           name
           ...on Component {
             dependencies {
@@ -174,8 +189,8 @@ describe('querying the graphql API', () => {
       `),
     ).toMatchObject({
       entity: {
-        name: 'artist-lookup',
-        dependencies: [{ name: 'artists-db' }]
+        name: 'backstage',
+        dependencies: expect.arrayContaining([{ name: 'artists-db' }]),
       }
     });
   });
