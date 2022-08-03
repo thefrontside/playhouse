@@ -10,7 +10,7 @@
 yarn workspace backend add @frontside/backstage-plugin-humanitec-backend
 ```
 
-2. Create `./packages/backend/plugins/humanitec.ts` with the following content,
+2. Create `./packages/backend/src/plugins/humanitec.ts` with the following content,
 
 ```ts
 import { createRouter } from '@frontside/backstage-plugin-humanitec-backend';
