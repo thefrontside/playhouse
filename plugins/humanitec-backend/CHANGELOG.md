@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.2.4
+
+### Patch Changes
+
+- Manually publish packages
+- Updated dependencies
+  - @frontside/backstage-plugin-humanitec-common@0.1.4
+
 ## 0.2.3
 
 ### Patch Changes
