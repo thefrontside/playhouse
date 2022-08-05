@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec
 
+## 0.3.0
+
+### Minor Changes
+
+- 2837d26: Doing a minor release to show that publishing is working
+
 ## 0.2.4
 
 ### Patch Changes
