@@ -1,5 +1,13 @@
 # backend
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [2837d26]
+  - @frontside/backstage-plugin-humanitec-backend@0.3.0
+  - app@0.0.2
+
 ## 0.0.2
 
 ### Patch Changes
