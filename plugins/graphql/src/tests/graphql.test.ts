@@ -11,6 +11,7 @@ describe('querying the graphql API', () => {
     harness = createGraphQLAPI();
     backstageId = harness.create("Component", {
       name: "backstage",
+      lifecycle: "production",
       description: "An example of a Backstage application.",
       owner: {
         name: 'computer-department',
@@ -36,7 +37,14 @@ describe('querying the graphql API', () => {
         name: 'artists-db',
       }]
     })
+    harness.create("User", {
+      displayName: "Janelle Dawe"
+    })
+    let users = [...harness.all('User')];
+    console.dir({ users }, { depth: 5 });
   });
+
+
 
   it('can look up a known node by id', function* () {
     expect(
@@ -216,7 +224,7 @@ describe('querying the graphql API', () => {
     });
   });
 
-  it.skip('can look up a known user', function* () {
+  it('can look up a known user', function* () {
     expect(
       yield harness.query(/* GraphQL */`
         entity(kind: "User", name: "janelle.dawe") {
@@ -230,8 +238,8 @@ describe('querying the graphql API', () => {
     ).toMatchObject({
       entity: {
         displayName: 'Janelle Dawe',
-        email: 'janelle-dawe@example.com',
-        picture: 'https://avatars.dicebear.com/api/avataaars/janelle-dawe@example.com.svg?background=%23fff'
+        email: 'janelle.dawe@example.com',
+        picture: 'https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/247.jpg'
       }
     });
   });

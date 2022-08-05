@@ -12,6 +12,7 @@ import { Factory, World, createFactory } from './factory';
 export interface GraphQLHarness {
   query(query: string): Operation<JsonObject>;
   create(...params: Parameters<Factory["create"]>): string;
+  all(...params: Parameters<Factory["all"]>): ReturnType<Factory["all"]>;
 }
 
 
@@ -52,6 +53,7 @@ export function createGraphQLAPI(): GraphQLHarness {
         name: node.name
       });
     },
+    all: factory.all,
   };
 }
 
@@ -64,6 +66,7 @@ export function createSimulatedCatalog(factory: Factory): CatalogApi {
         factory.all('System'),
         factory.all('API'),
         factory.all('Resource'),
+        factory.all('User'),
       );
       for (let node of all) {
         let { __typename: kind, name } = node;
@@ -109,7 +112,7 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
           dependsOn: node.dependencies,
         }),
       }
-  } else if (node.__typename === "Group") {
+  } else if (node.__typename === "Group" || node.__typename === "User") {
       let { displayName, email, picture } = node;
       return {
         ...entity,

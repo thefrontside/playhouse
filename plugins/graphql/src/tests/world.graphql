@@ -1,3 +1,10 @@
+type User {
+  displayName: String! @gen(with: "@faker/name.findName")
+  email: String! @computed
+  name: String! @computed
+  picture: String! @gen(with: "@faker/internet.avatar")
+
+}
 type Group {
   name: String! @computed
   department: String! @gen(with: "@faker/commerce.department")
