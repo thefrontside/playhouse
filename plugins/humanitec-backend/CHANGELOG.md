@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.2.3
+
+### Patch Changes
+
+- bf70ff9: Fixed publishing pipeline and releasing
+- Updated dependencies [bf70ff9]
+  - @frontside/backstage-plugin-humanitec-common@0.1.3
+
 ## 0.2.2
 
 ### Patch Changes

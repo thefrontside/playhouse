@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec
 
+## 0.2.3
+
+### Patch Changes
+
+- bf70ff9: Fixed publishing pipeline and releasing
+
 ## 0.2.2
 
 ### Patch Changes
