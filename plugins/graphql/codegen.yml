@@ -2,7 +2,7 @@ overwrite: true
 schema: "src/app/modules/**/*.graphql"
 documents: null
 generates:
-  ./dist/schema.graphql:
+  ./__generated__/schema.graphql:
     plugins:
      - schema-ast
   ./src/app/modules/:
