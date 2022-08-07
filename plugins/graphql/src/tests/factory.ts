@@ -2,66 +2,13 @@ import { Generate, createGraphGen, GraphGen, weighted } from '@frontside/graphge
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fakergen } from './fakergen';
-
-export interface User {
-  __typename: "User";
-  displayName: string;
-  description: string;
-  name: string;
-  email: string;
-  picture: string;
-}
-
-export interface Group {
-  __typename: "Group";
-  name: string;
-  description: string;
-  department: string;
-  displayName: string;
-  email: string;
-  picture: string,
-}
-
-export interface Component {
-  __typename: "Component";
-  name: string;
-  description: string;
-  type: string;
-  lifecycle: string;
-  owner: Group;
-  partOf: (Component | System)[];
-  subComponents: Component[];
-  consumes: API[];
-  provides: API[];
-  dependencies: Resource[];
-}
-
-export interface System {
-  __typename: "System";
-  name: string;
-  description: string;
-  displayName: string;
-}
-
-export interface API {
-  __typename: "API";
-  name: string;
-  description: string;
-  consumedBy: Component[];
-  providedBy: Component[];
-}
-
-export interface Resource {
-  __typename: "Resource";
-  name: string;
-  description: string;
-}
+import { Component, Group, Resource, System, User, Api } from './__generated__/world.types';
 
 export interface World {
   Group: Group;
   Component: Component;
   System: System;
-  API: API;
+  Api: Api;
   Resource: Resource;
   User: User;
 }

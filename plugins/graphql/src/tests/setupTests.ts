@@ -8,6 +8,7 @@ import { PromiseOrValue } from '@envelop/core';
 import { createApp } from '..';
 
 import { Factory, World, createFactory } from './factory';
+import { Maybe } from './__generated__/world.types';
 
 export interface GraphQLHarness {
   query(query: string): Operation<JsonObject>;
@@ -64,7 +65,7 @@ export function createSimulatedCatalog(factory: Factory): CatalogApi {
         factory.all('Group'),
         factory.all('Component'),
         factory.all('System'),
-        factory.all('API'),
+        factory.all('Api'),
         factory.all('Resource'),
         factory.all('User'),
       );
@@ -81,7 +82,7 @@ export function createSimulatedCatalog(factory: Factory): CatalogApi {
   }
 }
 
-function *concat<T>(...iterables: Iterable<T>[]): Iterable<T> {
+function* concat<T>(...iterables: Iterable<T>[]): Iterable<T> {
   for (let iterable of iterables) {
     yield* iterable;
   }
@@ -100,31 +101,31 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
   } as Entity;
   if (node.__typename === "Component") {
     let { type, lifecycle } = node;
-      return {
-        ...entity,
-        spec: { type, lifecycle },
-        relations: relations({
-          ownedBy: node.owner,
-          partOf: node.partOf,
-          hasPart: node.subComponents,
-          consumesApi: node.consumes,
-          providesApi: node.provides,
-          dependsOn: node.dependencies,
-        }),
-      }
+    return {
+      ...entity,
+      spec: { type, lifecycle },
+      relations: relations({
+        ownedBy: node.owner,
+        partOf: node.partOf,
+        hasPart: node.subComponents,
+        consumesApi: node.consumes,
+        providesApi: node.provides,
+        dependsOn: node.dependencies,
+      }),
+    }
   } else if (node.__typename === "Group" || node.__typename === "User") {
-      let { displayName, email, picture } = node;
-      return {
-        ...entity,
-        spec: {
-          profile: {
-            displayName,
-            email,
-            picture,
-          }
+    let { displayName, email, picture } = node;
+    return {
+      ...entity,
+      spec: {
+        profile: {
+          displayName,
+          email,
+          picture,
         }
       }
-  } else if (node.__typename === "API") {
+    }
+  } else if (node.__typename === "Api") {
     return {
       ...entity,
       relations: relations({
@@ -139,17 +140,17 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
   }
 }
 
-export function relations(map: Record<string, World[keyof World] | World[keyof World][]>): EntityRelation[] {
+export function relations(map: Record<string, Maybe<World[keyof World] | World[keyof World][]>>): EntityRelation[] {
   return Object.entries(map).reduce((relations, [type, content]) => {
     let targets = Array.isArray(content) ? content : [content];
-    return relations.concat(targets.map(node => ({
+    return relations.concat(targets.flatMap(node => node ? [{
       type,
       targetRef: stringifyEntityRef({
         kind: node.__typename,
         namespace: 'default',
         name: node.name,
       })
-    })));
+    }] : []));
   }, [] as EntityRelation[]);
 }
 
@@ -157,7 +158,7 @@ function isPromise<T>(x: PromiseOrValue<T>): x is Promise<T> {
   return typeof (x as Promise<T>).then === 'function';
 }
 
-function* unwrap<T>(promiseOrValue: PromiseOrValue<T> | Operation<T>): {[Symbol.iterator](): Iterator<Operation<T>, T, any> } {
+function* unwrap<T>(promiseOrValue: PromiseOrValue<T> | Operation<T>): { [Symbol.iterator](): Iterator<Operation<T>, T, any> } {
   if (isPromise(promiseOrValue)) {
     return yield promiseOrValue;
   } else {

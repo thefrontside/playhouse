@@ -1,0 +1,12 @@
+schema: ./src/tests/world.graphql
+overwrite: true
+generates:
+  ./src/tests/__generated__/world.types.ts:
+    config:
+      avoidOptionals: true
+      declarationKind: 'interface'
+      nonOptionalTypename: true
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - typescript

@@ -1,10 +1,9 @@
+schema: 'src/app/modules/**/*.graphql'
 overwrite: true
-schema: "src/app/modules/**/*.graphql"
-documents: null
 generates:
   ./__generated__/schema.graphql:
     plugins:
-     - schema-ast
+      - schema-ast
   ./src/app/modules/:
     preset: graphql-modules
     presetConfig:

@@ -3,8 +3,9 @@ type User {
   email: String! @computed
   name: String! @computed
   picture: String! @gen(with: "@faker/internet.avatar")
-
+  description: String! @gen(with: "@faker/lorem.words", args: [20])
 }
+
 type Group {
   name: String! @computed
   department: String! @gen(with: "@faker/commerce.department")
@@ -22,11 +23,11 @@ type Component {
   type: String! @computed
   lifecycle: String! @gen(with: "@backstage/component.lifecycle")
   owner: Group!
-  partOf: [Container] @affinity(of: 0.25) @size(mean: 0.25)
-  subComponents: [Component] @affinity(of: 0.25) @size(mean: 0)
-  consumes: [API] @affinity(of: 0.1) @size(mean: 1)
-  provides: [API] @affinity(of: 0.1) @size(mean: 1)
-  dependencies: [Resource] @affinity(of: 0.1) @size(mean: 1)
+  partOf: [Container!] @affinity(of: 0.25) @size(mean: 0.25)
+  subComponents: [Component!] @affinity(of: 0.25) @size(mean: 0)
+  consumes: [Api!] @affinity(of: 0.1) @size(mean: 1)
+  provides: [Api!] @affinity(of: 0.1) @size(mean: 1)
+  dependencies: [Resource!] @affinity(of: 0.1) @size(mean: 1)
 }
 
 type System {
@@ -35,13 +36,14 @@ type System {
   displayName: String! @gen(with: "@faker/commerce.productName")
 }
 
-type API {
+type Api {
   name: String! @gen(with: "@faker/lorem.slug", args: [2])
   description: String! @gen(with: "@faker/lorem.words", args: [20])
-  consumedBy: [Component] @inverse(of: "Component.consumes") @affinity(of: 0.1) @size(mean: 3)
+  consumedBy: [Component!] @inverse(of: "Component.consumes") @affinity(of: 0.1) @size(mean: 3)
   providedBy: Component! @inverse(of: "Component.provides") @affinity(of: 0.1)
 }
 
 type Resource {
   name: String! @gen(with: "@faker/lorem.slug", args: [2])
+  description: String! @gen(with: "@faker/lorem.words", args: [20])
 }
