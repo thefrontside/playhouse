@@ -1,4 +1,4 @@
-import { Generate, createGraphGen, GraphGen, seedrandom, weighted } from '@frontside/graphgen';
+import { Generate, createGraphGen, GraphGen, weighted } from '@frontside/graphgen';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { fakergen } from './fakergen';
