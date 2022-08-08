@@ -34,7 +34,7 @@ export const apis: AnyApiFactory[] = [
       GraphQLEndpoints.from([
         {
           id: 'backstage-backend',
-          title: 'Backstage Backend',
+          title: 'Backstage GraphQL API',
           // we use the lower level object with a fetcher function
           // as we need to `await` the backend url for the graphql plugin
           fetcher: async (params: any) => {

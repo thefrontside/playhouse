@@ -4,6 +4,7 @@ import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { graphqlHTTP } from 'express-graphql';
 import { CatalogClient } from '@backstage/catalog-client';
+import { printSchema } from 'graphql';
 
 export interface RouterOptions {
   logger: Logger;
@@ -26,6 +27,10 @@ export async function createRouter(
   router.use((_, res, next) => {
     res.setHeader('Content-Security-Policy', "'self' http: 'unsafe-inline'");
     next();
+  });
+
+  router.get('/schema', (_, response) => {
+    response.send(printSchema(app().schema))
   });
 
   router.use('/',  graphqlHTTP(async () => {

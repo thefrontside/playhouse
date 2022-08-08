@@ -14,3 +14,18 @@ spec:
   type: website
   owner: engineering@frontside.com
   lifecycle: production
+  providesApis:
+    - backstage-graphql-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: backstage-graphql-api
+  description: GraphQL API provided by GraphQL Plugin
+spec:
+  type: graphql
+  owner: engineering@frontside.com
+  lifecycle: production
+  definition:
+    $text: http://localhost:7007/api/graphql/schema
+  
