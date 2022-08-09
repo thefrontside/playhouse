@@ -68,7 +68,7 @@
   },
   "files": [
     "dist",
-    "__generated__"
+    "src/app/modules/**/*.graphql"
   ],
   "jest": {
     "testTimeout": 15000
