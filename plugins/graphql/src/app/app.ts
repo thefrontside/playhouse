@@ -31,7 +31,9 @@ export function createApp(catalog: CatalogApi): App {
 function create(): Application {
   return createApplication({
     schemaBuilder: ({ typeDefs, resolvers }) =>
-      transform(makeExecutableSchema({ typeDefs, resolvers })),
+      transform(makeExecutableSchema({
+        typeDefs, resolvers
+      })),
     modules: [Core, Catalog],
   });
 }
