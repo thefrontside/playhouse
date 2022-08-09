@@ -1,5 +1,12 @@
 # backend
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [7f8bb2b]
+  - @frontside/backstage-plugin-graphql@0.2.0
+
 ## 0.0.3
 
 ### Patch Changes
