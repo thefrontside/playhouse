@@ -12,4 +12,5 @@ jobs:
         cache: 'yarn'
     - run: yarn install --frozen-lockfile # optional, --immutable
     - run: yarn tsc
+    - run: docker-compose up &
     - run: yarn test
