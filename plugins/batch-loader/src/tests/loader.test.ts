@@ -2,33 +2,14 @@
 /* eslint-disable jest/no-standalone-expect */
 import { describe, beforeAll, it } from '@effection/jest';
 import { DatabaseManager, getRootLogger, ServerTokenManager, SingleHostDiscovery, UrlReaders } from '@backstage/backend-common';
-import { ScaffolderEntitiesProcessor } from '@backstage/plugin-scaffolder-backend';
 import { CatalogBuilder, CatalogEnvironment } from '@backstage/plugin-catalog-backend';
 import { ServerPermissionClient } from '@backstage/plugin-permission-node';
-import {
-  ScmIntegrations,
-  DefaultGithubCredentialsProvider
-} from '@backstage/integration';
-import { GitHubOrgEntityProvider } from '@backstage/plugin-catalog-backend-module-github';
-
 import { ConfigReader } from '@backstage/config';
 import { BatchLoader } from '..'
 import { backstageConfig } from './config';
 
 async function createCatalogPlugin(env: CatalogEnvironment,): Promise<() => Promise<void>> {
   const builder = await CatalogBuilder.create(env);
-  builder.addProcessor(new ScaffolderEntitiesProcessor());
-
-  const integrations = ScmIntegrations.fromConfig(env.config);
-  const githubCredentialsProvider = DefaultGithubCredentialsProvider.fromIntegrations(integrations);
-
-  const gitProvider = GitHubOrgEntityProvider.fromConfig(env.config, {
-    id: "thefrontside",
-    orgUrl: "https://github.com/thefrontside",
-    logger: env.logger,
-    githubCredentialsProvider
-  });
-  builder.addEntityProvider(gitProvider);
 
   const { processingEngine } = await builder.build();
   await processingEngine.start();

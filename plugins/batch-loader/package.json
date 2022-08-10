@@ -32,9 +32,7 @@
     "@backstage/config": "^1.0.0",
     "@backstage/integration": "^1.1.0",
     "@backstage/plugin-catalog-backend": "^1.1.1",
-    "@backstage/plugin-catalog-backend-module-github": "^0.1.2",
     "@backstage/plugin-permission-node": "^0.6.0",
-    "@backstage/plugin-scaffolder-backend": "^1.1.0",
     "@effection/jest": "^2.0.2",
     "effection": "^2.0.4",
     "jest": "^27.0.0"
