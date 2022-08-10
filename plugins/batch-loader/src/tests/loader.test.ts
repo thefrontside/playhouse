@@ -4,12 +4,6 @@ import { describe, beforeAll, it } from '@effection/jest';
 import { DatabaseManager, getRootLogger, ServerTokenManager, SingleHostDiscovery, UrlReaders } from '@backstage/backend-common';
 import { CatalogBuilder, CatalogEnvironment } from '@backstage/plugin-catalog-backend';
 import { ServerPermissionClient } from '@backstage/plugin-permission-node';
-import {
-  ScmIntegrations,
-  DefaultGithubCredentialsProvider
-} from '@backstage/integration';
-import { GitHubOrgEntityProvider } from '@backstage/plugin-catalog-backend-module-github';
-
 import { ConfigReader } from '@backstage/config';
 import { BatchLoader } from '..'
 import { backstageConfig } from './config';
