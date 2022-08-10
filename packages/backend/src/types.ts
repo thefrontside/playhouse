@@ -1,6 +1,7 @@
 import { Logger } from 'winston';
 import { Config } from '@backstage/config';
 import {
+  DatabaseManager,
   PluginCacheManager,
   PluginDatabaseManager,
   PluginEndpointDiscovery,
@@ -14,6 +15,7 @@ import { CatalogClient } from '@backstage/catalog-client';
 export type PluginEnvironment = {
   logger: Logger;
   database: PluginDatabaseManager;
+  databaseManager: DatabaseManager;
   cache: PluginCacheManager;
   config: Config;
   reader: UrlReader;

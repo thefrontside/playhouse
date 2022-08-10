@@ -37,6 +37,7 @@
     "@backstage/plugin-search-backend-module-pg": "^0.3.4",
     "@backstage/plugin-techdocs-backend": "^1.1.0",
     "@frontside/backstage-plugin-effection-inspector-backend": "0.1.1",
+    "@frontside/backstage-plugin-batch-loader": "0.1.0",
     "@frontside/backstage-plugin-humanitec-backend": "^0.3.0",
     "@frontside/backstage-plugin-graphql": "^0.2.0",
     "@gitbeaker/node": "^34.6.0",

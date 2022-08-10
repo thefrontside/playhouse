@@ -58,7 +58,19 @@ function makeCreateEnv(config: Config) {
     const database = databaseManager.forPlugin(plugin);
     const cache = cacheManager.forPlugin(plugin);
     const scheduler = taskScheduler.forPlugin(plugin);
-    return { logger, database, cache, config, reader, discovery, tokenManager, scheduler, permissions, catalog: catalogClient };
+    return {
+      logger,
+      database,
+      cache,
+      config,
+      reader,
+      discovery,
+      tokenManager,
+      scheduler,
+      permissions,
+      catalog: catalogClient,
+      databaseManager,
+    };
   };
 }
 
