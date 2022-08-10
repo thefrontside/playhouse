@@ -40,7 +40,8 @@
     "jest": "^27.0.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "migrations"
   ],
   "jest": {
     "testTimeout": 15000,

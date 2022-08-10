@@ -15,7 +15,7 @@ import { ConfigReader } from '@backstage/config';
 import { BatchLoader } from '..'
 import { backstageConfig } from './config';
 
-async function createCatalogPlugin(env: CatalogEnvironment,): Promise<void> {
+async function createCatalogPlugin(env: CatalogEnvironment,): Promise<() => Promise<void>> {
   const builder = await CatalogBuilder.create(env);
   builder.addProcessor(new ScaffolderEntitiesProcessor());
 
@@ -32,10 +32,12 @@ async function createCatalogPlugin(env: CatalogEnvironment,): Promise<void> {
 
   const { processingEngine } = await builder.build();
   await processingEngine.start();
+  return () => processingEngine.stop();
 }
 
 describe('loading entities in a batch', () => {
   let loader: BatchLoader
+  let teardown: () => Promise<void>;
 
   beforeAll(function* () {
     const logger = getRootLogger();
@@ -48,7 +50,7 @@ describe('loading entities in a batch', () => {
       discovery,
       tokenManager,
     });
-    yield createCatalogPlugin({
+    teardown = yield createCatalogPlugin({
       logger,
       database: databaseManager.forPlugin('catalog'),
       config,
@@ -58,6 +60,10 @@ describe('loading entities in a batch', () => {
     loader = new BatchLoader({ databaseManager, logger })
     yield loader.init()
   });
+
+  afterAll(function *() {
+    yield teardown()
+  })
 
   it.eventually('can look up a entity by stringified ref', function* () {
     const [teamA] = yield loader.getEntitiesByRefs(['group:default/team-a'])
