@@ -40,7 +40,6 @@ describe('loading entities in a batch', () => {
   let teardown: () => Promise<void>;
 
   beforeAll(function* () {
-    jest.useFakeTimers();
     const logger = getRootLogger();
     const config = new ConfigReader(backstageConfig);
     const reader = UrlReaders.default({ logger, config });
@@ -64,7 +63,6 @@ describe('loading entities in a batch', () => {
 
   afterAll(function *() {
     yield teardown()
-    jest.useRealTimers();
   })
 
   it.eventually('can look up a entity by stringified ref', function* () {
