@@ -15,6 +15,7 @@ jobs:
       # Installing yarn globaly so the workflow will work in `act`
       - run: npm install --global yarn
       - run: yarn install --frozen-lockfile # optional, --immutable
-      - run: yarn tsc --detectOpenHandles --runInBand
+      - run: yarn tsc
       - run: docker-compose up &
-      - run: yarn test
+      - run: yarn test --detectOpenHandles --runInBand
+
