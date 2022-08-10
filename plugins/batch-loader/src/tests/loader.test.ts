@@ -59,17 +59,17 @@ describe('loading entities in a batch', () => {
     yield loader.init()
   });
 
-  it('can look up a entity by stringified ref', function* () {
+  it.eventually('can look up a entity by stringified ref', function* () {
     const [teamA] = yield loader.getEntitiesByRefs(['group:default/team-a'])
     expect(teamA).toMatchObject({ metadata: { description: "Team A" } });
   });
 
-  it('can look up a entity by compound ref', function* () {
+  it.eventually('can look up a entity by compound ref', function* () {
     const [teamA] = yield loader.getEntitiesByRefs([{ kind: 'group', namespace: 'default', name: 'team-a' }])
     expect(teamA).toMatchObject({ metadata: { description: "Team A" } });
   });
 
-  it('can look up entities in a right order', function* () {
+  it.eventually('can look up entities in a right order', function* () {
     const [teamA, teamB, teamC] = yield loader.getEntitiesByRefs(['group:default/team-a', 'group:default/team-b', 'group:default/team-c'])
     expect(teamA).toMatchObject({ metadata: { description: "Team A" } });
     expect(teamB).toMatchObject({ metadata: { description: "Team B" } });
