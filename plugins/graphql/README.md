@@ -20,6 +20,10 @@ We plan to add these over time. If you're interested in contributing to this plu
 
 - [@frontside/backstage-plugin-graphql](#frontsidebackstage-plugin-graphql)
   - [Getting started](#getting-started)
+  - [Extending Schema](#extending-schema)
+    - [In Backstage Backend](#in-backstage-backend)
+      - [](#)
+    - [In Backstage Backend](#in-backstage-backend-1)
   - [Integrations](#integrations)
     - [Backstage GraphiQL Plugin](#backstage-graphiql-plugin)
     - [Backstage API Docs](#backstage-api-docs)
@@ -60,6 +64,21 @@ You can install the GraphQL Plugin using the same process that you would use to 
     ```
 
   See [packages/backend/src/index.ts](https://github.com/thefrontside/backstage/blob/main/packages/backend/src/index.ts) for an example.
+
+## Extending Schema
+
+Backstage GraphQL Plugin allows developers to extend the schema provided by the plugin. Extending the schema allows you to query additional information for existing types or add new types. GraphQL is often used as a gateway to many different APIs. It's reasonable and expected that you may want to add custom types and fields. This section will tell you what you need to know to extend the schema.
+
+### In Backstage Backend
+
+You can extend the schema from inside of Backstage Backend by creating a [GraphQL Module](https://www.graphql-modules.com) that you can pass to the GraphQL API plugin's router. Here are step-by-step instructions on how to set up your GraphQL API plugin to provide a custom GraphQL Module. 
+
+
+
+#### 
+
+### In Backstage Backend
+
 
 ## Integrations
 
@@ -123,4 +142,3 @@ You might want to show the schema from your GraphQL API in API definition sectio
         - host: localhost:7007
   ```
 
-  

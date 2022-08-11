@@ -5,13 +5,15 @@ import { Logger } from 'winston';
 import { graphqlHTTP } from 'express-graphql';
 import { CatalogClient } from '@backstage/catalog-client';
 import { printSchema } from 'graphql';
+import type { Module } from 'graphql-modules';
 
 export interface RouterOptions {
   logger: Logger;
   catalog: CatalogClient;
+  modules?: Module[]
 }
 
-import { schema, createApp } from './app';
+import { createGraphQLApp } from './app';
 
 export * from './app';
 
@@ -20,7 +22,10 @@ export async function createRouter(
 ): Promise<express.Router> {
   const { logger } = options;
 
-  const app = createApp(options.catalog);
+  const { run, application } = createGraphQLApp({ 
+    catalog: options.catalog, 
+    modules: options.modules ?? []
+  });
 
   const router = Router();
   router.use(express.json());
@@ -30,13 +35,13 @@ export async function createRouter(
   });
 
   router.get('/schema', (_, response) => {
-    response.send(printSchema(app().schema))
+    response.send(printSchema(application.schema))
   });
 
   router.use('/',  graphqlHTTP(async () => {
-    const { parse, validate, contextFactory, execute } = app();
+    const { parse, validate, contextFactory, execute } = run();
     return {
-      schema,
+      schema: application.schema,
       graphiql: true,
       customParseFn: parse,
       customValidateFn: validate,
