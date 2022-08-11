@@ -22,6 +22,10 @@ We plan to add these over time. If you're interested in contributing to this plu
   - [Getting started](#getting-started)
   - [Extending Schema](#extending-schema)
     - [In Backstage Backend](#in-backstage-backend)
+    - [Directives API](#directives-api)
+      - [`@field(at: String!)`](#fieldat-string)
+      - [`@relation(type: String!)`](#relationtype-string)
+      - [`@extend(type: String!)`](#extendtype-string)
   - [Integrations](#integrations)
     - [Backstage GraphiQL Plugin](#backstage-graphiql-plugin)
     - [Backstage API Docs](#backstage-api-docs)
@@ -118,6 +122,30 @@ You can extend the schema from inside of Backstage Backend by creating a [GraphQ
   ```
 
 5. Start your backend and you should be able to query your API with `{ hello }` query to get `{ data: { hello: 'world' } }`
+
+### Directives API
+
+Every GraphQL API consists of two things - a schema and resolvers. The schema describes relationships and fields that you can retrieve from the API. The resolvers describe how you retrieve the data described in the schema. The Backstage GraphQL Plugin provides several directives to help write a GraphQL schema and resolvers for Backstage. These directives take into account some specificities for Backstage APIs to make it easier to write schema and implement resolvers. This section will explain each directive and the assumptions they make about the developer's intention.
+
+#### `@field(at: String!)`
+
+`@field` directive allows you to access properties on the object using a given path. It allows you to specify a resolver for a field from the schema without actually writing a real resolver. Under the hood, it's creating the resolver for you. It's used extensively in the [`catalog.graphql`](https://github.com/thefrontside/backstage/blob/main/plugins/graphql/src/app/modules/catalog/catalog.graphql) module to retrieve properties like `namespace`, `title` and others. For example, here is how we define the resolver for the `Entity#name` field `name: String! @field(at: "metadata.name")`
+
+#### `@relation(type: String!)`
+
+`@relation` directive allows you to resolve relationships between entities. Similar to `@field` directive, it provides the resolver from the schema so you do not have to write a resolver yourself. It assumes that relationships are defined as standard `Entity` relationships. The `type` argument allows you to specify the name of the relationship. It will automatically look up the entity in the catalog. For example, here is how we define `consumers` of an API - `consumers: [Component] @relation(type: "apiConsumedBy")`.
+
+#### `@extend(type: String!)`
+
+`@extend` directive allows you to inherit fields from another entity. We created this directive to make it easier to implement types that extend from `Entity` and other types. It makes GraphQL types similar to extending types in TypeScript. In TypeScript, when a class extends another class, the child class automatically inherits properties and methods of the parent class. This functionality doesn't have an equivalent in GraphQL. Without this directive, the `Component` type in GraphQL would need to reimplement many fields that are defined on Entity which leads to lots of duplication. Using this type, you can easily create a new type that includes all of the properties of the parent. For example, if you wanted to create a `Repository` type, you can do the following,
+
+```graphql
+type Repository @extends(type: "Entity") {
+  languages: [String] @field('spec.languages')
+}
+```
+
+Your `Repository` type will automatically get all of the properties from `Entity`.
 
 ## Integrations
 
