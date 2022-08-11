@@ -22,6 +22,7 @@ We plan to add these over time. If you're interested in contributing to this plu
   - [Getting started](#getting-started)
   - [Integrations](#integrations)
     - [Backstage GraphiQL Plugin](#backstage-graphiql-plugin)
+    - [Backstage API Docs](#backstage-api-docs)
 
 ## Getting started
 
@@ -69,26 +70,57 @@ It's convenient to be able to query the Backstage GraphQL API from inside of Bac
 1. Once you installed `@backstage/plugin-graphiql` plugin [with these instructions](https://roadie.io/backstage/plugins/graphiQL/) 
 2. Modify `packages/app/src/apis.ts` to add your GraphQL API as an endpoint
 
-  ```ts
-      factory: ({ errorApi, githubAuthApi, discovery }) =>
-        GraphQLEndpoints.from([
-          {
-            id: 'backstage-backend',
-            title: 'Backstage GraphQL API',
-            // we use the lower level object with a fetcher function
-            // as we need to `await` the backend url for the graphql plugin
-            fetcher: async (params: any) => {
-              const graphqlURL = await discovery.getBaseUrl('graphql');
-              return fetch(graphqlURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params),
-              }).then(res => res.json());
-            },
+    ```ts
+    factory: ({ errorApi, githubAuthApi, discovery }) =>
+      GraphQLEndpoints.from([
+        {
+          id: 'backstage-backend',
+          title: 'Backstage GraphQL API',
+          // we use the lower level object with a fetcher function
+          // as we need to `await` the backend url for the graphql plugin
+          fetcher: async (params: any) => {
+            const graphqlURL = await discovery.getBaseUrl('graphql');
+            return fetch(graphqlURL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(params),
+            }).then(res => res.json());
           },
-        ])
-      }
-  ```
+        },
+      ])
+    }
+    ```
 
   Checkout this example [`packages/app/src/apis.ts`](https://github.com/thefrontside/backstage/blob/main/packages/app/src/apis.ts#L35).
 
+### Backstage API Docs
+
+You might want to show the schema from your GraphQL API in API definition section of an API entity in Backstage. You can use the `/api/graphql/schema` endpoint to read the schema provided by your GraphQL API. Here is how you can accomplish this.
+
+1. Create API entity and reference `definition.$text: http://localhost:7007/api/graphql/schema`
+
+    ```yaml
+    apiVersion: backstage.io/v1alpha1
+    kind: API
+    metadata:
+      name: backstage-graphql-api
+      description: GraphQL API provided by GraphQL Plugin
+    spec:
+      type: graphql
+      owner: engineering@frontside.com
+      lifecycle: production
+      definition:
+        $text: http://localhost:7007/api/graphql/schema
+    ```
+2. Modify `app-config.yaml` to allow reading urls from `localhost:7007`
+
+  ```yaml
+  backend:
+    ...
+
+    reading:
+      allow:
+        - host: localhost:7007
+  ```
+
+  
