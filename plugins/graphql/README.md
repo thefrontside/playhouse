@@ -18,6 +18,11 @@ Some key features are currently missing. These features may change the schema in
 
 We plan to add these over time. If you're interested in contributing to this plugin, feel free to message us in [`#graphql` channel in Backstage Discord](https://discord.gg/yXEYX2h7Ed).
 
+- [@frontside/backstage-plugin-graphql](#frontsidebackstage-plugin-graphql)
+  - [Getting started](#getting-started)
+  - [Integrations](#integrations)
+    - [Backstage GraphiQL Plugin](#backstage-graphiql-plugin)
+
 ## Getting started
 
 You can install the GraphQL Plugin using the same process that you would use to install other backend Backtstage plugins.
@@ -54,4 +59,36 @@ You can install the GraphQL Plugin using the same process that you would use to 
     ```
 
   See [packages/backend/src/index.ts](https://github.com/thefrontside/backstage/blob/main/packages/backend/src/index.ts) for an example.
+
+## Integrations
+
+### Backstage GraphiQL Plugin
+
+It's convenient to be able to query the Backstage GraphQL API from inside of Backstage App. You can accomplish this by installing the [Backstage GraphiQL Plugin](https://roadie.io/backstage/plugins/graphiQL/) and adding the GraphQL API endpoint to the GraphiQL Plugin API factory.
+
+1. Once you installed `@backstage/plugin-graphiql` plugin [with these instructions](https://roadie.io/backstage/plugins/graphiQL/) 
+2. Modify `packages/app/src/apis.ts` to add your GraphQL API as an endpoint
+
+  ```ts
+      factory: ({ errorApi, githubAuthApi, discovery }) =>
+        GraphQLEndpoints.from([
+          {
+            id: 'backstage-backend',
+            title: 'Backstage GraphQL API',
+            // we use the lower level object with a fetcher function
+            // as we need to `await` the backend url for the graphql plugin
+            fetcher: async (params: any) => {
+              const graphqlURL = await discovery.getBaseUrl('graphql');
+              return fetch(graphqlURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params),
+              }).then(res => res.json());
+            },
+          },
+        ])
+      }
+  ```
+
+  Checkout this example [`packages/app/src/apis.ts`](https://github.com/thefrontside/backstage/blob/main/packages/app/src/apis.ts#L35).
 
