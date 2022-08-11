@@ -40,8 +40,6 @@ describe('querying the graphql API', () => {
     harness.create("User", {
       displayName: "Janelle Dawe"
     })
-    let users = [...harness.all('User')];
-    console.dir({ users }, { depth: 5 });
   });
 
 
