@@ -22,8 +22,6 @@ We plan to add these over time. If you're interested in contributing to this plu
   - [Getting started](#getting-started)
   - [Extending Schema](#extending-schema)
     - [In Backstage Backend](#in-backstage-backend)
-      - [](#)
-    - [In Backstage Backend](#in-backstage-backend-1)
   - [Integrations](#integrations)
     - [Backstage GraphiQL Plugin](#backstage-graphiql-plugin)
     - [Backstage API Docs](#backstage-api-docs)
@@ -71,14 +69,55 @@ Backstage GraphQL Plugin allows developers to extend the schema provided by the 
 
 ### In Backstage Backend
 
-You can extend the schema from inside of Backstage Backend by creating a [GraphQL Module](https://www.graphql-modules.com) that you can pass to the GraphQL API plugin's router. Here are step-by-step instructions on how to set up your GraphQL API plugin to provide a custom GraphQL Module. 
+You can extend the schema from inside of Backstage Backend by creating a [GraphQL Module](https://www.graphql-modules.com) that you can pass to the GraphQL API plugin's router. Here are step-by-step instructions on how to set up your GraphQL API plugin to provide a custom GraphQL Module.
 
+1. Add `graphql-modules` to your backend packages in `packages/backend` with `yarn add graphql-modules`
+2. Create `packages/backend/src/graphql` directory that will contain your modules
+3. Create a file for your first GraphQL module called `packages/backend/src/graphql/my-module.ts` with the following content
 
+  ```ts
+  import { createModule, gql } from 'graphql-modules'
 
-#### 
+  export const myModule = createModule({
+    id: 'my-module',
+    dirname: __dirname,
+    typeDefs: [
+      gql`
+        type Query {
+          hello: String!
+        }
+      `
+    ],
+    resolvers: {
+      Query: {
+        hello: () => 'world'
+      }
+    }
+  })
+  ```
 
-### In Backstage Backend
+4. Register your GraphQL module with the GraphQL API plugin by modifying `packages/backend/src/plugins/graphql.ts`.
+  You must import your new module and pass it to the router using `modules: [myModule]`. Here is what the result
+  should look like.
 
+  ```ts
+  import { createRouter } from '@frontside/backstage-plugin-graphql';
+  import { Router } from 'express';
+  import { PluginEnvironment } from '../types';
+  import { myModule } from '../graphql/my-module';
+
+  export default async function createPlugin(
+    env: PluginEnvironment,
+  ): Promise<Router> {
+    return await createRouter({
+      modules: [myModule],
+      logger: env.logger,
+      catalog: env.catalog,
+    });
+  }
+  ```
+
+5. Start your backend and you should be able to query your API with `{ hello }` query to get `{ data: { hello: 'world' } }`
 
 ## Integrations
 
