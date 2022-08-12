@@ -8,7 +8,6 @@ export type Loader = DataLoader<EntityRef, Entity>;
 
 export interface ResolverContext {
   loader: Loader
-  catalog: CatalogApi
 }
 
 export type CatalogApi = Pick<Client, "getEntityByRef">;

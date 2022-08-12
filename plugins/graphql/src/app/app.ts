@@ -19,7 +19,7 @@ export function createGraphQLApp(options: createGraphQLAppOptions) {
 
   const run = envelop({
     plugins: [
-      useExtendContext(() => ({ catalog: options.catalog, loader })),
+      useExtendContext(() => ({ loader })),
       useGraphQLModules(application),
     ],
   });
