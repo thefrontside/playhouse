@@ -4,10 +4,10 @@ import DataLoader from 'dataloader';
 
 export type EntityRef = string | CompoundEntityRef
 
-export type Loader = DataLoader<EntityRef, Entity>;
+export type EntityLoader = DataLoader<EntityRef, Entity>;
 
 export interface ResolverContext {
-  loader: Loader
+  entityLoader: EntityLoader
 }
 
 export type CatalogApi = Pick<Client, "getEntityByRef">;

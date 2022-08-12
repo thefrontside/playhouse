@@ -8,6 +8,7 @@ import { PromiseOrValue } from '@envelop/core';
 import { createGraphQLApp } from '..';
 
 import { Factory, World, createFactory } from './factory';
+import { createLoader } from '../app/loaders';
 
 export interface GraphQLHarness {
   query(query: string): Operation<JsonObject>;
@@ -15,12 +16,12 @@ export interface GraphQLHarness {
   all(...params: Parameters<Factory["all"]>): ReturnType<Factory["all"]>;
 }
 
-
-
 export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
+  const catalog = createSimulatedCatalog(factory);
+
   let { run, application } = createGraphQLApp({
-    catalog: createSimulatedCatalog(factory),
+    entityLoaderCreator: () => createLoader({ catalog }),
     modules: []
   });
 

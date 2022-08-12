@@ -3156,6 +3156,11 @@
   dependencies:
     "@envelop/types" "2.3.0"
 
+"@envelop/dataloader@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@envelop/dataloader/-/dataloader-3.4.2.tgz#36dc99e79d00c642426732209d87006f7d48116f"
+  integrity sha512-ElEYMHGD5E1SXiUym3rx79pdUsy4cs4pY0ovlTGvrJDPB01JPeHhx3l664X8952LSEaePVwmCga3TT37wcepDQ==
+
 "@envelop/graphql-modules@^3.3.0":
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/@envelop/graphql-modules/-/graphql-modules-3.4.0.tgz#91193e50e61e9a6103a661fd248c54bb55dc26a2"
@@ -12489,7 +12494,7 @@ graphql-language-service@^5.0.6:
     nullthrows "^1.0.0"
     vscode-languageserver-types "^3.15.1"
 
-graphql-modules@^2.0.0:
+graphql-modules@^2.0.0, graphql-modules@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/graphql-modules/-/graphql-modules-2.1.0.tgz#d99692034b4b053fba3d0ebe49e4e66772ed2785"
   integrity sha512-fOUc4i5xNLkRxqx234MIr+kolrxk1tZ2onTeRIcB73mCY4NeKxej7FMLb5St+UcNLzhqM4L6Mf47rN9MPVDmgA==

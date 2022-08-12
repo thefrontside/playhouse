@@ -10,10 +10,13 @@ import type { Module } from 'graphql-modules';
 export interface RouterOptions {
   logger: Logger;
   catalog: CatalogClient;
+  entityLoaderCreator?: () => EntityLoader;
   modules?: Module[]
 }
 
 import { createGraphQLApp } from './app';
+import { createLoader } from './loaders';
+import { EntityLoader } from './types';
 
 export * from './app';
 
@@ -22,8 +25,10 @@ export async function createRouter(
 ): Promise<express.Router> {
   const { logger } = options;
 
+  const entityLoaderCreator = options.entityLoaderCreator ? options.entityLoaderCreator : () => createLoader({ catalog: options.catalog })
+
   const { run, application } = createGraphQLApp({ 
-    catalog: options.catalog, 
+    entityLoaderCreator, 
     modules: options.modules ?? []
   });
 

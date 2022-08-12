@@ -1,42 +1,33 @@
-import type { CatalogApi } from './types';
-import { envelop, useExtendContext } from '@envelop/core';
+import type { EntityLoader } from './types';
+import { envelop } from '@envelop/core';
 import { useGraphQLModules } from '@envelop/graphql-modules';
+import { useDataLoader } from '@envelop/dataloader';
 import { createApplication, Module } from 'graphql-modules';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { createLoader } from './loaders';
 import { Catalog } from './modules/catalog/catalog';
 import { Core } from './modules/core/core';
 import { transform } from './schema-mapper';
 
 export interface createGraphQLAppOptions {
-  catalog: CatalogApi;
+  entityLoaderCreator: () => EntityLoader
   modules: Module[]
 }
 
-export function createGraphQLApp(options: createGraphQLAppOptions) {
-  const application = create(options);
-  const loader = createLoader(options);
+export function createGraphQLApp({ modules, entityLoaderCreator }: createGraphQLAppOptions) {
+  const application = createApplication({
+    schemaBuilder: ({ typeDefs, resolvers }) =>
+      transform(makeExecutableSchema({
+        typeDefs, resolvers
+      })),
+    modules: [Core, Catalog, ...modules],
+  });
 
   const run = envelop({
     plugins: [
-      useExtendContext(() => ({ loader })),
+      useDataLoader("entityLoader", entityLoaderCreator),
       useGraphQLModules(application),
     ],
   });
 
   return { run, application };
-}
-
-interface CreateOptions {
-  modules: Module[]
-}
-
-function create(options: CreateOptions) {
-  return createApplication({
-    schemaBuilder: ({ typeDefs, resolvers }) =>
-      transform(makeExecutableSchema({
-        typeDefs, resolvers
-      })),
-    modules: [Core, Catalog, ...options.modules],
-  });
 }

@@ -10,8 +10,8 @@ export const Core = createModule({
   resolvers: {
     Node: {
       __resolveType: resolveType,
-      id: async ({ id }: { id: string }, _: never, { loader }: ResolverContext): Promise<string | null> => {
-        const entity = await loader.load(id);
+      id: async ({ id }: { id: string }, _: never, { entityLoader }: ResolverContext): Promise<string | null> => {
+        const entity = await entityLoader.load(id);
         if (!entity) return null;
         return id;
       },

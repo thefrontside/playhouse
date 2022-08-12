@@ -28,6 +28,7 @@
     "@backstage/catalog-model": "^1.0.1",
     "@backstage/config": "^1.0.0",
     "@envelop/core": "^2.3.0",
+    "@envelop/dataloader": "^3.4.2",
     "@envelop/graphql-modules": "^3.3.0",
     "@graphql-tools/load-files": "^6.5.3",
     "@graphql-tools/schema": "^8.3.6",

@@ -33,8 +33,8 @@ const resolveMappers: Array<(
     const isKeyValuePairs = fieldType instanceof GraphQLList
       && fieldType.ofType instanceof GraphQLObjectType
       && fieldType.ofType.name === 'KeyValuePair'
-    objectField.resolve = async ({ id }, _, { loader }) => {
-      const entity = await loader.load(id);
+    objectField.resolve = async ({ id }, _, { entityLoader }) => {
+      const entity = await entityLoader.load(id);
       if (!entity) return null;
       const fieldValue = get(entity, fieldDirective.at);
       return isKeyValuePairs && fieldValue ? Object.entries(fieldValue).map(([key, value]) => ({ key, value })) : fieldValue
@@ -47,8 +47,8 @@ const resolveMappers: Array<(
     const fieldType = (interfaceField ?? objectField).type
     const isList = fieldType instanceof GraphQLList
       || (fieldType instanceof GraphQLNonNull && fieldType.ofType instanceof GraphQLList)
-    objectField.resolve = async ({ id }, _, { loader }) => {
-      const entities = (await loader.load(id))
+    objectField.resolve = async ({ id }, _, { entityLoader }) => {
+      const entities = (await entityLoader.load(id))
         ?.relations
         ?.filter(({ type, targetRef }) => {
           const { kind } = parseEntityRef(targetRef)
