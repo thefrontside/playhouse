@@ -44,10 +44,11 @@ export class BatchLoader {
     const client = await this.client;
     const stringifiedRefs = refs.map(ref => typeof ref === 'string' ? ref : stringifyEntityRef(ref))
     const rows = await client('refs.entities')
-      .select('final_entity')
-      .whereIn('refs.entities.ref', stringifiedRefs)
-      .orderByRaw(`FIELD(refs.entities.ref, '${stringifiedRefs.join("','")}')`);
-    const entities = rows.map(row => JSON.parse(row.final_entity));
+      .select('*')
+      .whereIn('refs.entities.ref', stringifiedRefs);
+
+    const unsortedEntities = new Map(rows.map(row => [row.ref, JSON.parse(row.final_entity)]));
+    const entities = stringifiedRefs.map(ref => unsortedEntities.get(ref));
     this.logger.info(`Loaded ${entities.length} entities`);
     return entities;
   }
