@@ -15,3 +15,4 @@
  */
 
 export * from './app';
+export type { EntityLoader } from './app/types';

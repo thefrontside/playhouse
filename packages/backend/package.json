@@ -40,6 +40,7 @@
     "@frontside/backstage-plugin-batch-loader": "0.1.0",
     "@frontside/backstage-plugin-humanitec-backend": "^0.3.0",
     "@frontside/backstage-plugin-graphql": "^0.2.0",
+    "dataloader": "^2.1.0",
     "graphql-modules": "^2.1.0",
     "@gitbeaker/node": "^34.6.0",
     "@internal/plugin-healthcheck": "0.1.0",
