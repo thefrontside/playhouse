@@ -17,5 +17,4 @@ jobs:
       - run: yarn install --frozen-lockfile # optional, --immutable
       - run: yarn tsc
       - run: docker-compose up &
-      - run: yarn test --detectOpenHandles --runInBand
-
+      - run: yarn test
