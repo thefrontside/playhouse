@@ -3203,6 +3203,11 @@
     graphql "16.5.0"
     hash.js "1.1.7"
 
+"@frontside/tsconfig@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@frontside/tsconfig/-/tsconfig-3.0.0.tgz#81851b980bb03882eba115e18c5120c3d1eb2117"
+  integrity sha512-yVSk+FLUyL5TzqYC85IpMI6qfgnIZwNPuj5RMwEY02z6zdi5Wa0Uj2G+N5VJNc5g6XKHKue9Rmr4vqn9GUU20g==
+
 "@gar/promisify@^1.0.1":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.3.tgz#555193ab2e3bb3b6adc3d551c9c030d9e860daf6"
@@ -12489,7 +12494,7 @@ graphql-language-service@^5.0.6:
     nullthrows "^1.0.0"
     vscode-languageserver-types "^3.15.1"
 
-graphql-modules@^2.0.0:
+graphql-modules@^2.0.0, graphql-modules@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/graphql-modules/-/graphql-modules-2.1.0.tgz#d99692034b4b053fba3d0ebe49e4e66772ed2785"
   integrity sha512-fOUc4i5xNLkRxqx234MIr+kolrxk1tZ2onTeRIcB73mCY4NeKxej7FMLb5St+UcNLzhqM4L6Mf47rN9MPVDmgA==

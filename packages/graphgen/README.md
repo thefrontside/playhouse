@@ -1,0 +1,1 @@
+# @frontside/graphgen-backstage-graphql-plugin

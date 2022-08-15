@@ -28,7 +28,8 @@
   "workspaces": {
     "packages": [
       "packages/*",
-      "plugins/*"
+      "plugins/*",
+      "graphgen/*"
     ]
   },
   "devDependencies": {
