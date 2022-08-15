@@ -6,8 +6,8 @@
   "types": "dist/index.d.ts",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "tsc",
-    "generate": "tsc && graphql-codegen --config codegen.yml",
+    "build": "shx cp ./src/world.graphql ./dist && tsc",
+    "generate": "yarn build && graphql-codegen --config codegen.yml",
     "lint": "backstage-cli package lint"
   },
   "dependencies": {
@@ -21,7 +21,8 @@
     "@graphql-codegen/graphql-modules-preset": "^2.3.8",
     "@graphql-codegen/typescript": "^2.4.8",
     "@graphql-codegen/typescript-resolvers": "^2.6.1",
-    "@types/graphql": "^14.5.0"
+    "@types/graphql": "^14.5.0",
+    "shx": "^0.3.4"
   },
   "peerDependencies": {
     "@faker-js/faker": "7.x.x",

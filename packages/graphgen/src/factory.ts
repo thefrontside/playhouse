@@ -1,7 +1,7 @@
-import { Generate, createGraphGen, GraphGen, weighted } from '@frontside/graphgen';
-import { readFileSync } from 'fs';
+import { Generate, createGraphGen, GraphGen, weighted, CacheStorage, CacheValue } from '@frontside/graphgen';
 import { join } from 'path';
 import { fakergen } from './fakergen';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 export interface User {
   __typename: "User";
@@ -80,13 +80,42 @@ const gen: Generate = (info) => {
   }
 }
 
+function createCacheStorage(filename: string): CacheStorage {
+  let values = {} as Record<string, CacheValue>;
+  let unread = true;
+  const map = {
+    get(key) {
+      if (unread) {
+        unread = false;
+        if (existsSync(filename)) {
+          const buffer = readFileSync(filename);
+          values = JSON.parse(String(buffer));
+        } else {
+          values = {};
+        }
+      }
+      return values[key];
+    },
+    set(key, value) {
+      values[key] = value;
+      writeFileSync(filename, JSON.stringify(values));
+      return map;
+    },
+  } as CacheStorage;
+  return map;
+}
+
 // eslint-disable-next-line no-restricted-syntax
 const sourceName = join(__dirname, 'world.graphql');
 
 export function createFactory(seed = 'factory'): Factory {
+  const storage = createCacheStorage(join(__dirname, 'cache.json'));
+  const source = String(readFileSync(join(__dirname, 'world.graphql')));
+
   return createGraphGen<World>({
     seed,
-    source: String(readFileSync(sourceName)),
+    storage,
+    source,
     sourceName,
     generate: [gen, fakergen],
     compute: {
