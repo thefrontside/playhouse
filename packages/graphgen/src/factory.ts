@@ -1,7 +1,8 @@
+import flatCache from 'flat-cache';
 import { Generate, createGraphGen, GraphGen, weighted, CacheStorage, CacheValue } from '@frontside/graphgen';
 import { join } from 'path';
 import { fakergen } from './fakergen';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 
 export interface User {
   __typename: "User";
@@ -80,25 +81,16 @@ const gen: Generate = (info) => {
   }
 }
 
-function createCacheStorage(filename: string): CacheStorage {
-  let values = {} as Record<string, CacheValue>;
-  let unread = true;
+function createCacheStorage(): CacheStorage {
+  const cache = flatCache.load('factory', join(__dirname, '..', '.cache'));
+
   const map = {
     get(key) {
-      if (unread) {
-        unread = false;
-        if (existsSync(filename)) {
-          const buffer = readFileSync(filename);
-          values = JSON.parse(String(buffer));
-        } else {
-          values = {};
-        }
-      }
-      return values[key];
+      return cache.getKey(key);
     },
     set(key, value) {
-      values[key] = value;
-      writeFileSync(filename, JSON.stringify(values));
+      cache.setKey(key, value);
+      cache.save(true);
       return map;
     },
   } as CacheStorage;
@@ -109,7 +101,7 @@ function createCacheStorage(filename: string): CacheStorage {
 const sourceName = join(__dirname, 'world.graphql');
 
 export function createFactory(seed = 'factory'): Factory {
-  const storage = createCacheStorage(join(__dirname, 'cache.json'));
+  const storage = createCacheStorage();
   const source = String(readFileSync(join(__dirname, 'world.graphql')));
 
   return createGraphGen<World>({
