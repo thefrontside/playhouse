@@ -1,12 +1,12 @@
 {
-  "name": "@frontside/graphgen-backstage-graphql-plugin",
+  "name": "@frontside/graphgen-backstage",
   "version": "0.1.0",
   "description": "The simulated data used in @frontside/backstage-plugin-graphql",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "shx cp ./src/world.graphql ./dist && tsc",
+    "build": "tsc && shx cp ./src/world.graphql ./dist",
     "generate": "yarn build && graphql-codegen --config codegen.yml",
     "lint": "backstage-cli package lint"
   },

@@ -7,8 +7,8 @@ import type { Node } from '@frontside/graphgen';
 import { PromiseOrValue } from '@envelop/core';
 import { createGraphQLApp } from '..';
 
-import type { Factory, World } from '@frontside/graphgen-backstage-graphql-plugin';
-import { createFactory } from '@frontside/graphgen-backstage-graphql-plugin';
+import type { Factory, World } from '@frontside/graphgen-backstage';
+import { createFactory } from '@frontside/graphgen-backstage';
 
 export interface GraphQLHarness {
   query(query: string): Operation<JsonObject>;
