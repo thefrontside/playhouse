@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.3.0
+
+### Minor Changes
+
+- 6ad6e23: Separate grapghen SDL file into new package @frontside/graphgen-backstage
+
 ## 0.2.1
 
 ### Patch Changes
