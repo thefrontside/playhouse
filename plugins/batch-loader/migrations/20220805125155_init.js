@@ -2,26 +2,20 @@ exports.up = async (knex) => {
   const schema = () => knex.schema.withSchema('refs');
 
   await schema().raw(`
-  CREATE OR REPLACE FUNCTION field(anyelement, VARIADIC anyarray) RETURNS integer AS $$
-    SELECT
-      COALESCE(
-      ( SELECT i FROM generate_subscripts($2, 1) gs(i)
-        WHERE $2[i] = $1 ),
-      0);
-  $$ LANGUAGE SQL;
+  CREATE OR REPLACE FUNCTION entity_to_ref(entity text) RETURNS text AS $$
+    SELECT FORMAT('%s:%s/%s',
+      LOWER(entity::json #>> '{kind}'),
+      LOWER(entity::json #>> '{metadata, namespace}'),
+      LOWER(entity::json #>> '{metadata, name}'));
+  $$ LANGUAGE sql IMMUTABLE;
 
-  CREATE VIEW refs.entities as SELECT
-    FORMAT('%s:%s/%s',
-      LOWER(final_entity::json #>> '{kind}'),
-      LOWER(final_entity::json #>> '{metadata, namespace}'),
-      LOWER(final_entity::json #>> '{metadata, name}')) as ref,
-    final_entity FROM public.final_entities;
+  CREATE INDEX entity_ref_idx ON final_entities (entity_to_ref(final_entity));
   `);
 };
 
 exports.down = async (knex) => {
   const schema = () => knex.schema.withSchema('refs');
 
-  await schema().dropView('entities');
-  await schema().dropFunction('field');
+  await schema().raw(`DROP INDEX entity_ref_idx;`);
+  await schema().dropFunction('entity_to_ref');
 };

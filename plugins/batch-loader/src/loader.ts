@@ -43,11 +43,13 @@ export class BatchLoader {
     this.logger.info(`Loading entities for refs: ${refs}`);
     const client = await this.client;
     const stringifiedRefs = refs.map(ref => typeof ref === 'string' ? ref : stringifyEntityRef(ref))
-    const rows = await client('refs.entities')
-      .select('final_entity')
-      .whereIn('refs.entities.ref', stringifiedRefs)
-      .orderByRaw(`FIELD(refs.entities.ref, '${stringifiedRefs.join("','")}')`);
-    const entities = rows.map(row => JSON.parse(row.final_entity));
+    const rows = await client('public.final_entities')
+      .select('final_entity', client.raw('entity_to_ref(final_entity) as ref'))
+      // NOTE: No overload matches this call. This is a bug in knex.
+      .whereIn(client.raw('entity_to_ref(final_entity)') as unknown as string, stringifiedRefs);
+
+    const unsortedEntities = new Map(rows.map(row => [row.ref, JSON.parse(row.final_entity)]));
+    const entities = stringifiedRefs.map(ref => unsortedEntities.get(ref));
     this.logger.info(`Loaded ${entities.length} entities`);
     return entities;
   }
