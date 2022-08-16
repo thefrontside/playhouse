@@ -1,5 +1,16 @@
 # backend
 
+## 0.0.5
+
+### Patch Changes
+
+- b26534b: Added batch-loader plugin
+- Updated dependencies [b26534b]
+- Updated dependencies [6ad6e23]
+- Updated dependencies [5f0c2bd]
+  - @frontside/backstage-plugin-batch-loader@0.1.1
+  - @frontside/backstage-plugin-graphql@0.3.0
+
 ## 0.0.4
 
 ### Patch Changes
