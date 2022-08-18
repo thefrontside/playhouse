@@ -3,6 +3,7 @@ import { Generate, createGraphGen, GraphGen, weighted, CacheStorage, CacheValue 
 import { join } from 'path';
 import { fakergen } from './fakergen';
 import { readFileSync } from 'fs';
+import { Domain } from 'types/graphql';
 
 export interface User {
   __typename: "User";
@@ -65,6 +66,7 @@ export interface World {
   API: API;
   Resource: Resource;
   User: User;
+  Domain: Domain;
 }
 
 export type Factory = GraphGen<World>;

@@ -23,11 +23,14 @@ const methods = Object.entries(globalFaker).reduce((methods, [name, mod]) => {
 }, {} as Record<string, any>);
 
 const dispatch = createDispatch({
-  methods,
+  methods: {
+    ...methods,
+    '@backstage/tags': ({ faker }) => faker.lorem.words(3).split(' '),
+  },
   patterns: {
     '*.firstName': '@faker/name.firstName',
     '*.lastName': '@faker/name.lastName',
-    '*.name': '@faker/name.findName',
+    '*.name': '@faker/name.fullName',
     '*.avatar': '@faker/internet.avatar',
     '*.avatarUrl': '@faker/internet.avatar',
     '*.password': '@faker/internet.password',
