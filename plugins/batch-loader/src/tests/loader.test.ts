@@ -64,7 +64,6 @@ describe('loading entities in a batch', () => {
       permissions,
     })
     loader = new BatchLoader({ databaseManager, logger })
-    yield loader.init()
   });
 
   it.eventually('can look up a entity by stringified ref', function* () {

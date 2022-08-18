@@ -1,4 +1,4 @@
-import { DatabaseManager, resolvePackagePath } from '@backstage/backend-common';
+import { DatabaseManager } from '@backstage/backend-common';
 import {
   CompoundEntityRef,
   Entity,
@@ -22,33 +22,18 @@ export class BatchLoader {
     this.client = this.manager.forPlugin('catalog').getClient();
   }
 
-  public async init() {
-    this.logger.info('Initializing batch loader');
-    const client = await this.client;
-    const migrationsDir = resolvePackagePath(
-      '@frontside/backstage-plugin-batch-loader',
-      'migrations',
-    );
-    this.logger.info(`Running migrations from ${migrationsDir}`);
-    await client.raw('CREATE SCHEMA IF NOT EXISTS refs;');
-    await client.migrate.latest({
-      schemaName: 'refs',
-      directory: migrationsDir,
-    });
-  }
-
   public async getEntitiesByRefs(
     refs: (string | CompoundEntityRef)[],
   ): Promise<Entity[]> {
     this.logger.info(`Loading entities for refs: ${refs}`);
     const client = await this.client;
     const stringifiedRefs = refs.map(ref => typeof ref === 'string' ? ref : stringifyEntityRef(ref))
-    const rows = await client('public.final_entities')
-      .select('final_entity', client.raw('entity_to_ref(final_entity) as ref'))
-      // NOTE: No overload matches this call. This is a bug in knex.
-      .whereIn(client.raw('entity_to_ref(final_entity)') as unknown as string, stringifiedRefs);
+    const rows = await client('final_entities')
+      .select('final_entity as entity', 'refresh_state.entity_ref as ref')
+      .join(client.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
+      .whereIn('refresh_state.entity_ref', stringifiedRefs);
 
-    const unsortedEntities = new Map(rows.map(row => [row.ref, JSON.parse(row.final_entity)]));
+    const unsortedEntities = new Map(rows.map(row => [row.ref, JSON.parse(row.entity)]));
     const entities = stringifiedRefs.map(ref => unsortedEntities.get(ref));
     this.logger.info(`Loaded ${entities.length} entities`);
     return entities;
