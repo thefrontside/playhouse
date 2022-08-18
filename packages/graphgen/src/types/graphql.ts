@@ -37,6 +37,15 @@ export interface Component {
 
 export type Container = Component | System;
 
+export interface Domain {
+  __typename?: 'Domain';
+  description: Scalars['String'];
+  links: Array<Link>;
+  name: Scalars['String'];
+  owner: Group;
+  tags: Array<Scalars['String']>;
+}
+
 export interface Group {
   __typename?: 'Group';
   department: Scalars['String'];
@@ -45,6 +54,12 @@ export interface Group {
   email: Scalars['String'];
   name: Scalars['String'];
   picture: Scalars['String'];
+}
+
+export interface Link {
+  __typename?: 'Link';
+  title: Scalars['String'];
+  url: Scalars['String'];
 }
 
 export interface Resource {

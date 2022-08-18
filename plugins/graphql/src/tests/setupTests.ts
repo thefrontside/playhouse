@@ -90,7 +90,7 @@ function* concat<T>(...iterables: Iterable<T>[]): Iterable<T> {
   }
 }
 
-export function nodeToEntity(node: Node & World[keyof World]): Entity {
+export function nodeToEntity(node: World[keyof World]): Entity {
   let { name, __typename: kind } = node;
   let entity = {
     kind,
@@ -135,6 +135,19 @@ export function nodeToEntity(node: Node & World[keyof World]): Entity {
         apiProvidedBy: node.providedBy,
       })
     };
+  } else if (node.__typename === 'Domain') {
+    const { metadata, ...rest } = entity;
+    return {
+      ...rest,
+      metadata: {
+        ...metadata,
+        tags: node.tags,
+        links: node.links
+      },
+      spec: {
+        owner: node.owner
+      }
+    }
   } else if (kind === "System") {
     return entity;
   } else {

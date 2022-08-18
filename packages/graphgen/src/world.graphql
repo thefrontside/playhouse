@@ -1,5 +1,5 @@
 type User {
-  displayName: String! @gen(with: "@faker/name.findName")
+  displayName: String! @gen(with: "@faker/name.fullName")
   email: String! @computed
   name: String! @computed
   picture: String! @gen(with: "@faker/internet.avatar")
@@ -44,4 +44,17 @@ type API {
 
 type Resource {
   name: String! @gen(with: "@faker/lorem.slug", args: [2])
+}
+
+type Link {
+  title: String! @gen(with: "@faker/lorem.slug", args: [2])
+  url: String! @gen(with: "@faker/internet.url")
+}
+
+type Domain {
+  name: String! @gen(with: "@faker/lorem.slug")
+  description: String! @gen(with: "@faker/lorem.lines", args: [1])
+  owner: Group!
+  tags: [String!]! @gen(with: "@backstage/tags")
+  links: [Link!]! @size(mean: 2)
 }
