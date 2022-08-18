@@ -1,6 +1,6 @@
 {
   "name": "@frontside/graphgen-backstage",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The simulated data used in @frontside/backstage-plugin-graphql",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
