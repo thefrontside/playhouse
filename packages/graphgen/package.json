@@ -5,17 +5,22 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "Apache-2.0",
+  "bin": "dist/cli.js",
   "scripts": {
     "build": "tsc && shx cp ./src/world.graphql ./dist",
+    "dev": "nodemon --watch './**/*.ts' --exec 'ts-node' src/location-parser/location-parser.ts",
     "generate": "yarn build && graphql-codegen --config codegen.yml",
     "lint": "backstage-cli package lint"
   },
   "dependencies": {
+    "@faker-js/faker": "^7.2.0",
     "@frontside/graphgen": "^1.6.0",
-    "flat-cache": "^3.0.4"
+    "assert-ts": "^0.3.4",
+    "commander": "^9.4.0",
+    "flat-cache": "^3.0.4",
+    "zod": "^3.18.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^7.2.0",
     "@frontside/tsconfig": "^3.0.0",
     "@graphql-codegen/add": "^3.1.1",
     "@graphql-codegen/cli": "^2.6.2",
@@ -24,6 +29,7 @@
     "@graphql-codegen/typescript-resolvers": "^2.6.1",
     "@types/flat-cache": "^2.0.0",
     "@types/graphql": "^14.5.0",
+    "nodemon": "^2.0.19",
     "shx": "^0.3.4"
   },
   "peerDependencies": {
