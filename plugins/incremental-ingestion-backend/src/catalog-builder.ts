@@ -13,7 +13,7 @@ export type CatalogBuilder = typeof CoreCatalogBuilder.prototype & {
 };
 
 // TODO: ensure ingestion and catalog share the same database client?
-export const createCatalogBuilder = (env: PluginEnvironment): CatalogBuilder => {
+export const createCatalogBuilder = (env: PluginEnvironment, annotationProviderKey = '@frontside.com/incremental-provider-name'): CatalogBuilder => {
   const { logger, database, scheduler } = env;
   const core = CoreCatalogBuilder.create(env);
 
@@ -29,7 +29,7 @@ export const createCatalogBuilder = (env: PluginEnvironment): CatalogBuilder => 
       getProviderName: provider.getProviderName,
       async connect(connection) {
         logger.info(`connecting incremental entity provider '${provider.getProviderName()}'`);
-        const db = await createIterationDB({ ...options, ready, database, logger, provider, restLength, connection });
+        const db = await createIterationDB({ ...options, ready, database, logger, provider, restLength, connection, annotationProviderKey });
         const frequency = Duration.fromObject(burstInterval);
         const length = Duration.fromObject(burstLength);
 
@@ -50,7 +50,7 @@ export const createCatalogBuilder = (env: PluginEnvironment): CatalogBuilder => 
     build: {
       async value() {
         const build = await core.build.call(this);
-        await applyDatabaseMigrations(await database.getClient());
+        await applyDatabaseMigrations(await database.getClient(), annotationProviderKey);
         ready.resolve();
         return build;
       },

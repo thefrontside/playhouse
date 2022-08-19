@@ -1,15 +1,5 @@
 /* eslint-disable func-names */
 exports.up = async function (knex) {
-  await knex.raw(`
-CREATE VIEW ingestion.current_entities as SELECT
-  FORMAT('%s:%s/%s',
-    LOWER(final_entity::json #>> '{kind}'),
-    LOWER(final_entity::json #>> '{metadata, namespace}'),
-    LOWER(final_entity::json #>> '{metadata, name}')) as ref,
-  final_entity::json #>> '{metadata, annotations, hp.com/provider-name}' as provider_name,
-  final_entity FROM public.final_entities;
-`);
-
   const schema = () => knex.schema.withSchema('ingestion');
 
   await schema().createTable('ingestions', table => {
@@ -75,7 +65,7 @@ CREATE VIEW ingestion.current_entities as SELECT
 exports.down = async function (knex) {
   const schema = () => knex.schema.withSchema('ingestion');
 
-  await schema().dropView('current_entities');
+  await knex.raw('drop index if exists current_entities;');
 
   await schema().dropTable('ingestion_mark_entities');
 

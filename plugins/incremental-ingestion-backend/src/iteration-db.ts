@@ -32,10 +32,11 @@ interface IterationDBOptions {
   restLength: DurationObjectUnits;
   ready: Promise<void>;
   backoff?: IncrementalEntityProviderOptions['backoff'];
+  annotationProviderKey: string;
 }
 
 export async function createIterationDB(options: IterationDBOptions): Promise<IterationDB> {
-  const { database, provider, connection, logger, ready } = options;
+  const { database, provider, connection, logger, ready, annotationProviderKey } = options;
   const restLength = Duration.fromObject(options.restLength);
   const client = await database.getClient();
   const backoff = options.backoff ?? [{ minutes: 1 }, { minutes: 5 }, { minutes: 30 }, { hours: 3 }];
@@ -242,7 +243,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
           ...deferred.entity.metadata,
           annotations: {
             ...deferred.entity.metadata.annotations,
-            'hp.com/provider-name': provider.getProviderName(),
+            [annotationProviderKey]: provider.getProviderName(),
           },
         },
       },
@@ -250,9 +251,13 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
 
     const removed = !done
       ? []
-      : await tx('ingestion.current_entities')
-          .select(tx.ref('final_entity').as('entity'))
-          .where('provider_name', provider.getProviderName())
+      : await tx('final_entities')
+          .select(tx.ref('final_entity').as('entity'), tx.ref('refresh_state.entity_ref').as('ref'))
+          .join(tx.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
+          .where(
+            `((final_entity::json #>> '{metadata, annotations, ${annotationProviderKey}}'))`,
+            provider.getProviderName(),
+          )
           .whereNotIn(
             'ref',
             tx('ingestion.ingestion_marks')
