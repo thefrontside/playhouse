@@ -2,7 +2,7 @@ import { resolvePackagePath } from '@backstage/backend-common';
 import { Knex } from 'knex';
 
 export async function applyDatabaseMigrations(knex: Knex, annotationProviderKey: string): Promise<void> {
-  const migrationsDir = resolvePackagePath('@devex/backend-incremental-ingestion', 'migrations');
+  const migrationsDir = resolvePackagePath('@frontside/backstage-plugin-incremental-ingestion-backend', 'migrations');
 
   await knex.raw('CREATE SCHEMA IF NOT EXISTS ingestion;');
 
