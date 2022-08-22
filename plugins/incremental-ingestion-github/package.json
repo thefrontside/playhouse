@@ -20,25 +20,34 @@
     "test": "backstage-cli package test",
     "clean": "backstage-cli package clean",
     "prepack": "backstage-cli package prepack",
-    "postpack": "backstage-cli package postpack"
+    "postpack": "backstage-cli package postpack",
+    "generate": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
     "@backstage/backend-common": "^0.14.0",
     "@backstage/config": "^1.0.1",
     "@frontside/backstage-plugin-incremental-ingestion-backend": "*",
-    "@types/express": "*",
+    "@graphql-codegen/cli": "^2.11.5",
+    "@graphql-codegen/typescript": "^2.7.3",
+    "@graphql-codegen/typescript-operations": "^2.5.3",
     "@octokit/graphql": "^4.8.0",
+    "@types/express": "*",
     "express": "^4.17.1",
     "express-promise-router": "^4.1.0",
-    "winston": "^3.2.1",
+    "graphql": "^16.5.0",
     "node-fetch": "^2.6.7",
+    "winston": "^3.2.1",
     "yn": "^4.0.0"
   },
   "devDependencies": {
     "@backstage/cli": "^0.17.2",
+    "@graphql-codegen/cli": "2.11.6",
+    "@graphql-codegen/typescript": "2.7.3",
+    "@graphql-codegen/typescript-document-nodes": "2.3.3",
+    "@octokit/graphql-schema": "^11.1.0",
     "@types/supertest": "^2.0.8",
-    "supertest": "^4.0.2",
-    "msw": "^0.42.0"
+    "msw": "^0.42.0",
+    "supertest": "^4.0.2"
   },
   "files": [
     "dist"
