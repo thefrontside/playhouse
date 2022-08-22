@@ -1,0 +1,49 @@
+query RepositorySearchQuery(
+  $cursor: String!
+) {
+    search(query: "created:>1970-01-01", type: REPOSITORY, first: 100, after: $cursor) {
+      pageInfo { hasNextPage, endCursor }
+      nodes{
+        ... on Repository {
+          id
+          isArchived
+          name
+          nameWithOwner
+          url
+          description
+          visibility
+          languages(first: 10) {
+            nodes {
+              name
+            }
+          }
+          repositoryTopics(first: 10) {
+            nodes {
+              topic {
+                name
+              }
+            }
+          }
+          owner {
+            ... on Organization {
+              __typename
+              name
+              login
+            }
+            ... on User {
+              __typename
+              name
+              login
+            }
+          }
+        }
+      }
+    }
+    rateLimit {
+      cost
+      remaining
+      used
+      limit
+    }
+  }
+}
