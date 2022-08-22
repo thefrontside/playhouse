@@ -25,9 +25,18 @@ Once the source has no more results, Incremental Entity Provider compares all en
 
 This approach has the following benefits,
 
-1. Each burst commits entities which are processed before the entire list is processed, reducing the processing latency of entities ingested by the entity provider.
-2. Each period between bursts provides an opportunity for the processing pipeline to settle without overwhelming the pipeline with a large number of unprocessed entities.
-3. Failed bursts are automatically retried with a built-in backoff interval providing an opportunity for the data source to reset its rate limits before retrying the burst.
-4. Deleted entities are removed as with `full` mutation with a low memory footprint.
+1. Reduced ingestion latency - each burst commits entities which are processed before the entire list is processed.
+2. Stable pressure - each period between bursts provides an opportunity for the processing pipeline to settle without overwhelming the pipeline with a large number of unprocessed entities.
+3. Built-in retry/backoff - Failed bursts are automatically retried with a built-in backoff interval providing an opportunity for the data source to reset its rate limits before retrying the burst.
+4. Prevents orphan entities - Deleted entities are removed as with `full` mutation with a low memory footprint.
 
+## Compatible data sources
 
+Incemental Entity Provider is designed for data sources that provide paginated results. Each burst attempts to handle one or more pages of the query. Incremental Entity Provider will attempt to fetch as many pages as it can within a configurable burst length. At every interation, it expects to receive the next cursor that will be used to query in the next iteration. Each iteration may happen on a different replica. This has several concequences,
+
+1. Cursor must be serializable to JSON - non-issue for most RESTful or GraphQL based APIs.
+2. Client must be stateless - a client is created from scratch for each iteration to allow distributing processing over multiple replicas.
+
+## LDAP Support
+
+LDAP is *special*. LDAP clients are stateful and each LDAP server supports different features. Even though, Incremental Entity Provider was initial designed to ingest 100k+ users from LDAP, support for LDAP is not available out of the box because there is no way to create a stateless client. We found a workaround for this. The workaround requires deploying an LDAP Proxy which maintains a stateful client that connects to the LDAP server. Unfortunately, this is not very portable because each LDAP server is different. We might eventually open source the proxy. In the mean time, [reach out](https://frontside.com/contact) if you'd like help ingesting data from LDAP.
