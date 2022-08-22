@@ -1,11 +1,15 @@
 overwrite: true
 schema: ../../node_modules/@octokit/graphql-schema/schema.graphql
 documents:
-  - src/providers/*.graphql
+  - src/**/!(*.__generated__).ts
 generates:
   src/__generated__/types.ts:
     plugins:
-      - "typescript"
-      - "typescript-operations"
-    config:
-      avoidOptionals: true
+      - typescript
+  src/:
+    preset: near-operation-file
+    presetConfig:
+      extension: .__generated__.ts
+      baseTypesPath: __generated__/types.ts
+    plugins:
+      - typescript-operations
