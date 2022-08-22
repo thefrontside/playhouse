@@ -47,8 +47,8 @@ type Entity = {
 
 async function loadYaml<T>(yamlUrl: string): Promise<T | T[]> {
   const domain = new URL(yamlUrl).host;
-
-  const url = yamlUrl.replace(domain, 'raw.githubusercontent.com').replace('/blob', '');
+  
+  const url = yamlUrl.startsWith('file:///') ? yamlUrl : yamlUrl.replace(domain, 'raw.githubusercontent.com').replace('/blob', '');
 
   const response = await fetch(url, {
     headers: {
