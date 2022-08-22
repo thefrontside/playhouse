@@ -9,7 +9,7 @@ import type { World } from '../factory';
 import { createFactory } from '../factory';
 import { isUrl, pathIsAbsolute } from './util';
 import path from 'path';
-import fileUrl from 'file-url';
+import { pathToFileURL } from 'url';
 
 let factory = createFactory("demo");
 
@@ -109,7 +109,7 @@ export async function parseLocations({ file, directory }: ParseLocationOptions) 
     } else {
       const filePath = pathIsAbsolute(file) ?  file : path.relative(process.cwd(), file);
 
-      appConfig = await loadYaml<AppConfig>(fileUrl(filePath)) as AppConfig;
+      appConfig = await loadYaml<AppConfig>(pathToFileURL(filePath).href) as AppConfig;
     }
   } else {
     if (typeof directory === 'undefined') {
@@ -126,9 +126,11 @@ export async function parseLocations({ file, directory }: ParseLocationOptions) 
     appConfig = appConfigs[0];
   }
 
-  assert(!!appConfig, `no appConfig loaded.`)
+  assert(!!appConfig, `no appConfig loaded.`);
 
-  const catalog = appConfig.data.catalog as Config['catalog'];
+  console.dir(appConfig?.data?.catalog);
+
+  const catalog = (!!appConfig?.data?.catalog ? appConfig.data.catalog : (appConfig as any).catalog) as Config['catalog'];
 
   assert(!!catalog?.locations, `no locations`);
 

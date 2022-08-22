@@ -39,3 +39,6 @@ site
 *-credentials.yaml
 
 __generated__
+
+# or do we want to ship this?
+.cache

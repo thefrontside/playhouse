@@ -17,7 +17,6 @@
     "@frontside/graphgen": "^1.6.0",
     "assert-ts": "^0.3.4",
     "commander": "^9.4.0",
-    "file-url": "^4.0.0",
     "flat-cache": "^3.0.4",
     "zod": "^3.18.0"
   },
