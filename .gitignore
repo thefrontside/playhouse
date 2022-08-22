@@ -39,3 +39,4 @@ site
 *-credentials.yaml
 
 __generated__
+*.__generated__.*
