@@ -1,4 +1,4 @@
-import { World } from '@frontside/graphgen-backstage';
+import type { World } from '../factory';
 import { z } from 'zod';
 
 export type Entities = keyof World;

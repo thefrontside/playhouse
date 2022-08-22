@@ -1,0 +1,1 @@
+export { parseLocations } from './location-parser';

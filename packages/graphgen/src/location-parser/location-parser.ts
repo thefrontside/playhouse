@@ -1,15 +1,17 @@
+import type { AppConfig } from '@backstage/config';
 import { loadConfig } from '@backstage/config-loader';
-import { findPaths } from '@backstage/cli-common';
 import type { Config } from "@backstage/plugin-catalog-backend/config";
-import yaml from 'js-yaml';
+import { load, loadAll } from 'js-yaml';
 import fetch from 'node-fetch';
-import { createFactory, World } from '@frontside/graphgen-backstage';
 import { assert } from 'assert-ts';
 import { Entities, entities } from './schema';
+import type { World } from '../factory';
+import { createFactory } from '../factory';
+import { isUrl, pathIsAbsolute } from './util';
+import path from 'path';
+import fileUrl from 'file-url';
 
 let factory = createFactory("demo");
-
-const paths = findPaths(__dirname);
 
 const pre: {
   [K in keyof World]: World[K][]
@@ -43,7 +45,11 @@ type Entity = {
   }
 };
 
-async function loadYaml<T>(url: string): Promise<T | T[]> {
+async function loadYaml<T>(yamlUrl: string): Promise<T | T[]> {
+  const domain = new URL(yamlUrl).host;
+
+  const url = yamlUrl.replace(domain, 'raw.githubusercontent.com').replace('/blob', '');
+
   const response = await fetch(url, {
     headers: {
       Authorization: `token ${process.env.GITHUB_TOKEN}`,
@@ -54,10 +60,10 @@ async function loadYaml<T>(url: string): Promise<T | T[]> {
   const text = await response.text();
 
   if (text.indexOf('---') > -1) {
-    return yaml.loadAll(text) as T[];
+    return loadAll(text) as T[];
   }
 
-  return yaml.load(text) as T;
+  return load(text) as T;
 }
 
 async function createEntitiesFromLocation(location: Entity, url: string) {
@@ -89,30 +95,52 @@ async function createEntitiesFromLocation(location: Entity, url: string) {
   }
 }
 
+interface ParseLocationOptions {
+  file?: string;
+  directory?: string;
+}
 
-async function parseYaml() {
-  const { appConfigs } = await loadConfig({
-    configRoot: paths.ownRoot,
-    configTargets: []
-  });
+export async function parseLocations({ file, directory }: ParseLocationOptions) {
+  let appConfig: AppConfig | undefined = undefined;
 
-  const catalog = appConfigs[0].data.catalog as Config['catalog'];
+  if (typeof file !== 'undefined') {
+    if(isUrl(file)) {
+      appConfig = await loadYaml<AppConfig>(file) as AppConfig;
+    } else {
+      const filePath = pathIsAbsolute(file) ?  file : path.relative(process.cwd(), file);
+
+      appConfig = await loadYaml<AppConfig>(fileUrl(filePath)) as AppConfig;
+    }
+  } else {
+    if (typeof directory === 'undefined') {
+      directory = process.cwd();
+    }
+  }
+
+  if (typeof directory !== 'undefined') {
+    const { appConfigs } = await loadConfig({
+      configRoot: pathIsAbsolute(directory) ? directory : path.relative(process.cwd(), directory),
+      configTargets: []
+    });
+
+    appConfig = appConfigs[0];
+  }
+
+  assert(!!appConfig, `no appConfig loaded.`)
+
+  const catalog = appConfig.data.catalog as Config['catalog'];
 
   assert(!!catalog?.locations, `no locations`);
 
   for (const location of catalog.locations) {
-    const domain = new URL(location.target).host;
-
-    const url = location.target.replace(domain, 'raw.githubusercontent.com').replace('/blob', '');
-
     try {
-      const initial = await loadYaml<Entity>(url);
+      const initial = await loadYaml<Entity>(location.target);
 
       const initialEntities = Array.isArray(initial) ? initial : [initial];
 
       for (const initialEntity of initialEntities) {
         if (initialEntity.kind === 'Location' as Entities) {
-          await createEntitiesFromLocation(initialEntity, url);
+          await createEntitiesFromLocation(initialEntity, location.target);
         } else {
           const entity = entities[initialEntity.kind].parse(initialEntity);
           factory.create(entity.__typename, entity);
@@ -124,11 +152,3 @@ async function parseYaml() {
     }
   }
 }
-
-function main() {
-  parseYaml().then(() => {
-    console.log('parsed!')
-  }).catch(console.error)
-}
-
-main();
