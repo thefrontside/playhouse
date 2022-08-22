@@ -1,0 +1,11 @@
+overwrite: true
+schema: ../../node_modules/@octokit/graphql-schema/schema.graphql
+documents:
+  - src/providers/*.graphql
+generates:
+  src/__generated__/types.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+    config:
+      avoidOptionals: true
