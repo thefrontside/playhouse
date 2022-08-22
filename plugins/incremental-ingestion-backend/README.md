@@ -21,10 +21,13 @@ Incremental Entity Provider will wait a configurable interval before proceeding 
 
 Once the source has no more results, Incremental Entity Provider compares all entities annotated with `frontside.com/incremental-entity-provider: <entity-provider-id>` against all marked entities to determine which entities commited by same entity provider were not marked during the last ingestion cycle. All unmarked entities are deleted at the end of the cycle. The Incremental Entity Provider rests for a fixed internal before restarting the ingestion process.
 
+![Diagram of execution of an Incremental Entity Provider](https://user-images.githubusercontent.com/74687/185822465-62f609c4-277c-45c7-9671-e50c7c6ae329.png)
+
 This approach has the following benefits,
 
 1. Each burst commits entities which are processed before the entire list is processed, reducing the processing latency of entities ingested by the entity provider.
 2. Each period between bursts provides an opportunity for the processing pipeline to settle without overwhelming the pipeline with a large number of unprocessed entities.
 3. Failed bursts are automatically retried with a built-in backoff interval providing an opportunity for the data source to reset its rate limits before retrying the burst.
 4. Deleted entities are removed as with `full` mutation with a low memory footprint.
+
 
