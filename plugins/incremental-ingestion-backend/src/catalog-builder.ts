@@ -12,8 +12,10 @@ export type CatalogBuilder = typeof CoreCatalogBuilder.prototype & {
   ): void;
 };
 
+export const INCREMENTAL_ENTITY_PROVIDER_ANNOTATION = 'frontside/incremental-provider-name';
+
 // TODO: ensure ingestion and catalog share the same database client?
-export const createCatalogBuilder = (env: PluginEnvironment, annotationProviderKey = '@frontside.com/incremental-provider-name'): CatalogBuilder => {
+export const createCatalogBuilder = (env: PluginEnvironment, annotationProviderKey = INCREMENTAL_ENTITY_PROVIDER_ANNOTATION): CatalogBuilder => {
   const { logger, database, scheduler } = env;
   const core = CoreCatalogBuilder.create(env);
 
