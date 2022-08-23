@@ -40,6 +40,8 @@
     "@frontside/backstage-plugin-batch-loader": "0.2.0",
     "@frontside/backstage-plugin-humanitec-backend": "^0.3.0",
     "@frontside/backstage-plugin-graphql": "^0.4.0",
+    "@frontside/backstage-plugin-incremental-ingestion-backend": "*",
+    "@frontside/backstage-plugin-incremental-ingestion-github": "*",
     "graphql-modules": "^2.1.0",
     "@gitbeaker/node": "^34.6.0",
     "@internal/plugin-healthcheck": "0.1.0",

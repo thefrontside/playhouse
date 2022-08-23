@@ -1,101 +1,117 @@
 import { ANNOTATION_LOCATION, ANNOTATION_ORIGIN_LOCATION, DEFAULT_NAMESPACE, stringifyEntityRef } from "@backstage/catalog-model";
-import { GithubCredentialsProvider, GitHubIntegrationConfig } from '@backstage/integration';
+import { GithubCredentialsProvider, GitHubIntegration } from '@backstage/integration';
 import { IncrementalEntityProvider } from "@frontside/backstage-plugin-incremental-ingestion-backend";
 import { graphql } from '@octokit/graphql';
 import slugify from 'slugify';
+import { Logger } from "winston";
 import type { RepositorySearchQuery } from "./repository-entity-provider.__generated__";
 
 interface GithubRepositoryEntityProviderContext {
-  client: typeof graphql
+  client: typeof graphql;
+  url: string;
 }
 
 interface Options {
   id: string;
+  searchQuery?: string;
   credentialsProvider: GithubCredentialsProvider;
-  integration: GitHubIntegrationConfig
+  integration: GitHubIntegration;
+  logger: Logger
 }
+
+const REPOSITORY_SEARCH_QUERY = /* GraphQL */`
+  query RepositorySearch($searchQuery: String!, $cursor: String) {
+    search(
+      query: $searchQuery
+      type: REPOSITORY
+      first: 100
+      after: $cursor
+    ) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        ... on Repository {
+          __typename
+          id
+          isArchived
+          name
+          nameWithOwner
+          url
+          description
+          visibility
+          languages(first: 10) {
+            nodes {
+              name
+            }
+          }
+          repositoryTopics(first: 10) {
+            nodes {
+              topic {
+                name
+              }
+            }
+          }
+          owner {
+            ... on Organization {
+              __typename
+              login
+            }
+            ... on User {
+              __typename
+              login
+            }
+          }
+        }
+      }
+    }
+    rateLimit {
+      cost
+      remaining
+      used
+      limit
+    }
+  }
+`;
 
 export function createGithubRepositoryEntityProvider({
   id,
   credentialsProvider,
-  integration
+  integration,
+  logger,
+  searchQuery = "created:>1970-01-01",
 }: Options): IncrementalEntityProvider<string, GithubRepositoryEntityProviderContext> {
 
   return {
     getProviderName() {
-      return `incremental-entity-provider:github-repository:${id}`
+      return `GithubRepositoryEntityProvider:${id}`
     },
     async around(burst) {
+      const url = `https://${integration.config.host}`;
+
       const { headers } = await credentialsProvider.getCredentials({
-        url: integration.host,
+        url,
       });
 
       const client = graphql.defaults({
-        baseUrl: integration.apiBaseUrl,
+        baseUrl: integration.config.apiBaseUrl,
         headers,
       });
 
-      await burst({ client })
+      await burst({ client, url })
     },
-    async next(context, cursor) {
+    async next({ client, url }, cursor) {
 
-      const data = await context.client<RepositorySearchQuery>(/* GraphQL */`
-        query RepositorySearch($cursor: String!) {
-          search(
-            query: "created:>1970-01-01"
-            type: REPOSITORY
-            first: 100
-            after: $cursor
-          ) {
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
-            nodes {
-              ... on Repository {
-                id
-                isArchived
-                name
-                nameWithOwner
-                url
-                description
-                visibility
-                languages(first: 10) {
-                  nodes {
-                    name
-                  }
-                }
-                repositoryTopics(first: 10) {
-                  nodes {
-                    topic {
-                      name
-                    }
-                  }
-                }
-                owner {
-                  ... on Organization {
-                    __typename
-                    login
-                  }
-                  ... on User {
-                    __typename
-                    login
-                  }
-                }
-              }
-            }
-          }
-          rateLimit {
-            cost
-            remaining
-            used
-            limit
-          }
-        }`,
-        { cursor }
-      )
+      logger.debug(JSON.stringify({ cursor, searchQuery }))
 
-      const location = `url:https://${integration.host}`;
+      const data = await client<RepositorySearchQuery>(REPOSITORY_SEARCH_QUERY,
+        { 
+          cursor: cursor || null,
+          searchQuery,
+         }
+      );
+      const location = `url:${url}`;
 
       const entities = data.search.nodes?.flatMap(node => node?.__typename === 'Repository' ? [node] : [])
         .map(node => ({
@@ -127,11 +143,15 @@ export function createGithubRepositoryEntityProvider({
           locationKey: this.getProviderName(),
         }));
 
-      return {
+      const result = {
         done: !data.search.pageInfo.hasNextPage,
-        cursor: data.search.pageInfo.endCursor ?? '',
+        cursor: JSON.stringify(data.search.pageInfo.endCursor),
         entities: entities ?? []
-      }
+      };
+
+      logger.debug(`Retrieved repositories: ${JSON.stringify(result)}`)
+
+      return result;
     }
   }
 }
