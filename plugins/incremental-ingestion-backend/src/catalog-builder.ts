@@ -30,8 +30,8 @@ export const createCatalogBuilder = (env: PluginEnvironment, annotationProviderK
       async connect(connection) {
         logger.info(`connecting incremental entity provider '${provider.getProviderName()}'`);
         const db = await createIterationDB({ ...options, ready, database, logger, provider, restLength, connection, annotationProviderKey });
-        const frequency = Duration.fromObject(burstInterval);
-        const length = Duration.fromObject(burstLength);
+        const frequency = Duration.isDuration(burstInterval) ? burstInterval : Duration.fromObject(burstInterval);
+        const length = Duration.isDuration(burstLength) ? burstLength : Duration.fromObject(burstLength);
 
         await scheduler.scheduleTask({
           id: provider.getProviderName(),
