@@ -37,7 +37,7 @@ interface IterationDBOptions {
 
 export async function createIterationDB(options: IterationDBOptions): Promise<IterationDB> {
   const { database, provider, connection, logger, ready, annotationProviderKey } = options;
-  const restLength = Duration.fromObject(options.restLength);
+  const restLength = Duration.isDuration(options.restLength) ? options.restLength : Duration.fromObject(options.restLength);
   const client = await database.getClient();
   const backoff = options.backoff ?? [{ minutes: 1 }, { minutes: 5 }, { minutes: 30 }, { hours: 3 }];
 
