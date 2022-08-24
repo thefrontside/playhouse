@@ -44,13 +44,13 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
   return {
     async taskFn(signal) {
       try {
-        logger.debug(`${provider.getProviderName()}: BEGIN INTERVAL`);
+        logger.debug(`${provider.getProviderName()}: BEGIN TICK`);
         await handleNextAction(signal);
       } catch (error) {
         logger.error(`${provider.getProviderName()}: ${error}`);
         throw error;
       } finally {
-        logger.debug(`${provider.getProviderName()}: END INTERVAL`);
+        logger.debug(`${provider.getProviderName()}: END TICK`);
       }
     },
   };
@@ -65,16 +65,20 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       }
 
       switch (nextAction) {
-        case 'rest':
-          if (Date.now() > nextActionAt) {
-            logger.info(`${provider.getProviderName()}: Rest period complete. Ingestion will be started again`);
+        case 'rest': {
+          const remainingTime = nextActionAt - Date.now();
+          if (remainingTime <= 0) {
+            logger.info(`${provider.getProviderName()}: Rest period complete. Ingestion will restart on the next tick.`);
             await update({
               next_action: 'nothing (done)',
               rest_completed_at: new Date(),
               status: 'complete',
             });
+          } else {
+            logger.debug(`${provider.getProviderName()}: Resting. Ingestion will restart in ${Duration.fromMillis(remainingTime).toHuman()}`)
           }
           break;
+        }
         case 'ingest':
           try {
             await update({
@@ -82,7 +86,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
             });
             const done = await ingestOneBurst(ingestionId, signal, tx);
             if (done) {
-              logger.info(`ingestion is complete, transitioning to rest period of ${restLength.toHuman()}`);
+              logger.info(`${provider.getProviderName()}: Ingestion is complete. Rest for ${restLength.toHuman()}`);
               await update({
                 next_action: 'rest',
                 next_action_at: new Date(Date.now() + restLength.as('milliseconds')),
