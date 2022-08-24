@@ -120,7 +120,7 @@ export function createGithubRepositoryEntityProvider({
             kind: 'GithubRepository',
             metadata: {
               namespace: DEFAULT_NAMESPACE,
-              name: normalizeEntityName(node.nameWithOwner),
+              name: slugify(node.nameWithOwner),
               description: node.description ?? '',
               annotations: {
                 [ANNOTATION_LOCATION]: location,
@@ -154,8 +154,4 @@ export function createGithubRepositoryEntityProvider({
       return result;
     }
   }
-}
-
-function normalizeEntityName(name: string) {
-  return slugify(name, { replacement: '__', trim: true, lower: true })
 }
