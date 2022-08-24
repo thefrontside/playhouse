@@ -255,7 +255,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
         removed = await tx('final_entities')
           .select(tx.ref('final_entity').as('entity'), tx.ref('refresh_state.entity_ref').as('ref'))
           .join(tx.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
-          .where(
+          .whereRaw(
             `((final_entity::json #>> '{metadata, annotations, ${annotationProviderKey}}'))`,
             provider.getProviderName(),
           )
