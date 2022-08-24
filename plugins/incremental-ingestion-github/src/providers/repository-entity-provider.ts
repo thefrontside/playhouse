@@ -143,7 +143,7 @@ export function createGithubRepositoryEntityProvider({
 
       return {
         done: !data.search.pageInfo.hasNextPage,
-        cursor: JSON.stringify(data.search.pageInfo.endCursor),
+        cursor: data.search.pageInfo.endCursor,
         entities: entities ?? []
       };
     }
