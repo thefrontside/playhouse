@@ -84,7 +84,7 @@ export function createGithubRepositoryEntityProvider({
 
   return {
     getProviderName() {
-      return `GithubRepositoriesIngestion:${id}`
+      return `GithubRepository:${id}`
     },
     async around(burst) {
       const url = `https://${integration.config.host}`;
@@ -118,7 +118,7 @@ export function createGithubRepositoryEntityProvider({
             kind: 'GithubRepository',
             metadata: {
               namespace: DEFAULT_NAMESPACE,
-              name: slugify(node.nameWithOwner),
+              name: normalizeEntityName(node.nameWithOwner),
               description: node.description ?? '',
               annotations: {
                 [ANNOTATION_LOCATION]: location,
@@ -148,4 +148,8 @@ export function createGithubRepositoryEntityProvider({
       };
     }
   }
+}
+
+function normalizeEntityName(name: string = '') {
+  return slugify(name.replace('/', '__').replace('.', '__dot__'))
 }
