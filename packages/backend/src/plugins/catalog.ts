@@ -35,7 +35,7 @@ export default async function createPlugin(
       {
         burstInterval: Duration.fromObject({ seconds: 3 }),
         burstLength: Duration.fromObject({ seconds: 3 }),
-        restLength: Duration.fromObject({ weeks: 1 })
+        restLength: Duration.fromObject({ day: 1 })
       }
     )
   }

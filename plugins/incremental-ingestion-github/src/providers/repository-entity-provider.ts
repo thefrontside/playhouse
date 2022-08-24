@@ -84,7 +84,7 @@ export function createGithubRepositoryEntityProvider({
 
   return {
     getProviderName() {
-      return `GithubRepositoryEntityProvider:${id}`
+      return `GithubRepositoriesIngestion:${id}`
     },
     async around(burst) {
       const url = `https://${integration.config.host}`;
@@ -143,7 +143,7 @@ export function createGithubRepositoryEntityProvider({
 
       return {
         done: !data.search.pageInfo.hasNextPage,
-        cursor: data.search.pageInfo.endCursor,
+        cursor: data.search.pageInfo.endCursor ?? '',
         entities: entities ?? []
       };
     }
