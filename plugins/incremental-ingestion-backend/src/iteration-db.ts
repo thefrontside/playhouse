@@ -36,21 +36,23 @@ interface IterationDBOptions {
 }
 
 export async function createIterationDB(options: IterationDBOptions): Promise<IterationDB> {
-  const { database, provider, connection, logger, ready, annotationProviderKey } = options;
+  const { database, provider, connection, logger: catalogLogger, ready, annotationProviderKey } = options;
   const restLength = Duration.isDuration(options.restLength) ? options.restLength : Duration.fromObject(options.restLength);
   const client = await database.getClient();
   const backoff = options.backoff ?? [{ minutes: 1 }, { minutes: 5 }, { minutes: 30 }, { hours: 3 }];
 
+  const logger = catalogLogger.child({ provider: provider.getProviderName() })
+
   return {
     async taskFn(signal) {
       try {
-        logger.debug(`${provider.getProviderName()}: BEGIN TICK`);
+        logger.debug(`Begin tick`);
         await handleNextAction(signal);
       } catch (error) {
-        logger.error(`${provider.getProviderName()}: ${error}`);
+        logger.error(`${error}`);
         throw error;
       } finally {
-        logger.debug(`${provider.getProviderName()}: END TICK`);
+        logger.debug(`End tick`);
       }
     },
   };
@@ -68,14 +70,14 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
         case 'rest': {
           const remainingTime = nextActionAt - Date.now();
           if (remainingTime <= 0) {
-            logger.info(`${provider.getProviderName()}: Rest period complete. Ingestion will restart on the next tick.`);
+            logger.info(`Rest period complete. Ingestion will restart on the next tick.`);
             await update({
               next_action: 'nothing (done)',
               rest_completed_at: new Date(),
               status: 'complete',
             });
           } else {
-            logger.debug(`${provider.getProviderName()}: Resting. Ingestion will restart in ${Duration.fromMillis(remainingTime).toHuman()}`)
+            logger.debug(`Resting. Ingestion will restart in ${toHumanDuration(Duration.fromMillis(remainingTime))}`)
           }
           break;
         }
@@ -86,7 +88,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
             });
             const done = await ingestOneBurst(ingestionId, signal, tx);
             if (done) {
-              logger.info(`${provider.getProviderName()}: Ingestion is complete. Rest for ${restLength.toHuman()}`);
+              logger.info(`Ingestion is complete. Rest for ${restLength.toHuman()}`);
               await update({
                 next_action: 'rest',
                 next_action_at: new Date(Date.now() + restLength.as('milliseconds')),
@@ -101,7 +103,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
             }
           } catch (error) {
             if ((error as Error).message && (error as Error).message === 'CANCEL') {
-              logger.info(`${provider.getProviderName()}: Ingestion canceled.`);
+              logger.info(`Ingestion canceled.`);
               await update({
                 next_action: 'cancel',
                 last_error: (error as Error).message,
@@ -113,9 +115,11 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
 
               const backoffLength = currentBackoff.as('milliseconds');
 
+              logger.error(error);
               logger.info(
-                `${provider.getProviderName()}: Error during ingestion burst. Ingestion will backoff for ${currentBackoff.toHuman()} (${error})`,
+                `Error during ingestion burst. Ingestion will backoff for ${toHumanDuration(currentBackoff)}`,
               );
+
               await update({
                 next_action: 'backoff',
                 attempts: attempts + 1,
@@ -126,18 +130,22 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
             }
           }
           break;
-        case 'backoff':
-          if (Date.now() > nextActionAt) {
+        case 'backoff': {
+          const remainingTime = nextActionAt - Date.now();
+          if (remainingTime <= 0) {
             logger.info(
-              `${provider.getProviderName()}: backoff period is complete. Resumption of ingestion will be attempted`,
+              `Backoff period is complete. Attempt to resume ingestion on next tick.`,
             );
             await update({
               next_action: 'ingest',
             });
+          } else {
+            logger.debug(`Backoff period will expire in ${toHumanDuration(Duration.fromMillis(remainingTime))}.`);
           }
-          break;
+          break;          
+        }
         case 'cancel':
-          logger.info(`${provider.getProviderName()}: Current ingestion canceled. Ingestion will be started again`);
+          logger.info(`Current ingestion cancelled. Ingestion will restart on the next tick.`);
           await update({
             next_action: 'nothing (canceled)',
             rest_completed_at: new Date(),
@@ -145,7 +153,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
           });
           break;
         default:
-          logger.error(`incremental iterator received unknown action '${nextAction}'`);
+          logger.error(`Incremental iterator received unknown action '${nextAction}'`);
       }
     });
   }
@@ -187,7 +195,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     const start = performance.now();
     let count = 0;
     let done = false;
-    logger.info(`${provider.getProviderName()}: burst initiated`);
+    logger.info(`Burst initiated`);
 
     await provider.around(async function burst(context: unknown) {
       let next = await provider.next(context, cursor);
@@ -207,7 +215,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     });
 
     logger.info(
-      `${provider.getProviderName()}: burst complete (${count} batches in ${Math.round(performance.now() - start)}ms).`,
+      `Burst complete (${count} batches in ${Duration.fromMillis(performance.now() - start).toHuman()}).`,
     );
     return done;
   }
@@ -222,7 +230,8 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
   ) {
     const _cursor = JSON.stringify(cursor);
 
-    logger.debug(`${provider.getProviderName()}: MARK ${entities.length} entities, cursor: ${_cursor}, done: ${done}`);
+    logger.info(`Mark`, { entities: entities.length, cursor, done });
+
     const markId = v4();
 
     await tx('ingestion.ingestion_marks').insert({
@@ -285,4 +294,8 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       removed,
     });
   }
+}
+
+function toHumanDuration(duration: Duration) {
+  return duration.shiftTo('days', 'hours', 'minutes', 'seconds').toHuman()
 }
