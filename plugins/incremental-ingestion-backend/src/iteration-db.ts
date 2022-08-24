@@ -230,7 +230,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
   ) {
     const _cursor = JSON.stringify(cursor);
 
-    logger.info(`Mark`, { entities: entities.length, cursor, done });
+    logger.info(`Mark`, { entities: entities.length, cursor: _cursor, done });
 
     const markId = v4();
 
