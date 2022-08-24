@@ -1,4 +1,4 @@
-# @frontside/backstage-plugin-incremental-ingestion-backend
+# @frontside/backstage-plugin-incremental-ingestion-backend (FBPIIB Plugin)
 
 The Incremental Ingestion Backend plugin provides Incremental Entity Provider that can be used to ingest data from sources using `delta` mutations while retaining an orphan preventing mechanism provided by `full` mutations.
 
