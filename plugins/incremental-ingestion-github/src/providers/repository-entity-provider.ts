@@ -6,7 +6,7 @@ import slugify from 'slugify';
 import { Logger } from "winston";
 import type { RepositorySearchQuery } from "./repository-entity-provider.__generated__";
 
-interface GithubRepositoryEntityProviderContext {
+interface Context {
   client: typeof graphql;
   url: string;
 }
@@ -17,6 +17,10 @@ interface Options {
   credentialsProvider: GithubCredentialsProvider;
   integration: GitHubIntegration;
   logger: Logger
+}
+
+interface Cursor {
+  cursor: string | null;
 }
 
 const REPOSITORY_SEARCH_QUERY = /* GraphQL */`
@@ -80,7 +84,7 @@ export function createGithubRepositoryEntityProvider({
   credentialsProvider,
   integration,
   searchQuery = "created:>1970-01-01",
-}: Options): IncrementalEntityProvider<string, GithubRepositoryEntityProviderContext> {
+}: Options): IncrementalEntityProvider<Cursor, Context> {
 
   return {
     getProviderName() {
@@ -100,13 +104,13 @@ export function createGithubRepositoryEntityProvider({
 
       await burst({ client, url })
     },
-    async next({ client, url }, cursor) {
+    async next({ client, url }, { cursor } = { cursor: null }) {
 
       const data = await client<RepositorySearchQuery>(REPOSITORY_SEARCH_QUERY,
-        { 
-          cursor: cursor || null,
+        {
+          cursor,
           searchQuery,
-         }
+        }
       );
 
       const location = `url:${url}`;
@@ -143,7 +147,7 @@ export function createGithubRepositoryEntityProvider({
 
       return {
         done: !data.search.pageInfo.hasNextPage,
-        cursor: data.search.pageInfo.endCursor ?? '',
+        cursor: { cursor: data.search.pageInfo.endCursor ?? null },
         entities: entities ?? []
       };
     }
