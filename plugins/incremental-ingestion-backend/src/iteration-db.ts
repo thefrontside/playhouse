@@ -41,7 +41,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
   const client = await database.getClient();
   const backoff = options.backoff ?? [{ minutes: 1 }, { minutes: 5 }, { minutes: 30 }, { hours: 3 }];
 
-  const logger = catalogLogger.child({ provider: provider.getProviderName() })
+  const logger = catalogLogger.child({ entityProvider: provider.getProviderName() })
 
   return {
     async taskFn(signal) {
