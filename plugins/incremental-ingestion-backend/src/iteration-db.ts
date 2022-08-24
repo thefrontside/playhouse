@@ -46,7 +46,6 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       try {
         logger.debug(`${provider.getProviderName()}: BEGIN INTERVAL`);
         await handleNextAction(signal);
-        logger.debug(`${provider.getProviderName()}: END INTERVAL`);
       } catch (error) {
         logger.error(`${provider.getProviderName()}: ${error}`);
         throw error;
