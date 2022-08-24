@@ -249,9 +249,10 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       },
     }));
 
-    const removed = !done
-      ? []
-      : await tx('final_entities')
+    let removed: DeferredEntity[] = []
+    if (done) {
+      try {
+        removed = await tx('final_entities')
           .select(tx.ref('final_entity').as('entity'), tx.ref('refresh_state.entity_ref').as('ref'))
           .join(tx.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
           .where(
@@ -267,7 +268,11 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
                 'ingestion.ingestion_mark_entities.ingestion_mark_id',
               )
               .select('ingestion.ingestion_mark_entities.ref'),
-          );
+          )
+      } catch (e) {
+        logger.error(`Failed to determine entities to delete. ${e}`)
+      }
+    }
 
     await connection.applyMutation({
       type: 'delta',
