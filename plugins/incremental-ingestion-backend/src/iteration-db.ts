@@ -216,13 +216,15 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     done: boolean,
     cursor?: unknown,
   ) {
-    logger.debug(`MARK ${entities.length} entities, cursor: ${JSON.stringify(cursor)}, done: ${done}`);
+    const _cursor = JSON.stringify(cursor);
+
+    logger.debug(`${provider.getProviderName()}: MARK ${entities.length} entities, cursor: ${_cursor}, done: ${done}`);
     const markId = v4();
 
     await tx('ingestion.ingestion_marks').insert({
       id: markId,
       ingestion_id: id,
-      cursor,
+      cursor: _cursor,
       sequence,
     });
 
