@@ -79,7 +79,6 @@ export function createGithubRepositoryEntityProvider({
   id,
   credentialsProvider,
   integration,
-  logger,
   searchQuery = "created:>1970-01-01",
 }: Options): IncrementalEntityProvider<string, GithubRepositoryEntityProviderContext> {
 
@@ -103,14 +102,13 @@ export function createGithubRepositoryEntityProvider({
     },
     async next({ client, url }, cursor) {
 
-      logger.debug(JSON.stringify({ cursor, searchQuery }))
-
       const data = await client<RepositorySearchQuery>(REPOSITORY_SEARCH_QUERY,
         { 
           cursor: cursor || null,
           searchQuery,
          }
       );
+
       const location = `url:${url}`;
 
       const entities = data.search.nodes?.flatMap(node => node?.__typename === 'Repository' ? [node] : [])
@@ -143,15 +141,11 @@ export function createGithubRepositoryEntityProvider({
           locationKey: this.getProviderName(),
         }));
 
-      const result = {
+      return {
         done: !data.search.pageInfo.hasNextPage,
         cursor: JSON.stringify(data.search.pageInfo.endCursor),
         entities: entities ?? []
       };
-
-      logger.debug(`Retrieved repositories: ${JSON.stringify(result)}`)
-
-      return result;
     }
   }
 }
