@@ -1,5 +1,11 @@
 /* eslint-disable func-names */
+const INCREMENTAL_ENTITY_PROVIDER_ANNOTATION = 'frontside/incremental-entity-provider';
+
 exports.up = async function (knex) {
+  await knex.raw(
+    `CREATE INDEX IF NOT EXISTS current_entities ON public.final_entities ((final_entity::json #>> '{metadata, annotations, ${INCREMENTAL_ENTITY_PROVIDER_ANNOTATION}}'));`,
+  );
+
   const schema = () => knex.schema.withSchema('ingestion');
 
   await schema().createTable('ingestions', table => {

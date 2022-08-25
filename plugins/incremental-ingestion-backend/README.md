@@ -1,10 +1,10 @@
-# @frontside/backstage-plugin-incremental-ingestion-backend (FBPIIB Plugin)
+# @frontside/backstage-plugin-incremental-ingestion-backend
 
 The Incremental Ingestion Backend plugin provides Incremental Entity Provider that can be used to ingest data from sources using `delta` mutations while retaining an orphan preventing mechanism provided by `full` mutations.
 
 ## Why did we create it?
 
-Backstage provides an [Entity Provider mechanism that has two kinds of mutations](https://backstage.io/docs/features/software-catalog/external-integrations#provider-mutations): `delta` and `full`. `delta` mutations tell Backstage Catalog which entities should be added and removed from the catalog. `full` mutation accepts a list of entities and automatically computes which entities must be removed by comparing the provided entities against existing entities to create a diff between the two sets. These two kinds of mutations are convenient for different kinds of data sources. A `delta` mutation can be used with a data source that emits UPDATE and DELETE events for its data. A `full` mutation is useful for APIs that produce fewer entities than can fit in Backstage processes' memory. 
+Backstage provides an [Entity Provider mechanism that has two kinds of mutations](https://backstage.io/docs/features/software-catalog/external-integrations#provider-mutations): `delta` and `full`. `delta` mutations tell Backstage Catalog which entities should be added and removed from the catalog. `full` mutation accepts a list of entities and automatically computes which entities must be removed by comparing the provided entities against existing entities to create a diff between the two sets. These two kinds of mutations are convenient for different kinds of data sources. A `delta` mutation can be used with a data source that emits UPDATE and DELETE events for its data. A `full` mutation is useful for APIs that produce fewer entities than can fit in Backstage processes' memory.
 
 Unfortunately, these two kinds of mutations are insufficient for very large data sources for the following reasons,
 
@@ -31,6 +31,11 @@ This approach has the following benefits,
 2. Stable pressure - each period between bursts provides an opportunity for the processing pipeline to settle without overwhelming the pipeline with a large number of unprocessed entities.
 3. Built-in retry/backoff - Failed bursts are automatically retried with a built-in backoff interval providing an opportunity for the data source to reset its rate limits before retrying the burst.
 4. Prevents orphan entities - Deleted entities are removed as with `full` mutation with a low memory footprint.
+
+## Installation
+
+1. Install `@frontside/backstage-plugin-incremental-ingestion-backend` in `packages/backend` with `yarn add @frontside/backstage-plugin-incremental-ingestion-backend`
+2. Replace `CatalogBuilder` import from `@backstage/plugin-catalog-backend` with `IncrementalCatalogBuilder` from `@frontside/backstage-plugin-incremental-ingestion-backend`
 
 ## Compatible data sources
 

@@ -5,37 +5,46 @@ import { Duration } from 'luxon';
 import { createIterationDB } from './iteration-db';
 import { applyDatabaseMigrations } from './migrations';
 
-export type CatalogBuilder = typeof CoreCatalogBuilder.prototype & {
+export class IncrementalCatalogBuilder {
+  static create(env: PluginEnvironment, builder: CoreCatalogBuilder) {
+    return new IncrementalCatalogBuilder(env, builder);
+  }
+
+  private env: PluginEnvironment;
+  private ready: Deferred<void>;
+  private builder: CoreCatalogBuilder;
+
+  private constructor(env: PluginEnvironment, builder: CoreCatalogBuilder) {
+    this.env = env;
+    this.builder = builder;
+    this.ready = new Deferred<void>();
+  }
+
+  async build() {
+    const db = await this.env.database.getClient();
+
+    await applyDatabaseMigrations(db);
+
+    this.ready.resolve();
+  }
+
   addIncrementalEntityProvider<T, C>(
-    provider: IncrementalEntityProvider<T, C>,
-    options: IncrementalEntityProviderOptions,
-  ): void;
-};
-
-export const INCREMENTAL_ENTITY_PROVIDER_ANNOTATION = 'frontside/incremental-provider-name';
-
-// TODO: ensure ingestion and catalog share the same database client?
-export const createCatalogBuilder = (env: PluginEnvironment, annotationProviderKey = INCREMENTAL_ENTITY_PROVIDER_ANNOTATION): CatalogBuilder => {
-  const { logger: catalogLogger, database, scheduler } = env;
-  const core = CoreCatalogBuilder.create(env);
-
-  const ready = new Deferred<void>();
-
-  function addIncrementalEntityProvider<T, C>(
-    this: CatalogBuilder,
     provider: IncrementalEntityProvider<T, C>,
     options: IncrementalEntityProviderOptions,
   ) {
     const { burstInterval, burstLength, restLength } = options;
-    this.addEntityProvider({
-      getProviderName: provider.getProviderName,
+    const { logger: catalogLogger, database, scheduler } = this.env;
+    const ready = this.ready;
+
+    return this.builder.addEntityProvider({
+      getProviderName: provider.getProviderName.bind(provider),
       async connect(connection) {
         const logger = catalogLogger.child({ entityProvider: provider.getProviderName() });
 
         logger.info(`Connecting`);
 
-        const db = await createIterationDB({ ...options, ready, database, logger, provider, restLength, connection, annotationProviderKey });
-        
+        const db = await createIterationDB({ ...options, ready, database, logger, provider, restLength, connection });
+
         const frequency = Duration.isDuration(burstInterval) ? burstInterval : Duration.fromObject(burstInterval);
         const length = Duration.isDuration(burstLength) ? burstLength : Duration.fromObject(burstLength);
 
@@ -48,18 +57,4 @@ export const createCatalogBuilder = (env: PluginEnvironment, annotationProviderK
       },
     });
   }
-
-  return Object.create(core, {
-    addIncrementalEntityProvider: {
-      value: addIncrementalEntityProvider,
-    },
-    build: {
-      async value() {
-        const build = await core.build.call(this);
-        await applyDatabaseMigrations(await database.getClient(), annotationProviderKey);
-        ready.resolve();
-        return build;
-      },
-    },
-  });
-};
+}
