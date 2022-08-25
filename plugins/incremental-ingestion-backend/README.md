@@ -72,21 +72,6 @@ export default async function createPlugin(
   // incremental builder receives builder because it'll register
   // incremental entity providers with the builder 
   const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
-  
-  const githubRepositoryProvider = GithubRepositoryEntityProvider.create({ 
-    host: 'github.com', 
-    searchQuery: "created:>1970-01-01 user:thefrontside", 
-    config: env.config 
-  })
-
-  incrementalBuilder.addIncrementalEntityProvider(
-    githubRepositoryProvider,
-    {
-      burstInterval: Duration.fromObject({ seconds: 3 }),
-      burstLength: Duration.fromObject({ seconds: 3 }),
-      restLength: Duration.fromObject({ day: 1 })
-    }
-  )
 
   builder.addProcessor(new ScaffolderEntitiesProcessor());
 
@@ -260,17 +245,20 @@ export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cu
 
     // convert returned items into entities
     const entities = data.items.map(item => ({
-      kind: 'Component',
-      metadata: {
-        name: item.name,
-        annotations: {
-          // You need to define these, otherwise they'll fail validation
-          [ANNOTATION_LOCATION]: this.getProviderName(),
-          [ANNOTATION_ORIGIN_LOCATION]: this.getProviderName(),
+      entity: {
+        apiVersion: 'backstage.io/v1beta1',
+        kind: 'Component',
+        metadata: {
+          name: item.name,
+          annotations: {
+            // You need to define these, otherwise they'll fail validation
+            [ANNOTATION_LOCATION]: this.getProviderName(),
+            [ANNOTATION_ORIGIN_LOCATION]: this.getProviderName(),
+          }
         }
-      }
-      spec: {
-        type: 'service'
+        spec: {
+          type: 'service'
+        }
       }
     }));
 
@@ -288,7 +276,36 @@ export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cu
 }
 ```
 
-That's it. 
+Now that you have your new Incremental Entity Provider, we can connect it to the catalog. 
+
+## Adding an Incremental Entity Provider to the catalog
+
+We'll assume you followed the <a href="#Installation">Installation</a> instructions. After you create your `incrementalBuilder`, you can instantiate your Entity Provider and pass it to the `addIncrementalEntityProvider` method.
+
+```ts
+  const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
+
+  // I'm assuming you're going to get your token from config
+  const token = config.getString('myApiClient.token');
+
+  const myEntityProvider = new MyIncrementalEntityProvider(token)
+
+  incrementalBuilder.addIncrementalEntityProvider(
+    myEntityProvider,
+    {
+      // how long should it attempt to read pages from the API
+      // keep this short. Incremental Entity Provider will attempt to
+      // read as many pages as it can in this time
+      burstLength: Duration.fromObject({ seconds: 3 }),
+      // how long should it wait between bursts?
+      burstInterval: Duration.fromObject({ seconds: 3 }),
+      // how long should it rest before re-ingesting again?
+      restLength: Duration.fromObject({ day: 1 })
+    }
+  )
+```
+
+That's it!!!
 
 ## Error handling
 
