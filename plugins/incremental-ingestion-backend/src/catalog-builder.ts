@@ -16,7 +16,7 @@ export const INCREMENTAL_ENTITY_PROVIDER_ANNOTATION = 'frontside/incremental-pro
 
 // TODO: ensure ingestion and catalog share the same database client?
 export const createCatalogBuilder = (env: PluginEnvironment, annotationProviderKey = INCREMENTAL_ENTITY_PROVIDER_ANNOTATION): CatalogBuilder => {
-  const { logger, database, scheduler } = env;
+  const { logger: catalogLogger, database, scheduler } = env;
   const core = CoreCatalogBuilder.create(env);
 
   const ready = new Deferred<void>();
@@ -30,8 +30,12 @@ export const createCatalogBuilder = (env: PluginEnvironment, annotationProviderK
     this.addEntityProvider({
       getProviderName: provider.getProviderName,
       async connect(connection) {
-        logger.info(`connecting incremental entity provider '${provider.getProviderName()}'`);
+        const logger = catalogLogger.child({ entityProvider: provider.getProviderName() });
+
+        logger.info(`Connecting`);
+
         const db = await createIterationDB({ ...options, ready, database, logger, provider, restLength, connection, annotationProviderKey });
+        
         const frequency = Duration.isDuration(burstInterval) ? burstInterval : Duration.fromObject(burstInterval);
         const length = Duration.isDuration(burstLength) ? burstLength : Duration.fromObject(burstLength);
 
