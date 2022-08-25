@@ -16,12 +16,12 @@ Unfortunately, these two kinds of mutations are insufficient for very large data
 We created the Incremental Entity Provider to address all of the above issues. The Incremental Entity Provider addresses these issues with a combination of `delta` mutations and a mark-and-sweep mechanism. Instead of doing a single `full` mutation, it performs a series of bursts. At the end of each burst, the Incremental Entity Provider performs the following three operations,
 
 1. Marks each received entity in the database.
-2. Annotates each entity with `frontside.com/incremental-entity-provider: <entity-provider-id>` annotation.
+2. Annotates each entity with `frontside/incremental-entity-provider: <entity-provider-id>` annotation.
 3. Commits all of the entities with a `delta` mutation.
 
 Incremental Entity Provider will wait a configurable interval before proceeding to the next burst.
 
-Once the source has no more results, Incremental Entity Provider compares all entities annotated with `frontside.com/incremental-entity-provider: <entity-provider-id>` against all marked entities to determine which entities commited by same entity provider were not marked during the last ingestion cycle. All unmarked entities are deleted at the end of the cycle. The Incremental Entity Provider rests for a fixed internal before restarting the ingestion process.
+Once the source has no more results, Incremental Entity Provider compares all entities annotated with `frontside/incremental-entity-provider: <entity-provider-id>` against all marked entities to determine which entities commited by same entity provider were not marked during the last ingestion cycle. All unmarked entities are deleted at the end of the cycle. The Incremental Entity Provider rests for a fixed internal before restarting the ingestion process.
 
 ![Diagram of execution of an Incremental Entity Provider](https://user-images.githubusercontent.com/74687/185822734-ee6279c7-64fa-46b9-9aa8-d4092ab73858.png)
 
@@ -35,7 +35,72 @@ This approach has the following benefits,
 ## Installation
 
 1. Install `@frontside/backstage-plugin-incremental-ingestion-backend` in `packages/backend` with `yarn add @frontside/backstage-plugin-incremental-ingestion-backend`
-2. Add 
+2. Import `IncrementalCatalogBuilder` from `@frontside/backstage-plugin-incremental-ingestion-backend` and instantiate it with `IncrementalCatalogBuilder.create(env, builder)`. You have to pass `builder` into `IncrementalCatalogBuilder.create` function because `IncrementalCatalogBuilder` will convert an `IncrementalEntityProvider` into an `EntityProvider` and call `builder.addEntityProvider`.
+  ```ts
+  const builder = CatalogBuilder.create(env);
+  // incremental builder receives builder because it'll register
+  // incremental entity providers with the builder 
+  const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
+  ```
+3. Last step, add `await incrementBuilder.build()` after `await builder.build()` to ensure that all `CatalogBuider` migration run before running `incrementBuilder.build()` migrations.
+  ```ts
+  const { processingEngine, router } = await builder.build();
+
+  // this has to run after `await builder.build()` so ensure that catalog migrations are completed 
+  // before incremental builder migrations are executed 
+  await incrementalBuilder.build();
+  ```
+
+The resuld should look something like this,
+
+```ts
+import {
+  CatalogBuilder
+} from '@backstage/plugin-catalog-backend';
+import { ScaffolderEntitiesProcessor } from '@backstage/plugin-scaffolder-backend';
+import { IncrementalCatalogBuilder } from '@frontside/backstage-plugin-incremental-ingestion-backend';
+import { GithubRepositoryEntityProvider } from '@frontside/backstage-plugin-incremental-ingestion-github';
+import { Router } from 'express';
+import { Duration } from 'luxon';
+import { PluginEnvironment } from '../types';
+
+export default async function createPlugin(
+  env: PluginEnvironment,
+): Promise<Router> {
+  
+  const builder = CatalogBuilder.create(env);
+  // incremental builder receives builder because it'll register
+  // incremental entity providers with the builder 
+  const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
+  
+  const githubRepositoryProvider = GithubRepositoryEntityProvider.create({ 
+    host: 'github.com', 
+    searchQuery: "created:>1970-01-01 user:thefrontside", 
+    config: env.config 
+  })
+
+  incrementalBuilder.addIncrementalEntityProvider(
+    githubRepositoryProvider,
+    {
+      burstInterval: Duration.fromObject({ seconds: 3 }),
+      burstLength: Duration.fromObject({ seconds: 3 }),
+      restLength: Duration.fromObject({ day: 1 })
+    }
+  )
+
+  builder.addProcessor(new ScaffolderEntitiesProcessor());
+
+  const { processingEngine, router } = await builder.build();
+
+  // this has to run after `await builder.build()` so ensure that catalog migrations are completed 
+  // before incremental builder migrations are executed 
+  await incrementalBuilder.build();
+
+  await processingEngine.start();
+
+  return router;
+}
+```
 
 ## Compatible data sources
 
