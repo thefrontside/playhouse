@@ -11,6 +11,7 @@ import { stringifyEntityRef } from '@backstage/catalog-model';
 import { performance } from 'perf_hooks';
 import { Duration } from 'luxon';
 import { v4 } from 'uuid';
+import { toHumanDuration } from './to-human-duration';
 
 export interface IterationDB {
   taskFn: TaskFunction;
@@ -36,12 +37,10 @@ interface IterationDBOptions {
 }
 
 export async function createIterationDB(options: IterationDBOptions): Promise<IterationDB> {
-  const { database, provider, connection, logger: catalogLogger, ready, annotationProviderKey } = options;
+  const { database, provider, connection, logger, ready, annotationProviderKey } = options;
   const restLength = Duration.isDuration(options.restLength) ? options.restLength : Duration.fromObject(options.restLength);
   const client = await database.getClient();
   const backoff = options.backoff ?? [{ minutes: 1 }, { minutes: 5 }, { minutes: 30 }, { hours: 3 }];
-
-  const logger = catalogLogger.child({ entityProvider: provider.getProviderName() })
 
   return {
     async taskFn(signal) {
@@ -296,6 +295,3 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
   }
 }
 
-function toHumanDuration(duration: Duration) {
-  return duration.shiftTo('days', 'hours', 'minutes', 'seconds').toHuman()
-}
