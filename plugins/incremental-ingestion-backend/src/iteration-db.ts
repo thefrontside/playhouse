@@ -13,6 +13,9 @@ import { Duration } from 'luxon';
 import { v4 } from 'uuid';
 import { toHumanDuration } from './to-human-duration';
 
+// If you change this, you must create a migration that will change this value in the database
+const INCREMENTAL_ENTITY_PROVIDER_ANNOTATION = 'frontside/incremental-entity-provider';
+
 export interface IterationDB {
   taskFn: TaskFunction;
 }
@@ -33,11 +36,10 @@ interface IterationDBOptions {
   restLength: DurationObjectUnits;
   ready: Promise<void>;
   backoff?: IncrementalEntityProviderOptions['backoff'];
-  annotationProviderKey: string;
 }
 
 export async function createIterationDB(options: IterationDBOptions): Promise<IterationDB> {
-  const { database, provider, connection, logger, ready, annotationProviderKey } = options;
+  const { database, provider, connection, logger, ready } = options;
   const restLength = Duration.isDuration(options.restLength) ? options.restLength : Duration.fromObject(options.restLength);
   const client = await database.getClient();
   const backoff = options.backoff ?? [{ minutes: 1 }, { minutes: 5 }, { minutes: 30 }, { hours: 3 }];
@@ -256,7 +258,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
           ...deferred.entity.metadata,
           annotations: {
             ...deferred.entity.metadata.annotations,
-            [annotationProviderKey]: provider.getProviderName(),
+            [INCREMENTAL_ENTITY_PROVIDER_ANNOTATION]: provider.getProviderName(),
           },
         },
       },
@@ -269,7 +271,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
           .select(tx.ref('final_entity').as('entity'), tx.ref('refresh_state.entity_ref').as('ref'))
           .join(tx.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
           .whereRaw(
-            `((final_entity::json #>> '{metadata, annotations, ${annotationProviderKey}}'))`,
+            `((final_entity::json #>> '{metadata, annotations, ${INCREMENTAL_ENTITY_PROVIDER_ANNOTATION}}'))`,
             provider.getProviderName(),
           )
           .whereNotIn(

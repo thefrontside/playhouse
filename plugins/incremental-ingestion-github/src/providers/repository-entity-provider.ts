@@ -13,8 +13,18 @@ interface Context {
 
 interface Options {
   id: string;
+  /**
+   * Advanced search query that can be generated at
+   * https://github.com/search/advanced
+   */
   searchQuery?: string;
+  /**
+   * Used to retrieve token that will be used by the client
+   */
   credentialsProvider: GithubCredentialsProvider;
+  /**
+   * Provides base URL for GitHub GraphQL API
+   */
   integration: GitHubIntegration;
   logger: Logger
 }
