@@ -35,7 +35,7 @@ This approach has the following benefits,
 ## Installation
 
 1. Install `@frontside/backstage-plugin-incremental-ingestion-backend` in `packages/backend` with `yarn add @frontside/backstage-plugin-incremental-ingestion-backend`
-2. Replace `CatalogBuilder` import from `@backstage/plugin-catalog-backend` with `IncrementalCatalogBuilder` from `@frontside/backstage-plugin-incremental-ingestion-backend`
+2. Add 
 
 ## Compatible data sources
 
