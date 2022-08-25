@@ -102,6 +102,198 @@ export default async function createPlugin(
 }
 ```
 
+## Writing an Incremental Entity Provider
+
+To create an Incremental Entity Provider, you need to know how to retrieve a single page of the data that you wish to ingest into the Backstage catalog. If the API has pagination and you know how to make a paginated request to that API, you'll be able to implement an Incremental Entity Provider for this API. For more information about compatibility, checkout <a href="#Compatible-Data-Source">Compatible data sources</a> section on this page.
+
+Here is the type definition for an Incremental Entity Provider.
+
+```ts
+interface IncrementalEntityProvider<TCursor, TContext> {
+  /**
+   * This name must be unique between all of the entity providers
+   * operating in the catalog.
+   */
+  getProviderName(): string;
+
+  /**
+   * Do any setup and teardown necessary in order to provide the
+   * context for fetching pages. This should always invoke `burst` in
+   * order to fetch the individual pages.
+   *
+   * @param burst - a function which performs a series of iterations
+   */
+  around(burst: (context: TContext) => Promise<void>): Promise<void>;
+
+  /**
+   * Return a single page of entities from a specific point in the
+   * ingestion.
+   *
+   * @param context - anything needed in order to fetch a single page.
+   * @param cursor - a uniqiue value identifying the page to ingest.
+   * @returns the entities to be ingested, as well as the cursor of
+   * the the next page after this one.
+   */
+  next(context: TContext, cursor?: TCursor): Promise<EntityIteratorResult<TCursor>>;
+}
+```
+
+For tutorial, we'll write an Incremental Entity Provider that will call an imaginary API. This imaginary API will return a list of imaginary services. This imaginary API has an imaginary API client with the following interface.
+
+```ts
+interface MyApiClient {
+  getServices(page: number): MyPaginatedResults<Service>
+}
+
+interface MyPaginatedResults<T> {
+  items: T[];
+  totalPages: number;
+}
+
+interface Service {
+  name: string;
+}
+```
+
+These are the only 3 methods that you need to implement. `getProviderName()` is pretty self explanatory and it's exactly same as on Entity Provider.
+
+```ts
+import { IncrementalEntityProvider, EntityIteratorResult } from '@frontside/backstage-plugin-incremental-ingestion-backend';
+
+// this will include your pagination information, let's say our API accepts a `page` parameter.
+// In this case, the cursor will include `page`
+interface MyApiCursor {
+  page: number;
+}
+
+// This interface describes the type of data that will be passed to your burst function.
+interface MyContext {
+  apiClient: MyApiClient
+}
+
+export class MyIncrementalEntityProvider implements IncrementalEntityProvider<MyApiCursor, MyContext> {
+  getProviderName() {
+    return `MyIncrementalEntityProvider`;
+  }
+}
+```
+
+`around` method is used for setup and teardown. For example, if you need to create a client that will connect to the API, you would do that here.
+
+```ts
+export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cursor, Context> {
+  getProviderName() {
+    return `MyIncrementalEntityProvider`;
+  }
+
+  async around(burst: (context: MyContext) => Promise<void>): Promise<void> {
+
+    const apiClient = new MyApiClient();
+
+    await around({ apiClient });
+
+    // if you need to do any teardown, you can do it here
+  }
+}
+```
+
+If you need to pass a token to your API, then you can create a constructor that will receive a token and use the token to setup th client.
+
+```ts
+export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cursor, Context> {
+  
+  token: string;
+  
+  construtor(token: string) {
+    this.token = token;
+  }
+
+  getProviderName() {
+    return `MyIncrementalEntityProvider`;
+  }
+
+
+  async around(burst: (context: MyContext) => Promise<void>): Promise<void> {
+
+    const apiClient = new MyApiClient(this.token)
+
+    await around({ apiClient })
+  }
+}
+```
+
+The last step is to implement the actual `next` method that will accept the cursor, call the API, process the result and return the result.
+
+```ts
+export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cursor, Context> {
+  
+  token: string;
+  
+  construtor(token: string) {
+    this.token = token;
+  }
+
+  getProviderName() {
+    return `MyIncrementalEntityProvider`;
+  }
+
+
+  async around(burst: (context: MyContext) => Promise<void>): Promise<void> {
+
+    const apiClient = new MyApiClient(this.token)
+
+    await around({ apiClient })
+  }
+
+  async next(context: MyContext, cursor?: MyApiCursor = { page: 1 }): Promise<EntityIteratorResult<TCursor>> {
+    const { apiClient } = context;
+    const { page } = cursor;
+
+    // call your API with the current page
+    const data = await apiClient.getServices(page);
+
+    // calculate the next page
+    const nextPage = page + 1;
+
+    // figure out if there are any more pages to fetch
+    const done = nextPage > data.totalPages;
+
+    // convert returned items into entities
+    const entities = data.items.map(item => ({
+      kind: 'Component',
+      metadata: {
+        name: item.name,
+        annotations: {
+          // You need to define these, otherwise they'll fail validation
+          [ANNOTATION_LOCATION]: this.getProviderName(),
+          [ANNOTATION_ORIGIN_LOCATION]: this.getProviderName(),
+        }
+      }
+      spec: {
+        type: 'service'
+      }
+    }));
+
+    // create the next cursor
+    const nextCursor = {
+      page: nextPage
+    };
+
+    return {
+      done,
+      entities,
+      cursor: nextCursor
+    }
+  }
+}
+```
+
+That's it. 
+
+## Error handling
+
+If `around` or `next` methods throw an error, the error will show up in logs and it'll trigger the Incremental Entity Provider to try again after a backoff period. It'll keep trying until it reaches the last backoff attempt. You don't need to do anything special to handle the retry logic.
+
 ## Compatible data sources
 
 Incemental Entity Provider is designed for data sources that provide paginated results. Each burst attempts to handle one or more pages of the query. Incremental Entity Provider will attempt to fetch as many pages as it can within a configurable burst length. At every interation, it expects to receive the next cursor that will be used to query in the next iteration. Each iteration may happen on a different replica. This has several concequences,
