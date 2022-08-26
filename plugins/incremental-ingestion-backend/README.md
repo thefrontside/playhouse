@@ -202,7 +202,7 @@ export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cu
 
     const apiClient = new MyApiClient(this.token)
 
-    await around({ apiClient })
+    await burst({ apiClient })
   }
 }
 ```
