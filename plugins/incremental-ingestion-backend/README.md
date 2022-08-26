@@ -227,7 +227,7 @@ export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cu
 
     const apiClient = new MyApiClient(this.token)
 
-    await around({ apiClient })
+    await burst({ apiClient })
   }
 
   async next(context: MyContext, cursor?: MyApiCursor = { page: 1 }): Promise<EntityIteratorResult<TCursor>> {
