@@ -175,7 +175,7 @@ export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cu
 
     const apiClient = new MyApiClient();
 
-    await around({ apiClient });
+    await burst({ apiClient });
 
     // if you need to do any teardown, you can do it here
   }
