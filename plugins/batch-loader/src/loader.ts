@@ -15,22 +15,28 @@ export interface BatchLoaderOptions {
 export class BatchLoader {
   private readonly logger: Logger;
   private readonly manager: DatabaseManager;
-  private readonly client: Promise<Knex>;
+  private client?: Knex;
   constructor(options: BatchLoaderOptions) {
     this.logger = options.logger;
     this.manager = options.databaseManager;
-    this.client = this.manager.forPlugin('catalog').getClient();
+  }
+
+  private async getClient(): Promise<Knex> {
+    if (!this.client) {
+      this.client = await this.manager.forPlugin('catalog').getClient();
+    }
+    return this.client;
   }
 
   public async getEntitiesByRefs(
     refs: (string | CompoundEntityRef)[],
   ): Promise<Entity[]> {
     this.logger.info(`Loading entities for refs: ${refs}`);
-    const client = await this.client;
+    const client = await this.getClient();
     const stringifiedRefs = refs.map(ref => typeof ref === 'string' ? ref : stringifyEntityRef(ref))
     const rows = await client('final_entities')
       .select('final_entity as entity', 'refresh_state.entity_ref as ref')
-      .join(client.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
+      .join('refresh_state', 'final_entities.entity_id', 'refresh_state.entity_id')
       .whereIn('refresh_state.entity_ref', stringifiedRefs);
 
     const unsortedEntities = new Map(rows.map(row => [row.ref, JSON.parse(row.entity)]));
