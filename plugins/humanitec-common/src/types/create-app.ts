@@ -10,8 +10,6 @@ const IngressRule = object({
   type: string()
 });
 
-const Variables = record(string()).optional();
-
 export const Module = object({
   externals: record(object({
     type: string()
@@ -25,7 +23,7 @@ export const Module = object({
         limits: Resource.optional(),
         requests: Resource.optional(),
       }).optional(),
-      variables: Variables,
+      variables: record(string()).optional(),
       volume_mounts: object({}),
       files: object({})
     })).optional(),
