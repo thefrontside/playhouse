@@ -1,5 +1,12 @@
 # backend
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [5618624]
+  - @frontside/backstage-plugin-batch-loader@0.2.1
+
 ## 0.0.7
 
 ### Patch Changes
