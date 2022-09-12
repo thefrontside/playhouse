@@ -18,9 +18,10 @@ export default async function createPlugin(
   const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
   
   const githubRepositoryProvider = GithubRepositoryEntityProvider.create({ 
-    host: 'github.com', 
-    searchQuery: "created:>1970-01-01 user:thefrontside", 
-    config: env.config 
+    host: 'github.com',
+    logger: env.logger,
+    config: env.config,
+    organizations: ['thefrontside', 'microstates']
   })
 
   incrementalBuilder.addIncrementalEntityProvider(

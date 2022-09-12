@@ -2,53 +2,53 @@ import { ANNOTATION_LOCATION, ANNOTATION_ORIGIN_LOCATION, DEFAULT_NAMESPACE, str
 import { Config } from "@backstage/config";
 import { DefaultGithubCredentialsProvider, GitHubIntegration, ScmIntegrations } from '@backstage/integration';
 import type { EntityIteratorResult, IncrementalEntityProvider } from "@frontside/backstage-plugin-incremental-ingestion-backend";
-import { graphql } from '@octokit/graphql';
+import { Octokit } from '@octokit/rest';
 import assert from 'assert-ts';
 import slugify from 'slugify';
-import type { RepositorySearchQuery } from "./repository-entity-provider.__generated__";
+import { RepositoryPrivacy } from "../__generated__/types";
+import type { OrganizationRepositoriesQuery } from "./repository-entity-provider.__generated__";
+import parseLinkHeader from 'parse-link-header';
+import { Logger } from "winston";
 
-const REPOSITORY_SEARCH_QUERY = /* GraphQL */`
-  query RepositorySearch($searchQuery: String!, $cursor: String) {
-    search(
-      query: $searchQuery
-      type: REPOSITORY
-      first: 100
-      after: $cursor
-    ) {
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      nodes {
-        ... on Repository {
-          __typename
-          id
-          isArchived
-          name
-          nameWithOwner
-          url
-          description
-          visibility
-          languages(first: 10) {
-            nodes {
-              name
-            }
-          }
-          repositoryTopics(first: 10) {
-            nodes {
-              topic {
+const ORGANIZATION_REPOSITORIES_QUERY = /* GraphQL */`
+  query OrganizationRepositories($organization: String!, $privacy: RepositoryPrivacy, $cursor: String) {
+    organization(login: $organization) {
+      repositories(first: 100, privacy: $privacy, after: $cursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          ... on Repository {
+            __typename
+            id
+            isArchived
+            name
+            nameWithOwner
+            url
+            description
+            visibility
+            languages(first: 10) {
+              nodes {
                 name
               }
             }
-          }
-          owner {
-            ... on Organization {
-              __typename
-              login
+            repositoryTopics(first: 10) {
+              nodes {
+                topic {
+                  name
+                }
+              }
             }
-            ... on User {
-              __typename
-              login
+            owner {
+              ... on Organization {
+                __typename
+                login
+              }
+              ... on User {
+                __typename
+                login
+              }
             }
           }
         }
@@ -64,48 +64,63 @@ const REPOSITORY_SEARCH_QUERY = /* GraphQL */`
 `;
 
 interface GithubRepositoryEntityProviderOptions {
-  host: string;
+  logger: Logger;
   config: Config;
-  searchQuery: string;
+  host: string;
+  organizations?: string[];
+  privacy?: RepositoryPrivacy;
 }
 
 interface Context {
-  client: typeof graphql;
+  octokit: Octokit;
   url: string;
 }
 
 interface Cursor {
+  /**
+   * Cursor used to paginate repositories
+   */
   cursor: string | null;
+  /**
+   * Organiation id used to fetch next organization
+   */
+  since?: number;
 }
 
-interface GithubRepositoryEntityProviderConstructorOptions { 
-  credentialsProvider: DefaultGithubCredentialsProvider; 
-  host: string; 
-  integration: GitHubIntegration; 
-  searchQuery: string; 
+interface GithubRepositoryEntityProviderConstructorOptions {
+  credentialsProvider: DefaultGithubCredentialsProvider;
+  host: string;
+  integration: GitHubIntegration;
+  organizations?: string[];
+  privacy?: RepositoryPrivacy;
+  logger: Logger;
 }
 
 export class GithubRepositoryEntityProvider implements IncrementalEntityProvider<Cursor, Context> {
   private host: string;
   private credentialsProvider: DefaultGithubCredentialsProvider;
   private integration: GitHubIntegration;
-  private searchQuery: string;
+  private logger: Logger;
+  private organizations?: string[];
+  private privacy?: RepositoryPrivacy;
 
-  static create({ host, config, searchQuery = "created:>1970-01-01" }: GithubRepositoryEntityProviderOptions) {
+  static create({ host, config, organizations, logger, privacy = RepositoryPrivacy.Public }: GithubRepositoryEntityProviderOptions) {
     const integrations = ScmIntegrations.fromConfig(config);
     const credentialsProvider = DefaultGithubCredentialsProvider.fromIntegrations(integrations);
     const integration = integrations.github.byHost(host);
 
     assert(integration !== undefined, `Missing Github integration for ${host}`);
 
-    return new GithubRepositoryEntityProvider({ credentialsProvider, host, integration, searchQuery })
+    return new GithubRepositoryEntityProvider({ credentialsProvider, host, integration, organizations, privacy, logger });
   }
 
   private constructor(options: GithubRepositoryEntityProviderConstructorOptions) {
     this.credentialsProvider = options.credentialsProvider;
     this.host = options.host;
     this.integration = options.integration;
-    this.searchQuery = options.searchQuery;
+    this.organizations = options.organizations;
+    this.privacy = options.privacy;
+    this.logger = options.logger;
   }
 
   getProviderName() {
@@ -116,30 +131,66 @@ export class GithubRepositoryEntityProvider implements IncrementalEntityProvider
 
     const url = `https://${this.host}`;
 
-    const { headers } = await this.credentialsProvider.getCredentials({
+    const { token } = await this.credentialsProvider.getCredentials({
       url,
     });
 
-    const client = graphql.defaults({
+    const octokit = new Octokit({
       baseUrl: this.integration.config.apiBaseUrl,
-      headers,
+      auth: token,
     });
 
-    await burst({ client, url })
+    await burst({ octokit, url })
   }
 
-  async next({ client, url }: Context, { cursor }: Cursor = { cursor: null }): Promise<EntityIteratorResult<Cursor>> {
+  async next({ url, octokit }: Context, cursor: Cursor = { cursor: null }): Promise<EntityIteratorResult<Cursor>> {
 
-    const data = await client<RepositorySearchQuery>(REPOSITORY_SEARCH_QUERY,
+    const since = cursor.since ?? 0;
+
+    let organization: { login: string, id: number };
+    let hasMoreOrgs = false;
+
+    if (this.organizations) {
+      // array of organizations was passed to entity provider
+      // treat index in array as id
+      organization = {
+        login: this.organizations[since],
+        id: since + 1
+      }
+      hasMoreOrgs = organization.id < this.organizations.length;
+    } else {
+      const response = await octokit.request('GET /organizations', {
+        since,
+        per_page: 1
+      });
+      [organization] = response.data;
+      const link = parseLinkHeader(response.headers.link);
+      if (link) {
+        hasMoreOrgs = !!link.next;
+      }
+    }
+
+    this.logger.info(`Current organization`, {...organization, hasMoreOrgs});
+
+    if (!organization) {
+      return {
+        done: true,
+        cursor: { cursor: null },
+        entities: []
+      }
+    }
+
+    const data = await octokit.graphql<OrganizationRepositoriesQuery>(ORGANIZATION_REPOSITORIES_QUERY,
       {
-        cursor,
-        searchQuery: this.searchQuery,
+        organization: organization.login,
+        cursor: cursor.cursor,
+        privacy: this.privacy
       }
     );
 
     const location = `url:${url}`;
 
-    const entities = data.search.nodes?.flatMap(node => node?.__typename === 'Repository' ? [node] : [])
+    const entities = data.organization?.repositories.nodes?.flatMap(node => node?.__typename === 'Repository' ? [node] : [])
       .map(node => ({
         entity: {
           apiVersion: 'backstage.io/v1beta1',
@@ -167,13 +218,39 @@ export class GithubRepositoryEntityProvider implements IncrementalEntityProvider
           },
         },
         locationKey: this.getProviderName(),
-      }));
+      })) ?? [];
+
+    if (data.organization?.repositories.pageInfo.hasNextPage) {
+      const _cursor = {
+        cursor: data.organization?.repositories.pageInfo.endCursor ?? null,
+        since: organization.id,
+      }
+      this.logger.debug("Has more repositories", _cursor);
+      return {
+        done: false,
+        cursor: _cursor,
+        entities,
+      }
+    }
+    
+    if (hasMoreOrgs) {
+      const _cursor = {
+        cursor: null,
+        since: organization.id
+      };
+      this.logger.debug("Has no more repositories but has more orgs", _cursor);
+      return {
+        done: false,
+        cursor: _cursor,
+        entities
+      }
+    }
 
     return {
-      done: !data.search.pageInfo.hasNextPage,
-      cursor: { cursor: data.search.pageInfo.endCursor ?? null },
-      entities: entities ?? []
-    };
+      done: true,
+      cursor: { cursor: null },
+      entities,
+    }
   }
 }
 
