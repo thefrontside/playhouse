@@ -25,9 +25,7 @@ export const Module = object({
         limits: Resource.optional(),
         requests: Resource.optional(),
       }).optional(),
-      variables: object({
-        Variables
-      }),
+      variables: Variables,
       volume_mounts: object({}),
       files: object({})
     })).optional(),
