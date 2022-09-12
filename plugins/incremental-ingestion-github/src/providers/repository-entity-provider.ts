@@ -85,6 +85,16 @@ interface Cursor {
    * Organiation id used to fetch next organization
    */
   since?: number;
+
+  /**
+   * Current organization login
+   */
+  organization?: string;
+
+  /**
+   * Are there more orgs to process?
+   */
+  hasMoreOrgs: boolean;
 }
 
 interface GithubRepositoryEntityProviderConstructorOptions {
@@ -143,34 +153,42 @@ export class GithubRepositoryEntityProvider implements IncrementalEntityProvider
     await burst({ octokit, url })
   }
 
-  async next({ url, octokit }: Context, cursor: Cursor = { cursor: null }): Promise<EntityIteratorResult<Cursor>> {
+  async next({ url, octokit }: Context, cursor: Cursor = { cursor: null, hasMoreOrgs: false }): Promise<EntityIteratorResult<Cursor>> {
 
     const since = cursor.since ?? 0;
+    let hasMoreOrgs = cursor.hasMoreOrgs ?? false;
 
     let organization: { login: string, id: number };
-    let hasMoreOrgs = false;
 
-    if (this.organizations) {
-      // array of organizations was passed to entity provider
-      // treat index in array as id
+    if (cursor.organization && cursor.cursor !== null) {
       organization = {
-        login: this.organizations[since],
-        id: since + 1
+        login: cursor.organization,
+        id: since
       }
-      hasMoreOrgs = organization.id < this.organizations.length;
     } else {
-      const response = await octokit.request('GET /organizations', {
-        since,
-        per_page: 1
-      });
-      [organization] = response.data;
-      const link = parseLinkHeader(response.headers.link);
-      if (link) {
-        hasMoreOrgs = !!link.next;
+      if (this.organizations) {
+        // array of organizations was passed to entity provider
+        // treat index in array as id
+        organization = {
+          login: this.organizations[since],
+          id: since + 1
+        }
+        hasMoreOrgs = organization.id < this.organizations.length;
+      } else {
+        const response = await octokit.request('GET /organizations', {
+          since,
+          per_page: 1
+        });
+        [organization] = response.data;
+        const link = parseLinkHeader(response.headers.link);
+        this.logger.debug(`LINK: ${JSON.stringify(link)}`);
+        if (link) {
+          hasMoreOrgs = !!link.next;
+        }
       }
     }
 
-    this.logger.info(`Current organization`, {...organization, hasMoreOrgs});
+    this.logger.info(`Current organization`, { login: organization.login, id: organization.id, hasMoreOrgs});
 
     if (!organization) {
       return {
@@ -224,6 +242,8 @@ export class GithubRepositoryEntityProvider implements IncrementalEntityProvider
       const _cursor = {
         cursor: data.organization?.repositories.pageInfo.endCursor ?? null,
         since: organization.id,
+        organization: organization.login,
+        hasMoreOrgs
       }
       this.logger.debug("Has more repositories", _cursor);
       return {
@@ -236,7 +256,8 @@ export class GithubRepositoryEntityProvider implements IncrementalEntityProvider
     if (hasMoreOrgs) {
       const _cursor = {
         cursor: null,
-        since: organization.id
+        since: organization.id,
+        hasMoreOrgs
       };
       this.logger.debug("Has no more repositories but has more orgs", _cursor);
       return {
