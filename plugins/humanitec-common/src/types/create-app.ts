@@ -23,7 +23,7 @@ export const Module = object({
         limits: Resource.optional(),
         requests: Resource.optional(),
       }).optional(),
-      variables: object({}),
+      variables: record(string()).optional(),
       volume_mounts: object({}),
       files: object({})
     })).optional(),
