@@ -84,9 +84,6 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
         }
         case 'ingest':
           try {
-            await update({
-              status: 'bursting',
-            });
             const done = await ingestOneBurst(ingestionId, signal, tx);
             if (done) {
               logger.info(`Ingestion is complete. Rest for ${restLength.toHuman()}`);
@@ -139,11 +136,12 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
             );
             await update({
               next_action: 'ingest',
+              status: 'bursting',
             });
           } else {
             logger.debug(`Backoff period will expire in ${toHumanDuration(Duration.fromMillis(remainingTime))}.`);
           }
-          break;          
+          break;
         }
         case 'cancel':
           logger.info(`Current ingestion cancelled. Ingestion will restart on the next tick.`);
@@ -168,7 +166,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     if (record) {
       return {
         ingestionId: record.id,
-        nextAction: record.next_action as 'rest' | 'ingest' | 'backoff',
+        nextAction: record.next_action as 'rest' | 'ingest' | 'backoff' | 'cancel',
         attempts: record.attempts as number,
         nextActionAt: record.next_action_at.valueOf() as number,
       };
@@ -204,7 +202,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       // eslint-disable-next-line no-constant-condition
       while (true) {
         done = next.done;
-        await mark(tx, id, sequence, next.entities, next.done, next.cursor);
+        await mark(tx, id, sequence, next.entities, next.done, JSON.stringify(next.cursor));
         if (signal.aborted || next.done) {
           break;
         } else {
@@ -227,27 +225,27 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     sequence: number,
     entities: DeferredEntity[],
     done: boolean,
-    cursor?: unknown,
+    cursor: string,
   ) {
-    const _cursor = JSON.stringify(cursor);
-
-    logger.info(`Mark`, { entities: entities.length, cursor: _cursor, done });
+    logger.info(`Mark`, { entities: entities.length, cursor, done });
 
     const markId = v4();
 
     await tx('ingestion.ingestion_marks').insert({
       id: markId,
       ingestion_id: id,
-      cursor: _cursor,
+      cursor,
       sequence,
     });
 
-    for (const entity of entities) {
-      await tx('ingestion.ingestion_mark_entities').insert({
-        id: v4(),
-        ingestion_mark_id: markId,
-        ref: stringifyEntityRef(entity.entity),
-      });
+    if (entities.length > 0) {
+      await tx('ingestion.ingestion_mark_entities').insert(
+        entities.map(entity => ({
+          id: v4(),
+          ingestion_mark_id: markId,
+          ref: stringifyEntityRef(entity.entity),
+        })),
+      );
     }
 
     const added = entities.map(deferred => ({
@@ -264,30 +262,36 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       },
     }));
 
-    let removed: DeferredEntity[] = []
-    if (done) {
+    async function computeRemoved(): Promise<DeferredEntity[]> {
+      if (!done) return [];
+
       try {
-        removed = await tx('final_entities')
-          .select(tx.ref('final_entity').as('entity'), tx.ref('refresh_state.entity_ref').as('ref'))
-          .join(tx.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
-          .whereRaw(
-            `((final_entity::json #>> '{metadata, annotations, ${INCREMENTAL_ENTITY_PROVIDER_ANNOTATION}}'))`,
-            provider.getProviderName(),
+        return (
+          await tx('final_entities')
+            .select(tx.ref('final_entity').as('entity'), tx.ref('refresh_state.entity_ref').as('ref'))
+            .join(tx.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
+            .whereRaw(
+              `((final_entity::json #>> '{metadata, annotations, ${INCREMENTAL_ENTITY_PROVIDER_ANNOTATION}}')) = ?`,
+              [provider.getProviderName()],
+            )
+            .whereNotIn(
+              'ref',
+              tx('ingestion.ingestion_marks')
+                .join(
+                  'ingestion.ingestion_mark_entities',
+                  'ingestion.ingestion_marks.id',
+                  'ingestion.ingestion_mark_entities.ingestion_mark_id',
+                )
+                .select('ingestion.ingestion_mark_entities.ref'),
           )
-          .whereNotIn(
-            'ref',
-            tx('ingestion.ingestion_marks')
-              .join(
-                'ingestion.ingestion_mark_entities',
-                'ingestion.ingestion_marks.id',
-                'ingestion.ingestion_mark_entities.ingestion_mark_id',
-              )
-              .select('ingestion.ingestion_mark_entities.ref'),
-          )
+        ).map(entity => ({ entity: JSON.parse(entity.entity) }));
       } catch (e) {
         logger.error(`Failed to determine entities to delete. ${e}`)
+        return [];
       }
     }
+
+    const removed = await computeRemoved();
 
     await connection.applyMutation({
       type: 'delta',
@@ -296,4 +300,3 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     });
   }
 }
-
