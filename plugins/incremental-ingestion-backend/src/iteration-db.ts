@@ -84,9 +84,6 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
         }
         case 'ingest':
           try {
-            await update({
-              status: 'bursting',
-            });
             const done = await ingestOneBurst(ingestionId, signal, tx);
             if (done) {
               logger.info(`Ingestion is complete. Rest for ${restLength.toHuman()}`);
@@ -139,6 +136,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
             );
             await update({
               next_action: 'ingest',
+              status: 'bursting',
             });
           } else {
             logger.debug(`Backoff period will expire in ${toHumanDuration(Duration.fromMillis(remainingTime))}.`);
@@ -168,7 +166,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     if (record) {
       return {
         ingestionId: record.id,
-        nextAction: record.next_action as 'rest' | 'ingest' | 'backoff',
+        nextAction: record.next_action as 'rest' | 'ingest' | 'backoff' | 'cancel',
         attempts: record.attempts as number,
         nextActionAt: record.next_action_at.valueOf() as number,
       };
@@ -264,10 +262,11 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       },
     }));
 
-    let removed: DeferredEntity[] = []
-    if (done) {
+    async function computeRemoved(): Promise<DeferredEntity[]> {
+      if (!done) return [];
+
       try {
-        removed = (
+        return (
           await tx('final_entities')
             .select(tx.ref('final_entity').as('entity'), tx.ref('refresh_state.entity_ref').as('ref'))
             .join(tx.raw('refresh_state ON refresh_state.entity_id = final_entities.entity_id'))
@@ -288,8 +287,11 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
         ).map(entity => ({ entity: JSON.parse(entity.entity) }));
       } catch (e) {
         logger.error(`Failed to determine entities to delete. ${e}`)
+        return [];
       }
     }
+
+    const removed = await computeRemoved();
 
     await connection.applyMutation({
       type: 'delta',
