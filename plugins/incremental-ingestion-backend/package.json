@@ -37,12 +37,17 @@
     "yn": "^4.0.0"
   },
   "devDependencies": {
+    "@backstage/backend-tasks": "^0.3.0",
     "@backstage/cli": "^0.17.0",
-    "@types/supertest": "^2.0.8",
+    "@backstage/plugin-permission-node": "^0.6.0",
+    "@effection/vitest": "^2.0.0",
     "@types/luxon": "^2.0.4",
+    "@types/supertest": "^2.0.8",
     "@types/uuid": "^8.3.4",
+    "effection": "^2.0.4",
+    "msw": "^0.35.0",
     "supertest": "^4.0.2",
-    "msw": "^0.35.0"
+    "vitest": "^0.23.2"
   },
   "files": [
     "dist",

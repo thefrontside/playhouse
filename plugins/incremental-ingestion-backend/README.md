@@ -39,15 +39,15 @@ This approach has the following benefits,
   ```ts
   const builder = CatalogBuilder.create(env);
   // incremental builder receives builder because it'll register
-  // incremental entity providers with the builder 
+  // incremental entity providers with the builder
   const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
   ```
-3. Last step, add `await incrementBuilder.build()` after `await builder.build()` to ensure that all `CatalogBuider` migration run before running `incrementBuilder.build()` migrations.
+3. Last step, add `await incrementalBuilder.build()` after `await builder.build()` to ensure that all `CatalogBuider` migration run before running `incrementalBuilder.build()` migrations.
   ```ts
   const { processingEngine, router } = await builder.build();
 
-  // this has to run after `await builder.build()` so ensure that catalog migrations are completed 
-  // before incremental builder migrations are executed 
+  // this has to run after `await builder.build()` so ensure that catalog migrations are completed
+  // before incremental builder migrations are executed
   await incrementalBuilder.build();
   ```
 
@@ -67,18 +67,18 @@ import { PluginEnvironment } from '../types';
 export default async function createPlugin(
   env: PluginEnvironment,
 ): Promise<Router> {
-  
+
   const builder = CatalogBuilder.create(env);
   // incremental builder receives builder because it'll register
-  // incremental entity providers with the builder 
+  // incremental entity providers with the builder
   const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
 
   builder.addProcessor(new ScaffolderEntitiesProcessor());
 
   const { processingEngine, router } = await builder.build();
 
-  // this has to run after `await builder.build()` so ensure that catalog migrations are completed 
-  // before incremental builder migrations are executed 
+  // this has to run after `await builder.build()` so ensure that catalog migrations are completed
+  // before incremental builder migrations are executed
   await incrementalBuilder.build();
 
   await processingEngine.start();
@@ -186,9 +186,9 @@ If you need to pass a token to your API, then you can create a constructor that 
 
 ```ts
 export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cursor, Context> {
-  
+
   token: string;
-  
+
   construtor(token: string) {
     this.token = token;
   }
@@ -211,9 +211,9 @@ The last step is to implement the actual `next` method that will accept the curs
 
 ```ts
 export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cursor, Context> {
-  
+
   token: string;
-  
+
   construtor(token: string) {
     this.token = token;
   }
@@ -276,7 +276,7 @@ export class MyIncrementalEntityProvider implements IncrementalEntityProvider<Cu
 }
 ```
 
-Now that you have your new Incremental Entity Provider, we can connect it to the catalog. 
+Now that you have your new Incremental Entity Provider, we can connect it to the catalog.
 
 ## Adding an Incremental Entity Provider to the catalog
 
