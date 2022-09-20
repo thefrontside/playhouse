@@ -47,6 +47,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
   return {
     async taskFn(signal) {
       try {
+        console.log('Waiting for client to be ready');
         logger.debug(`Begin tick`);
         await handleNextAction(signal);
       } catch (error) {
@@ -66,6 +67,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       function update(attrs: Record<string, unknown>) {
         return tx('ingestion.ingestions').where('id', ingestionId).update(attrs);
       }
+      console.log(nextAction, ingestionId);
 
       switch (nextAction) {
         case 'rest': {
@@ -293,6 +295,8 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     }
 
     const removed = await computeRemoved();
+
+    console.log(added, removed);
 
     await connection.applyMutation({
       type: 'delta',

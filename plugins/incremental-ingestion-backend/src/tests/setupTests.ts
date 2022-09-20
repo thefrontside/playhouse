@@ -1,10 +1,12 @@
 /* eslint-disable func-names */
+import Router from 'express-promise-router';
 import { CatalogBuilder } from '@backstage/plugin-catalog-backend';
 import { ensure, once, Operation } from 'effection';
 import { Duration } from 'luxon';
 import { createLogger, Logger, transports } from 'winston';
 import { EntityIteratorResult, IncrementalCatalogBuilder } from '..';
 import { IncrementalEntityProvider, IncrementalEntityProviderOptions, PluginEnvironment } from '../types';
+import express from 'express';
 
 interface Instruction {
   id: number;
@@ -39,20 +41,19 @@ export class ClientFactory {
   client: Client = { fetch() { throw new Error('Client is not ready') } };
 
   createClient(instructions: Instruction[]): Promise<void> {
-    console.log('Creating client');
     let done = false;
     let instruction: Instruction | undefined = undefined;
     const totalPages = instructions.length
 
     this.client = {
       fetch: async (page: number) => {
-        console.log(page)
         await delay();
 
         if (instruction && instruction.retries) instruction.retries--;
         if (done) {
           this.resolve();
-          throw new Error('Client is done');
+          return { status: 'error', error: 'Client is done' };
+          // throw new Error('Client is done');
         }
         if (page >= totalPages) return { status: 'success', data: [], totalPages };
         if (instructions[page].id !== instruction?.id) instruction = { ...instructions[page] };
@@ -62,7 +63,6 @@ export class ClientFactory {
         return { status: 'success', data: instruction.data, totalPages };
       }
     }
-    console.log('Client created');
     return new Promise<void>(resolve => (this.resolve = resolve));
   }
 }
@@ -78,12 +78,10 @@ class EntityProvider implements IncrementalEntityProvider<number, Client> {
   }
 
   async around(burst: (client: Client) => Promise<void>): Promise<void> {
-    console.log('around')
     await burst(this.factory.client);
   }
 
-  async next(client: Client, page: number): Promise<EntityIteratorResult<number>> {
-    console.log('next', page)
+  async next(client: Client, page: number = 0): Promise<EntityIteratorResult<number>> {
     const response = await client.fetch(page);
     if (response.status === 'error') throw new Error(response.error);
 
@@ -115,14 +113,13 @@ class EntityProvider implements IncrementalEntityProvider<number, Client> {
   }
 }
 
-export function useCatalogPlugin(env: PluginEnvironment, factory: ClientFactory): Operation<void> {
+export function useCatalogPlugin(env: PluginEnvironment, factory: ClientFactory): Operation<express.Router> {
   return {
     name: "CatalogPlugin",
     *init() {
+      const apiRouter = Router();
       const builder = CatalogBuilder.create(env);
       const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
-      const { processingEngine } = yield builder.build();
-      yield incrementalBuilder.build()
 
       const provider = new EntityProvider(factory);
       const schedule: IncrementalEntityProviderOptions = {
@@ -133,8 +130,15 @@ export function useCatalogPlugin(env: PluginEnvironment, factory: ClientFactory)
 
       incrementalBuilder.addIncrementalEntityProvider(provider, schedule);
 
+      const { processingEngine, router } = yield builder.build();
+      yield incrementalBuilder.build()
       yield processingEngine.start();
+
+      apiRouter.use('/catalog', router);
+
       yield ensure(() => processingEngine.stop());
+
+      return apiRouter
      }
   }
 }
