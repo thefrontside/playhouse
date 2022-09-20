@@ -1,41 +1,121 @@
 /* eslint-disable func-names */
-import { describe, beforeAll, it } from '@effection/vitest';
-import { TaskScheduler } from '@backstage/backend-tasks';
 import { CatalogBuilder } from '@backstage/plugin-catalog-backend';
-import { ServerPermissionClient } from '@backstage/plugin-permission-node';
 import { ensure, once, Operation } from 'effection';
 import { Duration } from 'luxon';
 import { createLogger, Logger, transports } from 'winston';
 import { EntityIteratorResult, IncrementalCatalogBuilder } from '..';
 import { IncrementalEntityProvider, IncrementalEntityProviderOptions, PluginEnvironment } from '../types';
-import { ConfigReader } from '@backstage/config';
-import { backstageConfig } from './config';
-import { DatabaseManager, ServerTokenManager, SingleHostDiscovery, UrlReaders } from '@backstage/backend-common';
 
-interface Page {
+interface Instruction {
+  id: number;
   data: string[];
   retries?: number;
-  timeout?: number;
+  delay?: number;
 }
 
-class EntityProvider implements IncrementalEntityProvider<number, void> {
-  private pages: Page[] = [];
+interface SuccessResponse {
+  status: 'success';
+  data: string[];
+  totalPages: number;
+}
 
+interface ErrorResponse {
+  status: 'error';
+  error: string;
+}
+
+type Response = SuccessResponse | ErrorResponse;
+
+interface Client {
+  fetch(page: number): Promise<Response>;
+}
+
+function delay(ms: number = 0) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export class ClientFactory {
+  private resolve: () => void = () => {};
+  client: Client = { fetch() { throw new Error('Client is not ready') } };
+
+  createClient(instructions: Instruction[]): Promise<void> {
+    console.log('Creating client');
+    let done = false;
+    let instruction: Instruction | undefined = undefined;
+    const totalPages = instructions.length
+
+    this.client = {
+      fetch: async (page: number) => {
+        console.log(page)
+        await delay();
+
+        if (instruction && instruction.retries) instruction.retries--;
+        if (done) {
+          this.resolve();
+          throw new Error('Client is done');
+        }
+        if (page >= totalPages) return { status: 'success', data: [], totalPages };
+        if (instructions[page].id !== instruction?.id) instruction = { ...instructions[page] };
+        if (instruction.delay) await delay(instruction.delay)
+        if (instruction.retries) return { status: 'error', error: '¯\\_(ツ)_/¯' };
+        if (page + 1 === totalPages) done = true;
+        return { status: 'success', data: instruction.data, totalPages };
+      }
+    }
+    console.log('Client created');
+    return new Promise<void>(resolve => (this.resolve = resolve));
+  }
+}
+
+// TODO example of scenario
+// get 5 entities => get an error => start again => get 4 entities instead of 5
+
+class EntityProvider implements IncrementalEntityProvider<number, Client> {
   getProviderName() { return 'EntityProvider' }
 
-  async around(burst: () => Promise<void>): Promise<void> {
-    burst();
+  constructor(private factory: ClientFactory) {
+
   }
 
-  async next(_context: void, page: number): Promise<EntityIteratorResult<number>> {
-    // TODO Handle pages
-    return this.pages
+  async around(burst: (client: Client) => Promise<void>): Promise<void> {
+    console.log('around')
+    await burst(this.factory.client);
   }
 
-  setData(data: Page[]) { this.pages = data }
+  async next(client: Client, page: number): Promise<EntityIteratorResult<number>> {
+    console.log('next', page)
+    const response = await client.fetch(page);
+    if (response.status === 'error') throw new Error(response.error);
+
+    const nextPage = page + 1;
+    const done = nextPage > response.totalPages;
+    const entities = response.data.map(item => ({
+      entity: {
+        apiVersion: 'backstage.io/v1beta1',
+        kind: 'Component',
+        metadata: {
+          name: item,
+          annotations: {
+            // You need to define these, otherwise they'll fail validation
+            'example.com/entity-provider': this.getProviderName(),
+            'example.com/entity-origin-provider': this.getProviderName(),
+          }
+        },
+        spec: {
+          type: 'service'
+        }
+      }
+    }));
+
+    return {
+      done,
+      entities,
+      cursor: nextPage
+    }
+  }
 }
 
-function useCatalogPlugin(env: PluginEnvironment): Operation<EntityProvider> {
+export function useCatalogPlugin(env: PluginEnvironment, factory: ClientFactory): Operation<void> {
   return {
     name: "CatalogPlugin",
     *init() {
@@ -44,7 +124,7 @@ function useCatalogPlugin(env: PluginEnvironment): Operation<EntityProvider> {
       const { processingEngine } = yield builder.build();
       yield incrementalBuilder.build()
 
-      const provider = new EntityProvider();
+      const provider = new EntityProvider(factory);
       const schedule: IncrementalEntityProviderOptions = {
         burstInterval: Duration.fromObject({ milliseconds: 100 }),
         burstLength: Duration.fromObject({ milliseconds: 100 }),
@@ -55,13 +135,11 @@ function useCatalogPlugin(env: PluginEnvironment): Operation<EntityProvider> {
 
       yield processingEngine.start();
       yield ensure(() => processingEngine.stop());
-
-      return provider;
      }
   }
 }
 
-function useLogger(): Operation<Logger> {
+export function useLogger(): Operation<Logger> {
   return {
     name: "Logger",
     *init() {
@@ -79,30 +157,3 @@ function useLogger(): Operation<Logger> {
     }
   }
 }
-
-describe('incrementally ingest entities', () => {
-  let provider: EntityProvider
-
-  beforeAll(function* () {
-    const logger = yield useLogger()
-    const config = new ConfigReader(backstageConfig);
-    const reader = UrlReaders.default({ logger, config });
-    const databaseManager = DatabaseManager.fromConfig(config);
-    const discovery = SingleHostDiscovery.fromConfig(config);
-    const tokenManager = ServerTokenManager.noop();
-    const permissions = ServerPermissionClient.fromConfig(config, { discovery, tokenManager });
-    const scheduler = TaskScheduler.fromConfig(config).forPlugin('catalog');
-    provider = yield useCatalogPlugin({
-      logger,
-      database: databaseManager.forPlugin('catalog'),
-      config,
-      reader,
-      permissions,
-      scheduler
-    })
-  });
-
-  it.eventually('successfuly ingest data', function* () {
-    provider.setData([]);
-  })
-})

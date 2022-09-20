@@ -84,6 +84,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
         }
         case 'ingest':
           try {
+            // TODO should update current action to avoid race condition?
             const done = await ingestOneBurst(ingestionId, signal, tx);
             if (done) {
               logger.info(`Ingestion is complete. Rest for ${restLength.toHuman()}`);
