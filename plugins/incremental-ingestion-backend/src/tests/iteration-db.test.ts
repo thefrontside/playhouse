@@ -13,6 +13,7 @@ describe('incrementally ingest entities', () => {
   let catalog: CatalogClient;
 
   beforeAll(function* () {
+    // TODO Drop db before each test
     const logger = yield useLogger()
     const config = new ConfigReader(backstageConfig);
     const reader = UrlReaders.default({ logger, config });
@@ -42,7 +43,12 @@ describe('incrementally ingest entities', () => {
       { id: 1, data: ['a', 'b', 'c', 'd', 'e'], delay: 10 },
     ]);
     console.log('catalog1');
-    yield new Promise(resolve => setTimeout(resolve, 5000));
+    yield new Promise(resolve => setTimeout(resolve, 1000));
     console.log(yield catalog.getEntities());
-  }, 15000)
+    yield factory.createClient([
+      { id: 1, data: ['1', '2', '3', '4', '5'], delay: 10 },
+    ]);
+    yield new Promise(resolve => setTimeout(resolve, 1000));
+    console.log(yield catalog.getEntities());
+  }, 30000)
 })

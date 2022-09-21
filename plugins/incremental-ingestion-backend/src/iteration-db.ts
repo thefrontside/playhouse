@@ -103,6 +103,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
               });
             }
           } catch (error) {
+            console.log(error);
             if ((error as Error).message && (error as Error).message === 'CANCEL') {
               logger.info(`Ingestion canceled.`);
               await update({
@@ -133,6 +134,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
           break;
         case 'backoff': {
           const remainingTime = nextActionAt - Date.now();
+          console.log(remainingTime);
           if (remainingTime <= 0) {
             logger.info(
               `Backoff period is complete. Attempt to resume ingestion on next tick.`,

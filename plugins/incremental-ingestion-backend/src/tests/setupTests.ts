@@ -52,7 +52,7 @@ export class ClientFactory {
         if (instruction && instruction.retries) instruction.retries--;
         if (done) {
           this.resolve();
-          return { status: 'error', error: 'Client is done' };
+          // return { status: 'error', error: 'Client is done' };
           // throw new Error('Client is done');
         }
         if (page >= totalPages) return { status: 'success', data: [], totalPages };
@@ -95,12 +95,14 @@ class EntityProvider implements IncrementalEntityProvider<number, Client> {
           name: item,
           annotations: {
             // You need to define these, otherwise they'll fail validation
-            'example.com/entity-provider': this.getProviderName(),
-            'example.com/entity-origin-provider': this.getProviderName(),
+            'backstage.io/managed-by-location': `test:${this.getProviderName()}`,
+            'backstage.io/managed-by-origin-location': `test:${this.getProviderName()}`,
           }
         },
         spec: {
-          type: 'service'
+          type: 'service',
+          lifecycle: 'production',
+          owner: 'guest',
         }
       }
     }));
