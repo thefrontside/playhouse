@@ -1,5 +1,5 @@
 {
-  "name": "@frontside/plugin-platform",
+  "name": "@frontside/backstage-plugin-platform",
   "version": "0.1.0",
   "main": "src/index.ts",
   "types": "src/index.ts",
