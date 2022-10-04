@@ -33,7 +33,7 @@ import { FlatRoutes } from '@backstage/core-app-api';
 import { orgPlugin } from '@backstage/plugin-org';
 import { InspectorPage } from '@frontside/backstage-plugin-effection-inspector';
 import { GraphiQLPage } from '@backstage/plugin-graphiql';
-import { PlatformPage } from '@frontside/plugin-platform';
+import { PlatformPage } from '@frontside/backstage-plugin-platform';
 
 const app = createApp({
   apis,

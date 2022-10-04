@@ -33,7 +33,7 @@
     "@backstage/theme": "^0.2.15",
     "@frontside/backstage-plugin-effection-inspector": "^0.1.0",
     "@frontside/backstage-plugin-humanitec": "^0.3.0",
-    "@frontside/plugin-platform": "^0.1.0",
+    "@frontside/backstage-plugin-platform": "^0.1.0",
     "@material-ui/core": "^4.12.2",
     "@material-ui/icons": "^4.9.1",
     "history": "^5.0.0",
