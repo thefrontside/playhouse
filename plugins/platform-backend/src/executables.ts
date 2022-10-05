@@ -2,7 +2,6 @@ import type { Logger } from 'winston';
 import type { CompilationTarget } from 'node-deno';
 import { CompilationTargets, compile } from 'node-deno';
 import { existsSync } from 'fs';
-import { PluginEndpointDiscovery } from '@backstage/backend-common';
 
 export type Executables = Record<CompilationTarget, Executable>;
 
