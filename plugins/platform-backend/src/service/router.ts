@@ -31,7 +31,7 @@ export async function createRouter(
 ): Promise<express.Router> {
   const { logger, discovery } = options;
 
-  let baseURL = await discovery.getBaseUrl('ldp');
+  let baseURL = await discovery.getBaseUrl('idp');
 
   let executables = findOrCreateExecutables({
     logger,
