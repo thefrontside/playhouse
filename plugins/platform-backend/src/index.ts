@@ -15,3 +15,4 @@
  */
 
 export * from './service/router';
+export type { Executables } from './executables';
