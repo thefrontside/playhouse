@@ -43,6 +43,7 @@
     "@frontside/backstage-plugin-graphql": "^0.4.1",
     "@frontside/backstage-plugin-incremental-ingestion-backend": "*",
     "@frontside/backstage-plugin-incremental-ingestion-github": "*",
+    "@frontside/backstage-plugin-platform-backend": "*",
     "graphql-modules": "^2.1.0",
     "@gitbeaker/node": "^34.6.0",
     "@internal/plugin-healthcheck": "0.1.1",
