@@ -53,8 +53,9 @@ function findOrCreateExecutable(target: CompilationTarget, options: FindOrCreate
     stderr: '',
   }
 
+  let ext = target.includes('windows') ? '.exe' : ''
 
-  if (existsSync(output)) {
+  if (existsSync(`${output}${ext}`)) {
     logger.info(`found existing executable: ${output}`);
     executable = {
       type: 'compiled',
