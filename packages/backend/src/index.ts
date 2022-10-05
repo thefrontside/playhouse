@@ -34,6 +34,7 @@ import healthcheck from './plugins/healthcheck';
 import effectionInspector from './plugins/effection-inspector';
 import humanitec from './plugins/humanitec';
 import graphql from './plugins/graphql';
+import ldp from './plugins/ldp';
 import { PluginEnvironment } from './types';
 import { CatalogClient } from '@backstage/catalog-client';
 
@@ -99,6 +100,7 @@ async function main() {
   const searchEnv = useHotMemoize(module, () => createEnv('search'));
   const appEnv = useHotMemoize(module, () => createEnv('app'));
   const humanitecEnv = useHotMemoize(module, () => createEnv('humanitec'));
+  const ldpEnv = useHotMemoize(module, () => createEnv('ldp'));
 
   const apiRouter = Router();
   apiRouter.use('/catalog', await catalog(catalogEnv));
@@ -111,6 +113,7 @@ async function main() {
   apiRouter.use('/effection-inspector', await effectionInspector(effectionInspectorEnv));
   apiRouter.use('/humanitec', await humanitec(humanitecEnv));
   apiRouter.use('/graphql', await graphql(graphqlEnv));
+  apiRouter.use('/ldp', await ldp(ldpEnv));
   apiRouter.use(notFoundHandler());
 
   const service = createServiceBuilder(module)
