@@ -3097,6 +3097,15 @@
     chalk "^4.1.2"
     stacktrace-parser "^0.1.10"
 
+"@effection/main@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@effection/main/-/main-2.1.0.tgz#90a691d1a78e17ec27ba7ff7e5a87894182c2876"
+  integrity sha512-jnAlVjsLy1feJeNBLHwmA/mDpnoJsYO3gGtAg2XALS4EiIc7nhNDeoj9D6bsBxqUHHEp2FYupYztFK0vU11UFA==
+  dependencies:
+    "@effection/core" "2.2.0"
+    chalk "^4.1.2"
+    stacktrace-parser "^0.1.10"
+
 "@effection/process@^2.0.4":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@effection/process/-/process-2.1.0.tgz#de44de2c7078d25bedfaf9d25a0c61c8bfa0a465"
@@ -3105,6 +3114,16 @@
     cross-spawn "^7.0.3"
     ctrlc-windows "^2.0.0"
     effection "2.0.4"
+    shellwords "^0.1.1"
+
+"@effection/process@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@effection/process/-/process-2.1.1.tgz#bf48a884faa06b8004c473065c385ab3939e6439"
+  integrity sha512-VNRbRCKwbP48iZcDB66pH4oe77dmffdeQVnLHFth2HIPfJisGH0vTE/3aAQ+1KDaJImWXtq4xOTaurjwqYPHEg==
+  dependencies:
+    cross-spawn "^7.0.3"
+    ctrlc-windows "^2.1.0"
+    effection "2.0.5"
     shellwords "^0.1.1"
 
 "@effection/react@^2.1.4":
@@ -7178,6 +7197,11 @@ address@^1.0.1, address@^1.1.2:
   resolved "https://registry.yarnpkg.com/address/-/address-1.2.0.tgz#d352a62c92fee90f89a693eccd2a8b2139ab02d9"
   integrity sha512-tNEZYz5G/zYunxFm7sfhAxkXEuLj3K6BKwv6ZURlsF6yiUQ65z0Q2wZW9L5cPUl9ocofGvXOdFYbFHp0+6MOig==
 
+adm-zip@^0.5.4:
+  version "0.5.9"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.9.tgz#b33691028333821c0cf95c31374c5462f2905a83"
+  integrity sha512-s+3fXLkeeLjZ2kLjCBwQufpI5fuN+kIGBxu6530nVQZGVol0d7Y/M88/xw9HGGUcJjKf8LutN3VPRUBq6N7Ajg==
+
 agent-base@6, agent-base@^6.0.2:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-6.0.2.tgz#49fff58577cfee3f37176feab4c22e00f86d7f77"
@@ -9725,6 +9749,11 @@ ctrlc-windows@^2.0.0:
     "@mapbox/node-pre-gyp" "^1.0.5"
     neon-cli "^0.8.1"
 
+ctrlc-windows@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/ctrlc-windows/-/ctrlc-windows-2.1.0.tgz#f2096a96ac1d03181e0ec808c2c8a67fdc20b300"
+  integrity sha512-OrX5KI+K+2NMN91QIhYZdW7VDO2YsSdTZW494pA7Nvw/wBdU2hz+MGP006bR978zOTrG6Q8EIeJvLJmLqc6MsQ==
+
 cypress@^7.3.0:
   version "7.7.0"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-7.7.0.tgz#0839ae28e5520536f9667d6c9ae81496b3836e64"
@@ -10084,6 +10113,14 @@ delegates@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/delegates/-/delegates-1.0.0.tgz#84c6e159b81904fdca59a0ef44cd870d31250f9a"
   integrity sha512-bd2L678uiWATM6m5Z1VzNCErI3jiGzt6HGY8OVICs40JQq/HALfbyNJmp0UDakEY4pMMaN0Ly5om/B1VI/+xfQ==
+
+deno-bin@^1.26.0:
+  version "1.26.0"
+  resolved "https://registry.yarnpkg.com/deno-bin/-/deno-bin-1.26.0.tgz#03158f4d75950866051e81f7a98d30740b51b958"
+  integrity sha512-4RIh4Igx2F4E4EGttAerFV35QIzyHB9fzw4tTBTEUKHyom/Kuj85WoHDggBvoPliAAd+xDk7fJT9dyLu1w4EpQ==
+  dependencies:
+    adm-zip "^0.5.4"
+    follow-redirects "^1.10.0"
 
 denque@^2.0.1:
   version "2.1.0"
@@ -10453,6 +10490,19 @@ effection@2.0.4, effection@^2.0.0, effection@^2.0.4:
     "@effection/events" "2.0.3"
     "@effection/fetch" "2.0.4"
     "@effection/main" "2.0.3"
+    "@effection/stream" "2.0.3"
+    "@effection/subscription" "2.0.3"
+
+effection@2.0.5, effection@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/effection/-/effection-2.0.5.tgz#caac782994f8f69644bac3eda32228d8799dd244"
+  integrity sha512-q+5iex8LMWP3kitokhkCQErDIN1awRHy7MVqsDIweGeTl0rgpX4Y1KDjE4onvnPF9JtyvhOEFpAAUMRnqi0wqg==
+  dependencies:
+    "@effection/channel" "2.0.3"
+    "@effection/core" "2.2.0"
+    "@effection/events" "2.0.3"
+    "@effection/fetch" "2.0.4"
+    "@effection/main" "2.1.0"
     "@effection/stream" "2.0.3"
     "@effection/subscription" "2.0.3"
 
@@ -11824,6 +11874,11 @@ follow-redirects@^1.0.0, follow-redirects@^1.14.0:
   version "1.15.1"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.1.tgz#0ca6a452306c9b276e4d3127483e29575e207ad5"
   integrity sha512-yLAMQs+k0b2m7cVxpS1VKJVvoz7SS9Td1zss3XRwXj+ZDH00RJgnuLx7E44wx02kQLrdM3aOOy+FpzS7+8OizA==
+
+follow-redirects@^1.10.0:
+  version "1.15.2"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
+  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
 
 for-each@^0.3.3:
   version "0.3.3"
@@ -16724,6 +16779,15 @@ node-cache@^5.1.2:
   integrity sha512-t1QzWwnk4sjLWaQAS8CHgOJ+RAfmHpxFWmc36IWTiWHQfs0w5JDMBS1b1ZxQteo0vVVuWJvIUKHDkkeK7vIGCg==
   dependencies:
     clone "2.x"
+
+node-deno@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/node-deno/-/node-deno-0.0.2.tgz#9ece02a018bb50d0ed6b54c04e4c688fa1c8b314"
+  integrity sha512-uP+ATXzDyfqxzfPR/TPg47n+eCQGYNMJqQs+/mARh2UsQaAn+O7z9yNnkKXqS7rQ2z0Zcg1tzsXYsbCxJeyFxQ==
+  dependencies:
+    "@effection/process" "^2.1.1"
+    deno-bin "^1.26.0"
+    effection "^2.0.5"
 
 node-domexception@1.0.0:
   version "1.0.0"

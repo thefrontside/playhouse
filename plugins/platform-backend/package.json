@@ -30,7 +30,8 @@
     "express-promise-router": "^4.1.0",
     "winston": "^3.2.1",
     "node-fetch": "^2.6.7",
-    "yn": "^4.0.0"
+    "yn": "^4.0.0",
+    "node-deno": "^0.0.2"
   },
   "devDependencies": {
     "@backstage/cli": "^0.17.2",

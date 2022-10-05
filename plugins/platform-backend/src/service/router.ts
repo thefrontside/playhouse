@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
-import { errorHandler } from '@backstage/backend-common';
+
+import { errorHandler, PluginEndpointDiscovery, resolvePackagePath } from '@backstage/backend-common';
 import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
+import { findOrCreateExecutables } from '../executables';
 
 export interface RouterOptions {
   logger: Logger;
+  discovery: PluginEndpointDiscovery;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger } = options;
+  const { logger, discovery } = options;
+
+  let baseURL = await discovery.getBaseUrl('ldp');
+
+  let executables = findOrCreateExecutables({
+    logger,
+    distDir: 'dist-bin',
+    baseURL,
+    executableName: 'my-ldp',
+    entrypoint: resolvePackagePath("@frontside/backstage-plugin-platform-backend", "cli", "main.ts"),
+  })
 
   const router = Router();
   router.use(express.json());
@@ -35,6 +48,13 @@ export async function createRouter(
     logger.info('PONG!');
     response.send({ status: 'ok' });
   });
+
+  router.get('/executables', (_, response)=> {
+    response.send(executables);
+  });
+
+  router.use('/executables/dist', express.static('dist-bin'));
+
   router.use(errorHandler());
   return router;
 }
