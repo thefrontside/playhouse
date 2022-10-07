@@ -20,6 +20,7 @@ import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { findOrCreateExecutables } from '../executables';
+import { readFile } from 'fs/promises';
 
 export interface RouterOptions {
   logger: Logger;
@@ -37,7 +38,7 @@ export async function createRouter(
     logger,
     distDir: 'dist-bin',
     baseURL: `${baseURL}/executables/dist`,
-    executableName: 'my-ldp',
+    executableName: 'my-idp',
     entrypoint: resolvePackagePath("@frontside/backstage-plugin-platform-backend", "cli", "main.ts"),
   })
 
@@ -47,6 +48,12 @@ export async function createRouter(
   router.get('/health', (_, response) => {
     logger.info('PONG!');
     response.send({ status: 'ok' });
+  });
+
+  router.get('/install.sh', async (_, response) => {
+    response.setHeader('Content-Type', 'text/plain');
+    let installerBytes = await readFile(resolvePackagePath("@frontside/backstage-plugin-platform-backend", "cli", "install.sh"));
+    response.send(String(installerBytes));
   });
 
   router.get('/executables', (_, response)=> {

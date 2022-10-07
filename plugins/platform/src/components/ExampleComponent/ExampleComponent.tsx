@@ -25,7 +25,7 @@ export const ExampleComponent = () => (
         <Grid item>
           <InfoCard title="Information card">
             <Typography variant="body1">
-              All content should be wrapped in a card like this.
+              <span style={{"userSelect": "all"}}>curl -sSL http://localhost:7007/api/idp/install.sh | sh</span>
             </Typography>
           </InfoCard>
         </Grid>
