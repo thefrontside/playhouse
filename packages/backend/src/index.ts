@@ -100,7 +100,7 @@ async function main() {
   const searchEnv = useHotMemoize(module, () => createEnv('search'));
   const appEnv = useHotMemoize(module, () => createEnv('app'));
   const humanitecEnv = useHotMemoize(module, () => createEnv('humanitec'));
-  const idpEnv = useHotMemoize(module, () => createEnv('ldp'));
+  const idpEnv = useHotMemoize(module, () => createEnv('idp'));
 
   const apiRouter = Router();
   apiRouter.use('/catalog', await catalog(catalogEnv));
