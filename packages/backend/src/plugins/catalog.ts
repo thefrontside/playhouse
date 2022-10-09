@@ -3,7 +3,7 @@ import {
 } from '@backstage/plugin-catalog-backend';
 import { ScaffolderEntitiesProcessor } from '@backstage/plugin-scaffolder-backend';
 import { IncrementalCatalogBuilder } from '@frontside/backstage-plugin-incremental-ingestion-backend';
-import { GithubRepositoryEntityProvider } from '@frontside/backstage-plugin-incremental-ingestion-github';
+import { GithubDiscoveryEntityProvider } from '@frontside/backstage-plugin-incremental-ingestion-github';
 import { Router } from 'express';
 import { Duration } from 'luxon';
 import { PluginEnvironment } from '../types';
@@ -17,7 +17,7 @@ export default async function createPlugin(
   // incremental entity providers with the builder 
   const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
   
-  const githubRepositoryProvider = GithubRepositoryEntityProvider.create({ 
+  const githubRepositoryProvider = GithubDiscoveryEntityProvider.create({ 
     host: 'github.com',
     logger: env.logger,
     config: env.config,
@@ -29,7 +29,7 @@ export default async function createPlugin(
     {
       burstInterval: Duration.fromObject({ seconds: 3 }),
       burstLength: Duration.fromObject({ seconds: 3 }),
-      restLength: Duration.fromObject({ day: 1 })
+      restLength: Duration.fromObject({ minutes: 5 })
     }
   )
 

@@ -6,6 +6,9 @@ generates:
   src/__generated__/types.ts:
     plugins:
       - typescript
+    config:
+      avoidOptionals: true
+      declarationKind: 'interface'
   src/:
     preset: near-operation-file
     presetConfig:
