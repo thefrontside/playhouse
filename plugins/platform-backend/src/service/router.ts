@@ -41,6 +41,7 @@ export async function createRouter(
   let executables = findOrCreateExecutables({
     logger,
     distDir: 'dist-bin',
+    baseURL,
     downloadsURL,
     executableName,
     entrypoint: resolvePackagePath("@frontside/backstage-plugin-platform-backend", "cli", "main.ts"),
