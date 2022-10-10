@@ -3,7 +3,9 @@ import type { CompilationTarget } from 'node-deno';
 import { CompilationTargets, compile } from 'node-deno';
 import { existsSync } from 'fs';
 
-export type Executables = Record<CompilationTarget, Executable>;
+export interface Executables extends  Record<CompilationTarget, Executable> {
+  executableName: string;
+}
 
 export type Executable = {
   type: 'error';
@@ -24,7 +26,7 @@ export type Executable = {
 }
 
 export interface FindOrCreateOptions {
-  baseURL: string;
+  downloadsURL: string;
   logger: Logger;
   distDir: string;
   executableName: string;
@@ -38,13 +40,13 @@ export function findOrCreateExecutables(options: FindOrCreateOptions): Executabl
       ...executables,
       [target]: findOrCreateExecutable(target, options),
     }
-  }, {}) as Executables;
+  }, { executableName: options.executableName }) as Executables;
 }
 
 function findOrCreateExecutable(target: CompilationTarget, options: FindOrCreateOptions): Executable {
-  let { logger, distDir, executableName, entrypoint, baseURL } = options;
+  let { logger, distDir, executableName, entrypoint, downloadsURL } = options;
   let output = `${distDir}/${executableName}-${target}`;
-  let url = `${baseURL}/${executableName}-${target}`;
+  let url = `${downloadsURL}/${executableName}-${target}`;
 
   let executable: Executable = {
     type: 'compiling',
