@@ -21,24 +21,28 @@ import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { findOrCreateExecutables } from '../executables';
 import { readFile } from 'fs/promises';
+import * as nunjucks from 'nunjucks';
 
 export interface RouterOptions {
   logger: Logger;
   discovery: PluginEndpointDiscovery;
+  executableName: string;
+  appURL: string;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger, discovery } = options;
+  const { logger, discovery, executableName, appURL } = options;
 
   let baseURL = await discovery.getBaseUrl('idp');
+  let downloadsURL = `${baseURL}/executables/dist`;
 
   let executables = findOrCreateExecutables({
     logger,
     distDir: 'dist-bin',
-    baseURL: `${baseURL}/executables/dist`,
-    executableName: 'my-idp',
+    downloadsURL,
+    executableName,
     entrypoint: resolvePackagePath("@frontside/backstage-plugin-platform-backend", "cli", "main.ts"),
   })
 
@@ -53,7 +57,11 @@ export async function createRouter(
   router.get('/install.sh', async (_, response) => {
     response.setHeader('Content-Type', 'text/plain');
     let installerBytes = await readFile(resolvePackagePath("@frontside/backstage-plugin-platform-backend", "cli", "install.sh"));
-    response.send(String(installerBytes));
+    response.send(nunjucks.renderString(String(installerBytes), {
+      appURL,
+      downloadsURL,
+      executableName,
+    }));
   });
 
   router.get('/executables', (_, response)=> {

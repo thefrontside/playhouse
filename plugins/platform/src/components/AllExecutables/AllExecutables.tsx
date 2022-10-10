@@ -15,7 +15,9 @@ export const DenseTable = ({ executables }: { executables: Executables}) => {
     { title: 'URL', field: 'url' },
   ];
 
-  const data = Object.entries(executables).map(([target, executable]) => {
+  let { executableName, ...binaries } = executables;
+
+  const data = Object.entries(binaries).map(([target, executable]) => {
     return {
       target,
       url: executable.type === 'compiled' ? executable.url : 'N/A',
@@ -25,7 +27,7 @@ export const DenseTable = ({ executables }: { executables: Executables}) => {
 
   return (
     <Table
-      title="Downlead my-idp"
+      title={`${executableName} downloads`}
       options={{ search: false, paging: false }}
       columns={columns}
       data={data}
