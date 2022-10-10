@@ -28,7 +28,7 @@ export const PlatformPage = platformPlugin.provide(
   createRoutableExtension({
     name: 'PlatformPage',
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import('./components/Install').then(m => m.Install),
     mountPoint: rootRouteRef,
   }),
 );

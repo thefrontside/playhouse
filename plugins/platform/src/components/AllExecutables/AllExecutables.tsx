@@ -33,7 +33,7 @@ export const DenseTable = ({ executables }: { executables: Executables}) => {
   );
 };
 
-export const ExampleFetchComponent = () => {
+export const AllExecutables = () => {
   let api = useApi(executablesApiRef);
   const { value, loading, error } = useAsync(api.fetchExecutables, []);
 

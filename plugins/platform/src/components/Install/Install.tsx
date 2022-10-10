@@ -9,9 +9,9 @@ import {
   HeaderLabel,
   SupportButton,
 } from '@backstage/core-components';
-import { ExampleFetchComponent } from '../ExampleFetchComponent';
+import { AllExecutables } from '../AllExecutables';
 
-export const ExampleComponent = () => (
+export const Install = () => (
   <Page themeId="tool">
     <Header title="Welcome to platform!" subtitle="Optional subtitle">
       <HeaderLabel label="Owner" value="Team X" />
@@ -30,7 +30,7 @@ export const ExampleComponent = () => (
           </InfoCard>
         </Grid>
         <Grid item>
-          <ExampleFetchComponent />
+          <AllExecutables />
         </Grid>
       </Grid>
     </Content>
