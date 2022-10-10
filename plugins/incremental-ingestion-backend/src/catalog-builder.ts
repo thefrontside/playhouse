@@ -32,6 +32,7 @@ export class IncrementalCatalogBuilder {
     provider: IncrementalEntityProvider<T, C>,
     options: IncrementalEntityProviderOptions,
   ) {
+    // TODO Check if build was called and throw error
     const { burstInterval, burstLength, restLength } = options;
     const { logger: catalogLogger, database, scheduler } = this.env;
     const ready = this.ready;

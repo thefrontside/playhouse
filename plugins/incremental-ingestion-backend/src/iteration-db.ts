@@ -84,6 +84,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
         }
         case 'ingest':
           try {
+            // TODO should update current action to avoid race condition?
             const done = await ingestOneBurst(ingestionId, signal, tx);
             if (done) {
               logger.info(`Ingestion is complete. Rest for ${restLength.toHuman()}`);
@@ -275,7 +276,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
               [provider.getProviderName()],
             )
             .whereNotIn(
-              'ref',
+              'entity_ref',
               tx('ingestion.ingestion_marks')
                 .join(
                   'ingestion.ingestion_mark_entities',
