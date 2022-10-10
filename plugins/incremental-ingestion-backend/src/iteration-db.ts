@@ -47,7 +47,6 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
   return {
     async taskFn(signal) {
       try {
-        console.log('Waiting for client to be ready');
         logger.debug(`Begin tick`);
         await handleNextAction(signal);
       } catch (error) {
@@ -67,7 +66,6 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
       function update(attrs: Record<string, unknown>) {
         return tx('ingestion.ingestions').where('id', ingestionId).update(attrs);
       }
-      console.log(nextAction, ingestionId);
 
       switch (nextAction) {
         case 'rest': {
@@ -103,7 +101,6 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
               });
             }
           } catch (error) {
-            console.log(error);
             if ((error as Error).message && (error as Error).message === 'CANCEL') {
               logger.info(`Ingestion canceled.`);
               await update({
@@ -134,7 +131,6 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
           break;
         case 'backoff': {
           const remainingTime = nextActionAt - Date.now();
-          console.log(remainingTime);
           if (remainingTime <= 0) {
             logger.info(
               `Backoff period is complete. Attempt to resume ingestion on next tick.`,
@@ -280,7 +276,7 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
               [provider.getProviderName()],
             )
             .whereNotIn(
-              'ref',
+              'entity_ref',
               tx('ingestion.ingestion_marks')
                 .join(
                   'ingestion.ingestion_mark_entities',
@@ -297,8 +293,6 @@ export async function createIterationDB(options: IterationDBOptions): Promise<It
     }
 
     const removed = await computeRemoved();
-
-    console.log(added, removed);
 
     await connection.applyMutation({
       type: 'delta',

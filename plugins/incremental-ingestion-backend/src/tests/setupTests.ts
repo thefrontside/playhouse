@@ -1,17 +1,25 @@
 /* eslint-disable func-names */
+import express from 'express';
 import Router from 'express-promise-router';
-import { CatalogBuilder } from '@backstage/plugin-catalog-backend';
+import { CatalogBuilder, CatalogProcessingEngine } from '@backstage/plugin-catalog-backend';
 import { ensure, once, Operation } from 'effection';
 import { Duration } from 'luxon';
 import { createLogger, Logger, transports } from 'winston';
 import { EntityIteratorResult, IncrementalCatalogBuilder } from '..';
 import { IncrementalEntityProvider, IncrementalEntityProviderOptions, PluginEnvironment } from '../types';
-import express from 'express';
+import { createServiceBuilder, SingleHostDiscovery } from '@backstage/backend-common';
 
-interface Instruction {
-  id: number;
+type Instruction = DataInstruction | ErrorInstruction;
+
+interface DataInstruction {
+  type: 'data';
   data: string[];
-  retries?: number;
+  totalPages: number;
+  delay?: number;
+}
+
+interface ErrorInstruction {
+  type: 'error';
   delay?: number;
 }
 
@@ -41,34 +49,28 @@ export class ClientFactory {
   client: Client = { fetch() { throw new Error('Client is not ready') } };
 
   createClient(instructions: Instruction[]): Promise<void> {
-    let done = false;
-    let instruction: Instruction | undefined = undefined;
-    const totalPages = instructions.length
+    let instruction: Instruction | undefined;
+    let restInstruction: Instruction[] = instructions;
+    const pages: string[][] = [];
 
     this.client = {
       fetch: async (page: number) => {
-        await delay();
-
-        if (instruction && instruction.retries) instruction.retries--;
-        if (done) {
+        ([instruction, ...restInstruction] = restInstruction);
+        if (instruction === undefined) {
           this.resolve();
-          // return { status: 'error', error: 'Client is done' };
-          // throw new Error('Client is done');
+          return { status: 'success', data: pages[page], totalPages: pages.length };
         }
-        if (page >= totalPages) return { status: 'success', data: [], totalPages };
-        if (instructions[page].id !== instruction?.id) instruction = { ...instructions[page] };
-        if (instruction.delay) await delay(instruction.delay)
-        if (instruction.retries) return { status: 'error', error: '¯\\_(ツ)_/¯' };
-        if (page + 1 === totalPages) done = true;
-        return { status: 'success', data: instruction.data, totalPages };
+        await delay(instruction.delay);
+        if (instruction.type === 'data') {
+          pages[page] = instruction.data;
+          return { status: 'success', data: instruction.data, totalPages: instruction.totalPages };
+        }
+        return { status: 'error', error: '¯\\_(ツ)_/¯' };
       }
     }
     return new Promise<void>(resolve => (this.resolve = resolve));
   }
 }
-
-// TODO example of scenario
-// get 5 entities => get an error => start again => get 4 entities instead of 5
 
 class EntityProvider implements IncrementalEntityProvider<number, Client> {
   getProviderName() { return 'EntityProvider' }
@@ -115,15 +117,75 @@ class EntityProvider implements IncrementalEntityProvider<number, Client> {
   }
 }
 
-export function useCatalogPlugin(env: PluginEnvironment, factory: ClientFactory): Operation<express.Router> {
+export function useCatalog(env: PluginEnvironment & { discovery: SingleHostDiscovery, builder: CatalogBuilder, incrementalBuilder: IncrementalCatalogBuilder }): Operation<{ stop: () => Promise<void>, rebuild: Operation<void> }> {
   return {
-    name: "CatalogPlugin",
+    name: 'Catalog',
     *init() {
+      let processingEngine: CatalogProcessingEngine;
+      let router: express.Router;
+      ;({ processingEngine, router } = yield env.builder.build());
+      const proxyfiedRouter = new Proxy(router, {
+        apply(_target, thisArg, argArray: Parameters<express.Router>) {
+          return router.apply(thisArg, argArray);
+        },
+        get(_target, prop: keyof express.Router) {
+          return router[prop]
+        },
+      })
+
+      yield env.incrementalBuilder.build()
+      yield processingEngine.start();
+      yield ensure(() => processingEngine.stop());
+
       const apiRouter = Router();
+      apiRouter.use('/catalog', proxyfiedRouter);
+
+      const service = createServiceBuilder(module)
+        .loadConfig(env.config)
+        .addRouter('/api', apiRouter)
+
+      yield service.start();
+
+      return {
+        stop: () => processingEngine.stop(),
+        rebuild: () => ({
+          name: 'Rebuild Catalog',
+          *init() {
+            const client = yield env.database.getClient()
+
+            yield client.raw('TRUNCATE TABLE public.knex_migrations CASCADE');
+            yield client.raw('TRUNCATE TABLE public.knex_migrations_lock CASCADE');
+            yield client.raw('DROP TABLE public.final_entities CASCADE');
+            yield client.raw('DROP TABLE public.locations CASCADE');
+            yield client.raw('DROP TABLE public.location_update_log CASCADE');
+            yield client.raw('DROP TABLE public.refresh_state CASCADE');
+            yield client.raw('DROP TABLE public.refresh_state_references CASCADE');
+            yield client.raw('DROP TABLE public.relations CASCADE');
+            yield client.raw('DROP TABLE public.search CASCADE');
+            yield client.raw('TRUNCATE TABLE ingestion.knex_migrations CASCADE');
+            yield client.raw('TRUNCATE TABLE ingestion.knex_migrations_lock CASCADE');
+            yield client.raw('DROP TABLE ingestion.ingestions CASCADE');
+            yield client.raw('DROP TABLE ingestion.ingestion_marks CASCADE');
+            yield client.raw('DROP TABLE ingestion.ingestion_mark_entities CASCADE');
+
+            ;({ processingEngine, router } = yield env.builder.build());
+            yield env.incrementalBuilder.build();
+            yield processingEngine.start();
+          }
+        })
+      }
+    }
+  }
+}
+
+export function useIncrementalBuilder(env: PluginEnvironment & { factory: ClientFactory }): Operation<{ builder: CatalogBuilder, incrementalBuilder: IncrementalCatalogBuilder }> {
+  return {
+    name: "IncrementalBuilder",
+    *init() {
       const builder = CatalogBuilder.create(env);
       const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
 
-      const provider = new EntityProvider(factory);
+      const provider = new EntityProvider(env.factory);
       const schedule: IncrementalEntityProviderOptions = {
         burstInterval: Duration.fromObject({ milliseconds: 100 }),
         burstLength: Duration.fromObject({ milliseconds: 100 }),
@@ -132,15 +194,7 @@ export function useCatalogPlugin(env: PluginEnvironment, factory: ClientFactory)
 
       incrementalBuilder.addIncrementalEntityProvider(provider, schedule);
 
-      const { processingEngine, router } = yield builder.build();
-      yield incrementalBuilder.build()
-      yield processingEngine.start();
-
-      apiRouter.use('/catalog', router);
-
-      yield ensure(() => processingEngine.stop());
-
-      return apiRouter
+      return { builder, incrementalBuilder };
      }
   }
 }
