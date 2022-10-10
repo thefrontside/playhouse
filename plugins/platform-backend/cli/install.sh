@@ -1,8 +1,13 @@
-executables_url() {
-    echo "http://localhost:3000/api/idp/executables"
+executable_name() {
+    echo "{{executableName}}"
 }
-download_url() {
-    echo "http://localhost:7007/api/idp/executables/dist"
+
+executables_url() {
+    echo "{{appURL}}"
+}
+
+downloads_url() {
+    echo "{{downloadsURL}}"
 }
 
 info() {
@@ -33,7 +38,7 @@ bold() {
 
 usage() {
     cat >&2 <<END_USAGE
-install.sh: Install idp executables
+install.sh: Install {{executableName}} executables
 
 USAGE:
     install.sh [FLAGS] [OPTIONS]
@@ -92,9 +97,9 @@ download_executable_from_backstage() {
     local os_info="$1"
     local tmpdir="$2"
 
-    local filename="my-idp-$os_info"
+    local filename="$(executable_name)-$os_info"
     local download_file="$tmpdir/$filename"
-    local archive_url="$(download_url)/$filename"
+    local archive_url="$(downloads_url)/$filename"
     curl --progress-bar --show-error --location "$archive_url" --output "$download_file" --write-out '%{filename_effective}'
 }
 
@@ -131,7 +136,7 @@ install_from_file() {
 
     create_tree "$install_dir"
 
-    info 'Extracting' "IDP binaries"
+    info 'Extracting' "$(executable_name) executable..."
     # extract the files to the specified directory
     cp -c "$binfile" "$install_dir"/bin/idp
     chmod a+x "$install_dir"/bin/idp
@@ -146,7 +151,7 @@ install_remote() {
     exit_status="$?"
     if [ "$exit_status" != 0 ]
     then
-        error "Could not download IDP executable. See $(executables_url) for a list of available executables"
+        error "Could not download the $(executable_name) executable. See $(executables_url) for a list of available executables"
         return "$exit_status"
     fi
 
@@ -162,7 +167,7 @@ install() {
     exit 1
   fi
 
-  if [ -e "$install_dir/bin/idp" ]; then
+  if [ -e "$install_dir/bin/$(executable_name)" ]; then
       info "Upgrade" "new executable will overwrite existing version"
   fi
 
