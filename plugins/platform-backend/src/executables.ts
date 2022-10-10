@@ -26,6 +26,7 @@ export type Executable = {
 }
 
 export interface FindOrCreateOptions {
+  baseURL: string;
   downloadsURL: string;
   logger: Logger;
   distDir: string;
@@ -44,7 +45,7 @@ export function findOrCreateExecutables(options: FindOrCreateOptions): Executabl
 }
 
 function findOrCreateExecutable(target: CompilationTarget, options: FindOrCreateOptions): Executable {
-  let { logger, distDir, executableName, entrypoint, downloadsURL } = options;
+  let { logger, baseURL, distDir, executableName, entrypoint, downloadsURL } = options;
   let output = `${distDir}/${executableName}-${target}`;
   let url = `${downloadsURL}/${executableName}-${target}`;
 
@@ -69,7 +70,14 @@ function findOrCreateExecutable(target: CompilationTarget, options: FindOrCreate
     compile({
       target,
       output,
-      entrypoint,
+      // pass metadata as the first three args of the script
+      entrypoint: [entrypoint, executableName, baseURL, '"internal developer platform"'],
+
+      // only allow network access back to the backstage server
+      allowNet: [baseURL],
+
+      // fail immediately if a permission is not present
+      noPrompt: true,
     }).then(result => {
       let stdio = {
         stdout: result.stdout,
