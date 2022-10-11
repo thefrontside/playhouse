@@ -15,4 +15,4 @@
  */
 
 export * from './service/router';
-export * from './providers/repository-entity-provider';
+export * from './providers/discovery-entity-provider';
