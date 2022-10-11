@@ -2,7 +2,6 @@ import type { ResolverContext } from './types';
 
 import { parseEntityRef } from '@backstage/catalog-model';
 import {
-  mapSchema,
   getDirective,
   MapperKind,
   SchemaMapper,
@@ -65,7 +64,7 @@ const resolveMappers: Array<(
   },
 ]
 
-const objectMapper: SchemaMapper = {
+export const mappers: SchemaMapper = {
   [MapperKind.OBJECT_TYPE]: (objectType, schema) => {
     const interfaces = traverseExtends(objectType, schema)
     const typeConfig = objectType.toConfig()
@@ -113,7 +112,3 @@ function traverseExtends(type: GraphQLObjectType | GraphQLInterfaceType, schema:
   }
   return isInterfaceType(type) ? [...interfaces, type] : interfaces
 }
-
-export const transform = (schema: GraphQLSchema) => {
-  return mapSchema(schema, objectMapper)
-};

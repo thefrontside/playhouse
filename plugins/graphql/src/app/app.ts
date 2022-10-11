@@ -6,7 +6,10 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { createLoader } from './loaders';
 import { Catalog } from './modules/catalog/catalog';
 import { Core } from './modules/core/core';
-import { transform } from './schema-mapper';
+import { mappers } from './mappers';
+import { mapSchema } from '@graphql-tools/utils';
+
+export { transformSchema } from './transform';
 
 export interface createGraphQLAppOptions {
   catalog: CatalogApi;
@@ -34,9 +37,10 @@ interface CreateOptions {
 function create(options: CreateOptions) {
   return createApplication({
     schemaBuilder: ({ typeDefs, resolvers }) =>
-      transform(makeExecutableSchema({
-        typeDefs, resolvers
-      })),
+      mapSchema(
+        makeExecutableSchema({ typeDefs, resolvers}),
+        mappers
+      ),
     modules: [Core, Catalog, ...options.modules],
   });
 }

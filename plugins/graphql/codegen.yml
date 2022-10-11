@@ -1,5 +1,5 @@
 overwrite: true
-schema: "src/app/modules/**/*.graphql"
+schema: "src/app/schema.ts"
 documents: null
 generates:
   ./src/app/modules/:
