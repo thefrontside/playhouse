@@ -2,9 +2,9 @@ export { parse } from "https://deno.land/std@0.159.0/flags/mod.ts";
 export { assert } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 export * as path from "https://deno.land/std@0.159.0/path/mod.ts";
 export * as yaml from "https://deno.land/std@0.159.0/encoding/yaml.ts";
+export { Command } from "https://deno.land/x/cliffy@v0.25.2/command/mod.ts"
 
-
-//we tried to get this from backstage. We really did.
+// we tried to get this from backstage. We really did.
 export interface Entity {
   /**
    * The version of specification format for this particular entity that
