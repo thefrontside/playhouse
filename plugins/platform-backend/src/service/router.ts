@@ -18,7 +18,8 @@
 import { errorHandler, PluginEndpointDiscovery, resolvePackagePath } from '@backstage/backend-common';
 import express from 'express';
 import Router from 'express-promise-router';
-import { Logger } from 'winston';
+import type { Logger } from 'winston';
+import type { CatalogClient } from '@backstage/catalog-client';
 import { findOrCreateExecutables } from '../executables';
 import { readFile } from 'fs/promises';
 import * as nunjucks from 'nunjucks';
@@ -28,12 +29,13 @@ export interface RouterOptions {
   discovery: PluginEndpointDiscovery;
   executableName: string;
   appURL: string;
+  catalog: CatalogClient;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger, discovery, executableName, appURL } = options;
+  const { catalog, logger, discovery, executableName, appURL } = options;
 
   let baseURL = await discovery.getBaseUrl('idp');
   let downloadsURL = `${baseURL}/executables/dist`;
@@ -70,6 +72,17 @@ export async function createRouter(
   });
 
   router.use('/executables/dist', express.static('dist-bin'));
+
+  router.get('/components/:name/info', async (req, res) => {
+    let name = req.params.name;
+    let component = await catalog.getEntityByRef(`component:default/${name}`);
+    if (component) {
+      res.send(`${JSON.stringify(component, null, 2)}\n`);
+    } else {
+      res.sendStatus(404);
+      res.send("Not Found");
+    }
+  })
 
   router.use(errorHandler());
   return router;
