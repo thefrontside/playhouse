@@ -6,11 +6,13 @@ export default async function createPlugin({
   config,
   logger,
   discovery,
+  catalog,
 }: PluginEnvironment): Promise<Router> {
   return await createRouter({
     executableName: 'idp',
     logger,
     discovery,
     appURL: `${config.getString('app.baseUrl')}/platform`,
+    catalog
   });
 }
