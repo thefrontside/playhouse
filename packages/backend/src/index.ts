@@ -21,6 +21,7 @@ import {
 } from '@backstage/backend-common';
 import { TaskScheduler } from '@backstage/backend-tasks';
 import { ServerPermissionClient } from '@backstage/plugin-permission-node';
+import { DefaultIdentityClient } from '@backstage/plugin-auth-node';
 import { Config } from '@backstage/config';
 import app from './plugins/app';
 import auth from './plugins/auth';
@@ -44,9 +45,14 @@ function makeCreateEnv(config: Config) {
   root.info(`Created UrlReader ${reader}`);
 
   const cacheManager = CacheManager.fromConfig(config);
-  const databaseManager = DatabaseManager.fromConfig(config);
+  const databaseManager = DatabaseManager.fromConfig(config, { logger: root });
   const tokenManager = ServerTokenManager.noop();
   const taskScheduler = TaskScheduler.fromConfig(config);
+
+  const identity = DefaultIdentityClient.create({
+    discovery,
+  });
+
   const permissions = ServerPermissionClient.fromConfig(config, {
     discovery,
     tokenManager,
@@ -70,6 +76,7 @@ function makeCreateEnv(config: Config) {
       permissions,
       catalog: catalogClient,
       databaseManager,
+      identity,
     };
   };
 }
@@ -119,6 +126,6 @@ async function main() {
 
 module.hot?.accept();
 main().catch(error => {
-  console.error(`Backend failed to start up, ${error}`);
+  console.error('Backend failed to start up', error);
   process.exit(1);
 });

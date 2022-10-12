@@ -9,6 +9,7 @@ import {
   UrlReader,
 } from '@backstage/backend-common';
 import { PluginTaskScheduler } from '@backstage/backend-tasks';
+import { IdentityApi } from '@backstage/plugin-auth-node';
 import { PermissionEvaluator } from '@backstage/plugin-permission-common';
 import { CatalogClient } from '@backstage/catalog-client';
 
@@ -23,5 +24,6 @@ export type PluginEnvironment = {
   tokenManager: TokenManager;
   scheduler: PluginTaskScheduler;
   permissions: PermissionEvaluator;
+  identity: IdentityApi;
   catalog: CatalogClient
 };

@@ -14,7 +14,7 @@
     "pretsc": "lerna run generate",
     "tsc": "tsc",
     "tsc:full": "tsc --skipLibCheck false --incremental false",
-    "clean": "backstage-cli clean && lerna run clean",
+    "clean": "backstage-cli repo clean",
     "diff": "lerna run diff --",
     "test": "backstage-cli test",
     "test:all": "lerna run test -- --coverage",
@@ -22,7 +22,7 @@
     "lint:all": "backstage-cli repo lint",
     "prettier:check": "prettier --check .",
     "create-plugin": "backstage-cli create-plugin --scope internal",
-    "remove-plugin": "backstage-cli remove-plugin",
+    "new": "backstage-cli new --scope internal",
     "smee": "node packages/backend/src/plugins/webhook.js"
   },
   "workspaces": {
@@ -39,7 +39,8 @@
     "concurrently": "^6.0.0",
     "lerna": "^4.0.0",
     "prettier": "^2.3.2",
-    "typescript": "~4.6.4"
+    "typescript": "~4.6.4",
+    "node-gyp": "^9.0.0"
   },
   "resolutions": {
     "@types/react": "^17",

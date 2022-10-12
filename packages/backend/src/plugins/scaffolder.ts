@@ -12,6 +12,7 @@ export default async function createPlugin({
   database,
   reader,
   discovery,
+  identity
 }: PluginEnvironment): Promise<Router> {
   const catalogClient = new CatalogClient({ discoveryApi: discovery });
   const integrations = ScmIntegrations.fromConfig(config);
@@ -37,6 +38,7 @@ export default async function createPlugin({
     config,
     database,
     catalogClient,
+    identity,
     reader,
     actions,
   });
