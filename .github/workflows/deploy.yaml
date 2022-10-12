@@ -56,7 +56,11 @@ jobs:
       run: gcloud container clusters get-credentials $CLUSTER --zone $ZONE
 
     - name: Helm Upgrade Postgres
-      run: helm upgrade --install min-postgres-chart ./charts/postgres -f ./charts/postgres/Values.yaml --set postgresUsername=${{ secrets.POSTGRES_USER }} --set postgresPassword=${{ secrets.POSTGRES_PASSWORD }}
+      run: |-
+        helm upgrade --install min-postgres-chart ./charts/postgres \
+          -f ./charts/postgres/Values.yaml \
+          --set postgresUsername=${{ secrets.POSTGRES_USER }} \
+          --set postgresPassword=${{ secrets.POSTGRES_PASSWORD }}
 
     - name: Helm Upgrade Backstage (backstage:${{ env.TAG }})
       run: |-

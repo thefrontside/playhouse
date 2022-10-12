@@ -41,7 +41,7 @@ import {
   hasCatalogProcessingErrors,
   isOrphan,
 } from '@backstage/plugin-catalog';
-import { EntityCatalogGraphCard } from '@backstage/plugin-catalog-graph'
+import { EntityCatalogGraphCard } from '@backstage/plugin-catalog-graph';
 import {
   isGithubActionsAvailable,
   EntityGithubActionsContent,
@@ -61,10 +61,10 @@ import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
 
 const techdocsContent = (
   <EntityTechdocsContent>
-    <TechDocsAddons >
+    <TechDocsAddons>
       <ReportIssue />
     </TechDocsAddons>
-  </EntityTechdocsContent >
+  </EntityTechdocsContent>
 );
 
 const cicdContent = (
@@ -305,7 +305,10 @@ const systemPage = (
         <Grid item md={6}>
           <EntityAboutCard variant="gridItem" />
         </Grid>
-        <Grid item md={6}>
+        <Grid item md={4} xs={12}>
+          <EntityLinksCard />
+        </Grid>
+        <Grid item md={8}>
           <EntityHasComponentsCard variant="gridItem" />
         </Grid>
         <Grid item md={6}>

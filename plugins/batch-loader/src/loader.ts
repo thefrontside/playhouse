@@ -4,7 +4,7 @@ import {
   Entity,
   stringifyEntityRef,
 } from '@backstage/catalog-model';
-import { Knex } from 'knex';
+import type { Knex } from 'knex';
 import { Logger } from 'winston';
 
 export interface BatchLoaderOptions {
