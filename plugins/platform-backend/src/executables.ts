@@ -74,7 +74,9 @@ function findOrCreateExecutable(target: CompilationTarget, options: FindOrCreate
       entrypoint: [entrypoint, executableName, baseURL, '"internal developer platform"'],
 
       // only allow network access back to the backstage server
-      allowNet: [baseURL],
+      allowNet: [new URL(baseURL).host],
+
+      allowRead: true,
 
       // fail immediately if a permission is not present
       noPrompt: true,
