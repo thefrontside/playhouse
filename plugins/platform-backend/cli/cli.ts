@@ -18,7 +18,7 @@ export async function cli(options: CLIOptions) {
 
   const cmd = new Command()
     .name(name)
-    .version(() => `${name}\n${Array(name.length).fill("=").join('')}\narchitecture: ${target}\nbackstage: ${apiURL}`)
+    .version(() => `\narchitecture: ${target}\nbackstage: ${apiURL}`)
     .description(description)
     .command('info', 'display info about a backstage component entity.')
     .option('-c --component <component:string>', 'The backstage component entity')
