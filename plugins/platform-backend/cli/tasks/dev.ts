@@ -1,4 +1,4 @@
-import { cli } from './cli.ts';
+import { cli } from '../cli.ts';
 
 await cli({
   name: 'idp',
