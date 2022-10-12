@@ -1,11 +1,4 @@
-import { parse, path, yaml, Entity, Command } from "./deps.ts";
-
-const usage = (name: string, description: string) => `
-${name}: ${description}
-
-USAGE:
-${name} COMMAND [OPTIONS]
-`;
+import { path, yaml, Entity, Command } from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -22,8 +15,6 @@ class MainError extends Error {
 export async function cli(options: CLIOptions) {
   let { apiURL, description, args, name, target } = options;
   let get = (endpoint: string) => fetch(`${apiURL}/${endpoint}`);
-  let flags = parse(args);
-  let [command] = flags._;
 
   const cmd = new Command()
     .name(name)
@@ -33,8 +24,15 @@ export async function cli(options: CLIOptions) {
     .option('-c --component <component:string>', 'The backstage component entity')
     .action(async ({ component }) => {
       let ref = await findEntityContext(component);
-      let response = await get(`components/${ref}/info`);
-      if (response.ok) {
+      let response: Response;
+      try {
+        response = await get(`components/${ref}/info`);
+      } catch (error) {
+        throw new MainError(error.message);
+      }
+      if (!response) {
+        throw new MainError(`no response from server`);
+      } else if (response.ok) {
         await Deno.stdout.write(new TextEncoder().encode(await response.text()));
       } else {
         if (response.status === 404) {
