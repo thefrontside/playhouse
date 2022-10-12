@@ -9,13 +9,13 @@ export function transformSchema(source: TypeSource) {
   return mapSchema(
     buildASTSchema(
       mergeTypeDefs([
-        source,
         loadFilesSync(
           resolvePackagePath(
             '@frontside/backstage-plugin-graphql',
             'src/app/modules/**/*.graphql'
           )
-        )
+        ),
+        source
       ])
     ),
     mappers,
