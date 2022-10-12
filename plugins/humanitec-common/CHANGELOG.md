@@ -1,5 +1,15 @@
 # @frontside/backstage-plugin-humanitec-common
 
+## 0.3.0
+
+### Minor Changes
+
+- e914d87: Modify modules schema to include variables records
+
+### Patch Changes
+
+- 2a52c92: Upgraded dependencies to bring inline with Backstage 1.6
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,5 +1,22 @@
 # backend
 
+## 0.0.9
+
+### Patch Changes
+
+- 2a52c92: Upgraded dependencies to bring inline with Backstage 1.6
+- Updated dependencies [2a52c92]
+- Updated dependencies [50f45c3]
+- Updated dependencies [2cf8906]
+  - app@0.0.3
+  - @frontside/backstage-plugin-batch-loader@0.2.2
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.2
+  - @frontside/backstage-plugin-graphql@0.4.1
+  - @internal/plugin-healthcheck@0.1.1
+  - @frontside/backstage-plugin-humanitec-backend@0.3.1
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.2.1
+  - @frontside/backstage-plugin-incremental-ingestion-github@0.2.1
+
 ## 0.0.8
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.1
+
+### Patch Changes
+
+- 2a52c92: Upgraded dependencies to bring inline with Backstage 1.6
+- Updated dependencies [2a52c92]
+- Updated dependencies [e914d87]
+  - @frontside/backstage-plugin-humanitec-common@0.3.0
+
 ## 0.3.0
 
 ### Minor Changes

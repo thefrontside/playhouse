@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.4.1
+
+### Patch Changes
+
+- 2a52c92: Upgraded dependencies to bring inline with Backstage 1.6
+
 ## 0.4.0
 
 ### Minor Changes
