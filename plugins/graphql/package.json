@@ -30,6 +30,7 @@
     "@backstage/catalog-client": "^1.1.1",
     "@backstage/catalog-model": "^1.1.2",
     "@envelop/core": "^2.3.0",
+    "@envelop/dataloader": "^3.3.2",
     "@envelop/graphql-modules": "^3.3.0",
     "@frontside/backstage-plugin-batch-loader": "^0.2.1",
     "@graphql-tools/load-files": "^6.5.3",

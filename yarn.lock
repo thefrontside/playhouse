@@ -3379,6 +3379,13 @@
   dependencies:
     "@envelop/types" "2.3.0"
 
+"@envelop/dataloader@^3.3.2":
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/@envelop/dataloader/-/dataloader-3.6.0.tgz#51b1697361f662ee8f9949f8dcccff82e3236607"
+  integrity sha512-SMECnpCyPmUS6nNLeKfvu7ow+8CMiMv7wset1nmkvC1+hjK5sGt3vBOvQ3MnsqxYmD8GkUKyI1Bl7TIs0HOHCA==
+  dependencies:
+    tslib "^2.4.0"
+
 "@envelop/graphql-modules@^3.3.0":
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/@envelop/graphql-modules/-/graphql-modules-3.4.0.tgz#91193e50e61e9a6103a661fd248c54bb55dc26a2"

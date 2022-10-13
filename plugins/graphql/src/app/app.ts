@@ -1,6 +1,7 @@
 import type { CatalogApi, Loader } from './types';
 import { envelop, useExtendContext } from '@envelop/core';
 import { useGraphQLModules } from '@envelop/graphql-modules';
+import { useDataLoader } from '@envelop/dataloader';
 import { createApplication, Module } from 'graphql-modules';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { Catalog } from './modules/catalog/catalog';
@@ -13,8 +14,8 @@ export { transformSchema } from './transform';
 export type createGraphQLAppOptions = {
   catalog: CatalogApi;
   modules: Module[]
-  loader: Loader;
   plugins: Parameters<typeof envelop>[0]['plugins']
+  loader: () => Loader
 }
 
 export function createGraphQLApp(options: createGraphQLAppOptions) {
@@ -22,7 +23,8 @@ export function createGraphQLApp(options: createGraphQLAppOptions) {
 
   const run = envelop({
     plugins: [
-      useExtendContext(() => ({ catalog: options.catalog, loader: options.loader })),
+      useExtendContext(() => ({ catalog: options.catalog })),
+      useDataLoader('loader', options.loader),
       useGraphQLModules(application),
       ...options.plugins
     ],

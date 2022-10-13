@@ -21,10 +21,10 @@ export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
   let catalog = createSimulatedCatalog(factory);
   let { run, application } = createGraphQLApp({
-    catalog: createSimulatedCatalog(factory),
+    catalog,
     modules: [],
     plugins: [],
-    loader: createSimulatedLoader(catalog),
+    loader: () => createSimulatedLoader(catalog),
   });
 
   return {
