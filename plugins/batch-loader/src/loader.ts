@@ -30,7 +30,7 @@ export class BatchLoader {
 
   public async getEntitiesByRefs(
     refs: (string | CompoundEntityRef)[],
-  ): Promise<Entity[]> {
+  ): Promise<(Entity | undefined)[]> {
     this.logger.info(`Loading entities for refs: ${refs}`);
     const client = await this.getClient();
     const stringifiedRefs = refs.map(ref => typeof ref === 'string' ? ref : stringifyEntityRef(ref))

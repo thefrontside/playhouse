@@ -1,14 +1,15 @@
 import { Entity, EntityRelation, stringifyEntityRef } from '@backstage/catalog-model';
-import type { CatalogApi } from '../app/types';
+import type { CatalogApi, EntityRef, Loader } from '../app/types';
 import type { JsonObject } from '@backstage/types';
 import type { Operation } from 'effection';
 import type { Node } from '@frontside/graphgen';
 
-import { PromiseOrValue } from '@envelop/core';
+import { EnvelopError, PromiseOrValue } from '@envelop/core';
 import { createGraphQLApp } from '..';
 
 import type { Factory, World } from '@frontside/graphgen-backstage';
 import { createFactory } from '@frontside/graphgen-backstage';
+import DataLoader from 'dataloader';
 
 export interface GraphQLHarness {
   query(query: string): Operation<JsonObject>;
@@ -16,13 +17,14 @@ export interface GraphQLHarness {
   all(...params: Parameters<Factory["all"]>): ReturnType<Factory["all"]>;
 }
 
-
-
 export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
+  let catalog = createSimulatedCatalog(factory);
   let { run, application } = createGraphQLApp({
     catalog: createSimulatedCatalog(factory),
-    modules: []
+    modules: [],
+    plugins: [],
+    loader: createSimulatedLoader(catalog),
   });
 
   return {
@@ -58,6 +60,15 @@ export function createGraphQLAPI(): GraphQLHarness {
     },
     all: factory.all,
   };
+}
+
+export function createSimulatedLoader(catalog: CatalogApi): Loader {
+  return new DataLoader<EntityRef, Entity>(function fetch(refs): Promise<Array<Entity | Error>> {
+    return Promise.all(refs.map(async ref => {
+      let entity = await catalog.getEntityByRef(ref);
+      return entity ?? new EnvelopError(`no such node with ref: '${ref}'`);
+    }));
+  });
 }
 
 export function createSimulatedCatalog(factory: Factory): CatalogApi {

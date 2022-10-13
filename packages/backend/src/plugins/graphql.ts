@@ -10,5 +10,6 @@ export default async function createPlugin(
     modules: [myModule],
     logger: env.logger,
     catalog: env.catalog,
+    databaseManager: env.databaseManager,
   });
 }
