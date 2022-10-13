@@ -1,11 +1,4 @@
-import { parse, path, yaml, Entity, Command } from "./deps.ts";
-
-const usage = (name: string, description: string) => `
-${name}: ${description}
-
-USAGE:
-${name} COMMAND [OPTIONS]
-`;
+import { parse, path, yaml, Entity, Command, useApi, createApiRef } from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -15,6 +8,11 @@ export interface CLIOptions {
   target: string;
 }
 
+
+export const scaffolderApiRef = createApiRef({
+  id: 'plugin.scaffolder.service',
+});
+
 class MainError extends Error {
   name = 'Mainerror';
 }
@@ -23,7 +21,6 @@ export async function cli(options: CLIOptions) {
   let { apiURL, description, args, name, target } = options;
   let get = (endpoint: string) => fetch(`${apiURL}/${endpoint}`);
   let flags = parse(args);
-  let [command] = flags._;
 
   const cmd = new Command()
     .name(name)
@@ -43,6 +40,21 @@ export async function cli(options: CLIOptions) {
           throw new MainError(`communication error with backstage server: ${response.status} ${response.statusText}`);
         }
       }
+    })
+    .command('scaffold', 'scaffold something new')
+    .option('-t --template <template:string>', 'the scaffolder template', {
+      default: 'standard-microservice'
+    })
+    .action(async ({ template }) => {
+      const scaffolderApi: any = useApi(scaffolderApiRef);
+
+      const { taskId } = await scaffolderApi.scaffold({
+        templateRef: `template:default/${template}`,
+        values: {
+          repoUrl: 'github.com?owner=dagda1&repo=dd',
+          componentName: 'AAAA',
+        }
+      }) 
     })
 
     try {
