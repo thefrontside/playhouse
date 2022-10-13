@@ -38,6 +38,7 @@
     "@backstage/plugin-techdocs-backend": "^1.1.0",
     "@frontside/backstage-plugin-effection-inspector-backend": "0.1.1",
     "@frontside/backstage-plugin-batch-loader": "0.2.1",
+    "@frontside/backstage-plugin-humanitec-common": "*",
     "@frontside/backstage-plugin-humanitec-backend": "^0.3.0",
     "@frontside/backstage-plugin-graphql": "^0.4.0",
     "@frontside/backstage-plugin-incremental-ingestion-backend": "*",

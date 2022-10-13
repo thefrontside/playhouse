@@ -23,6 +23,7 @@ import type { CatalogClient } from '@backstage/catalog-client';
 import { findOrCreateExecutables } from '../executables';
 import { readFile } from 'fs/promises';
 import * as nunjucks from 'nunjucks';
+import { PlatformApi, EntityRef } from '../types';
 
 export interface RouterOptions {
   logger: Logger;
@@ -30,12 +31,13 @@ export interface RouterOptions {
   executableName: string;
   appURL: string;
   catalog: CatalogClient;
+  platform: PlatformApi;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { catalog, logger, discovery, executableName, appURL } = options;
+  const { catalog, logger, discovery, executableName, appURL, platform } = options;
 
   let baseURL = await discovery.getBaseUrl('idp');
   let downloadsURL = `${baseURL}/executables/dist`;
@@ -78,6 +80,31 @@ export async function createRouter(
     let component = await catalog.getEntityByRef(`component:default/${name}`);
     if (component) {
       res.send(`${JSON.stringify(component, null, 2)}\n`);
+    } else {
+      res.sendStatus(404);
+      res.send("Not Found");
+    }
+  })
+
+  router.get('/components/:name/environments', async (req, res) => {
+    let name = req.params.name;
+    let component = await catalog.getEntityByRef(`component:default/${name}`);
+
+
+    if (component) {
+      let ref: EntityRef = {
+        ref: `component:default/${name}`,
+        compound: {
+          kind: 'component',
+          name,
+          namespace: 'default'
+        },
+        load: () => Promise.resolve(component),
+      };
+      let environments = await platform.getEnvironments(ref);
+      let names = environments.items.map(({ value }) => value.name);
+
+      res.send(`${names.join("\n")}\n`);
     } else {
       res.sendStatus(404);
       res.send("Not Found");

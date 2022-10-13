@@ -1,5 +1,6 @@
 import type { Router } from 'express';
 import { createRouter } from '@frontside/backstage-plugin-platform-backend';
+import { createHumanitecPlatformApi } from '@frontside/backstage-plugin-humanitec-common';
 import { PluginEnvironment } from '../types';
 
 export default async function createPlugin({
@@ -13,6 +14,9 @@ export default async function createPlugin({
     logger,
     discovery,
     appURL: `${config.getString('app.baseUrl')}/platform`,
-    catalog
+    catalog,
+    platform: createHumanitecPlatformApi({
+      token: config.getString('humanitec.token')
+    })
   });
 }

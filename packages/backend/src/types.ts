@@ -23,5 +23,5 @@ export type PluginEnvironment = {
   tokenManager: TokenManager;
   scheduler: PluginTaskScheduler;
   permissions: PermissionEvaluator;
-  catalog: CatalogClient
+  catalog: CatalogClient;
 };
