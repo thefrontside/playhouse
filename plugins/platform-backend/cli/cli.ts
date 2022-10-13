@@ -1,4 +1,4 @@
-import { parse, path, yaml, Entity, Command, useApi, createApiRef } from "./deps.ts";
+import { path, yaml, Entity, Command } from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -9,10 +9,6 @@ export interface CLIOptions {
 }
 
 
-export const scaffolderApiRef = createApiRef({
-  id: 'plugin.scaffolder.service',
-});
-
 class MainError extends Error {
   name = 'Mainerror';
 }
@@ -20,7 +16,6 @@ class MainError extends Error {
 export async function cli(options: CLIOptions) {
   let { apiURL, description, args, name, target } = options;
   let get = (endpoint: string) => fetch(`${apiURL}/${endpoint}`);
-  let flags = parse(args);
 
   const cmd = new Command()
     .name(name)
@@ -46,16 +41,21 @@ export async function cli(options: CLIOptions) {
       default: 'standard-microservice'
     })
     .action(async ({ template }) => {
-      const scaffolderApi: any = useApi(scaffolderApiRef);
-
-      const { taskId } = await scaffolderApi.scaffold({
-        templateRef: `template:default/${template}`,
-        values: {
+      console.log(`${apiURL}/create/${template}`);
+      
+      const response = await fetch(`${apiURL}/create/${template}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           repoUrl: 'github.com?owner=dagda1&repo=dd',
           componentName: 'AAAA',
-        }
-      }) 
-    })
+        })
+      });
+
+      console.dir(await response.json());
+    });
 
     try {
       await cmd.parse(args);

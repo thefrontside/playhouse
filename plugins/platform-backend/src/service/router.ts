@@ -23,6 +23,7 @@ import type { CatalogClient } from '@backstage/catalog-client';
 import { findOrCreateExecutables } from '../executables';
 import { readFile } from 'fs/promises';
 import * as nunjucks from 'nunjucks';
+import fetch from 'node-fetch-native';
 
 export interface RouterOptions {
   logger: Logger;
@@ -39,6 +40,7 @@ export async function createRouter(
 
   let baseURL = await discovery.getBaseUrl('idp');
   let downloadsURL = `${baseURL}/executables/dist`;
+  let scaffolderUrl = `${await discovery.getBaseUrl('scaffolder')}/v2/tasks`;
 
   let executables = findOrCreateExecutables({
     logger,
@@ -67,7 +69,7 @@ export async function createRouter(
     }));
   });
 
-  router.get('/executables', (_, response)=> {
+  router.get('/executables', (_, response) => {
     response.send(executables);
   });
 
@@ -83,6 +85,38 @@ export async function createRouter(
       res.send("Not Found");
     }
   })
+
+  router.post('/create/:template', async (req, res) => {
+    const template = req.params.template;
+
+    logger.info(`creating template ${template}`);
+
+    const values = req.body;
+
+    try {
+      const response = await fetch(scaffolderUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          templateRef: `template:default/${template}`,
+          values: {
+            ...values
+          },
+          secrets: {}
+        })
+      });
+  
+      const { id } = (await response.json()) as { id: string };
+  
+      res.json({ taskId: id });
+    } catch(err) {
+      logger.error(err);
+      res.status(500);
+      res.render('error', { error: err })
+    }
+  });
 
   router.use(errorHandler());
   return router;
