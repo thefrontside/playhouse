@@ -4,7 +4,7 @@ import type { JsonObject } from '@backstage/types';
 import type { Operation } from 'effection';
 import type { Node } from '@frontside/graphgen';
 
-import { EnvelopError, PromiseOrValue } from '@envelop/core';
+import { EnvelopError, PromiseOrValue, useExtendContext } from '@envelop/core';
 import { createGraphQLApp } from '..';
 
 import type { Factory, World } from '@frontside/graphgen-backstage';
@@ -19,12 +19,10 @@ export interface GraphQLHarness {
 
 export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
-  let catalog = createSimulatedCatalog(factory);
   let { run, application } = createGraphQLApp({
-    catalog,
     modules: [],
-    plugins: [],
-    loader: () => createSimulatedLoader(catalog),
+    plugins: [useExtendContext(() => ({ catalog: createSimulatedCatalog(factory) }))],
+    loader: ({ catalog }) => createSimulatedLoader(catalog),
   });
 
   return {

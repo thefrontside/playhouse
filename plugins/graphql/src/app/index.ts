@@ -3,22 +3,22 @@ import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { graphqlHTTP } from 'express-graphql';
-import { CatalogClient } from '@backstage/catalog-client';
 import { printSchema } from 'graphql';
 import type { Module } from 'graphql-modules';
-import { createGraphQLApp, createGraphQLAppOptions } from './app';
+import { createGraphQLApp } from './app';
 import { createLoader } from './loaders';
+import type { EnvelopPlugins } from './types';
 
 export * from './app';
 export * from './loaders';
-export type { Loader } from './types';
+export type { Loader as EntityLoader } from './types';
+export { transformSchema } from './transform';
 
 export type RouterOptions = {
   logger: Logger;
-  catalog: CatalogClient;
   databaseManager: DatabaseManager;
   modules?: Module[]
-  plugins?: createGraphQLAppOptions['plugins']
+  plugins?: EnvelopPlugins
 };
 
 export async function createRouter(
@@ -28,7 +28,6 @@ export async function createRouter(
 
   const { run, application } = createGraphQLApp({
     loader: () => createLoader(options),
-    catalog: options.catalog,
     modules: options.modules ?? [],
     plugins: options.plugins ?? [],
   });
