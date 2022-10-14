@@ -17,6 +17,7 @@
 
 import { errorHandler, PluginEndpointDiscovery, resolvePackagePath } from '@backstage/backend-common';
 import express from 'express';
+import request from 'request';
 import Router from 'express-promise-router';
 import type { Logger } from 'winston';
 import type { CatalogClient } from '@backstage/catalog-client';
@@ -24,6 +25,8 @@ import { findOrCreateExecutables } from '../executables';
 import { readFile } from 'fs/promises';
 import * as nunjucks from 'nunjucks';
 import { PlatformApi, EntityRef } from '../types';
+import fetch from 'node-fetch-native';
+import { load } from 'js-yaml';
 
 export interface RouterOptions {
   logger: Logger;
@@ -34,13 +37,15 @@ export interface RouterOptions {
   platform: PlatformApi;
 }
 
+
 export async function createRouter(
   options: RouterOptions,
-): Promise<express.Router> {
+  ): Promise<express.Router> {
   const { catalog, logger, discovery, executableName, appURL, platform } = options;
-
+    
   let baseURL = await discovery.getBaseUrl('idp');
   let downloadsURL = `${baseURL}/executables/dist`;
+  let scaffolderUrl = `${await discovery.getBaseUrl('scaffolder')}/v2/tasks`;
 
   let executables = findOrCreateExecutables({
     logger,
@@ -52,6 +57,7 @@ export async function createRouter(
   })
 
   const router = Router();
+  router.use(express.text());
   router.use(express.json());
 
   router.get('/health', (_, response) => {
@@ -111,6 +117,51 @@ export async function createRouter(
     }
   })
 
+  router.post('/create/:template', async (req, res) => {
+    const template = req.params.template;
+
+    logger.info(`creating template ${template}`);
+
+    
+    try {
+      const values = load(req.body) as Record<string, unknown>;
+  
+      const post = await fetch(scaffolderUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          templateRef: `template:default/${template}`,
+          values: {
+            ...values
+          },
+          secrets: {}
+        })
+      });
+
+      if(post.status !== 201) {
+        throw new Error(`resource not created, ${post.status} - ${post.statusText}`);
+      }
+  
+      const { id } = (await post.json()) as { id: string };
+
+      res.json({ taskId: id });
+    } catch(err) {
+      logger.error(err);
+      res.status(500);
+      res.render('error', { error: err })
+    }
+  });
+
+
+  router.get('/tasks/:taskId/eventstream', (req, res) => {
+    const { taskId } = req.params;
+
+    const eventStreamUrl = `${scaffolderUrl}/${encodeURIComponent(taskId)}/eventstream`
+
+    req.pipe(request(eventStreamUrl)).pipe(res);
+  })
   router.use(errorHandler());
   return router;
 }
