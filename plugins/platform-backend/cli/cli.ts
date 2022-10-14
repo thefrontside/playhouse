@@ -1,4 +1,4 @@
-import { path, yaml, Entity, Command } from "./deps.ts";
+import { path, yaml, Entity, Command, EventSource, red, blue, green, parseDate } from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -8,9 +8,56 @@ export interface CLIOptions {
   target: string;
 }
 
+interface SSEMessage {
+  type: 'log' | 'completion' | 'error';
+  createdAt: string;
+  body: {
+    message: string;
+    error?: {
+      name: string;
+      message: string;
+    }
+  };
+}
 
 class MainError extends Error {
   name = 'Mainerror';
+}
+
+const logTextColors: Record<SSEMessage['type'], (s: string) => string> = {
+  'log': blue,
+  'completion': green,
+  'error': red
+}
+
+function logSSEMessage(raw: string) {
+  const message: SSEMessage = JSON.parse(raw)
+  const color = logTextColors[message.type];
+  const timestamp = message.createdAt;// parseDate(message.createdAt, 'dd.MM.yyyy');
+  const logType = color(`[${message.type} - ${timestamp}]`);
+
+  console.log(`${logType} - ${message.body.message})`);
+
+  if (message.body.error) {
+    logSSEMessage(JSON.stringify({
+      type: "error",
+      body: {
+        message: message.body.error.message
+      },
+      createdAt: message.createdAt
+    }))
+  }
+}
+
+// deno-lint-ignore no-explicit-any
+function sseMessageHandler(event: any) {
+  if (event.data) {
+    try {
+      logSSEMessage(event.data);
+    } catch (ex) {
+      console.error(ex);
+    }
+  }
 }
 
 export async function cli(options: CLIOptions) {
@@ -41,8 +88,6 @@ export async function cli(options: CLIOptions) {
       default: 'standard-microservice'
     })
     .action(async ({ template }) => {
-      console.log(`${apiURL}/create/${template}`);
-      
       const response = await fetch(`${apiURL}/create/${template}`, {
         method: 'POST',
         headers: {
@@ -54,18 +99,32 @@ export async function cli(options: CLIOptions) {
         })
       });
 
-      console.dir(await response.json());
+      if (response.status !== 200) {
+        throw new MainError(`create failed with ${response.status} - ${response.statusText}`)
+      }
+
+      const { taskId } = await response.json();
+
+      const eventStreamUrl = `${apiURL}/tasks/${taskId}/eventstream`;
+
+      const eventSource = new EventSource(eventStreamUrl, { withCredentials: true });
+
+      eventSource.addEventListener('log', sseMessageHandler.bind(null));
+
+      eventSource.addEventListener('completion', sseMessageHandler.bind(null));
+
+      eventSource.addEventListener('error', sseMessageHandler.bind(null));
     });
 
-    try {
-      await cmd.parse(args);
-    } catch (error) {
-      if (error instanceof MainError) {
-        console.log(error.message);
-      } else {
-        throw error;
-      }
+  try {
+    await cmd.parse(args);
+  } catch (error) {
+    if (error instanceof MainError) {
+      console.log(error.message);
+    } else {
+      throw error;
     }
+  }
 }
 
 async function findEntityContext(component?: string): Promise<string> {

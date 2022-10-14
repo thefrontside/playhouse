@@ -31,7 +31,8 @@
     "node-deno": "^0.0.3",
     "node-fetch": "^2.6.7",
     "node-fetch-native": "^0.1.7",
-    "nunjucks": "^3.2.3",
+    "nunjucks": " ^3.2.3",
+    "request": "^2.88.2",
     "winston": "^3.2.1",
     "yn": "^4.0.0"
   },

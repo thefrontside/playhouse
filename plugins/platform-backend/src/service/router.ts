@@ -17,6 +17,7 @@
 
 import { errorHandler, PluginEndpointDiscovery, resolvePackagePath } from '@backstage/backend-common';
 import express from 'express';
+import request from 'request';
 import Router from 'express-promise-router';
 import type { Logger } from 'winston';
 import type { CatalogClient } from '@backstage/catalog-client';
@@ -94,7 +95,7 @@ export async function createRouter(
     const values = req.body;
 
     try {
-      const response = await fetch(scaffolderUrl, {
+      const post = await fetch(scaffolderUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,9 +108,13 @@ export async function createRouter(
           secrets: {}
         })
       });
+
+      if(post.status !== 201) {
+        throw new Error(`resource not created, ${post.status} - ${post.statusText}`);
+      }
   
-      const { id } = (await response.json()) as { id: string };
-  
+      const { id } = (await post.json()) as { id: string };
+
       res.json({ taskId: id });
     } catch(err) {
       logger.error(err);
@@ -117,6 +122,14 @@ export async function createRouter(
       res.render('error', { error: err })
     }
   });
+
+  router.get('/tasks/:taskId/eventstream', (req, res) => {
+    const { taskId } = req.params;
+
+    const eventStreamUrl = `${scaffolderUrl}/${encodeURIComponent(taskId)}/eventstream`
+
+    req.pipe(request(eventStreamUrl)).pipe(res);
+  })
 
   router.use(errorHandler());
   return router;
