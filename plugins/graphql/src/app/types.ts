@@ -15,10 +15,16 @@ export type CatalogApi = Pick<Client, "getEntityByRef">;
 
 export type EnvelopPlugins = Parameters<typeof envelop>[0]['plugins']
 
-export type Context<TPlugins extends EnvelopPlugins> = (
+type Merge<T> = {
+  [K in T extends any ? keyof T : never]: T extends { [key in K]: infer V }
+  ? V
+  : never
+}
+
+export type Context<TPlugins extends EnvelopPlugins> = Merge<(
   TPlugins extends Array<infer TPlugin>
     ? TPlugin extends Plugin<infer TContext>
       ? TContext
       : never
     : never
-);
+)>;
