@@ -1,4 +1,4 @@
-import { Command, Entity, path, yaml } from "./deps.ts";
+import { path, yaml, Entity, Command, EventSource, red, blue, green, format } from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -8,8 +8,45 @@ export interface CLIOptions {
   target: string;
 }
 
+interface SSEMessage {
+  type: 'log' | 'completion' | 'error';
+  createdAt: string;
+  body: {
+    message: string;
+    error?: {
+      name: string;
+      message: string;
+    }
+  };
+}
+
 class MainError extends Error {
   name = "Mainerror";
+}
+
+const logTextColors: Record<SSEMessage['type'], (s: string) => string> = {
+  'log': blue,
+  'completion': green,
+  'error': red
+}
+
+function logSSEMessage(raw: string) {
+  const message: SSEMessage = JSON.parse(raw)
+  const color = logTextColors[message.type];
+  const timestamp = format(new Date(message.createdAt), 'dd-MM-yyyy:hh:mm');
+  const logType = color(`[${message.type.toLocaleUpperCase()} - ${timestamp}]`);
+
+  console.log(`${logType} - ${message.body.message})`);
+
+  if (message.body.error) {
+    logSSEMessage(JSON.stringify({
+      type: "error",
+      body: {
+        message: message.body.error.message
+      },
+      createdAt: message.createdAt
+    }))
+  }
 }
 
 export async function cli(options: CLIOptions) {
@@ -77,6 +114,57 @@ export async function cli(options: CLIOptions) {
           );
         }
       }
+    })
+    .command('scaffold', 'scaffold something new')
+    .option('-t --template <template:string>', 'the scaffolder template', {
+      default: 'standard-microservice'
+    })
+    .action(async ({ template }) => {
+      const response = await fetch(`${apiURL}/create/${template}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          repoUrl: 'github.com?owner=dagda1&repo=yy',
+          componentName: 'yyy',
+        })
+      });
+
+      if (response.status !== 200) {
+        throw new MainError(`create failed with ${response.status} - ${response.statusText}`)
+      }
+
+      // deno-lint-ignore no-explicit-any
+      function sseMessageHandler(event: any) {
+        if (event.data) {
+          try {
+            logSSEMessage(event.data);
+          } catch (ex) {
+            console.error(ex);
+          }
+        }
+      }
+
+      const { taskId } = await response.json();
+
+      const eventSourceUrl = `${apiURL}/tasks/${taskId}/eventstream`;
+
+      const eventSource = new EventSource(eventSourceUrl, { withCredentials: true });
+
+      eventSource.addEventListener('log', sseMessageHandler);
+      eventSource.addEventListener('completion', (event: any) => {
+        sseMessageHandler(event);
+        
+        try {
+          eventSource.close();
+        } catch (err) {
+          console.dir(err);
+
+          throw err;
+        }
+      });
+      eventSource.addEventListener('error', sseMessageHandler);
     });
 
   try {
