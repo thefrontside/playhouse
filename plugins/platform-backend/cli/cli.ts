@@ -1,4 +1,4 @@
-import { path, yaml, Entity, Command, EventSource, red, blue, green, parseDate } from "./deps.ts";
+import { path, yaml, Entity, Command, EventSource, red, blue, green, format } from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -33,8 +33,8 @@ const logTextColors: Record<SSEMessage['type'], (s: string) => string> = {
 function logSSEMessage(raw: string) {
   const message: SSEMessage = JSON.parse(raw)
   const color = logTextColors[message.type];
-  const timestamp = message.createdAt;// parseDate(message.createdAt, 'dd.MM.yyyy');
-  const logType = color(`[${message.type} - ${timestamp}]`);
+  const timestamp = format(new Date(message.createdAt), 'dd-MM-yyyy:hh:mm');
+  const logType = color(`[${message.type.toLocaleUpperCase()} - ${timestamp}]`);
 
   console.log(`${logType} - ${message.body.message})`);
 
@@ -46,17 +46,6 @@ function logSSEMessage(raw: string) {
       },
       createdAt: message.createdAt
     }))
-  }
-}
-
-// deno-lint-ignore no-explicit-any
-function sseMessageHandler(event: any) {
-  if (event.data) {
-    try {
-      logSSEMessage(event.data);
-    } catch (ex) {
-      console.error(ex);
-    }
   }
 }
 
@@ -94,8 +83,8 @@ export async function cli(options: CLIOptions) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          repoUrl: 'github.com?owner=dagda1&repo=dd',
-          componentName: 'AAAA',
+          repoUrl: 'github.com?owner=dagda1&repo=yy',
+          componentName: 'yyy',
         })
       });
 
@@ -103,17 +92,36 @@ export async function cli(options: CLIOptions) {
         throw new MainError(`create failed with ${response.status} - ${response.statusText}`)
       }
 
+      // deno-lint-ignore no-explicit-any
+      function sseMessageHandler(event: any) {
+        if (event.data) {
+          try {
+            logSSEMessage(event.data);
+          } catch (ex) {
+            console.error(ex);
+          }
+        }
+      }
+
       const { taskId } = await response.json();
 
-      const eventStreamUrl = `${apiURL}/tasks/${taskId}/eventstream`;
+      const eventSourceUrl = `${apiURL}/tasks/${taskId}/eventstream`;
 
-      const eventSource = new EventSource(eventStreamUrl, { withCredentials: true });
+      const eventSource = new EventSource(eventSourceUrl, { withCredentials: true });
 
-      eventSource.addEventListener('log', sseMessageHandler.bind(null));
+      eventSource.addEventListener('log', sseMessageHandler);
+      eventSource.addEventListener('completion', (event: any) => {
+        sseMessageHandler(event);
+        
+        try {
+          eventSource.close();
+        } catch (err) {
+          console.dir(err);
 
-      eventSource.addEventListener('completion', sseMessageHandler.bind(null));
-
-      eventSource.addEventListener('error', sseMessageHandler.bind(null));
+          throw err;
+        }
+      });
+      eventSource.addEventListener('error', sseMessageHandler);
     });
 
   try {
