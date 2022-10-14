@@ -26,6 +26,7 @@ import { readFile } from 'fs/promises';
 import * as nunjucks from 'nunjucks';
 import { PlatformApi, EntityRef } from '../types';
 import fetch from 'node-fetch-native';
+import { load } from 'js-yaml';
 
 export interface RouterOptions {
   logger: Logger;
@@ -56,6 +57,7 @@ export async function createRouter(
   })
 
   const router = Router();
+  router.use(express.text());
   router.use(express.json());
 
   router.get('/health', (_, response) => {
@@ -120,9 +122,10 @@ export async function createRouter(
 
     logger.info(`creating template ${template}`);
 
-    const values = req.body;
-
+    
     try {
+      const values = load(req.body) as Record<string, unknown>;
+  
       const post = await fetch(scaffolderUrl, {
         method: 'POST',
         headers: {

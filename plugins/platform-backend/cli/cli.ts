@@ -1,4 +1,4 @@
-import { path, yaml, Entity, Command, EventSource, red, blue, green, format } from "./deps.ts";
+import { path, yaml, Entity, Command, EventSource, red, blue, green, format, readAll, assert } from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -52,6 +52,11 @@ function logSSEMessage(raw: string) {
 export async function cli(options: CLIOptions) {
   let { apiURL, description, args, name, target } = options;
   let get = (endpoint: string) => fetch(`${apiURL}/${endpoint}`);
+
+  let post = (endpoint: string, init: Omit<RequestInit, 'method'>) => fetch(`${apiURL}/${endpoint}`, {
+    method: 'POST',
+    ...init
+  });
 
   const cmd = new Command()
     .name(name)
@@ -115,20 +120,40 @@ export async function cli(options: CLIOptions) {
         }
       }
     })
-    .command('create', 'create something new')
+    .command('create', `create something new from a template.
+usage:
+
+# heredoc
+<<EOF | idp create -t standard-microservice -
+repoUrl: github.com?owner=github-owner&repo=repo
+componentName: component-name
+EOF
+
+# yaml file
+idp create -t standard-microservice -f ./f.yaml
+    `)
     .option('-t --template <template:string>', 'the scaffolder template', {
       default: 'standard-microservice'
     })
-    .action(async ({ template }) => {
-      const response = await fetch(`${apiURL}/create/${template}`, {
-        method: 'POST',
+    .option('-f --file <file:string>', `an optional file path to a file containing the template's fields`)
+    .arguments("[input]")
+    .action(async ({ template, file }, input) => {
+      let body: string | undefined;
+
+      if (input === "-") {
+        const stdinContent = await readAll(Deno.stdin);
+        body = new TextDecoder().decode(stdinContent);
+      } else if (file) {
+        body = Deno.readTextFileSync(file);
+      }
+
+      assert(body, `no body has been created.`);
+
+      const response = await post(`create/${template}`, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
-        body: JSON.stringify({
-          repoUrl: 'github.com?owner=dagda1&repo=yy',
-          componentName: 'yyy',
-        })
+        body
       });
 
       if (response.status !== 200) {
@@ -155,14 +180,8 @@ export async function cli(options: CLIOptions) {
       eventSource.addEventListener('log', sseMessageHandler);
       eventSource.addEventListener('completion', (event: any) => {
         sseMessageHandler(event);
-        
-        try {
-          eventSource.close();
-        } catch (err) {
-          console.dir(err);
 
-          throw err;
-        }
+        eventSource.close();
       });
       eventSource.addEventListener('error', sseMessageHandler);
     });
