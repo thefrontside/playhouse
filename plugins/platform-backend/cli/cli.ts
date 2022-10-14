@@ -115,7 +115,7 @@ export async function cli(options: CLIOptions) {
         }
       }
     })
-    .command('scaffold', 'scaffold something new')
+    .command('create', 'create something new')
     .option('-t --template <template:string>', 'the scaffolder template', {
       default: 'standard-microservice'
     })
