@@ -1,4 +1,4 @@
-import { Command, Entity, path, yaml } from "./deps.ts";
+import { path, yaml, Entity, Command, EventSource, red, blue, green, format, readAll, assert } from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -8,13 +8,55 @@ export interface CLIOptions {
   target: string;
 }
 
+interface SSEMessage {
+  type: 'log' | 'completion' | 'error';
+  createdAt: string;
+  body: {
+    message: string;
+    error?: {
+      name: string;
+      message: string;
+    }
+  };
+}
+
 class MainError extends Error {
   name = "Mainerror";
+}
+
+const logTextColors: Record<SSEMessage['type'], (s: string) => string> = {
+  'log': blue,
+  'completion': green,
+  'error': red
+}
+
+function logSSEMessage(raw: string) {
+  const message: SSEMessage = JSON.parse(raw)
+  const color = logTextColors[message.type];
+  const timestamp = format(new Date(message.createdAt), 'dd-MM-yyyy:hh:mm');
+  const logType = color(`[${message.type.toLocaleUpperCase()} - ${timestamp}]`);
+
+  console.log(`${logType} - ${message.body.message})`);
+
+  if (message.body.error) {
+    logSSEMessage(JSON.stringify({
+      type: "error",
+      body: {
+        message: message.body.error.message
+      },
+      createdAt: message.createdAt
+    }))
+  }
 }
 
 export async function cli(options: CLIOptions) {
   let { apiURL, description, args, name, target } = options;
   let get = (endpoint: string) => fetch(`${apiURL}/${endpoint}`);
+
+  let post = (endpoint: string, init: Omit<RequestInit, 'method'>) => fetch(`${apiURL}/${endpoint}`, {
+    method: 'POST',
+    ...init
+  });
 
   const cmd = new Command()
     .name(name)
@@ -77,6 +119,71 @@ export async function cli(options: CLIOptions) {
           );
         }
       }
+    })
+    .command('create', `create something new from a template.
+usage:
+
+# heredoc
+<<EOF | idp create -t standard-microservice -
+repoUrl: github.com?owner=github-owner&repo=repo
+componentName: component-name
+EOF
+
+# yaml file
+idp create -t standard-microservice -f ./f.yaml
+    `)
+    .option('-t --template <template:string>', 'the scaffolder template', {
+      default: 'standard-microservice'
+    })
+    .option('-f --file <file:string>', `an optional file path to a file containing the template's fields`)
+    .arguments("[input]")
+    .action(async ({ template, file }, input) => {
+      let body: string | undefined;
+
+      if (input === "-") {
+        const stdinContent = await readAll(Deno.stdin);
+        body = new TextDecoder().decode(stdinContent);
+      } else if (file) {
+        body = Deno.readTextFileSync(file);
+      }
+
+      assert(body, `no body has been created.`);
+
+      const response = await post(`create/${template}`, {
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body
+      });
+
+      if (response.status !== 200) {
+        throw new MainError(`create failed with ${response.status} - ${response.statusText}`)
+      }
+
+      // deno-lint-ignore no-explicit-any
+      function sseMessageHandler(event: any) {
+        if (event.data) {
+          try {
+            logSSEMessage(event.data);
+          } catch (ex) {
+            console.error(ex);
+          }
+        }
+      }
+
+      const { taskId } = await response.json();
+
+      const eventSourceUrl = `${apiURL}/tasks/${taskId}/eventstream`;
+
+      const eventSource = new EventSource(eventSourceUrl, { withCredentials: true });
+
+      eventSource.addEventListener('log', sseMessageHandler);
+      eventSource.addEventListener('completion', (event: any) => {
+        sseMessageHandler(event);
+
+        eventSource.close();
+      });
+      eventSource.addEventListener('error', sseMessageHandler);
     });
 
   try {
