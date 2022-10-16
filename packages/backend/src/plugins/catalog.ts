@@ -23,14 +23,14 @@ export default async function createPlugin(
     config: env.config 
   })
 
-  incrementalBuilder.addIncrementalEntityProvider(
-    githubRepositoryProvider,
-    {
-      burstInterval: Duration.fromObject({ seconds: 3 }),
-      burstLength: Duration.fromObject({ seconds: 3 }),
-      restLength: Duration.fromObject({ day: 1 })
-    }
-  )
+  // incrementalBuilder.addIncrementalEntityProvider(
+  //   githubRepositoryProvider,
+  //   {
+  //     burstInterval: Duration.fromObject({ seconds: 3 }),
+  //     burstLength: Duration.fromObject({ seconds: 3 }),
+  //     restLength: Duration.fromObject({ day: 1 })
+  //   }
+  // )
 
   builder.addProcessor(new ScaffolderEntitiesProcessor());
 
