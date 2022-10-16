@@ -26,7 +26,7 @@ import request from 'request';
 import type { Logger } from 'winston';
 import { findOrCreateExecutables } from '../executables';
 import { EntityRef, PlatformApi } from '../types';
-import { RepositoriesRoute } from './routes/repositories';
+import { Repositories } from './routes/repositories';
 
 export interface RouterOptions {
   logger: Logger;
@@ -160,9 +160,10 @@ export async function createRouter(
     req.pipe(request(eventStreamUrl)).pipe(res);
   });
   
-  router.get('/repositories', RepositoriesRoute({
+  router.use('/repositories', Repositories({
     catalog
   }));
+
 
   router.use(errorHandler());
   return router;
