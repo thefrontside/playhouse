@@ -95,27 +95,62 @@ export async function cli(options: CLIOptions) {
       "clone",
       "clone a repository associated with a component"
     )
-    .option(
-      "-c --component <component:string>",
-      "The backstage component entity",
+    .option('-S, --ssh', 'Use ssh url to clone repository')
+    .option('-H, --https', 'Use https url to clone repository')
+    .arguments(
+      "[component:string] [directory:string]",
     )
-    .action(async ({ component }) => {
-      if (!component) {
+    .action(async ({ ssh, https }, component, directory) => {
+      const output = directory ?? component;
+      if (ssh && https) {
+        throw new MainError(`Invalid options: --ssh and --https can't be used together - use one or the other.`)
+      }
+      // prefer ssh
+      const protocol = !(ssh && https) || ssh ? 'ssh' : 'https';
+      if (component) {
         let response: Response;
         try {
-          response = await get(`repositories`, {
-            headers: {
-              Accept: 'text/plain'
-            }
-          });
+          response = await get(`repositories/${component}/urls`);
         } catch (error) {
           throw new MainError(error.message);
         }
-        if (response.ok) {      
-          await Deno.stdout.write(
-            new TextEncoder().encode(await response.text())
-          )
+        if (response.ok) {
+          const urls = await response.json();
+          const url = urls[protocol];
+          const clone = Deno.run({
+            cmd: ['git', 'clone', url, output]
+          });
+          if (!(await clone.status()).success) {
+            throw new MainError(`Encountered an error cloning "${url}" to "${output}".`)
+          }
+        } else if (response.status === 404) {
+          throw new MainError(`unknown component '${component}'`);
+        } else {
+          throw new MainError(
+            `communication error with backstage server: ${response.status} ${response.statusText}`,
+          );
         }
+        return;
+      }
+
+      let response: Response;
+      try {
+        response = await get(`repositories`, {
+          headers: {
+            Accept: 'text/plain'
+          }
+        });
+      } catch (error) {
+        throw new MainError(error.message);
+      }
+      if (response.ok) {
+        await Deno.stdout.write(
+          new TextEncoder().encode(await response.text())
+        )
+      } else {
+        throw new MainError(
+          `communication error with backstage server: ${response.status} ${response.statusText}`
+        )
       }
     })
     .command(

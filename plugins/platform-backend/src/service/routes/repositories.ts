@@ -1,25 +1,23 @@
 import type { CatalogClient } from '@backstage/catalog-client'; 
 import type { Entity } from '@backstage/catalog-model';
-import { Handler } from 'express';
 import CliTable3 from 'cli-table3';
 import chalk  from 'chalk';
+import Router from 'express-promise-router';
 
-export const RepositoriesRoute = ({ catalog }: { catalog: CatalogClient }) => {
-  const repositoriesRoute: Handler = async (req, res) => {
+export const Repositories = ({ catalog }: { catalog: CatalogClient }) => {
+  const router = Router();
+
+  router.get('/', async (req, res) => {
     const { items: entities } = await catalog.getEntities();
 
     const repositories = entities.flatMap(entity => {
-      const slug = entity.metadata
-        && entity.metadata.annotations
-        && entity.metadata.annotations["github.com/project-slug"];
+      const slug = getGithubProjectSlug(entity);
       if (slug) {
         return [{
           componentRef: getComponentRef(entity),
           slug,
           description: entity.metadata.description,
           url: `https://github/${slug}`,
-          ssh: `git@github.com:${slug}.git`,
-          https: `https://github/${slug}.git`
         }]
       }
       return [];
@@ -37,9 +35,35 @@ export const RepositoriesRoute = ({ catalog }: { catalog: CatalogClient }) => {
       res.send(`\n${chalk.bold('  🥁 Available Repositories')}\n${table}`)
     }
 
-    return repositoriesRoute;
-  }
-  return repositoriesRoute;
+    return router;
+  });
+
+  router.get('/:component/urls', async (req, res) => {
+    const entity = await catalog.getEntityByRef({
+      kind: 'Component',
+      namespace: 'default',
+      name: req.params.component
+    });
+    if (entity) {
+      const slug = getGithubProjectSlug(entity);
+      res.json({
+        ssh: `git@github.com:${slug}.git`,
+        https: `https://github/${slug}.git`
+      })
+      return;
+    }
+    res.sendStatus(404);
+    res.send("Not Found");
+  });
+
+  
+  return router;
+}
+
+function getGithubProjectSlug(entity: Entity) {
+  return entity.metadata
+    && entity.metadata.annotations
+    && entity.metadata.annotations["github.com/project-slug"];
 }
 
 function getComponentRef(entity: Entity) {
