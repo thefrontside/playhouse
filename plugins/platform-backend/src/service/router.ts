@@ -115,7 +115,7 @@ export async function createRouter(
       res.sendStatus(404);
       res.send("Not Found");
     }
-  })
+  });
 
   router.post('/create/:template', async (req, res) => {
     const template = req.params.template;
@@ -154,14 +154,14 @@ export async function createRouter(
     }
   });
 
-
   router.get('/tasks/:taskId/eventstream', (req, res) => {
     const { taskId } = req.params;
 
     const eventStreamUrl = `${scaffolderUrl}/${encodeURIComponent(taskId)}/eventstream`
 
     req.pipe(request(eventStreamUrl)).pipe(res);
-  })
+  });
+  
   router.use(errorHandler());
   return router;
 }
