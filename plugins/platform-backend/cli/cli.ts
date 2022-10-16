@@ -51,7 +51,7 @@ function logSSEMessage(raw: string) {
 
 export async function cli(options: CLIOptions) {
   let { apiURL, description, args, name, target } = options;
-  let get = (endpoint: string) => fetch(`${apiURL}/${endpoint}`);
+  let get: typeof fetch = (endpoint, init) => fetch(`${apiURL}/${endpoint}`, init);
 
   let post = (endpoint: string, init: Omit<RequestInit, 'method'>) => fetch(`${apiURL}/${endpoint}`, {
     method: 'POST',
@@ -92,10 +92,40 @@ export async function cli(options: CLIOptions) {
       }
     })
     .command(
+      "clone",
+      "clone a repository associated with a component"
+    )
+    .option(
+      "-c --component <component:string>",
+      "The backstage component entity",
+    )
+    .action(async ({ component }) => {
+      if (!component) {
+        let response: Response;
+        try {
+          response = await get(`repositories`, {
+            headers: {
+              Accept: 'text/plain'
+            }
+          });
+        } catch (error) {
+          throw new MainError(error.message);
+        }
+        if (response.ok) {      
+          await Deno.stdout.write(
+            new TextEncoder().encode(await response.text())
+          )
+        }
+      }
+    })
+    .command(
       "environments",
       "list enviroments in which a component is deployed",
     )
-    .option("-c --component <component:string>", "the component to query")
+    .option(
+      "-c --component <component:string>",
+      "The backstage component entity",
+    )
     .action(async ({ component }) => {
       let ref = await findEntityContext(component);
       let response: Response;
