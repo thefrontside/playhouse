@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-
 import { errorHandler, PluginEndpointDiscovery, resolvePackagePath } from '@backstage/backend-common';
-import express from 'express';
-import request from 'request';
-import Router from 'express-promise-router';
-import type { Logger } from 'winston';
 import type { CatalogClient } from '@backstage/catalog-client';
-import { findOrCreateExecutables } from '../executables';
+import express from 'express';
+import Router from 'express-promise-router';
 import { readFile } from 'fs/promises';
-import * as nunjucks from 'nunjucks';
-import { PlatformApi, EntityRef } from '../types';
-import fetch from 'node-fetch-native';
 import { load } from 'js-yaml';
+import fetch from 'node-fetch-native';
+import * as nunjucks from 'nunjucks';
+import request from 'request';
+import type { Logger } from 'winston';
+import { findOrCreateExecutables } from '../executables';
+import { EntityRef, PlatformApi } from '../types';
+import { RepositoriesRoute } from './routes/repositories';
 
 export interface RouterOptions {
   logger: Logger;
@@ -96,7 +96,6 @@ export async function createRouter(
     let name = req.params.name;
     let component = await catalog.getEntityByRef(`component:default/${name}`);
 
-
     if (component) {
       let ref: EntityRef = {
         ref: `component:default/${name}`,
@@ -122,7 +121,6 @@ export async function createRouter(
 
     logger.info(`creating template ${template}`);
 
-    
     try {
       const values = load(req.body) as Record<string, unknown>;
   
@@ -162,6 +160,10 @@ export async function createRouter(
     req.pipe(request(eventStreamUrl)).pipe(res);
   });
   
+  router.get('/repositories', RepositoriesRoute({
+    catalog
+  }));
+
   router.use(errorHandler());
   return router;
 }
