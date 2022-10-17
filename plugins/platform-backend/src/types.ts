@@ -5,8 +5,22 @@ export interface Environment {
   name: string;
 }
 
+export interface Repository {
+  componentRef: string;
+  slug: string;
+  description?: string;
+  url: string;
+}
+
+export interface RepositoryUrls {
+  ssh: string;
+  https: string;
+}
+
 export interface PlatformApi {
   getEnvironments(ref: EntityRef, page?: PageSpec): Promise<Page<Environment>>;
+  getRepositories(page?: PageSpec): Promise<Page<Repository>>
+  getRepositoryUrls(ref: EntityRef): Promise<RepositoryUrls | null>
 }
 
 export interface EntityRef {
@@ -33,3 +47,5 @@ export type PageSpec = {
   count: number;
   after: string;
 }
+
+export type GetComponentRef = (name: string) => Promise<EntityRef>
