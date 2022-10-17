@@ -19,10 +19,12 @@ export interface GraphQLHarness {
 
 export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
+  let catalog = createSimulatedCatalog(factory)
   let { run, application } = createGraphQLApp({
-    modules: [],
-    plugins: [useExtendContext(() => ({ catalog: createSimulatedCatalog(factory) }))],
-    loader: ({ catalog }) => createSimulatedLoader(catalog),
+    envelopOptions: {
+      plugins: [useExtendContext(() => ({ catalog }))],
+      loader: () => createSimulatedLoader(catalog)
+    }
   });
 
   return {
