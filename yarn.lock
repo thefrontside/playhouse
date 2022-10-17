@@ -16814,10 +16814,10 @@ node-cache@^5.1.2:
   dependencies:
     clone "2.x"
 
-node-deno@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/node-deno/-/node-deno-0.0.3.tgz#c2cea2c42ce23daa72bc6fcce7d068c6196febef"
-  integrity sha512-5mJGsLXEsuTgIHiqKjclPbpkUimqRiuQ1eaQ37oxeeh3bmi7O3jP1C4aU4lpnXDrVf3dfnqzqhyjOMSAZpU1nw==
+node-deno@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/node-deno/-/node-deno-0.0.4.tgz#62a0b7cba982c74908252d0e4d0a8c553a62b0ee"
+  integrity sha512-ZZe2sLojFzn9/lBMvcZ/gQ6cvs7U1IpLtxdOOXM4KUdd7QtkJ7Gb+VEJNj2JVDBT0OS8Gc090goBhKN2dsXqWg==
   dependencies:
     "@effection/process" "^2.1.1"
     deno-bin "^1.26.0"

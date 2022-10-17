@@ -78,6 +78,8 @@ function findOrCreateExecutable(target: CompilationTarget, options: FindOrCreate
 
       allowRead: true,
 
+      allowRun: true,
+
       // fail immediately if a permission is not present
       noPrompt: true,
     }).then(result => {
