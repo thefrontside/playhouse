@@ -25,7 +25,7 @@ import * as nunjucks from 'nunjucks';
 import request from 'request';
 import type { Logger } from 'winston';
 import { findOrCreateExecutables } from '../executables';
-import { EntityRef, PlatformApi } from '../types';
+import { EntityRef, GetComponentRef, PlatformApi } from '../types';
 import { Repositories } from './routes/repositories';
 
 export interface RouterOptions {
@@ -36,7 +36,6 @@ export interface RouterOptions {
   catalog: CatalogClient;
   platform: PlatformApi;
 }
-
 
 export async function createRouter(
   options: RouterOptions,
@@ -54,7 +53,21 @@ export async function createRouter(
     downloadsURL,
     executableName,
     entrypoint: resolvePackagePath("@frontside/backstage-plugin-platform-backend", "cli", "main.ts"),
-  })
+  });
+
+  const getComponentRef: GetComponentRef = async (name) => {
+    let component = await catalog.getEntityByRef(`component:default/${name}`);
+    let ref: EntityRef = {
+      ref: `component:default/${name}`,
+      compound: {
+        kind: 'component',
+        name,
+        namespace: 'default'
+      },
+      load: () => Promise.resolve(component),
+    };
+    return ref;
+  }
 
   const router = Router();
   router.use(express.text());
@@ -94,18 +107,8 @@ export async function createRouter(
 
   router.get('/components/:name/environments', async (req, res) => {
     let name = req.params.name;
-    let component = await catalog.getEntityByRef(`component:default/${name}`);
-
-    if (component) {
-      let ref: EntityRef = {
-        ref: `component:default/${name}`,
-        compound: {
-          kind: 'component',
-          name,
-          namespace: 'default'
-        },
-        load: () => Promise.resolve(component),
-      };
+    let ref = await getComponentRef(name);
+    if (ref) {
       let environments = await platform.getEnvironments(ref);
       let names = environments.items.map(({ value }) => value.name);
 
@@ -161,9 +164,10 @@ export async function createRouter(
   });
   
   router.use('/repositories', Repositories({
+    getComponentRef,
+    platform,
     catalog
   }));
-
 
   router.use(errorHandler());
   return router;

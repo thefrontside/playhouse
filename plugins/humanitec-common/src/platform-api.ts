@@ -4,7 +4,7 @@ import type { Entity } from '@backstage/catalog-model';
 import { HUMANITEC_APP_ID_ANNOTATION, HUMANITEC_ORG_ID_ANNOTATION } from './constants';
 import { createHumanitecClient } from './clients/humanitec';
 
-export function createHumanitecPlatformApi({ token }: { token: string }): PlatformApi {
+export function createHumanitecPlatformApi({ token }: { token: string }): Pick<PlatformApi, "getEnvironments"> {
 
   return {
     async getEnvironments(ref) {

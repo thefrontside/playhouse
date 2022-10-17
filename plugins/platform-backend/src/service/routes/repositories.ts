@@ -3,25 +3,22 @@ import type { Entity } from '@backstage/catalog-model';
 import CliTable3 from 'cli-table3';
 import chalk  from 'chalk';
 import Router from 'express-promise-router';
+import express from 'express';
+import { GetComponentRef, PlatformApi } from '../../types';
 
-export const Repositories = ({ catalog }: { catalog: CatalogClient }) => {
+interface RouteOptions { 
+  platform: PlatformApi;
+  catalog: CatalogClient;
+  getComponentRef: GetComponentRef;
+}
+
+type Route = (options: RouteOptions) => express.Router;
+
+export const Repositories: Route = ({ platform, getComponentRef }) => {
   const router = Router();
 
   router.get('/', async (req, res) => {
-    const { items: entities } = await catalog.getEntities();
-
-    const repositories = entities.flatMap(entity => {
-      const slug = getGithubProjectSlug(entity);
-      if (slug) {
-        return [{
-          componentRef: getComponentRef(entity),
-          slug,
-          description: entity.metadata.description,
-          url: `https://github/${slug}`,
-        }]
-      }
-      return [];
-    });
+    const repositories = await platform.getRepositories();
 
     if (req.accepts('json')) {
       res.json(repositories);
@@ -30,7 +27,7 @@ export const Repositories = ({ catalog }: { catalog: CatalogClient }) => {
         head: ['Component', 'Repository URL', 'Description']
       });
       table.push(
-        ...repositories.map(r => ([r.componentRef, r.url, r.description]))
+        ...repositories.items.map(({ value: r }) => ([r.componentRef, r.url, r.description]))
       )
       res.send(`\n${chalk.bold('  🥁 Available Repositories')}\n${table}`)
     }
@@ -39,37 +36,18 @@ export const Repositories = ({ catalog }: { catalog: CatalogClient }) => {
   });
 
   router.get('/:component/urls', async (req, res) => {
-    const entity = await catalog.getEntityByRef({
-      kind: 'Component',
-      namespace: 'default',
-      name: req.params.component
-    });
-    if (entity) {
-      const slug = getGithubProjectSlug(entity);
-      res.json({
-        ssh: `git@github.com:${slug}.git`,
-        https: `https://github/${slug}.git`
-      })
-      return;
-    }
-    res.sendStatus(404);
-    res.send("Not Found");
-  });
+    const name = req.params.component;
+    
+    const ref = await getComponentRef(name);
+    const urls = await platform.getRepositoryUrls(ref);
 
+    if (urls) {
+      res.json(urls)
+    } else {
+      res.sendStatus(404);
+      res.send("Not Found");
+    }
+  });
   
   return router;
-}
-
-function getGithubProjectSlug(entity: Entity) {
-  return entity.metadata
-    && entity.metadata.annotations
-    && entity.metadata.annotations["github.com/project-slug"];
-}
-
-function getComponentRef(entity: Entity) {
-  return [
-    entity.kind !== 'Component' ? entity.kind.toLowerCase() : '',
-    entity.metadata.namespace && entity.metadata.namespace !== 'default' ? entity.metadata.namespace : '',
-    entity.metadata.name
-  ].join('')
 }
