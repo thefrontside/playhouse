@@ -4,14 +4,14 @@ import type { Entity } from '@backstage/catalog-model';
 import { HUMANITEC_APP_ID_ANNOTATION, HUMANITEC_ORG_ID_ANNOTATION } from './constants';
 import { createHumanitecClient } from './clients/humanitec';
 
-export function createHumanitecPlatformApi({ token }: { token: string }): PlatformApi {
+export function createHumanitecPlatformApi({ token }: { token: string }): Pick<PlatformApi, "getEnvironments"> {
 
   return {
     async getEnvironments(ref) {
-      let entity = await ref.load();
-      let { appId, orgId } = getHumanitecMetadata(entity);
-      let client = createHumanitecClient({ token, orgId });
-      let environments = await client.getEnvironments(appId);
+      const entity = await ref.load();
+      const { appId, orgId } = getHumanitecMetadata(entity);
+      const client = createHumanitecClient({ token, orgId });
+      const environments = await client.getEnvironments(appId);
       return {
         hasNextPage: false,
         hasPreviousPage: false,
@@ -30,8 +30,10 @@ export function createHumanitecPlatformApi({ token }: { token: string }): Platfo
 }
 
 function getHumanitecMetadata(entity: Entity) {
-  let orgId = entity.metadata.annotations[HUMANITEC_ORG_ID_ANNOTATION];
-  let appId = entity.metadata.annotations[HUMANITEC_APP_ID_ANNOTATION];
+  const { 
+    [HUMANITEC_ORG_ID_ANNOTATION]: orgId,
+    [HUMANITEC_APP_ID_ANNOTATION]: appId,
+   } = entity.metadata.annotations ?? {};
 
   if (!orgId) {
     throw new Error(`${entity.kind}:${entity.metadata.name} is not a humanitec entity`);

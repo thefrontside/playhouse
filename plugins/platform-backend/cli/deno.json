@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run --location=http://localhost:7007 --allow-env --allow-read --allow-net=localhost:7007 tasks/dev.ts"
+    "dev": "deno run --location=http://localhost:7007 --allow-env --allow-read --allow-net=localhost:7007 --allow-run tasks/dev.ts"
   },
   "lint": {
     "rules": {

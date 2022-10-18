@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-
 import { errorHandler, PluginEndpointDiscovery, resolvePackagePath } from '@backstage/backend-common';
-import express from 'express';
-import request from 'request';
-import Router from 'express-promise-router';
-import type { Logger } from 'winston';
 import type { CatalogClient } from '@backstage/catalog-client';
-import { findOrCreateExecutables } from '../executables';
+import express from 'express';
+import Router from 'express-promise-router';
 import { readFile } from 'fs/promises';
-import * as nunjucks from 'nunjucks';
-import { PlatformApi, EntityRef } from '../types';
-import fetch from 'node-fetch-native';
 import { load } from 'js-yaml';
+import fetch from 'node-fetch-native';
+import * as nunjucks from 'nunjucks';
+import request from 'request';
+import type { Logger } from 'winston';
+import { findOrCreateExecutables } from '../executables';
+import { GetComponentRef, PlatformApi } from '../types';
+import { Repositories } from './routes/repositories';
 
 export interface RouterOptions {
   logger: Logger;
@@ -36,7 +36,6 @@ export interface RouterOptions {
   catalog: CatalogClient;
   platform: PlatformApi;
 }
-
 
 export async function createRouter(
   options: RouterOptions,
@@ -54,7 +53,25 @@ export async function createRouter(
     downloadsURL,
     executableName,
     entrypoint: resolvePackagePath("@frontside/backstage-plugin-platform-backend", "cli", "main.ts"),
-  })
+  });
+
+  const getComponentRef: GetComponentRef = async (name) => {
+    return {
+      ref: `component:default/${name}`,
+      compound: {
+        kind: 'component',
+        name,
+        namespace: 'default'
+      },
+      load: async () => {
+        const entity = await catalog.getEntityByRef(`component:default/${name}`);
+        if (!entity) {
+          throw new Error(`Component ${name} not found.`);
+        }
+        return entity;
+      },
+    };
+  }
 
   const router = Router();
   router.use(express.text());
@@ -94,19 +111,8 @@ export async function createRouter(
 
   router.get('/components/:name/environments', async (req, res) => {
     let name = req.params.name;
-    let component = await catalog.getEntityByRef(`component:default/${name}`);
-
-
-    if (component) {
-      let ref: EntityRef = {
-        ref: `component:default/${name}`,
-        compound: {
-          kind: 'component',
-          name,
-          namespace: 'default'
-        },
-        load: () => Promise.resolve(component),
-      };
+    let ref = await getComponentRef(name);
+    if (ref) {
       let environments = await platform.getEnvironments(ref);
       let names = environments.items.map(({ value }) => value.name);
 
@@ -115,14 +121,13 @@ export async function createRouter(
       res.sendStatus(404);
       res.send("Not Found");
     }
-  })
+  });
 
   router.post('/create/:template', async (req, res) => {
     const template = req.params.template;
 
     logger.info(`creating template ${template}`);
 
-    
     try {
       const values = load(req.body) as Record<string, unknown>;
   
@@ -154,14 +159,20 @@ export async function createRouter(
     }
   });
 
-
   router.get('/tasks/:taskId/eventstream', (req, res) => {
     const { taskId } = req.params;
 
     const eventStreamUrl = `${scaffolderUrl}/${encodeURIComponent(taskId)}/eventstream`
 
     req.pipe(request(eventStreamUrl)).pipe(res);
-  })
+  });
+  
+  router.use('/repositories', Repositories({
+    getComponentRef,
+    platform,
+    catalog
+  }));
+
   router.use(errorHandler());
   return router;
 }
