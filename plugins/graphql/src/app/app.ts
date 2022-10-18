@@ -1,6 +1,6 @@
 import { envelop } from '@envelop/core';
 import { useGraphQLModules } from '@envelop/graphql-modules';
-import { Application, createApplication, Module } from 'graphql-modules';
+import { createApplication, Module } from 'graphql-modules';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { Catalog } from './modules/catalog/catalog';
 import { Core } from './modules/core/core';
@@ -11,17 +11,16 @@ import { useDataLoader } from '@envelop/dataloader';
 import DataLoader from 'dataloader';
 
 export type createGraphQLAppOptions<Plugins extends EnvelopPlugins, Loader extends DataLoader<any, any>> = {
+  loader: () => Loader
+  plugins?: Plugins,
   modules?: Module[]
-  envelopOptions:
-  | { plugins?: Plugins, loader: () => Loader }
-  | ((app: Application) => { plugins?: Plugins, loader: () => Loader })
 }
 
 export function createGraphQLApp<
   Plugins extends EnvelopPlugins,
   Loader extends DataLoader<any, any>
 >(options: createGraphQLAppOptions<Plugins, Loader>) {
-  const { modules, envelopOptions } = options;
+  const { modules, plugins, loader } = options;
   const application = createApplication({
     schemaBuilder: ({ typeDefs, resolvers }) =>
       mapSchema(
@@ -30,7 +29,6 @@ export function createGraphQLApp<
       ),
     modules: [Core, Catalog, ...modules ?? []],
   });
-  const { plugins, loader } = typeof envelopOptions === 'function' ? envelopOptions(application) : envelopOptions;
 
   const run = envelop({
     plugins: [

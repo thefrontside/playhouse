@@ -28,7 +28,8 @@ export async function createRouter(
 
   const { run, application } = createGraphQLApp({
     modules: options.modules,
-    envelopOptions: { loader: () => createLoader(options), plugins: options.plugins }
+    loader: () => createLoader(options),
+    plugins: options.plugins,
   });
 
   const router = Router();

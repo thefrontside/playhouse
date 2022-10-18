@@ -21,10 +21,8 @@ export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
   let catalog = createSimulatedCatalog(factory)
   let { run, application } = createGraphQLApp({
-    envelopOptions: {
-      plugins: [useExtendContext(() => ({ catalog }))],
-      loader: () => createSimulatedLoader(catalog)
-    }
+    plugins: [useExtendContext(() => ({ catalog }))],
+    loader: () => createSimulatedLoader(catalog),
   });
 
   return {
