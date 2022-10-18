@@ -40,6 +40,7 @@ spec:
           componentName: ${{ parameters.componentName }}
           orgId: ${{ steps.environment.output.orgId }}
           appId: ${{ parameters.componentName }}
+          repoUrl: ${{ parameters.repoUrl | parseRepoUrl }}
           registryUrl: ${{ steps.environment.output.registryUrl }}
     - name: Create Repository on Github
       id: publish

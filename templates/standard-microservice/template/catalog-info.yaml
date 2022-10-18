@@ -4,6 +4,7 @@ metadata:
   name: ${{values.componentName | dump}}
   description: Sample service for Humanitec demo
   annotations:
+    "github.com/project-slug": ${{values.repoUrl | dump}}
     "humanitec.com/orgId": ${{values.orgId | dump}}
     "humanitec.com/appId": ${{values.appId | dump}}
 spec:
