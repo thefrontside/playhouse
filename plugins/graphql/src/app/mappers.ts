@@ -25,13 +25,13 @@ const resolveMappers: Array<(
   schema: GraphQLSchema
 ) => void> = [
   (objectField, interfaceField, schema) => {
-    const fieldDirective = getDirective(schema, interfaceField ?? objectField, 'field')?.[0];
+    const field = objectField ?? interfaceField
+    const fieldDirective = getDirective(schema, field, 'field')?.[0];
     if (!fieldDirective) return
 
-    const fieldType = (interfaceField ?? objectField).type
-    const isKeyValuePairs = fieldType instanceof GraphQLList
-      && fieldType.ofType instanceof GraphQLObjectType
-      && fieldType.ofType.name === 'KeyValuePair'
+    const isKeyValuePairs = field.type instanceof GraphQLList
+      && field.type.ofType instanceof GraphQLObjectType
+      && field.type.ofType.name === 'KeyValuePair'
     objectField.resolve = async ({ id }, _, { loader }) => {
       const entity = await loader.load(id);
       if (!entity) return null;
@@ -40,12 +40,12 @@ const resolveMappers: Array<(
     };
   },
   (objectField, interfaceField, schema) => {
-    const fieldDirective = getDirective(schema, interfaceField ?? objectField, 'relation')?.[0];
+    const field = objectField ?? interfaceField
+    const fieldDirective = getDirective(schema, field, 'relation')?.[0];
     if (!fieldDirective) return
 
-    const fieldType = (interfaceField ?? objectField).type
-    const isList = fieldType instanceof GraphQLList
-      || (fieldType instanceof GraphQLNonNull && fieldType.ofType instanceof GraphQLList)
+    const isList = field.type instanceof GraphQLList
+      || (field.type instanceof GraphQLNonNull && field.type.ofType instanceof GraphQLList)
     objectField.resolve = async ({ id }, _, { loader }) => {
       const entities = (await loader.load(id))
         ?.relations
