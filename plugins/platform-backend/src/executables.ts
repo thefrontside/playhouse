@@ -80,6 +80,8 @@ function findOrCreateExecutable(target: CompilationTarget, options: FindOrCreate
 
       allowRun: true,
 
+      location: baseURL,
+
       // fail immediately if a permission is not present
       noPrompt: true,
     }).then(result => {
