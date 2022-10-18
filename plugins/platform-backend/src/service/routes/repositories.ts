@@ -1,5 +1,4 @@
 import type { CatalogClient } from '@backstage/catalog-client'; 
-import type { Entity } from '@backstage/catalog-model';
 import CliTable3 from 'cli-table3';
 import chalk  from 'chalk';
 import Router from 'express-promise-router';
