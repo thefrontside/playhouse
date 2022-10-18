@@ -25,7 +25,7 @@ import * as nunjucks from 'nunjucks';
 import request from 'request';
 import type { Logger } from 'winston';
 import { findOrCreateExecutables } from '../executables';
-import { EntityRef, GetComponentRef, PlatformApi } from '../types';
+import { GetComponentRef, PlatformApi } from '../types';
 import { Repositories } from './routes/repositories';
 
 export interface RouterOptions {
@@ -56,17 +56,21 @@ export async function createRouter(
   });
 
   const getComponentRef: GetComponentRef = async (name) => {
-    let component = await catalog.getEntityByRef(`component:default/${name}`);
-    let ref: EntityRef = {
+    return {
       ref: `component:default/${name}`,
       compound: {
         kind: 'component',
         name,
         namespace: 'default'
       },
-      load: () => Promise.resolve(component),
+      load: async () => {
+        const entity = await catalog.getEntityByRef(`component:default/${name}`);
+        if (!entity) {
+          throw new Error(`Component ${name} not found.`);
+        }
+        return entity;
+      },
     };
-    return ref;
   }
 
   const router = Router();
