@@ -31,8 +31,8 @@ export function createHumanitecPlatformApi({ token }: { token: string }): Pick<P
 
 function getHumanitecMetadata(entity: Entity) {
   const { 
-    HUMANITEC_ORG_ID_ANNOTATION: orgId,
-    HUMANITEC_APP_ID_ANNOTATION: appId,
+    [HUMANITEC_ORG_ID_ANNOTATION]: orgId,
+    [HUMANITEC_APP_ID_ANNOTATION]: appId,
    } = entity.metadata.annotations ?? {};
 
   if (!orgId) {
