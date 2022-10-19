@@ -4,9 +4,9 @@ metadata:
   name: ${{values.componentName | dump}}
   description: Sample service for Humanitec demo
   annotations:
-    "github.com/project-slug": ${{values.repoUrl | dump}}
-    "humanitec.com/orgId": ${{values.orgId | dump}}
-    "humanitec.com/appId": ${{values.appId | dump}}
+    github.com/project-slug: ${{values.repoUrl.owner + "/" + values.repoUrl.repo}}
+    humanitec.com/orgId: ${{values.orgId | dump}}
+    humanitec.com/appId: ${{values.appId | dump}}
 spec:
   type: service
   owner: john@example.com
