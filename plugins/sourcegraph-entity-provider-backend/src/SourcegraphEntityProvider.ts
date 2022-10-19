@@ -102,7 +102,7 @@ export class SourcegraphEntityProvider implements EntityProvider {
       throw new Error('Not initialized');
     }
     const data: SourcegraphSearch = await this.graphQLClient.request(sourcegraphFileMatchQuery, {
-      search: "file:^catalog-info.yaml"
+      search: "file:^catalog-info.yaml$"
     });
     const parsed = parseSourcegraphSearch(data, this.getProviderName());
     await this.connection.applyMutation({
@@ -122,7 +122,7 @@ export class SourcegraphEntityProvider implements EntityProvider {
     let toRemove: DeferredEntity[] = [];
     payload.results.forEach(async result => {
       const data: SourcegraphSearch = await this.graphQLClient.request(sourcegraphFileMatchQuery, {
-        search: `file:^catalog-info.yaml repo:${result.repository}$`
+        search: `file:^catalog-info.yaml$ repo:${result.repository}$`
       });
       const parsed = parseSourcegraphSearch(data, this.getProviderName());
       if (parsed.length) {
