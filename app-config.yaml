@@ -80,8 +80,6 @@ scaffolder:
 catalog:
   locations:
     - type: url
-      target: https://github.com/thefrontside/backstage/blob/main/catalog-info.yaml
-    - type: url
       target: https://github.com/thefrontside/backstage/blob/main/templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]
@@ -90,3 +88,7 @@ humanitec:
   orgId: the-frontside-software-inc
   registryUrl: "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts"
   token: ${HUMANITEC_TOKEN}
+
+sourcegraph:
+  orgId: frontside
+  token: ${SOURCEGRAPH_TOKEN}
