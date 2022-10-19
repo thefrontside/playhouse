@@ -105,7 +105,6 @@ export class SourcegraphEntityProvider implements EntityProvider {
       search: "file:^catalog-info.yaml"
     });
     const parsed = parseSourcegraphSearch(data, this.getProviderName());
-    console.log(JSON.stringify(parsed, null, 2))
     await this.connection.applyMutation({
       type: 'full',
       entities: parsed.map(entity => ({
