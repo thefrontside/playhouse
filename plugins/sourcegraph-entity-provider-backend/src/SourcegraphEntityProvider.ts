@@ -12,6 +12,18 @@ import {
 import { Config } from '@backstage/config';
 import { GraphQLClient, gql } from "graphql-request";
 
+interface SourcegraphWebhookPayload {
+  monitorDescription: string;
+  monitorUrl: string;
+  query: string;
+  results: {
+    repository: string;
+    commit: string;
+    diff: string;
+    matchedDiffRanges: number[][];
+  }[];
+}
+
 interface SourcegraphSearch {
   search: {
     results: {
@@ -127,6 +139,40 @@ export class SourcegraphEntityProvider implements EntityProvider {
         entity: entity.entity,
         locationKey: entity.locationKey,
       })),
+    });
+  }
+
+  async delta(payload: SourcegraphWebhookPayload) {
+    if (!this.connection) {
+      throw new Error('Not initialized');
+    }
+    let toAdd: DeferredEntity[] = [];
+    let toRemove: DeferredEntity[] = [];
+    payload.results.forEach(async result => {
+      const data: SourcegraphSearch = await this.graphQLClient.request(sourcegraphFileMatchQuery, {
+        search: `file:^catalog-info.yaml repo:${result.repository}$`
+      });
+      const parsed = parseSourcegraphSearch(data, this.getProviderName());
+      if (parsed.length) {
+        toAdd.push(parsed[0]);
+      } else {
+        toRemove.push({
+          "entity": {
+            "apiVersion": "backstage.io/v1alpha1",
+            "kind": "Component",
+            "metadata": {
+              "name": /[^\/]*$/.exec(result.repository)![0]
+            },
+          },
+          "locationKey": `${result.repository}/catalog-info.yaml`
+        }); 
+      }
+    });
+
+    await this.connection.applyMutation({
+      type: 'delta',
+      added: [...toAdd],
+      removed: [...toRemove],
     });
   }
 }
