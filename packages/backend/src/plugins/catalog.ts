@@ -45,6 +45,13 @@ export default async function createPlugin(
   // before incremental builder migrations are executed 
   // await incrementalBuilder.build();
 
+  await env.scheduler.scheduleTask({
+    id: "test-task-scheduler",
+    frequency: { cron: '0 0 * * 7' },
+    timeout: { minutes: 10 },
+    fn: async () => await sourcegraphProvider.full(),
+  });
+
   await processingEngine.start();
 
   return router;
