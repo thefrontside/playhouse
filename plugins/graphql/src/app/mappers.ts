@@ -101,7 +101,7 @@ export const mappers: SchemaMapper = {
 
 function traverseExtends(type: GraphQLObjectType | GraphQLInterfaceType, schema: GraphQLSchema): GraphQLInterfaceType[] {
   const extendDirective = getDirective(schema, type, 'extend')?.[0];
-  const interfaces = []
+  const interfaces = [...type.getInterfaces()]
   if (extendDirective) {
     const extendType = schema.getType(extendDirective.type)
     if (!isInterfaceType(extendType)) {
