@@ -4,10 +4,10 @@ import Alert from '@material-ui/lab/Alert';
 import useAsync from 'react-use/lib/useAsync';
 import { useApi } from '@backstage/core-plugin-api';
 
-import type { Executables } from '@frontside/backstage-plugin-platform-backend';
+import type { DownloadInfo } from '@frontside/backstage-plugin-platform-backend';
 import { executablesApiRef } from '../../api/executables-api';
 
-export const DenseTable = ({ executables }: { executables: Executables}) => {
+export const DenseTable = ({ info }: { info: DownloadInfo}) => {
 
   const columns: TableColumn[] = [
     { title: 'Architecture', field: 'target' },
@@ -15,10 +15,11 @@ export const DenseTable = ({ executables }: { executables: Executables}) => {
     { title: 'URL', field: 'url' },
   ];
 
-  let { executableName, ...binaries } = executables;
+  let { executableName, executables } = info;
 
-  const data = Object.entries(binaries).map(([target, executable]) => {
+  const data = Object.entries(executables).map(([target, executable]) => {
     return {
+      id: target,
       target,
       url: executable.type === 'compiled' ? executable.url : 'N/A',
       status: executable.type,
@@ -44,7 +45,7 @@ export const AllExecutables = () => {
   } else if (error) {
     return <Alert severity="error">{error.message}</Alert>;
   } else {
-    return <DenseTable executables={value ?? {} as Executables} />;
+    return <DenseTable info={value ?? {} as DownloadInfo} />;
   }
 
 };
