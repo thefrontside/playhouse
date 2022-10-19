@@ -69,17 +69,14 @@ const parseSourcegraphSearch = (data: SourcegraphSearch, providerName: string) =
 export class SourcegraphEntityProvider implements EntityProvider {
   private readonly config: Config;
   private connection?: EntityProviderConnection;
-  private graphQLClient: GraphQLClient;
+  private graphQLClient?: GraphQLClient;
 
   static create(config: Config) {
     return new SourcegraphEntityProvider(config)
   }
 
-  private constructor(
-    config: Config
-  ) {
+  private constructor(config: Config) {
     this.config = config;
-    this.graphQLClient = new GraphQLClient("");
   }
 
   getProviderName(): string {
@@ -98,9 +95,9 @@ export class SourcegraphEntityProvider implements EntityProvider {
   }
 
   async full() {
-    if (!this.connection) {
-      throw new Error('Not initialized');
-    }
+    if (!this.connection) throw new Error('Not initialized');
+    if (!this.graphQLClient) throw new Error('GraphQL client not initialized')
+
     const data: SourcegraphSearch = await this.graphQLClient.request(sourcegraphFileMatchQuery, {
       search: "file:^catalog-info.yaml$"
     });
@@ -115,12 +112,12 @@ export class SourcegraphEntityProvider implements EntityProvider {
   }
 
   async delta(payload: SourcegraphWebhookPayload) {
-    if (!this.connection) {
-      throw new Error('Not initialized');
-    }
+    if (!this.connection) throw new Error('Not initialized');
+    
     let toAdd: DeferredEntity[] = [];
     let toRemove: DeferredEntity[] = [];
     payload.results.forEach(async result => {
+      if (!this.graphQLClient) throw new Error('GraphQL client not initialized');
       const data: SourcegraphSearch = await this.graphQLClient.request(sourcegraphFileMatchQuery, {
         search: `file:^catalog-info.yaml$ repo:${result.repository}$`
       });
