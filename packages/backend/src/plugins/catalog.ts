@@ -52,6 +52,10 @@ export default async function createPlugin(
     fn: async () => await sourcegraphProvider.full(),
   });
 
+  router.post("/sourcegraph/webhook", async (req, _res) => {
+    await sourcegraphProvider.delta(req.body);
+  });
+
   await processingEngine.start();
 
   return router;
