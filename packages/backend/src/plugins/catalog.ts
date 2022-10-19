@@ -1,5 +1,6 @@
 import {
-  CatalogBuilder
+  CatalogBuilder,
+  EntityProvider
 } from '@backstage/plugin-catalog-backend';
 import { ScaffolderEntitiesProcessor } from '@backstage/plugin-scaffolder-backend';
 // import { IncrementalCatalogBuilder } from '@frontside/backstage-plugin-incremental-ingestion-backend';
@@ -7,6 +8,7 @@ import { ScaffolderEntitiesProcessor } from '@backstage/plugin-scaffolder-backen
 import { Router } from 'express';
 // import { Duration } from 'luxon';
 import { PluginEnvironment } from '../types';
+import { SourcegraphEntityProvider } from "@frontside/backstage-plugin-sourcegraph-entity-provider";
 
 export default async function createPlugin(
   env: PluginEnvironment,
@@ -33,6 +35,9 @@ export default async function createPlugin(
   // )
 
   builder.addProcessor(new ScaffolderEntitiesProcessor());
+
+  const sourcegraphProvider = SourcegraphEntityProvider.create(env.config);
+  builder.addEntityProvider(sourcegraphProvider as EntityProvider);
 
   const { processingEngine, router } = await builder.build();
 
