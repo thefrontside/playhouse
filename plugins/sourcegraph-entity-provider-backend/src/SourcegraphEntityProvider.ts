@@ -11,34 +11,7 @@ import {
 } from '@backstage/plugin-catalog-backend';
 import { Config } from '@backstage/config';
 import { GraphQLClient, gql } from "graphql-request";
-
-interface SourcegraphWebhookPayload {
-  monitorDescription: string;
-  monitorUrl: string;
-  query: string;
-  results: {
-    repository: string;
-    commit: string;
-    diff: string;
-    matchedDiffRanges: number[][];
-  }[];
-}
-
-interface SourcegraphSearch {
-  search: {
-    results: {
-      results: {
-        repository: {
-          name: string;
-        };
-        file: {
-          url: string;
-          content: string;
-        }
-      }[];
-    }
-  }
-}
+import { SourcegraphSearch, SourcegraphWebhookPayload } from "./types";
 
 const sourcegraphFileMatchQuery = gql`
   query ($search: String!) {
