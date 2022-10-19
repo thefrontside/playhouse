@@ -1,10 +1,24 @@
 import type { Logger } from 'winston';
 import type { CompilationTarget } from 'node-deno';
-import { CompilationTargets, compile } from 'node-deno';
+import { CompilationTargets, run, compile } from 'node-deno';
 import { existsSync } from 'fs';
 
-export interface Executables extends  Record<CompilationTarget, Executable> {
+export interface DownloadInfo {
   executableName: string;
+  helpText: Async<string>;
+  executables: Executables;
+}
+
+export type Executables = Record<CompilationTarget, Executable>;
+
+type Async<T> = {
+  "type": "pending";
+} | {
+  "type": "resolved";
+  value: T;
+} | {
+  "type": "rejected";
+  error: Error;
 }
 
 export type Executable = {
@@ -34,6 +48,50 @@ export interface FindOrCreateOptions {
   entrypoint: string;
 }
 
+export function getDownloadInfo(options: FindOrCreateOptions): DownloadInfo {
+  let { executableName } = options;
+
+  let executables = findOrCreateExecutables(options);
+
+  let helpText = getHelpText(options);
+
+  return { executableName, helpText, executables };
+}
+
+export function getHelpText(options: FindOrCreateOptions): Async<string> {
+  let { executableName, entrypoint, baseURL, logger } = options;
+  let description = "internal developer platform";
+
+  let value: Async<string> = { "type": "pending" };
+
+  run({
+    entrypoint: [entrypoint, executableName, baseURL, `"${description}"`, "--help"],
+  }).then(result => {
+    if (result.code != 0) {
+      logger.info(`help text generation failed: ${result.stderr}`);
+      value = { "type": "rejected", error: new Error(result.stderr) };
+    } else {
+      logger.info("help text generated for platform executable");
+      value = { "type": "resolved", value: result.stdout };
+    }
+  }).catch(error => {
+    logger.error(`help text generation failed: ${error}`);
+    value = { "type": "rejected", error };
+  });
+
+  return new Proxy({} as Async<string>, {
+    get(_, prop: keyof Executable) {
+      return value[prop];
+    },
+    ownKeys: () => Object.keys(value),
+    getOwnPropertyDescriptor: (_, key) => ({
+      value: value[key as keyof Executable],
+      enumerable: true,
+      configurable: true,
+    })
+  })
+}
+
 export function findOrCreateExecutables(options: FindOrCreateOptions): Executables {
   options.logger.info(`generating executables for ${options.executableName}`);
   return CompilationTargets.reduce((executables, target) => {
@@ -41,7 +99,7 @@ export function findOrCreateExecutables(options: FindOrCreateOptions): Executabl
       ...executables,
       [target]: findOrCreateExecutable(target, options),
     }
-  }, { executableName: options.executableName }) as Executables;
+  }, {}) as Executables;
 }
 
 function findOrCreateExecutable(target: CompilationTarget, options: FindOrCreateOptions): Executable {

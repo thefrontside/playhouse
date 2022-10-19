@@ -25,7 +25,7 @@ export default async function createPlugin({
           return {
             ssh: `git@github.com:${slug}.git`,
             https: `https://github/${slug}.git`
-          }        
+          }
         }
 
         return null;
