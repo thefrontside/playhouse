@@ -24,7 +24,7 @@ import fetch from 'node-fetch-native';
 import * as nunjucks from 'nunjucks';
 import request from 'request';
 import type { Logger } from 'winston';
-import { findOrCreateExecutables } from '../executables';
+import { getDownloadInfo } from '../executables';
 import { GetComponentRef, PlatformApi } from '../types';
 import { Repositories } from './routes/repositories';
 
@@ -41,12 +41,12 @@ export async function createRouter(
   options: RouterOptions,
   ): Promise<express.Router> {
   const { catalog, logger, discovery, executableName, appURL, platform } = options;
-    
+
   let baseURL = await discovery.getBaseUrl('idp');
   let downloadsURL = `${baseURL}/executables/dist`;
   let scaffolderUrl = `${await discovery.getBaseUrl('scaffolder')}/v2/tasks`;
 
-  let executables = findOrCreateExecutables({
+  let executables = getDownloadInfo({
     logger,
     distDir: 'dist-bin',
     baseURL,
@@ -130,7 +130,7 @@ export async function createRouter(
 
     try {
       const values = load(req.body) as Record<string, unknown>;
-  
+
       const post = await fetch(scaffolderUrl, {
         method: 'POST',
         headers: {
@@ -148,7 +148,7 @@ export async function createRouter(
       if(post.status !== 201) {
         throw new Error(`resource not created, ${post.status} - ${post.statusText}`);
       }
-  
+
       const { id } = (await post.json()) as { id: string };
 
       res.json({ taskId: id });
@@ -166,7 +166,7 @@ export async function createRouter(
 
     req.pipe(request(eventStreamUrl)).pipe(res);
   });
-  
+
   router.use('/repositories', Repositories({
     getComponentRef,
     platform,

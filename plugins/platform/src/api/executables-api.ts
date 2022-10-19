@@ -1,4 +1,4 @@
-import type { Executables } from '@frontside/backstage-plugin-platform-backend';
+import type { DownloadInfo } from '@frontside/backstage-plugin-platform-backend';
 import { createApiRef } from '@backstage/core-plugin-api';
 
 export const executablesApiRef = createApiRef<ExecutablesAPI>({
@@ -6,5 +6,5 @@ export const executablesApiRef = createApiRef<ExecutablesAPI>({
 });
 
 export interface ExecutablesAPI {
-  fetchExecutables(): Promise<Executables>;
+  fetchExecutables(): Promise<DownloadInfo>;
 }
