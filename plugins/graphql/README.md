@@ -80,11 +80,12 @@ You can extend the schema from inside of Backstage Backend by creating a [GraphQ
 3. Create a file for your first GraphQL module called `packages/backend/src/graphql/my-module.ts` with the following content
 
   ```ts
+  import { resolvePackagePath } from '@backstage/backend-common'
   import { createModule, gql } from 'graphql-modules'
 
   export const myModule = createModule({
     id: 'my-module',
-    dirname: __dirname,
+    dirname: resolvePackagePath('backend', 'src/graphql'),
     typeDefs: [
       gql`
         type Query {
@@ -153,7 +154,7 @@ Your `Repository` type will automatically get all of the properties from `Entity
 
 It's convenient to be able to query the Backstage GraphQL API from inside of Backstage App. You can accomplish this by installing the [Backstage GraphiQL Plugin](https://roadie.io/backstage/plugins/graphiQL/) and adding the GraphQL API endpoint to the GraphiQL Plugin API factory.
 
-1. Once you installed `@backstage/plugin-graphiql` plugin [with these instructions](https://roadie.io/backstage/plugins/graphiQL/) 
+1. Once you installed `@backstage/plugin-graphiql` plugin [with these instructions](https://roadie.io/backstage/plugins/graphiQL/)
 2. Modify `packages/app/src/apis.ts` to add your GraphQL API as an endpoint
 
     ```ts
@@ -208,4 +209,3 @@ You might want to show the schema from your GraphQL API in API definition sectio
       allow:
         - host: localhost:7007
   ```
-
