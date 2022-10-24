@@ -1,7 +1,7 @@
 import type { CatalogClient } from '@backstage/catalog-client';
 import Router from 'express-promise-router';
 import express from 'express';
-import { EntityRef, GetComponentRef, PlatformApi } from '../../types';
+import { GetComponentRef, PlatformApi } from '../../types';
 
 interface RouteOptions {
   platform: PlatformApi;
