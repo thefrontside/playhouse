@@ -27,6 +27,7 @@ import type { Logger } from 'winston';
 import { getDownloadInfo } from '../executables';
 import { GetComponentRef, PlatformApi } from '../types';
 import { Repositories } from './routes/repositories';
+import { Logs } from './routes/logs';
 
 export interface RouterOptions {
   logger: Logger;
@@ -168,6 +169,12 @@ export async function createRouter(
   });
 
   router.use('/repositories', Repositories({
+    getComponentRef,
+    platform,
+    catalog
+  }));
+
+  router.use('/logs', Logs({
     getComponentRef,
     platform,
     catalog

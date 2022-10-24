@@ -1,11 +1,11 @@
-import type { CatalogClient } from '@backstage/catalog-client'; 
+import type { CatalogClient } from '@backstage/catalog-client';
 import CliTable3 from 'cli-table3';
 import chalk  from 'chalk';
 import Router from 'express-promise-router';
 import express from 'express';
 import { GetComponentRef, PlatformApi } from '../../types';
 
-interface RouteOptions { 
+interface RouteOptions {
   platform: PlatformApi;
   catalog: CatalogClient;
   getComponentRef: GetComponentRef;
@@ -36,7 +36,7 @@ export const Repositories: Route = ({ platform, getComponentRef }) => {
 
   router.get('/:component/urls', async (req, res) => {
     const name = req.params.component;
-    
+
     const ref = await getComponentRef(name);
     const urls = await platform.getRepositoryUrls(ref);
 
@@ -47,6 +47,6 @@ export const Repositories: Route = ({ platform, getComponentRef }) => {
       res.send("Not Found");
     }
   });
-  
+
   return router;
 }

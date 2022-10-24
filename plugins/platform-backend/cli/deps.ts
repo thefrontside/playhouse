@@ -4,8 +4,8 @@ export * as yaml from "https://deno.land/std@0.159.0/encoding/yaml.ts";
 export { format } from "https://deno.land/std@0.159.0/datetime/mod.ts";
 export { Command } from "https://deno.land/x/cliffy@v0.25.2/command/mod.ts";
 export { EventSource } from "https://deno.land/x/eventsource@v0.0.2/mod.ts";
-export { red, blue, green } from "https://deno.land/std@0.159.0/fmt/colors.ts"
-export  { readAll } from "https://deno.land/std@0.159.0/streams/conversion.ts?s=copy";
+export { blue, green, red } from "https://deno.land/std@0.159.0/fmt/colors.ts";
+export { readAll } from "https://deno.land/std@0.159.0/streams/conversion.ts?s=copy";
 
 // we tried to get this from backstage. We really did.
 export interface Entity {
