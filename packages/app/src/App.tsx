@@ -116,8 +116,8 @@ const routes = (
         <UserSettingsPage
           providerSettings={
             <ProviderSettingsItem
-              title="ACME"
-              description="Provides sign-in via ACME"
+              title="Auth0"
+              description="Provides sign-in via Auth0"
               apiRef={auth0AuthApiRef}
               icon={Star}
             />
