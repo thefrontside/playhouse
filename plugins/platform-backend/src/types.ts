@@ -3,6 +3,8 @@ import type { Entity, CompoundEntityRef } from '@backstage/catalog-model';
 export interface Environment {
   id: string;
   name: string;
+  type: string;
+  url: string;
 }
 
 export interface Repository {

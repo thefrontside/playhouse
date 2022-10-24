@@ -28,6 +28,8 @@ import { getDownloadInfo } from '../executables';
 import { GetComponentRef, PlatformApi } from '../types';
 import { Repositories } from './routes/repositories';
 import { Logs } from './routes/logs';
+import CliTable3 from 'cli-table3';
+import chalk from 'chalk';
 
 export interface RouterOptions {
   logger: Logger;
@@ -114,10 +116,14 @@ export async function createRouter(
     let name = req.params.name;
     let ref = await getComponentRef(name);
     if (ref) {
+      const table = new CliTable3({
+        head: ["ID", "Name", "Type", "URL"]
+      });
       let environments = await platform.getEnvironments(ref);
-      let names = environments.items.map(({ value }) => value.name);
-
-      res.send(`${names.join("\n")}\n`);
+      table.push(
+        ...environments.items.map(({ value: r }) => ([r.id, r.name, r.type, r.url ]))
+      )
+      res.send(`\n${chalk.bold('  ☀️ Deployment Environments')}\n${table}\n`);
     } else {
       res.sendStatus(404);
       res.send("Not Found");

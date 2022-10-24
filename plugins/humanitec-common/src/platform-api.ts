@@ -41,6 +41,8 @@ export function createHumanitecPlatformApi({ token }: { token: string }): Humani
           value: {
             id: env.id,
             name: env.name,
+            type: env.type,
+            url: `https://app.humanitec.io/orgs/${orgId}/apps/${appId}/envs/${env.id}`
           }
         })),
       };
