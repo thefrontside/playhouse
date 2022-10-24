@@ -60,6 +60,18 @@ export function createHumanitecClient({ orgId, token }: { token: string; orgId: 
       const result = await _fetch('GET', `apps/${appId}/envs/${envId}/resources`);
       return ResourcesResponsePayload.parse(result);
     },
+
+    async getEnvironmentLogsSnapshot(appId: string, envId: string) {
+      type Message = {
+        workload_id: string;
+        container_id: string;
+        payload: string;
+        level: string
+      };
+
+      return await _fetch<Message[]>('GET', `apps/${appId}/envs/${envId.toLowerCase()}/logs?limit=100&invert=true`);
+
+    },
     buildUrl(params: URLs) {
       const baseUrl = `https://app.humanitec.io/orgs/${orgId}`;
       switch (params.resource) {
@@ -89,6 +101,8 @@ export function createHumanitecClient({ orgId, token }: { token: string; orgId: 
 
       if (r.ok) {
         return await r.json() as R;
+      } else {
+        console.dir({ error: r.statusText });
       }
 
       throw new FetchError(`Fetch ${method} to ${url} failed.`, r);

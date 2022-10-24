@@ -18,6 +18,7 @@ export interface RepositoryUrls {
 }
 
 export interface PlatformApi {
+  getLogs(ref: EntityRef, environment: string): AsyncIterable<string>;
   getEnvironments(ref: EntityRef, page?: PageSpec): Promise<Page<Environment>>;
   getRepositories(page?: PageSpec): Promise<Page<Repository>>
   getRepositoryUrls(ref: EntityRef): Promise<RepositoryUrls | null>

@@ -1,4 +1,16 @@
-import { path, yaml, Entity, Command, EventSource, red, blue, green, format, readAll, assert } from "./deps.ts";
+import {
+  assert,
+  blue,
+  Command,
+  Entity,
+  EventSource,
+  format,
+  green,
+  path,
+  readAll,
+  red,
+  yaml,
+} from "./deps.ts";
 
 export interface CLIOptions {
   name: string;
@@ -9,14 +21,14 @@ export interface CLIOptions {
 }
 
 interface SSEMessage {
-  type: 'log' | 'completion' | 'error';
+  type: "log" | "completion" | "error";
   createdAt: string;
   body: {
     message: string;
     error?: {
       name: string;
       message: string;
-    }
+    };
   };
 }
 
@@ -24,16 +36,16 @@ class MainError extends Error {
   name = "Mainerror";
 }
 
-const logTextColors: Record<SSEMessage['type'], (s: string) => string> = {
-  'log': blue,
-  'completion': green,
-  'error': red
-}
+const logTextColors: Record<SSEMessage["type"], (s: string) => string> = {
+  "log": blue,
+  "completion": green,
+  "error": red,
+};
 
 function logSSEMessage(raw: string) {
-  const message: SSEMessage = JSON.parse(raw)
+  const message: SSEMessage = JSON.parse(raw);
   const color = logTextColors[message.type];
-  const timestamp = format(new Date(message.createdAt), 'dd-MM-yyyy:hh:mm');
+  const timestamp = format(new Date(message.createdAt), "dd-MM-yyyy:hh:mm");
   const logType = color(`[${message.type.toLocaleUpperCase()} - ${timestamp}]`);
 
   console.log(`${logType} - ${message.body.message})`);
@@ -42,21 +54,23 @@ function logSSEMessage(raw: string) {
     logSSEMessage(JSON.stringify({
       type: "error",
       body: {
-        message: message.body.error.message
+        message: message.body.error.message,
       },
-      createdAt: message.createdAt
-    }))
+      createdAt: message.createdAt,
+    }));
   }
 }
 
 export async function cli(options: CLIOptions) {
   let { apiURL, description, args, name, target } = options;
-  let get: typeof fetch = (endpoint, init) => fetch(`${apiURL}/${endpoint}`, init);
+  let get: typeof fetch = (endpoint, init) =>
+    fetch(`${apiURL}/${endpoint}`, init);
 
-  let post = (endpoint: string, init: Omit<RequestInit, 'method'>) => fetch(`${apiURL}/${endpoint}`, {
-    method: 'POST',
-    ...init
-  });
+  let post = (endpoint: string, init: Omit<RequestInit, "method">) =>
+    fetch(`${apiURL}/${endpoint}`, {
+      method: "POST",
+      ...init,
+    });
 
   const cmd = new Command()
     .name(name)
@@ -93,20 +107,22 @@ export async function cli(options: CLIOptions) {
     })
     .command(
       "clone",
-      "clone a repository associated with a component"
+      "clone a repository associated with a component",
     )
-    .option('-S, --ssh', 'Use ssh url to clone repository')
-    .option('-H, --https', 'Use https url to clone repository')
+    .option("-S, --ssh", "Use ssh url to clone repository")
+    .option("-H, --https", "Use https url to clone repository")
     .arguments(
       "[component:string] [directory:string]",
     )
     .action(async ({ ssh, https }, component, directory) => {
       const output = directory ?? component;
       if (ssh && https) {
-        throw new MainError(`Invalid options: --ssh and --https can't be used together - use one or the other.`)
+        throw new MainError(
+          `Invalid options: --ssh and --https can't be used together - use one or the other.`,
+        );
       }
       // prefer ssh
-      const protocol = !(ssh && https) || ssh ? 'ssh' : 'https';
+      const protocol = !(ssh && https) || ssh ? "ssh" : "https";
       if (component) {
         let response: Response;
         try {
@@ -118,10 +134,12 @@ export async function cli(options: CLIOptions) {
           const urls = await response.json();
           const url = urls[protocol];
           const clone = Deno.run({
-            cmd: ['git', 'clone', url, output]
+            cmd: ["git", "clone", url, output],
           });
           if (!(await clone.status()).success) {
-            throw new MainError(`Encountered an error cloning "${url}" to "${output}".`)
+            throw new MainError(
+              `Encountered an error cloning "${url}" to "${output}".`,
+            );
           }
         } else if (response.status === 404) {
           throw new MainError(`unknown component '${component}'`);
@@ -137,20 +155,20 @@ export async function cli(options: CLIOptions) {
       try {
         response = await get(`repositories`, {
           headers: {
-            Accept: 'text/plain'
-          }
+            Accept: "text/plain",
+          },
         });
       } catch (error) {
         throw new MainError(error.message);
       }
       if (response.ok) {
         await Deno.stdout.write(
-          new TextEncoder().encode(await response.text())
-        )
+          new TextEncoder().encode(await response.text()),
+        );
       } else {
         throw new MainError(
-          `communication error with backstage server: ${response.status} ${response.statusText}`
-        )
+          `communication error with backstage server: ${response.status} ${response.statusText}`,
+        );
       }
     })
     .command(
@@ -185,7 +203,9 @@ export async function cli(options: CLIOptions) {
         }
       }
     })
-    .command('create', `create something new from a template.
+    .command(
+      "create",
+      `create something new from a template.
 usage:
 
 # heredoc
@@ -196,11 +216,15 @@ EOF
 
 # yaml file
 idp create -t standard-microservice -f ./f.yaml
-    `)
-    .option('-t --template <template:string>', 'the scaffolder template', {
-      default: 'standard-microservice'
+    `,
+    )
+    .option("-t --template <template:string>", "the scaffolder template", {
+      default: "standard-microservice",
     })
-    .option('-f --file <file:string>', `an optional file path to a file containing the template's fields`)
+    .option(
+      "-f --file <file:string>",
+      `an optional file path to a file containing the template's fields`,
+    )
     .arguments("[input]")
     .action(async ({ template, file }, input) => {
       let body: string | undefined;
@@ -216,13 +240,15 @@ idp create -t standard-microservice -f ./f.yaml
 
       const response = await post(`create/${template}`, {
         headers: {
-          'Content-Type': 'text/plain',
+          "Content-Type": "text/plain",
         },
-        body
+        body,
       });
 
       if (response.status !== 200) {
-        throw new MainError(`create failed with ${response.status} - ${response.statusText}`)
+        throw new MainError(
+          `create failed with ${response.status} - ${response.statusText}`,
+        );
       }
 
       // deno-lint-ignore no-explicit-any
@@ -240,15 +266,27 @@ idp create -t standard-microservice -f ./f.yaml
 
       const eventSourceUrl = `${apiURL}/tasks/${taskId}/eventstream`;
 
-      const eventSource = new EventSource(eventSourceUrl, { withCredentials: true });
+      const eventSource = new EventSource(eventSourceUrl, {
+        withCredentials: true,
+      });
 
-      eventSource.addEventListener('log', sseMessageHandler);
-      eventSource.addEventListener('completion', (event: any) => {
+      eventSource.addEventListener("log", sseMessageHandler);
+      eventSource.addEventListener("completion", (event: any) => {
         sseMessageHandler(event);
 
         eventSource.close();
       });
-      eventSource.addEventListener('error', sseMessageHandler);
+      eventSource.addEventListener("error", sseMessageHandler);
+    })
+    .command("logs")
+    .option(
+      "-c --component <component:string>",
+      "the component for which to fetch the logs",
+    )
+    .action(async ({ component }) => {
+      let name = await findEntityContext(component);
+      let response = await get(`logs/${name}`);
+      await response.body?.pipeTo(Deno.stdout.writable);
     });
 
   try {
