@@ -4,9 +4,28 @@ import type { Entity } from '@backstage/catalog-model';
 import { HUMANITEC_APP_ID_ANNOTATION, HUMANITEC_ORG_ID_ANNOTATION } from './constants';
 import { createHumanitecClient } from './clients/humanitec';
 
-export function createHumanitecPlatformApi({ token }: { token: string }): Pick<PlatformApi, "getEnvironments"> {
+
+export type HumanitecPlatformAPI = Pick<PlatformApi, 'getLogs' | 'getEnvironments'>
+export function createHumanitecPlatformApi({ token }: { token: string }): HumanitecPlatformAPI {
 
   return {
+    async *getLogs(ref, envId) {
+      const entity = await ref.load();
+      const { appId, orgId } = getHumanitecMetadata(entity);
+      const client = createHumanitecClient({ token, orgId });
+      const logs = await client.getEnvironmentLogsSnapshot(appId, envId);
+      const bound = Math.floor(logs.length * .5);
+      const send = logs.slice(0, bound);
+      const stream = logs.slice(bound, logs.length);
+      for (const message of send) {
+        yield message.payload;
+      }
+      for (const message of stream) {
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 1500));
+        yield message.payload;
+      }
+    },
+
     async getEnvironments(ref) {
       const entity = await ref.load();
       const { appId, orgId } = getHumanitecMetadata(entity);
@@ -30,7 +49,7 @@ export function createHumanitecPlatformApi({ token }: { token: string }): Pick<P
 }
 
 function getHumanitecMetadata(entity: Entity) {
-  const { 
+  const {
     [HUMANITEC_ORG_ID_ANNOTATION]: orgId,
     [HUMANITEC_APP_ID_ANNOTATION]: appId,
    } = entity.metadata.annotations ?? {};
