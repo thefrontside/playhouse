@@ -8,7 +8,7 @@ import {
 import { useApi } from '@backstage/core-plugin-api';
 import { inspectorApiRef } from "../api/inspector-api";
 import { useResource } from '../hooks/use-resource';
-import { TaskTree } from '@effection/inspect-ui';
+import { TaskTree } from '@effection/inspect-ui/dist-esm/components/task-tree';
 import { useSlice } from '@effection/react';
 import type { Slice } from '@effection/atom';
 import type { InspectState } from '@effection/inspect-utils';

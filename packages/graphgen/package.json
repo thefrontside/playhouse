@@ -11,11 +11,11 @@
     "lint": "backstage-cli package lint"
   },
   "dependencies": {
-    "@frontside/graphgen": "^1.6.0",
+    "@frontside/graphgen": "^1.7.0",
     "flat-cache": "^3.0.4"
   },
   "devDependencies": {
-    "@faker-js/faker": "^7.2.0",
+    "@faker-js/faker": "^7.6.0",
     "@frontside/tsconfig": "^3.0.0",
     "@graphql-codegen/add": "^3.1.1",
     "@graphql-codegen/cli": "^2.6.2",
