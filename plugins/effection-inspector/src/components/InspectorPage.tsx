@@ -43,7 +43,7 @@ function TreeRoot({ slice }: { slice: Slice<InspectState> }) {
       task={task}
       basePath={''}
       collapsed={[]}
-      onToggle={function (collapsed: string[]): void {
+      onToggle={function (): void {
         throw new Error('Function not implemented.');
       }}
     />
