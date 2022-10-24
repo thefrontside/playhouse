@@ -44,7 +44,6 @@ backend:
     allow:
       - host: localhost:7007
 
-
 integrations:
   github:
     - host: github.com
@@ -72,7 +71,13 @@ techdocs:
 
 auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
-  providers: {}
+  environment: development
+  providers:
+    auth0:
+      development:
+        clientId: backstage_auth0_client_id
+        clientSecret: backstage_auth0_client_secret
+        domain: https://localhost:4400
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
@@ -88,5 +93,5 @@ catalog:
 
 humanitec:
   orgId: the-frontside-software-inc
-  registryUrl: "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts"
+  registryUrl: 'northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts'
   token: ${HUMANITEC_TOKEN}
