@@ -1,12 +1,8 @@
 import React from 'react';
 
-import {
-  Header,
-  Page,
-  Content
-} from '@backstage/core-components';
+import { Header, Page, Content } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
-import { inspectorApiRef } from "../api/inspector-api";
+import { inspectorApiRef } from '../api/inspector-api';
 import { useResource } from '../hooks/use-resource';
 import { TaskTree } from '@effection/inspect-ui/dist-esm/components/task-tree';
 import { useSlice } from '@effection/react';
@@ -14,14 +10,18 @@ import type { Slice } from '@effection/atom';
 import type { InspectState } from '@effection/inspect-utils';
 
 export const InspectorPage = () => {
-
   return (
     <Page themeId="tool">
-    <Header title="Effection Inspector" subtitle="server runtime visualization"/>
-    <Content><Inspector/></Content>
-  </Page>
+      <Header
+        title="Effection Inspector"
+        subtitle="server runtime visualization"
+      />
+      <Content>
+        <Inspector />
+      </Content>
+    </Page>
   );
-}
+};
 
 function Inspector() {
   const inspector = useApi(inspectorApiRef);
@@ -32,11 +32,20 @@ function Inspector() {
   } else if (slice.type === 'rejected') {
     return <p>{slice.error.toString()}</p>;
   } else {
-    return <TreeRoot slice={slice.value}/>
+    return <TreeRoot slice={slice.value} />;
   }
 }
 
 function TreeRoot({ slice }: { slice: Slice<InspectState> }) {
   const task = useSlice(slice);
-  return <TaskTree task={task}/>
+  return (
+    <TaskTree
+      task={task}
+      basePath={''}
+      collapsed={[]}
+      onToggle={function (collapsed: string[]): void {
+        throw new Error('Function not implemented.');
+      }}
+    />
+  );
 }
