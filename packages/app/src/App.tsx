@@ -34,8 +34,27 @@ import { orgPlugin } from '@backstage/plugin-org';
 import { InspectorPage } from '@frontside/backstage-plugin-effection-inspector';
 import { GraphiQLPage } from '@backstage/plugin-graphiql';
 
+import { SignInPage } from '@backstage/core-components';
+import { auth0AuthApiRef } from './internal';
+
 const app = createApp({
   apis,
+  components: {
+    SignInPage: props => (
+      <SignInPage
+        {...props}
+        providers={[
+          'guest',
+          {
+            id: 'auth0-auth-provider',
+            title: 'Auth0',
+            message: 'Sign in using Auth0',
+            apiRef: auth0AuthApiRef,
+          },
+        ]}
+      />
+    ),
+  },
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
       createComponent: scaffolderPlugin.routes.root,
