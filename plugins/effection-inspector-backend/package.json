@@ -22,11 +22,11 @@
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.15.1",
-    "@backstage/config": "^1.0.0",
-    "@effection/inspect-utils": "^2.1.4",
+    "@backstage/backend-common": "^0.15.2",
+    "@backstage/config": "^1.0.3",
+    "@effection/inspect-utils": "^2.1.6",
     "@types/express": "*",
-    "effection": "^2.0.4",
+    "effection": "^2.0.6",
     "express": "^4.17.1",
     "express-promise-router": "^4.1.0",
     "node-fetch": "^2.6.7",
@@ -34,7 +34,7 @@
     "yn": "^4.0.0"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.19.0",
+    "@backstage/cli": "^0.20.0",
     "@types/supertest": "^2.0.8",
     "msw": "^0.35.0",
     "supertest": "^4.0.2"
