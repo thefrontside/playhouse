@@ -77,7 +77,10 @@ auth:
       development:
         clientId: backstage_auth0_client_id
         clientSecret: backstage_auth0_client_secret
-        domain: https://localhost:4400
+        domain: localhost:4400
+        audience: ${AUTH_AUTH0_AUDIENCE}
+        connection: ${AUTH_AUTH0_CONNECTION}
+        connectionScope: ${AUTH_AUTH0_CONNECTION_SCOPE}
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
