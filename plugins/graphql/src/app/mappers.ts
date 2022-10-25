@@ -44,11 +44,9 @@ const resolveMappers: Record<'field' | 'relation', (
     field.resolve = async ({ id }, _, { loader }) => {
       const entity = await loader.load(id);
       if (!entity) return null;
-      // TODO Support arrays in graphql schema
       return get(entity, directive.at);
     };
   },
-  // TODO Support indirect relations `path: Path` `union Path = String | [Path]`
   relation: (field, fieldName, directive, schema) => {
     const fieldType = field.type;
     if (
