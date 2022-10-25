@@ -1,6 +1,10 @@
-directive @field(at: String!) on FIELD_DEFINITION
+directive @field(at: FieldAtArgument!) on FIELD_DEFINITION
 directive @relation(name: String, type: String, kind: String) on FIELD_DEFINITION
-directive @extend(type: String!) on OBJECT | INTERFACE
+directive @extend(type: String!, when: ExtendWhenArgument, is: ExtendIsArgument) on OBJECT | INTERFACE
+
+scalar FieldAtArgument
+scalar ExtendWhenArgument
+scalar ExtendIsArgument
 
 interface Node { id: ID! }
 

@@ -41,6 +41,9 @@ const resolveMappers: Record<'field' | 'relation', (
   schema: GraphQLSchema
 ) => void> = {
   field: (field, _, directive) => {
+    if (typeof directive.at !== 'string' || (Array.isArray(directive.at) && directive.at.every(a => typeof a === 'string'))) {
+      throw new Error(`"at" argument of "@field" directive must be a string or an array of strings`);
+    }
     field.resolve = async ({ id }, _, { loader }) => {
       const entity = await loader.load(id);
       if (!entity) return null;
@@ -53,7 +56,7 @@ const resolveMappers: Record<'field' | 'relation', (
       isListType(fieldType) && isConnectionType(fieldType.ofType)
       || isNonNullType(fieldType) && isListType(fieldType.ofType) && isConnectionType(fieldType.ofType.ofType)
       ) {
-        throw new Error(`It's not possible to use @relation directive on a list of Connection type. Use @relation on the Connection type itself.`)
+        throw new Error(`It's not possible to use a list of Connection type. Use either Connection type or list of specific type`)
       }
     const isList = isListType(fieldType) || (isNonNullType(fieldType) && isListType(fieldType.ofType))
 
@@ -135,7 +138,7 @@ export const mappers: SchemaMapper = {
           const typeName = [objectType, ...interfaces].find(type => Object.keys(type.toConfig().fields).find(name => name === fieldName))?.name as string
 
           if (fieldDirective && relationDirective) {
-            throw new Error(`Field '${fieldName}' of '${typeName}' type has both '@field' and '@relation' directives at the same time`)
+            throw new Error(`Field "${fieldName}" of "${typeName}" type has both "@field" and "@relation" directives at the same time`)
           }
 
           try {
@@ -148,7 +151,7 @@ export const mappers: SchemaMapper = {
             }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : error
-            throw new Error(`Error while processing directives on field '${fieldName}' of '${typeName}':\n${errorMessage}`)
+            throw new Error(`Error while processing directives on field "${fieldName}" of "${typeName}":\n${errorMessage}`)
           }
         }
       );
