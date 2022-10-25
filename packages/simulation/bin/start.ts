@@ -24,5 +24,9 @@ main(function* (): Generator<any, any, any> {
 
   console.dir({ simulation }, { depth: 3 });
 
+  const person = yield client.given(simulation, 'person');
+
+  console.dir({ person }, { depth: 3 });
+
   yield;
 });
