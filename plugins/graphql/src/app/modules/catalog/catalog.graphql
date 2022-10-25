@@ -34,41 +34,41 @@ type Location @extend(type: "Entity") {
 
 type API @extend(type: "Entity") {
   lifecycle: Lifecycle! @field(at: "spec.lifecycle")
-  owner: Owner! @relation(type: "ownedBy")
+  owner: Owner! @relation(name: "ownedBy")
   definition: String! @field(at: "spec.definition")
-  system: System @relation(type: "partOf")
-  consumers: [Component] @relation(type: "apiConsumedBy")
-  providers: [Component] @relation(type: "apiProvidedBy")
+  system: System @relation(name: "partOf")
+  consumers: Connection @relation(name: "apiConsumedBy", type: "Component")
+  providers: Connection @relation(name: "apiProvidedBy", type: "Component")
 }
 
 type Component @extend(type: "Entity") {
   lifecycle: Lifecycle! @field(at: "spec.lifecycle")
-  owner: Owner! @relation(type: "ownedBy")
-  system: System @relation(type: "partOf", kind: "system")
-  component: Component @relation(type: "partOf", kind: "component")
-  subComponents: [Component] @relation(type: "hasPart")
-  providesApi: [API] @relation
-  consumesApi: [API] @relation
-  dependencies: [Dependency] @relation(type: "dependsOn")
+  owner: Owner! @relation(name: "ownedBy")
+  system: System @relation(name: "partOf", kind: "system")
+  component: Component @relation(name: "partOf", kind: "component")
+  subComponents: Connection @relation(name: "hasPart", type: "Component")
+  providesApi: Connection @relation(type: "API")
+  consumesApi: Connection @relation(type: "API")
+  dependencies: Connection @relation(name: "dependsOn", type: "Dependency")
 }
 
 type Domain @extend(type: "Entity") {
-  owner: Owner! @relation(type: "ownedBy")
-  systems: [System] @relation(type: "hasPart")
+  owner: Owner! @relation(name: "ownedBy")
+  systems: Connection @relation(name: "hasPart", type: "System")
 }
 
 type Resource @extend(type: "Entity") {
-  owner: Owner! @relation(type: "ownedBy")
-  dependencies: [Dependency] @relation(type: "dependsOn")
-  dependents: [Dependency] @relation(type: "dependencyOf")
-  system: System @relation(type: "partOf")
+  owner: Owner! @relation(name: "ownedBy")
+  dependencies: Connection @relation(name: "dependsOn", type: "Dependency")
+  dependents: Connection @relation(name: "dependencyOf", type: "Dependency")
+  system: System @relation(name: "partOf")
 }
 
 type System @extend(type: "Entity") {
-  owner: Owner! @relation(type: "ownedBy")
-  domain: Domain @relation(type: "partOf")
-  components: [Component] @relation(type: "hasPart", kind: "component")
-  resources: [Resource] @relation(type: "hasPart", kind: "resource")
+  owner: Owner! @relation(name: "ownedBy")
+  domain: Domain @relation(name: "partOf")
+  components: Connection @relation(name: "hasPart", type: "Component", kind: "component")
+  resources: Connection @relation(name: "hasPart", type: "Resource", kind: "resource")
 }
 
 type Step {
@@ -80,28 +80,28 @@ type Step {
 }
 
 type Template @extend(type: "Entity") {
-  parameters: JSONObject @field(at: "spec.parameters ")
+  parameters: JSONObject @field(at: "spec.parameters")
   steps: [Step]! @field(at: "spec.steps")
   output: JSONObject @field(at: "spec.output")
-  owner: Owner @relation(type: "ownedBy")
+  owner: Owner @relation(name: "ownedBy")
 }
 
 type Group @extend(type: "Entity") {
-  children: [Group]! @relation(type: "parentOf")
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
   picture: String @field(at: "spec.profile.picture")
-  parent: Group @relation(type: "childOf")
-  members: [User] @relation(type: "hasMember")
-  ownerOf: [Ownable] @relation
+  parent: Group @relation(name: "childOf")
+  children: Connection @relation(name: "parentOf", type: "Group")
+  members: Connection @relation(name: "hasMember", type: "User")
+  ownerOf: Connection @relation(type: "Ownable")
 }
 
 type User @extend(type: "Entity") {
-  memberOf: [Group]! @relation
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
   picture: String @field(at: "spec.profile.picture")
-  ownerOf: [Ownable] @relation
+  memberOf: Connection @relation(type: "Group")
+  ownerOf: Connection @relation(type: "Ownable")
 }
 
 extend type Query {

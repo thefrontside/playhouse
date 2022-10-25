@@ -1,9 +1,31 @@
 directive @field(at: String!) on FIELD_DEFINITION
-directive @relation(type: String, kind: String) on FIELD_DEFINITION
+directive @relation(name: String, type: String, kind: String) on FIELD_DEFINITION
 directive @extend(type: String!) on OBJECT | INTERFACE
 # TODO Add directive @resolve(by: String!) on OBJECT | INTERFACE
 
 interface Node { id: ID! }
+
+interface Connection {
+  pageInfo: PageInfo!
+  edges: [Edge!]!
+  total: Int
+}
+
+interface PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String!
+  endCursor: String!
+}
+
+interface Edge {
+  cursor: String!
+  node: Node!
+}
+
+type NodeConnection @extend(type: "Connection") { pageInfo: PageInfo! }
+type NodePageInfo @extend(type: "PageInfo") { hasNextPage: Boolean! }
+type NodeEdge @extend(type: "Edge") { node: Node! }
 
 type Query {
   node(id: ID!): Node
