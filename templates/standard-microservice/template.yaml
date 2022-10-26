@@ -27,6 +27,15 @@ spec:
           ui:options:
             allowedHosts:
               - github.com
+    - title: Deployment
+      properties:
+        database:
+          title: PostgreSQL
+          type: number
+          enum:
+            - 15
+            - 14.5
+            - 13
   steps:
     - name: Read Environment
       id: environment
@@ -41,6 +50,7 @@ spec:
           orgId: ${{ steps.environment.output.orgId }}
           appId: ${{ parameters.componentName }}
           registryUrl: ${{ steps.environment.output.registryUrl }}
+          postgresVersion: ${{ parameters.database }}
     - name: Create Repository on Github
       id: publish
       action: publish:github
