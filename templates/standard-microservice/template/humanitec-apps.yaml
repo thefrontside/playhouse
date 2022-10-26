@@ -14,6 +14,7 @@ environments:
           http:
             type: dns
         profile: humanitec/default-module
+          database: ${{ values.database }}
         spec:
           containers:
             ${{values.componentName | dump}}:
