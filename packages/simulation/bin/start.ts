@@ -14,6 +14,8 @@ main(function* (): Generator<any, any, any> {
   let simulation = yield client.createSimulation('auth0', {
     options: {
       clientID: 'backstage_auth0_client_id',
+      scope: 'openid user profile offline_access',
+      audience: 'https://frontside-backstage',
     },
     services: {
       auth0: {
