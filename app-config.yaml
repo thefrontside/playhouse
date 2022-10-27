@@ -71,21 +71,19 @@ techdocs:
 
 auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
-  environment: development
   session:
-    secret: backstage_auth0_client_secret # 'frontsideauthsession'
+    secret: backstage_auth0_client_secret
+  environment: development
   providers:
     auth0:
       development:
-        clientId: backstage_auth0_client_id
-        clientSecret: backstage_auth0_client_secret
         # when using the auth0 simulator, the cert check in backstage needs to be disabled
         # invoke the start command with this env or set it in your shell
-        # NODE_TLS_REJECT_UNAUTHORIZED = '0'
+        # NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\"
         domain: localhost:4400
-        audience: https://frontside-backstage # ${AUTH_AUTH0_AUDIENCE}
-        connection: ${AUTH_AUTH0_CONNECTION}
-        connectionScope: ${AUTH_AUTH0_CONNECTION_SCOPE}
+        clientId: backstage_auth0_client_id
+        clientSecret: backstage_auth0_client_secret
+        audience: https://frontside-backstage
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
