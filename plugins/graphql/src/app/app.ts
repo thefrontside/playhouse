@@ -4,8 +4,7 @@ import { createApplication, Module } from 'graphql-modules';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { Catalog } from './modules/catalog/catalog';
 import { Core } from './modules/core/core';
-import { mappers } from './mappers';
-import { mapSchema } from '@graphql-tools/utils';
+import { transformDirectives } from './mappers';
 import { EnvelopPlugins } from './types';
 import { useDataLoader } from '@envelop/dataloader';
 import DataLoader from 'dataloader';
@@ -23,9 +22,8 @@ export function createGraphQLApp<
   const { modules, plugins, loader } = options;
   const application = createApplication({
     schemaBuilder: ({ typeDefs, resolvers }) =>
-      mapSchema(
+      transformDirectives(
         makeExecutableSchema({ typeDefs, resolvers }),
-        mappers
       ),
     modules: [Core, Catalog, ...modules ?? []],
   });

@@ -1,12 +1,12 @@
 import { resolvePackagePath } from '@backstage/backend-common';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { mergeTypeDefs } from '@graphql-tools/merge';
-import { mapSchema, TypeSource } from '@graphql-tools/utils';
+import { TypeSource } from '@graphql-tools/utils';
 import { buildASTSchema } from 'graphql';
-import { mappers } from './mappers';
+import { transformDirectives } from './mappers';
 
 export function transformSchema(source: TypeSource) {
-  return mapSchema(
+  return transformDirectives(
     buildASTSchema(
       mergeTypeDefs([
         loadFilesSync(
@@ -18,6 +18,5 @@ export function transformSchema(source: TypeSource) {
         source
       ])
     ),
-    mappers,
   );
 }
