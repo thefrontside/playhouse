@@ -4,7 +4,7 @@ import {
 } from '@simulacrum/server';
 import { auth0 } from '@simulacrum/auth0-simulator';
 import { Resource } from 'effection';
-export { Server } from '@simulacrum/server';
+export type { Server } from '@simulacrum/server';
 
 export function createSimulationServer(): Resource<Server> {
   return createSimulacrumServer({
