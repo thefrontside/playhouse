@@ -26,13 +26,13 @@ type EntityLink {
   icon: String
 }
 
-interface Location @extend(type: "Entity") {
+interface Location @extend(type: "Entity", when: "kind", is: "Location") {
   type: String @field(at: "spec.type")
   target: String @field(at: "spec.target")
   targets: [String] @field(at: "spec.targets")
 }
 
-interface API @extend(type: "Entity") {
+interface API @extend(type: "Entity", when: "kind", is: "API") {
   lifecycle: Lifecycle! @field(at: "spec.lifecycle")
   owner: Owner! @relation(name: "ownedBy")
   definition: String! @field(at: "spec.definition")
@@ -41,7 +41,7 @@ interface API @extend(type: "Entity") {
   providers: Connection @relation(name: "apiProvidedBy", type: "Component")
 }
 
-interface Component @extend(type: "Entity") {
+interface Component @extend(type: "Entity", when: "kind", is: "Component") {
   lifecycle: Lifecycle! @field(at: "spec.lifecycle")
   owner: Owner! @relation(name: "ownedBy")
   system: System @relation(name: "partOf", kind: "system")
@@ -52,19 +52,19 @@ interface Component @extend(type: "Entity") {
   dependencies: Connection @relation(name: "dependsOn", type: "Dependency")
 }
 
-interface Domain @extend(type: "Entity") {
+interface Domain @extend(type: "Entity", when: "kind", is: "Domain") {
   owner: Owner! @relation(name: "ownedBy")
   systems: Connection @relation(name: "hasPart", type: "System")
 }
 
-interface Resource @extend(type: "Entity") {
+interface Resource @extend(type: "Entity", when: "kind", is: "Resource") {
   owner: Owner! @relation(name: "ownedBy")
   dependencies: Connection @relation(name: "dependsOn", type: "Dependency")
   dependents: Connection @relation(name: "dependencyOf", type: "Dependency")
   system: System @relation(name: "partOf")
 }
 
-interface System @extend(type: "Entity") {
+interface System @extend(type: "Entity", when: "kind", is: "System") {
   owner: Owner! @relation(name: "ownedBy")
   domain: Domain @relation(name: "partOf")
   components: Connection @relation(name: "hasPart", type: "Component", kind: "component")
@@ -79,14 +79,14 @@ type Step {
   if: JSON
 }
 
-interface Template @extend(type: "Entity") {
+interface Template @extend(type: "Entity", when: "kind", is: "Template") {
   parameters: JSONObject @field(at: "spec.parameters")
   steps: [Step]! @field(at: "spec.steps")
   output: JSONObject @field(at: "spec.output")
   owner: Owner @relation(name: "ownedBy")
 }
 
-interface Group @extend(type: "Entity") {
+interface Group @extend(type: "Entity", when: "kind", is: "Group") {
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
   picture: String @field(at: "spec.profile.picture")
@@ -96,7 +96,7 @@ interface Group @extend(type: "Entity") {
   ownerOf: Connection @relation(type: "Ownable")
 }
 
-interface User @extend(type: "Entity") {
+interface User @extend(type: "Entity", when: "kind", is: "User") {
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
   picture: String @field(at: "spec.profile.picture")

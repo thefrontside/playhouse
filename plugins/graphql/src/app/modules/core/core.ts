@@ -14,9 +14,6 @@ export const Core = createModule({
         return id;
       },
     },
-    Connection: { __resolveType: () => 'ConnectionImpl' },
-    PageInfo: { __resolveType: () => 'PageInfoImpl' },
-    Edge: { __resolveType: () => 'EdgeImpl' },
     Query: { node: (_: any, { id }: { id: string }): { id: string } => ({ id }) },
   },
 });

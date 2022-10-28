@@ -13,6 +13,7 @@ import {
   GraphQLOutputType,
   GraphQLSchema,
   GraphQLString,
+  GraphQLTypeResolver,
   GraphQLUnionType,
   isInterfaceType,
   isListType,
@@ -140,45 +141,53 @@ const resolveMappers: Record<'field' | 'relation', (
 }
 
 export function transformDirectives(schema: GraphQLSchema) {
+  const extendsWithoutArgs = new Set<string>();
+  const resolversMap: Record<string, GraphQLTypeResolver<any, any>> = {}
   const implementedTypes: GraphQLObjectType[] = [];
-  return mapSchema(addTypes(mapSchema(schema, {
+  const finalSchema = mapSchema(addTypes(mapSchema(mapSchema(schema, {
+    [MapperKind.COMPOSITE_FIELD]: (fieldConfig, fieldName, typeName) => {
+      const [fieldDirective] = getDirective(schema, fieldConfig, 'field') ?? []
+      const [relationDirective] = getDirective(schema, fieldConfig, 'relation') ?? []
+
+      if (fieldDirective && relationDirective) {
+        throw new Error(`The field "${fieldName}" of "${typeName}" type has both @field and @relation directives at the same time`)
+      }
+
+      try {
+        if (fieldDirective) {
+          resolveMappers.field(fieldConfig, fieldName, fieldDirective, schema)
+        } else if (relationDirective) {
+          resolveMappers.relation(fieldConfig, fieldName, relationDirective, schema)
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : error
+        throw new Error(`Error while processing directives on field "${fieldName}" of "${typeName}":\n${errorMessage}`)
+      }
+      return fieldConfig;
+    }
+  }), {
     [MapperKind.INTERFACE_TYPE]: (interfaceType, schema) => {
+      if (interfaceType.name === 'Node') {
+        interfaceType.resolveType = (...args) => resolversMap[interfaceType.name](...args)
+      }
+      const [extendDirective] = getDirective(schema, interfaceType, 'extend') ?? []
+      if (!extendDirective) return interfaceType;
+      validateExtendDirective(extendDirective, extendsWithoutArgs)
+      defineResolver(interfaceType, extendDirective, resolversMap, schema)
+
       const interfaces = traverseExtends(interfaceType, schema)
       const fields = [...interfaces].reverse().reduce((acc, type) => ({ ...acc, ...type.toConfig().fields }), { } as GraphQLFieldConfigMap<any, any>)
 
-      Object
-        .keys(fields)
-        .forEach(
-          (fieldName) => {
-            const field = fields[fieldName];
-            const [fieldDirective] = getDirective(schema, field, 'field') ?? []
-            const [relationDirective] = getDirective(schema, field, 'relation') ?? []
-
-            const typeName = [interfaceType, ...interfaces].find(type => Object.keys(type.toConfig().fields).find(name => name === fieldName))?.name as string
-
-            if (fieldDirective && relationDirective) {
-              throw new Error(`The field "${fieldName}" of "${typeName}" type has both @field and @relation directives at the same time`)
-            }
-
-            try {
-              if (fieldDirective) {
-                resolveMappers.field(field, fieldName, fieldDirective, schema)
-              } else if (relationDirective) {
-                resolveMappers.relation(field, fieldName, relationDirective, schema)
-              } else {
-                return
-              }
-            } catch (error) {
-              const errorMessage = error instanceof Error ? error.message : error
-              throw new Error(`Error while processing directives on field "${fieldName}" of "${typeName}":\n${errorMessage}`)
-            }
-          }
-        );
       const { astNode, extensionASTNodes, ...typeConfig } = interfaceType.toConfig();
 
       implementedTypes.push(new GraphQLObjectType({ ...typeConfig, name: `${interfaceType.name}Impl`, fields, interfaces }))
 
-      return new GraphQLInterfaceType({ ...typeConfig, fields, interfaces: interfaces.filter(iface => iface.name !== interfaceType.name) });
+      return new GraphQLInterfaceType({
+        ...typeConfig,
+        fields,
+        resolveType: (...args) => resolversMap[interfaceType.name](...args),
+        interfaces: interfaces.filter(iface => iface.name !== interfaceType.name)
+      });
     }
   }), implementedTypes), {
     [MapperKind.UNION_TYPE]: (unionType, schema) => {
@@ -192,37 +201,57 @@ export function transformDirectives(schema: GraphQLSchema) {
       return new GraphQLUnionType(typeConfig)
     }
   })
+  return finalSchema
+}
+
+function defineResolver(type: GraphQLInterfaceType, extendDirective: Record<string, any>, resolvers: Record<string, GraphQLTypeResolver<any, any>>, schema: GraphQLSchema) {
+  if (!resolvers[type.name]) resolvers[type.name] = () => `${type.name}Impl`
+
+  const extendType = schema.getType(extendDirective.type)
+  if (!extendType) return
+
+  // TODO There is no NodeImpl
+  const resolveType = resolvers[extendType.name] ?? (() => `${extendType?.name}Impl`)
+  // @ts-ignore
+  resolvers[extendType.name] = async (source: { id: string }, context: ResolverContext, info, abstractType) => {
+    if ('when' in extendDirective && 'is' in extendDirective) {
+      const { id } = source;
+      const { loader } = context;
+      const entity = await loader.load(id)
+      if (!entity) return null
+      if (get(entity, extendDirective.when) === extendDirective.is) {
+        return resolvers[type.name]?.(source, context, info, abstractType) ?? null
+      }
+      return resolveType(source, context, info, abstractType) ?? null
+    }
+    return resolvers[type.name]?.(source, context, info, abstractType) ?? null
+  }
+}
+
+function validateExtendDirective(directive: Record<string, any>, extendsWithoutArgs: Set<string>) {
+  if ('when' in directive !== 'is' in directive) {
+    throw new Error(`The @extend directive of "${directive.type}" should have both "when" and "is" arguments or none of them`)
+  }
+  if (!('when' in directive) && extendsWithoutArgs.has(directive.type)) {
+    throw new Error(`The @extend directive of "${directive.type}" without "when" and "is" arguments could be used only once`)
+  } else {
+    extendsWithoutArgs.add(directive.type)
+  }
+  if ('when' in directive && (typeof directive.when !== 'string' || (Array.isArray(directive.when) && directive.when.some(a => typeof a !== 'string')))) {
+    throw new Error(`The "when" argument of @extend directive should be a string or an array of strings`)
+  }
 }
 
 function traverseExtends(type: GraphQLInterfaceType, schema: GraphQLSchema): GraphQLInterfaceType[] {
   const [extendDirective] = getDirective(schema, type, 'extend') ?? []
-  const interfaces = [type, ...type.getInterfaces()]
+  const interfaces = [type, ...type.getInterfaces().flatMap(iface => traverseExtends(iface, schema))]
   if (extendDirective) {
-    let extendType = schema.getType(extendDirective.type)
+    const extendType = schema.getType(extendDirective.type)
     if (!isInterfaceType(extendType)) {
       throw new Error(`"${extendDirective.type}" type described in @extend directive for "${type.name}" isn't abstract type or doesn't exist`)
     }
     if (interfaces.includes(extendType)) {
       throw new Error(`The interface "${extendDirective.type}" described in @extend directive for "${type.name}" is already implemented`)
-    }
-    if ('when' in extendDirective !== 'is' in extendDirective) {
-      throw new Error(`The @extend directive of "${extendDirective.type}" should have both "when" and "is" arguments or none of them`)
-    }
-    if ('when' in extendDirective && (typeof extendDirective.when !== 'string' || (Array.isArray(extendDirective.when) && extendDirective.when.some(a => typeof a !== 'string')))) {
-      throw new Error(`The "when" argument of @extend directive should be a string or an array of strings`)
-    }
-
-    const { resolveType } = extendType
-    extendType.resolveType = async ({ id }, { loader }, info, abstractType) => {
-      const entity = await loader.load(id)
-      if (!entity) return undefined
-      if ('when' in extendDirective && 'is' in extendDirective && get(entity, extendDirective.when) === extendDirective.is) {
-        return `${type.name}Impl`
-      }
-      const resolvedType = await resolveType?.({ id }, { loader }, info, abstractType) ?? null
-      if (resolvedType) return resolvedType
-      if (extendType?.name === entity.kind) return `${entity.kind}Impl`
-      return entity.kind
     }
 
     interfaces.push(...traverseExtends(extendType, schema))
