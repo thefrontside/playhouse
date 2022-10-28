@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { connectionFromArray } from 'graphql-relay';
 import { Entity, parseEntityRef } from '@backstage/catalog-model';
-import { getDirective, MapperKind, addTypes, mapSchema } from '@graphql-tools/utils';
+import { getDirective, MapperKind, addTypes, mapSchema, getImplementingTypes } from '@graphql-tools/utils';
 import {
   GraphQLFieldConfig,
   GraphQLFieldConfigMap,
@@ -13,9 +13,11 @@ import {
   GraphQLOutputType,
   GraphQLSchema,
   GraphQLString,
+  GraphQLUnionType,
   isInterfaceType,
   isListType,
   isNonNullType,
+  isUnionType,
 } from 'graphql';
 import type { ResolverContext } from './types';
 
@@ -32,6 +34,35 @@ function filterEntities(entity: Entity | undefined, relationName: string, target
 function isConnectionType(type: unknown): type is GraphQLInterfaceType {
   return isInterfaceType(type) && type.name === 'Connection'
   || isNonNullType(type) && isConnectionType(type.ofType);
+}
+
+function createConnectionType(fieldType: GraphQLInterfaceType, typeName: string, schema: GraphQLSchema): GraphQLObjectType {
+  const wrappedEdgeType = fieldType.getFields().edges.type as GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLInterfaceType>>>
+  const edgeType = wrappedEdgeType.ofType.ofType.ofType as GraphQLInterfaceType
+  const nodeType = schema.getType(typeName)
+
+  if (!nodeType) {
+    throw new Error(`The type "${typeName}" is not defined in the schema.`)
+  }
+  return new GraphQLObjectType({
+    name: `${typeName}Connection`,
+    fields: {
+      ...fieldType.toConfig().fields,
+      edges: {
+        type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(new GraphQLObjectType({
+          name: `${typeName}Edge`,
+          fields: {
+            ...edgeType.toConfig().fields,
+            node: {
+              type: new GraphQLNonNull(nodeType as GraphQLOutputType),
+            }
+          },
+          interfaces: [edgeType]
+        }))))
+      }
+    },
+    interfaces: [fieldType]
+  })
 }
 
 const resolveMappers: Record<'field' | 'relation', (
@@ -62,32 +93,19 @@ const resolveMappers: Record<'field' | 'relation', (
 
     if (isConnectionType(fieldType)) {
       if (directive.type) {
-        const connectionType = field.type as GraphQLInterfaceType
-        const wrappedEdgeType = connectionType.getFields().edges.type as GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLInterfaceType>>>
-        const edgeType = wrappedEdgeType.ofType.ofType.ofType as GraphQLInterfaceType
         const nodeType = schema.getType(directive.type)
+
         if (!nodeType) {
           throw new Error(`The type "${directive.type}" is not defined in the schema.`)
         }
-        field.type = new GraphQLObjectType({
-          name: `${directive.type}Connection`,
-          fields: {
-            ...connectionType.toConfig().fields,
-            edges: {
-              type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(new GraphQLObjectType({
-                name: `${directive.type}Edge`,
-                fields: {
-                  ...edgeType.toConfig().fields,
-                  node: {
-                    type: new GraphQLNonNull(nodeType as GraphQLOutputType),
-                  }
-                },
-                interfaces: [edgeType]
-              }))))
-            }
-          },
-          interfaces: [connectionType]
-        })
+        if (isUnionType(nodeType)) {
+          field.type = new GraphQLUnionType({
+            name: `${directive.type}Connection`,
+            types: nodeType.getTypes().map(type => createConnectionType(fieldType, type.name, schema)),
+          })
+        } else {
+          field.type = createConnectionType(fieldType, directive.type, schema)
+        }
       }
       const mandatoryArgs: [string, string][] = [
         ['first', 'Int'],
@@ -123,10 +141,10 @@ const resolveMappers: Record<'field' | 'relation', (
 
 export function transformDirectives(schema: GraphQLSchema) {
   const implementedTypes: GraphQLObjectType[] = [];
-  return addTypes(mapSchema(schema, {
+  return mapSchema(addTypes(mapSchema(schema, {
     [MapperKind.INTERFACE_TYPE]: (interfaceType, schema) => {
       const interfaces = traverseExtends(interfaceType, schema)
-      const fields = [interfaceType, ...interfaces].reverse().reduce((acc, type) => ({ ...acc, ...type.toConfig().fields }), { } as GraphQLFieldConfigMap<any, any>)
+      const fields = [...interfaces].reverse().reduce((acc, type) => ({ ...acc, ...type.toConfig().fields }), { } as GraphQLFieldConfigMap<any, any>)
 
       Object
         .keys(fields)
@@ -158,16 +176,27 @@ export function transformDirectives(schema: GraphQLSchema) {
         );
       const { astNode, extensionASTNodes, ...typeConfig } = interfaceType.toConfig();
 
-      implementedTypes.push(new GraphQLObjectType({ ...typeConfig, name: `${interfaceType.name}Impl`, fields, interfaces}))
+      implementedTypes.push(new GraphQLObjectType({ ...typeConfig, name: `${interfaceType.name}Impl`, fields, interfaces }))
 
-      return interfaceType;
+      return new GraphQLInterfaceType({ ...typeConfig, fields, interfaces: interfaces.filter(iface => iface.name !== interfaceType.name) });
     }
-  }), implementedTypes)
+  }), implementedTypes), {
+    [MapperKind.UNION_TYPE]: (unionType, schema) => {
+      const typeConfig = unionType.toConfig()
+      typeConfig.types = typeConfig.types.flatMap(type => {
+        if (isInterfaceType(type)) {
+          return getImplementingTypes((type as GraphQLInterfaceType).name, schema).map(name => schema.getType(name) as GraphQLObjectType)
+        }
+        return [type]
+      })
+      return new GraphQLUnionType(typeConfig)
+    }
+  })
 }
 
 function traverseExtends(type: GraphQLInterfaceType, schema: GraphQLSchema): GraphQLInterfaceType[] {
   const [extendDirective] = getDirective(schema, type, 'extend') ?? []
-  const interfaces = [...type.getInterfaces()]
+  const interfaces = [type, ...type.getInterfaces()]
   if (extendDirective) {
     let extendType = schema.getType(extendDirective.type)
     if (!isInterfaceType(extendType)) {
@@ -177,8 +206,7 @@ function traverseExtends(type: GraphQLInterfaceType, schema: GraphQLSchema): Gra
       throw new Error(`The interface "${extendDirective.type}" described in @extend directive for "${type.name}" is already implemented`)
     }
     if ('when' in extendDirective !== 'is' in extendDirective) {
-      // TODO Rewrite the message
-      throw new Error(`If you use @extend directive with object type "${extendDirective.type}", you should also specify "when" and "is" arguments`)
+      throw new Error(`The @extend directive of "${extendDirective.type}" should have both "when" and "is" arguments or none of them`)
     }
     if ('when' in extendDirective && (typeof extendDirective.when !== 'string' || (Array.isArray(extendDirective.when) && extendDirective.when.some(a => typeof a !== 'string')))) {
       throw new Error(`The "when" argument of @extend directive should be a string or an array of strings`)
@@ -199,5 +227,5 @@ function traverseExtends(type: GraphQLInterfaceType, schema: GraphQLSchema): Gra
 
     interfaces.push(...traverseExtends(extendType, schema))
   }
-  return isInterfaceType(type) ? [...interfaces, type] : interfaces
+  return interfaces
 }
