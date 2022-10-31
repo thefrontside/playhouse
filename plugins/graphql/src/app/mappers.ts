@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { connectionFromArray } from 'graphql-relay';
 import { Entity, parseEntityRef } from '@backstage/catalog-model';
 import { getDirective, MapperKind, addTypes, mapSchema, getImplementingTypes } from '@graphql-tools/utils';
@@ -162,7 +162,7 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
     if ('when' in directive !== 'is' in directive) {
       throw new Error(`The @extend directive of "${directive.type}" should have both "when" and "is" arguments or none of them`)
     }
-    if (!('when' in directive) && extendsWithoutArgs.has(directive.type)) {
+    if (!('when' in directive) && 'type' in directive && extendsWithoutArgs.has(directive.type)) {
       throw new Error(`The @extend directive of "${directive.type}" without "when" and "is" arguments could be used only once`)
     } else {
       extendsWithoutArgs.add(directive.type)
@@ -189,7 +189,7 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
         const { loader } = context;
         const entity = await loader.load(id)
         if (!entity) return undefined
-        if (get(entity, extendDirective.when) === extendDirective.is) {
+        if (isEqual(get(entity, extendDirective.when), extendDirective.is)) {
           return resolversMap[type.name]?.(source, context, info, abstractType) ?? undefined
         }
         return resolveType(source, context, info, abstractType) ?? undefined
@@ -229,7 +229,12 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
       validateExtendDirective(extendDirective)
       defineResolver(interfaceType, extendDirective, schema)
 
-      const interfaces = [...additionalInterfaces[interfaceType.name]?.values() ?? [], ...traverseExtends(interfaceType, schema)]
+      const extendInterfaces = traverseExtends(interfaceType, schema)
+      const interfaces = [...new Map([
+        ...additionalInterfaces[interfaceType.name]?.values() ?? [],
+        ...extendInterfaces.flatMap(iface => [...additionalInterfaces[iface.name]?.values() ?? []]),
+        ...extendInterfaces
+      ].map(iface => [iface.name, iface])).values()]
       const fields = [...interfaces].reverse().reduce((acc, type) => ({ ...acc, ...type.toConfig().fields }), { } as GraphQLFieldConfigMap<any, any>)
 
       const { astNode, extensionASTNodes, ...typeConfig } = interfaceType.toConfig();
@@ -269,7 +274,7 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
 function traverseExtends(type: GraphQLInterfaceType, schema: GraphQLSchema): GraphQLInterfaceType[] {
   const [extendDirective] = getDirective(schema, type, 'extend') ?? []
   const interfaces = [type, ...type.getInterfaces().flatMap(iface => traverseExtends(iface, schema))]
-  if (extendDirective) {
+  if (extendDirective && 'type' in extendDirective) {
     const extendType = schema.getType(extendDirective.type)
     if (!isInterfaceType(extendType)) {
       throw new Error(`"${extendDirective.type}" type described in @extend directive for "${type.name}" isn't abstract type or doesn't exist`)

@@ -1,6 +1,6 @@
 directive @field(at: FieldAtArgument!) on FIELD_DEFINITION
 directive @relation(name: String, type: String, kind: String) on FIELD_DEFINITION
-directive @extend(type: String!, when: ExtendWhenArgument, is: ExtendIsArgument) on INTERFACE
+directive @extend(type: String, when: ExtendWhenArgument, is: ExtendIsArgument) on INTERFACE
 
 scalar FieldAtArgument
 scalar ExtendWhenArgument
@@ -8,20 +8,20 @@ scalar ExtendIsArgument
 
 interface Node { id: ID! }
 
-interface Connection {
+interface Connection @extend {
   pageInfo: PageInfo!
   edges: [Edge!]!
   total: Int
 }
 
-interface PageInfo {
+interface PageInfo @extend {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String!
   endCursor: String!
 }
 
-interface Edge {
+interface Edge @extend {
   cursor: String!
   node: Node!
 }
