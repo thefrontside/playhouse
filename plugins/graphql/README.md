@@ -7,14 +7,14 @@ Backstage GraphQL Plugin adds a GraphQL API to a Backstage developer portal. The
 It includes the following features,
 
 1. **Graph schema** - easily query relationships between data in the catalog.
-2. **Schema-based resolvers** - add field resolvers using directives without requiring JavaScript.
-3. **Modular schema definition** - allows organizing related schema into [graphql-modules](https://www.graphql-modules.com/docs)
-4. Strives to support - [GraphQL Server Specification]
+1. **Schema-based resolvers** - add field resolvers using directives without requiring JavaScript.
+1. **Modular schema definition** - allows organizing related schema into [graphql-modules](https://www.graphql-modules.com/docs)
+1. [**Connection**](https://relay.dev/docs/guides/graphql-server-specification/#connections) - based on [GraphQL Cursor Connections Specification](https://relay.dev/graphql/connections.htm). (see [#68](https://github.com/thefrontside/backstage/issues/68))
+1. Strives to support - [GraphQL Server Specification]
 
 Some key features are currently missing. These features may change the schema in backward-incompatible ways.
 
-1. [`Connection`](https://relay.dev/docs/guides/graphql-server-specification/#connections) based on [GraphQL Cursor Connections Specification](https://relay.dev/graphql/connections.htm).(see [#68](https://github.com/thefrontside/backstage/issues/68))
-2. `viewer` query for retrieving data for the current user. (see [#67](https://github.com/thefrontside/backstage/issues/67))
+1. `viewer` query for retrieving data for the current user. (see [#67](https://github.com/thefrontside/backstage/issues/67))
 
 We plan to add these over time. If you're interested in contributing to this plugin, feel free to message us in [`#graphql` channel in Backstage Discord](https://discord.gg/yXEYX2h7Ed).
 
@@ -23,9 +23,9 @@ We plan to add these over time. If you're interested in contributing to this plu
   - [Extending Schema](#extending-schema)
     - [In Backstage Backend](#in-backstage-backend)
     - [Directives API](#directives-api)
-      - [`@field(at: String!)`](#fieldat-string)
-      - [`@relation(type: String!)`](#relationtype-string)
-      - [`@extend(type: String!)`](#extendtype-string)
+      - [`@field`](#field)
+      - [`@relation`](#relation)
+      - [`@extend`](#extend)
   - [Integrations](#integrations)
     - [Backstage GraphiQL Plugin](#backstage-graphiql-plugin)
     - [Backstage API Docs](#backstage-api-docs)
@@ -40,14 +40,20 @@ You can install the GraphQL Plugin using the same process that you would use to 
     ```ts
     import { createRouter } from '@frontside/backstage-plugin-graphql';
     import { Router } from 'express';
-    import { PluginEnvironment } from '../types';
+    import { Logger } from 'winston';
+    import { DatabaseManager } from '@backstage/backend-common';
+
+    interface PluginEnvironment {
+        logger: Logger;
+        databaseManager: DatabaseManager;
+    }
 
     export default async function createPlugin(
       env: PluginEnvironment,
     ): Promise<Router> {
       return await createRouter({
         logger: env.logger,
-        catalog: env.catalog,
+        database: env.databaseManager,
       });
     }
     ```
@@ -76,23 +82,17 @@ Backstage GraphQL Plugin allows developers to extend the schema provided by the 
 You can extend the schema from inside of Backstage Backend by creating a [GraphQL Module](https://www.graphql-modules.com) that you can pass to the GraphQL API plugin's router. Here are step-by-step instructions on how to set up your GraphQL API plugin to provide a custom GraphQL Module.
 
 1. Add `graphql-modules` to your backend packages in `packages/backend` with `yarn add graphql-modules`
-2. Create `packages/backend/src/graphql` directory that will contain your modules
-3. Create a file for your first GraphQL module called `packages/backend/src/graphql/my-module.ts` with the following content
+1. Create `packages/backend/src/graphql` directory that will contain your modules
+1. Create a file for your first GraphQL module called `packages/backend/src/graphql/my-module.ts` with the following content
 
   ```ts
   import { resolvePackagePath } from '@backstage/backend-common'
-  import { createModule, gql } from 'graphql-modules'
+  import { createModule } from 'graphql-modules'
 
   export const myModule = createModule({
     id: 'my-module',
     dirname: resolvePackagePath('backend', 'src/graphql'),
-    typeDefs: [
-      gql`
-        type Query {
-          hello: String!
-        }
-      `
-    ],
+    typeDefs: resolvePackagePath('backend', 'src/graphql/my-module.graphql'),
     resolvers: {
       Query: {
         hello: () => 'world'
@@ -100,16 +100,29 @@ You can extend the schema from inside of Backstage Backend by creating a [GraphQ
     }
   })
   ```
+1. Create GraphQL module's schema called `packages/backend/src/graphql/my-module.graphql` with the following content
 
-4. Register your GraphQL module with the GraphQL API plugin by modifying `packages/backend/src/plugins/graphql.ts`.
+  ```graphql
+  type Query {
+    hello: String!
+  }
+  ```
+
+1. Register your GraphQL module with the GraphQL API plugin by modifying `packages/backend/src/plugins/graphql.ts`.
   You must import your new module and pass it to the router using `modules: [myModule]`. Here is what the result
   should look like.
 
   ```ts
   import { createRouter } from '@frontside/backstage-plugin-graphql';
   import { Router } from 'express';
-  import { PluginEnvironment } from '../types';
+  import { Logger } from 'winston';
+  import { DatabaseManager } from '@backstage/backend-common';
   import { myModule } from '../graphql/my-module';
+
+  interface PluginEnvironment {
+      logger: Logger;
+      databaseManager: DatabaseManager;
+  }
 
   export default async function createPlugin(
     env: PluginEnvironment,
@@ -117,36 +130,57 @@ You can extend the schema from inside of Backstage Backend by creating a [GraphQ
     return await createRouter({
       modules: [myModule],
       logger: env.logger,
-      catalog: env.catalog,
+      database: env.databaseManager,
     });
   }
   ```
 
-5. Start your backend and you should be able to query your API with `{ hello }` query to get `{ data: { hello: 'world' } }`
+1. Start your backend and you should be able to query your API with `{ hello }` query to get `{ data: { hello: 'world' } }`
+
+1. If you use TypeScript and generate types from your GraphQL modules you should create `packages/backend/src/schema.ts` file:
+```ts
+import { resolvePackagePath } from '@backstage/backend-common';
+import { transformSchema } from '@frontside/backstage-plugin-graphql';
+import { loadFilesSync } from '@graphql-tools/load-files';
+import { printSchema } from 'graphql';
+
+export default printSchema(
+  transformSchema(
+    loadFilesSync(
+      resolvePackagePath('backend', 'src/graphql/*.graphql')
+    )
+  )
+);
+```
+
+1. Then replace `schema` field in your `codegen.yml` file to use `schema.ts` as a input schema:
+```yaml
+  schema: "src/schema.ts"
+```
 
 ### Directives API
 
 Every GraphQL API consists of two things - a schema and resolvers. The schema describes relationships and fields that you can retrieve from the API. The resolvers describe how you retrieve the data described in the schema. The Backstage GraphQL Plugin provides several directives to help write a GraphQL schema and resolvers for Backstage. These directives take into account some specificities for Backstage APIs to make it easier to write schema and implement resolvers. This section will explain each directive and the assumptions they make about the developer's intention.
 
-#### `@field(at: String!)`
+#### `@field`
 
-`@field` directive allows you to access properties on the object using a given path. It allows you to specify a resolver for a field from the schema without actually writing a real resolver. Under the hood, it's creating the resolver for you. It's used extensively in the [`catalog.graphql`](https://github.com/thefrontside/backstage/blob/main/plugins/graphql/src/app/modules/catalog/catalog.graphql) module to retrieve properties like `namespace`, `title` and others. For example, here is how we define the resolver for the `Entity#name` field `name: String! @field(at: "metadata.name")`
+`@field` directive allows you to access properties on the object using a given path. It allows you to specify a resolver for a field from the schema without actually writing a real resolver. Under the hood, it's creating the resolver for you. It's used extensively in the [`catalog.graphql`](https://github.com/thefrontside/backstage/blob/main/plugins/graphql/src/app/modules/catalog/catalog.graphql) module to retrieve properties like `namespace`, `title` and others. For example, here is how we define the resolver for the `Entity#name` field `name: String! @field(at: "metadata.name")`. It also accepts an array of strings, it useful when path tokens contain dots: `label: String! @field(at: ["spec", "data.label"])`.
 
-#### `@relation(type: String!)`
+#### `@relation`
 
-`@relation` directive allows you to resolve relationships between entities. Similar to `@field` directive, it provides the resolver from the schema so you do not have to write a resolver yourself. It assumes that relationships are defined as standard `Entity` relationships. The `type` argument allows you to specify the name of the relationship. It will automatically look up the entity in the catalog. For example, here is how we define `consumers` of an API - `consumers: [Component] @relation(type: "apiConsumedBy")`.
+`@relation` directive allows you to resolve relationships between entities. Similar to `@field` directive, it provides the resolver from the schema so you do not have to write a resolver yourself. It assumes that relationships are defined as standard `Entity` relationships. The `name` argument allows you to specify the name of the relationship. It will automatically look up the entity in the catalog. For example, here is how we define `owner` of an Component - `owner: Owner @relation(name: "ownedBy")`. If you have more than one relationship of specific type you might want to use a [relay connection](https://relay.dev/graphql/connections.htm). In that case you specify the `Connection` type as a field type and use `type` argument to specify which connection type you would like to resolve to. `contributors: Connection @relation(name: "contributedBy", type: "User")`. Or you can just use an array of entities `contributors: [User] @relation(name: "contributedBy")`. If you have different types of relationships with the same name you can filter them by `kind` argument. For example, `resources: Connection @relation(name: "hasPart", type: "Resource", kind: "resource")`.
 
-#### `@extend(type: String!)`
+#### `@extend`
 
-`@extend` directive allows you to inherit fields from another entity. We created this directive to make it easier to implement types that extend from `Entity` and other types. It makes GraphQL types similar to extending types in TypeScript. In TypeScript, when a class extends another class, the child class automatically inherits properties and methods of the parent class. This functionality doesn't have an equivalent in GraphQL. Without this directive, the `Component` type in GraphQL would need to reimplement many fields that are defined on Entity which leads to lots of duplication. Using this type, you can easily create a new type that includes all of the properties of the parent. For example, if you wanted to create a `Repository` type, you can do the following,
+`@extend` directive allows you to inherit fields from another entity. We created this directive to make it easier to implement interfaces that extend from `Entity` and other interfaces. It makes GraphQL types similar to extending types in TypeScript. In TypeScript, when a class extends another class, the child class automatically inherits properties and methods of the parent class. This functionality doesn't have an equivalent in GraphQL. Without this directive, the `Component` interface in GraphQL would need to reimplement many fields that are defined on Entity which leads to lots of duplication. Using this directive, you can easily create a new interface that includes all of the properties of the parent. For example, if you wanted to create a `Repository` interface, you can do the following,
 
 ```graphql
-type Repository @extends(type: "Entity") {
-  languages: [String] @field('spec.languages')
+interface Repository @extends(type: "Entity", when: "kind", is: "Repository") {
+  languages: [String] @field(at: "spec.languages")
 }
 ```
 
-Your `Repository` type will automatically get all of the properties from `Entity`.
+Your `Repository` interface will automatically get all of the properties from `Entity`. You might notice that we don't declare object types and `@extend` can be used only on interfaces. That's because you can't extend from object types, only interfaces can be used for implementations. But for making queries you must have object types, so we're creating object types for you automatically. And for `Repository` interface we're creating `RepositoryImpl`.
 
 ## Integrations
 
@@ -175,7 +209,6 @@ It's convenient to be able to query the Backstage GraphQL API from inside of Bac
           },
         },
       ])
-    }
     ```
 
   Checkout this example [`packages/app/src/apis.ts`](https://github.com/thefrontside/backstage/blob/main/packages/app/src/apis.ts#L35).
