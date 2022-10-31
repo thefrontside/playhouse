@@ -5,9 +5,11 @@ import { getDirective, MapperKind, addTypes, mapSchema, getImplementingTypes } f
 import {
   GraphQLFieldConfig,
   GraphQLFieldConfigMap,
+  GraphQLID,
   GraphQLInt,
   GraphQLInterfaceType,
   GraphQLList,
+  GraphQLNamedType,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLOutputType,
@@ -15,6 +17,7 @@ import {
   GraphQLString,
   GraphQLTypeResolver,
   GraphQLUnionType,
+  isInputType,
   isInterfaceType,
   isListType,
   isNonNullType,
@@ -37,14 +40,14 @@ function isConnectionType(type: unknown): type is GraphQLInterfaceType {
   || isNonNullType(type) && isConnectionType(type.ofType);
 }
 
-function createConnectionType(fieldType: GraphQLInterfaceType, typeName: string, schema: GraphQLSchema): GraphQLObjectType {
+function createConnectionType(
+  typeName: string,
+  fieldType: GraphQLInterfaceType,
+  nodeType: GraphQLOutputType,
+): GraphQLObjectType {
   const wrappedEdgeType = fieldType.getFields().edges.type as GraphQLNonNull<GraphQLList<GraphQLNonNull<GraphQLInterfaceType>>>
   const edgeType = wrappedEdgeType.ofType.ofType.ofType as GraphQLInterfaceType
-  const nodeType = schema.getType(typeName)
 
-  if (!nodeType) {
-    throw new Error(`The type "${typeName}" is not defined in the schema.`)
-  }
   return new GraphQLObjectType({
     name: `${typeName}Connection`,
     fields: {
@@ -66,13 +69,13 @@ function createConnectionType(fieldType: GraphQLInterfaceType, typeName: string,
   })
 }
 
-const resolveMappers: Record<'field' | 'relation', (
-  field: GraphQLFieldConfig<{ id: string }, ResolverContext>,
-  fieldName: string,
-  directive: Record<string, any>,
-  schema: GraphQLSchema
-) => void> = {
-  field: (field, _, directive) => {
+export function transformDirectives(sourceSchema: GraphQLSchema) {
+  const extendsWithoutArgs = new Set<string>();
+  const resolversMap: Record<string, GraphQLTypeResolver<any, any>> = {}
+  const typesToAdd = new Map<string, GraphQLNamedType>()
+  const additionalInterfaces: Record<string, Set<GraphQLInterfaceType>> = {};
+
+  function handleFieldDirective(field: GraphQLFieldConfig<{ id: string }, ResolverContext>, directive: Record<string, any>) {
     if (typeof directive.at !== 'string' || (Array.isArray(directive.at) && directive.at.every(a => typeof a !== 'string'))) {
       throw new Error(`The "at" argument of @field directive must be a string or an array of strings`);
     }
@@ -81,8 +84,14 @@ const resolveMappers: Record<'field' | 'relation', (
       if (!entity) return null;
       return get(entity, directive.at);
     };
-  },
-  relation: (field, fieldName, directive, schema) => {
+  }
+
+  function handleRelationDirective(
+    field: GraphQLFieldConfig<{ id: string }, ResolverContext>,
+    fieldName: string,
+    directive: Record<string, any>,
+    schema: GraphQLSchema
+  ) {
     const fieldType = field.type;
     if (
       isListType(fieldType) && isConnectionType(fieldType.ofType)
@@ -99,13 +108,23 @@ const resolveMappers: Record<'field' | 'relation', (
         if (!nodeType) {
           throw new Error(`The type "${directive.type}" is not defined in the schema.`)
         }
+        if (isInputType(nodeType)) {
+          throw new Error(`The type "${directive.type}" is an input type and can't be used as a node type.`)
+        }
         if (isUnionType(nodeType)) {
-          field.type = new GraphQLUnionType({
-            name: `${directive.type}Connection`,
-            types: nodeType.getTypes().map(type => createConnectionType(fieldType, type.name, schema)),
+          const iface = (typesToAdd.get(directive.type) ?? new GraphQLInterfaceType({
+            name: directive.type,
+            interfaces: [schema.getType('Node') as GraphQLInterfaceType],
+            fields: { id: { type: new GraphQLNonNull(GraphQLID) } },
+            resolveType: (...args) => resolversMap.Node(...args)
+          })) as GraphQLInterfaceType
+          typesToAdd.set(directive.type, iface)
+          nodeType.getTypes().forEach(type => {
+            additionalInterfaces[type.name] = (additionalInterfaces[type.name] ?? new Set()).add(iface)
           })
+          field.type = createConnectionType(directive.type, fieldType, iface)
         } else {
-          field.type = createConnectionType(fieldType, directive.type, schema)
+          field.type = createConnectionType(directive.type, fieldType, nodeType)
         }
       }
       const mandatoryArgs: [string, string][] = [
@@ -137,15 +156,50 @@ const resolveMappers: Record<'field' | 'relation', (
         return isList ? entities : entities[0] ?? null;
       }
     }
-  },
-}
+  }
 
-export function transformDirectives(schema: GraphQLSchema) {
-  const extendsWithoutArgs = new Set<string>();
-  const resolversMap: Record<string, GraphQLTypeResolver<any, any>> = {}
-  const implementedTypes: GraphQLObjectType[] = [];
-  const finalSchema = mapSchema(addTypes(mapSchema(mapSchema(schema, {
-    [MapperKind.COMPOSITE_FIELD]: (fieldConfig, fieldName, typeName) => {
+  function validateExtendDirective(directive: Record<string, any>) {
+    if ('when' in directive !== 'is' in directive) {
+      throw new Error(`The @extend directive of "${directive.type}" should have both "when" and "is" arguments or none of them`)
+    }
+    if (!('when' in directive) && extendsWithoutArgs.has(directive.type)) {
+      throw new Error(`The @extend directive of "${directive.type}" without "when" and "is" arguments could be used only once`)
+    } else {
+      extendsWithoutArgs.add(directive.type)
+    }
+    if ('when' in directive && (typeof directive.when !== 'string' || (Array.isArray(directive.when) && directive.when.some(a => typeof a !== 'string')))) {
+      throw new Error(`The "when" argument of @extend directive should be a string or an array of strings`)
+    }
+  }
+
+  function defineResolver(type: GraphQLInterfaceType, extendDirective: Record<string, any>, schema: GraphQLSchema) {
+    if (!resolversMap[type.name]) resolversMap[type.name] = () => `${type.name}Impl`
+
+    const extendType = schema.getType(extendDirective.type)
+    if (!extendType) return
+
+    const resolveType = resolversMap[extendType.name] ?? (
+      extendType.name === 'Node'
+      ? () => undefined
+      : () => `${extendType?.name}Impl`
+    )
+    resolversMap[extendType.name] = async (source: { id: string }, context: ResolverContext, info, abstractType) => {
+      if ('when' in extendDirective && 'is' in extendDirective) {
+        const { id } = source;
+        const { loader } = context;
+        const entity = await loader.load(id)
+        if (!entity) return undefined
+        if (get(entity, extendDirective.when) === extendDirective.is) {
+          return resolversMap[type.name]?.(source, context, info, abstractType) ?? undefined
+        }
+        return resolveType(source, context, info, abstractType) ?? undefined
+      }
+      return resolversMap[type.name]?.(source, context, info, abstractType) ?? undefined
+    }
+  }
+
+  const finalSchema = mapSchema(addTypes(mapSchema(mapSchema(sourceSchema, {
+    [MapperKind.COMPOSITE_FIELD]: (fieldConfig, fieldName, typeName, schema) => {
       const [fieldDirective] = getDirective(schema, fieldConfig, 'field') ?? []
       const [relationDirective] = getDirective(schema, fieldConfig, 'relation') ?? []
 
@@ -155,9 +209,9 @@ export function transformDirectives(schema: GraphQLSchema) {
 
       try {
         if (fieldDirective) {
-          resolveMappers.field(fieldConfig, fieldName, fieldDirective, schema)
+          handleFieldDirective(fieldConfig, fieldDirective)
         } else if (relationDirective) {
-          resolveMappers.relation(fieldConfig, fieldName, relationDirective, schema)
+          handleRelationDirective(fieldConfig, fieldName, relationDirective, schema)
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : error
@@ -172,15 +226,15 @@ export function transformDirectives(schema: GraphQLSchema) {
       }
       const [extendDirective] = getDirective(schema, interfaceType, 'extend') ?? []
       if (!extendDirective) return interfaceType;
-      validateExtendDirective(extendDirective, extendsWithoutArgs)
-      defineResolver(interfaceType, extendDirective, resolversMap, schema)
+      validateExtendDirective(extendDirective)
+      defineResolver(interfaceType, extendDirective, schema)
 
-      const interfaces = traverseExtends(interfaceType, schema)
+      const interfaces = [...additionalInterfaces[interfaceType.name]?.values() ?? [], ...traverseExtends(interfaceType, schema)]
       const fields = [...interfaces].reverse().reduce((acc, type) => ({ ...acc, ...type.toConfig().fields }), { } as GraphQLFieldConfigMap<any, any>)
 
       const { astNode, extensionASTNodes, ...typeConfig } = interfaceType.toConfig();
 
-      implementedTypes.push(new GraphQLObjectType({ ...typeConfig, name: `${interfaceType.name}Impl`, fields, interfaces }))
+      typesToAdd.set(`${interfaceType.name}Impl`, new GraphQLObjectType({ ...typeConfig, name: `${interfaceType.name}Impl`, fields, interfaces }))
 
       return new GraphQLInterfaceType({
         ...typeConfig,
@@ -189,57 +243,27 @@ export function transformDirectives(schema: GraphQLSchema) {
         interfaces: interfaces.filter(iface => iface.name !== interfaceType.name)
       });
     }
-  }), implementedTypes), {
+  }), [...typesToAdd.values()]), {
     [MapperKind.UNION_TYPE]: (unionType, schema) => {
       const typeConfig = unionType.toConfig()
+      if (
+        !typeConfig.types.some(type => (
+          isInterfaceType(type) &&
+          (type as GraphQLInterfaceType).name in resolversMap
+        ))
+      ) return unionType;
+
       typeConfig.types = typeConfig.types.flatMap(type => {
         if (isInterfaceType(type)) {
           return getImplementingTypes((type as GraphQLInterfaceType).name, schema).map(name => schema.getType(name) as GraphQLObjectType)
         }
         return [type]
       })
+      typeConfig.resolveType = (...args) => resolversMap.Node(...args)
       return new GraphQLUnionType(typeConfig)
     }
   })
   return finalSchema
-}
-
-function defineResolver(type: GraphQLInterfaceType, extendDirective: Record<string, any>, resolvers: Record<string, GraphQLTypeResolver<any, any>>, schema: GraphQLSchema) {
-  if (!resolvers[type.name]) resolvers[type.name] = () => `${type.name}Impl`
-
-  const extendType = schema.getType(extendDirective.type)
-  if (!extendType) return
-
-  // TODO There is no NodeImpl
-  const resolveType = resolvers[extendType.name] ?? (() => `${extendType?.name}Impl`)
-  // @ts-ignore
-  resolvers[extendType.name] = async (source: { id: string }, context: ResolverContext, info, abstractType) => {
-    if ('when' in extendDirective && 'is' in extendDirective) {
-      const { id } = source;
-      const { loader } = context;
-      const entity = await loader.load(id)
-      if (!entity) return null
-      if (get(entity, extendDirective.when) === extendDirective.is) {
-        return resolvers[type.name]?.(source, context, info, abstractType) ?? null
-      }
-      return resolveType(source, context, info, abstractType) ?? null
-    }
-    return resolvers[type.name]?.(source, context, info, abstractType) ?? null
-  }
-}
-
-function validateExtendDirective(directive: Record<string, any>, extendsWithoutArgs: Set<string>) {
-  if ('when' in directive !== 'is' in directive) {
-    throw new Error(`The @extend directive of "${directive.type}" should have both "when" and "is" arguments or none of them`)
-  }
-  if (!('when' in directive) && extendsWithoutArgs.has(directive.type)) {
-    throw new Error(`The @extend directive of "${directive.type}" without "when" and "is" arguments could be used only once`)
-  } else {
-    extendsWithoutArgs.add(directive.type)
-  }
-  if ('when' in directive && (typeof directive.when !== 'string' || (Array.isArray(directive.when) && directive.when.some(a => typeof a !== 'string')))) {
-    throw new Error(`The "when" argument of @extend directive should be a string or an array of strings`)
-  }
 }
 
 function traverseExtends(type: GraphQLInterfaceType, schema: GraphQLSchema): GraphQLInterfaceType[] {

@@ -8,9 +8,6 @@ export const Catalog = createModule({
   id: 'catalog',
   typeDefs: loadFilesSync(resolvePackagePath('@frontside/backstage-plugin-graphql', 'src/app/modules/catalog/catalog.graphql')),
   resolvers: {
-    Owner: { __resolveType: () => 'Node' },
-    Ownable: { __resolveType: () => 'Node' },
-    Dependency: { __resolveType: () => 'Node' },
     Lifecycle: {
       EXPERIMENTAL: 'experimental',
       PRODUCTION: 'production',
