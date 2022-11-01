@@ -13,12 +13,8 @@ import { IncrementalIngestionDatabaseManager } from '../database/IncrementalInge
 import { createIncrementalProviderRouter } from '../routes';
 
 class Deferred<T> implements Promise<T> {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  resolve: (value: T) => void;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  reject: (error: Error) => void;
+  resolve!: (value: T) => void;
+  reject!: (error: Error) => void;
 
   then: Promise<T>['then'];
   catch: Promise<T>['catch'];
