@@ -1,5 +1,20 @@
 # backend
 
+## 0.0.10
+
+### Patch Changes
+
+- ad0fde9: Upgrade backstage to 1.7 and bump effection dependencies
+- Updated dependencies [ad0fde9]
+- Updated dependencies [c2152b6]
+  - app@0.0.4
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.3
+  - @frontside/backstage-plugin-graphql@0.4.2
+  - @internal/plugin-healthcheck@0.1.2
+  - @frontside/backstage-plugin-humanitec-backend@0.3.2
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.3.0
+  - @frontside/backstage-plugin-incremental-ingestion-github@0.2.2
+
 ## 0.0.9
 
 ### Patch Changes

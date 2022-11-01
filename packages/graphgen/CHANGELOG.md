@@ -1,5 +1,11 @@
 # @frontside/graphgen-backstage
 
+## 0.3.1
+
+### Patch Changes
+
+- ad0fde9: Upgrade backstage to 1.7 and bump effection dependencies
+
 ## 0.3.0
 
 ### Minor Changes

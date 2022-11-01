@@ -1,5 +1,14 @@
 # app
 
+## 0.0.4
+
+### Patch Changes
+
+- ad0fde9: Upgrade backstage to 1.7 and bump effection dependencies
+- Updated dependencies [ad0fde9]
+  - @frontside/backstage-plugin-effection-inspector@0.1.3
+  - @frontside/backstage-plugin-humanitec@0.3.2
+
 ## 0.0.3
 
 ### Patch Changes
