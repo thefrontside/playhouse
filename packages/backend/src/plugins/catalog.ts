@@ -15,7 +15,7 @@ export default async function createPlugin(
   const builder = CatalogBuilder.create(env);
   // incremental builder receives builder because it'll register
   // incremental entity providers with the builder 
-  const incrementalBuilder = IncrementalCatalogBuilder.create(env, builder);
+  const incrementalBuilder = await IncrementalCatalogBuilder.create(env, builder);
   
   const githubRepositoryProvider = GithubRepositoryEntityProvider.create({ 
     host: 'github.com', 
