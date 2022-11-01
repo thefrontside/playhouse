@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@backstage/backend-common": "^0.15.2",
-    "@backstage/catalog-model": "^1.1.2",
     "@backstage/config": "^1.0.3",
     "@backstage/integration": "^1.3.2",
     "@frontside/backstage-plugin-incremental-ingestion-backend": "*",

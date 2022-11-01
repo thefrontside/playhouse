@@ -31,9 +31,9 @@ function Inspector() {
     return <p>Loading</p>;
   } else if (slice.type === 'rejected') {
     return <p>{slice.error.toString()}</p>;
-  } else {
+  } 
     return <TreeRoot slice={slice.value} />;
-  }
+  
 }
 
 function TreeRoot({ slice }: { slice: Slice<InspectState> }) {
@@ -41,7 +41,7 @@ function TreeRoot({ slice }: { slice: Slice<InspectState> }) {
   return (
     <TaskTree
       task={task}
-      basePath={''}
+      basePath=""
       collapsed={[]}
       onToggle={function (): void {
         throw new Error('Function not implemented.');

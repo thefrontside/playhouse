@@ -1,10 +1,29 @@
-import type { PluginDatabaseManager, UrlReader } from '@backstage/backend-common';
-import type { PluginTaskScheduler } from '@backstage/backend-tasks';
+
+import type {
+  PluginDatabaseManager,
+  UrlReader,
+} from '@backstage/backend-common';
+import type {
+  PluginTaskScheduler,
+  TaskFunction,
+} from '@backstage/backend-tasks';
 import type { Config } from '@backstage/config';
-import type { DeferredEntity } from '@backstage/plugin-catalog-backend';
+import type {
+  DeferredEntity,
+  EntityProviderConnection,
+} from '@backstage/plugin-catalog-backend';
 import type { PermissionAuthorizer } from '@backstage/plugin-permission-common';
 import type { DurationObjectUnits } from 'luxon';
 import type { Logger } from 'winston';
+import { IncrementalIngestionDatabaseManager } from './database/IncrementalIngestionDatabaseManager';
+
+/**
+ * Entity annotation containing the incremental entity provider.
+ *
+ * @public
+ */
+export const INCREMENTAL_ENTITY_PROVIDER_ANNOTATION =
+  'backstage.io/incremental-provider-name';
 
 /**
  * Ingest entities into the catalog in bite-sized chunks.
@@ -18,6 +37,7 @@ import type { Logger } from 'winston';
  * batches of entities in sequence so that you never need to have more
  * than a few hundred in memory at a time.
  *
+ * @public
  */
 export interface IncrementalEntityProvider<TCursor, TContext> {
   /**
@@ -35,7 +55,10 @@ export interface IncrementalEntityProvider<TCursor, TContext> {
    * @returns the entities to be ingested, as well as the cursor of
    * the the next page after this one.
    */
-  next(context: TContext, cursor?: TCursor): Promise<EntityIteratorResult<TCursor>>;
+  next(
+    context: TContext,
+    cursor?: TCursor,
+  ): Promise<EntityIteratorResult<TCursor>>;
 
   /**
    * Do any setup and teardown necessary in order to provide the
@@ -48,13 +71,16 @@ export interface IncrementalEntityProvider<TCursor, TContext> {
 }
 
 /**
- * Value returned by an @{link IncrementalEntityProvider} to provide a
+ * Value returned by an {@link IncrementalEntityProvider} to provide a
  * single page of entities to ingest.
+ *
+ * @public
  */
 export interface EntityIteratorResult<T> {
   /**
    * Indicates whether there are any further pages of entities to
    * ingest after this one.
+   *
    */
   done: boolean;
 
@@ -70,6 +96,7 @@ export interface EntityIteratorResult<T> {
   entities: DeferredEntity[];
 }
 
+/** @public */
 export interface IncrementalEntityProviderOptions {
   /**
    * Entities are ingested in bursts. This interval determines how
@@ -93,11 +120,16 @@ export interface IncrementalEntityProviderOptions {
   /**
    * In the event of an error during an ingestion burst, the backoff
    * determines how soon it will be retried. E.g.
-   * [{ minutes: 1}, { minutes: 5}, {minutes: 30 }, { hours: 3 }]
+   * `[{ minutes: 1}, { minutes: 5}, {minutes: 30 }, { hours: 3 }]`
    */
-  backoff?: [DurationObjectUnits, ...DurationObjectUnits[]];
+  backoff?: DurationObjectUnits[];
 }
 
+/**
+ * Provides the environment used by the incremental entity provider,
+ *
+ * @public
+ */
 export type PluginEnvironment = {
   logger: Logger;
   database: PluginDatabaseManager;
@@ -107,26 +139,120 @@ export type PluginEnvironment = {
   permissions: PermissionAuthorizer;
 };
 
-export class Deferred<T> implements Promise<T> {
-  // @ts-expect-error assigned in constructor, but TS cannot figure it out.
-  resolve: (value: T) => void;
-  // @ts-expect-error assigned in constructor, but TS cannot figure it out.
-  reject: (error: Error) => void;
+/**
+ * The core ingestion engine implements this interface
+ *
+ * @public
+ */
+export interface IterationEngine {
+  taskFn: TaskFunction;
+}
 
-  then: Promise<T>['then'];
-  catch: Promise<T>['catch'];
-  finally: Promise<T>['finally'];
+/**
+ * Options passed to the core ingestion engine during initialization.
+ *
+ * @public
+ */
+export interface IterationEngineOptions {
+  logger: Logger;
+  connection: EntityProviderConnection;
+  manager: IncrementalIngestionDatabaseManager;
+  provider: IncrementalEntityProvider<unknown, unknown>;
+  restLength: DurationObjectUnits;
+  ready: Promise<void>;
+  backoff?: IncrementalEntityProviderOptions['backoff'];
+}
 
-  constructor() {
-    const promise = new Promise<T>((resolve, reject) => {
-      this.resolve = resolve;
-      this.reject = reject;
-    });
+/**
+ * The shape of data inserted into or updated in the `ingestion.ingestions` table.
+ *
+ * @public
+ */
+export interface IngestionUpsertIFace {
+  next_action:
+    | 'rest'
+    | 'ingest'
+    | 'backoff'
+    | 'cancel'
+    | 'nothing (done)'
+    | 'nothing (canceled)';
+  status:
+    | 'complete'
+    | 'bursting'
+    | 'resting'
+    | 'canceling'
+    | 'interstitial'
+    | 'backing off';
+  provider_name: string;
+  next_action_at?: Date;
+  last_error?: string;
+  attempts?: number;
+  ingestion_completed_at?: Date;
+  rest_completed_at?: Date;
+}
 
-    this.then = promise.then.bind(promise);
-    this.catch = promise.catch.bind(promise);
-    this.finally = promise.finally.bind(promise);
-  }
+/**
+ * This interface supplies all potential values that can be inserted into the `ingestion.ingestions` table.
+ *
+ * @public
+ */
+export interface IngestionRecordInsert {
+  record: IngestionUpsertIFace & {
+    id: string;
+  };
+}
 
-  [Symbol.toStringTag] = 'Deferred' as const;
+/**
+ * This interface is for updating an existing ingestion record.
+ *
+ * @public
+ */
+export interface IngestionRecordUpdate {
+  ingestionId: string;
+  update: Partial<IngestionUpsertIFace>;
+}
+
+/**
+ * The expected response from the `ingestion.ingestion_marks` table.
+ *
+ * @public
+ */
+export interface MarkRecord {
+  id: string;
+  sequence: number;
+  ingestion_id: string;
+  cursor: string;
+  created_at: string;
+}
+
+/**
+ * The expected response from the `ingestion.ingestions` table.
+ *
+ * @public
+ */
+export interface IngestionRecord {
+  id: string;
+  provider_name: string;
+  status: string;
+  next_action: string;
+  next_action_at: Date;
+  last_error: string | null;
+  attempts: number;
+  created_at: string;
+  rest_completed_at: string | null;
+  ingestion_completed_at: string | null;
+}
+
+/**
+ * This interface supplies all the values for adding an ingestion mark.
+ *
+ * @public
+ */
+export interface MarkRecordInsert {
+  record: {
+    id: string;
+    ingestion_id: string;
+    cursor: unknown;
+    sequence: number;
+  };
 }
