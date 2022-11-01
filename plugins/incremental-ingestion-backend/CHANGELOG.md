@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.3.1
+
+### Patch Changes
+
+- b961522: call build from prepack in @frontside/backstage-plugin-incremental-ingestion-backend
+
 ## 0.3.0
 
 ### Minor Changes
