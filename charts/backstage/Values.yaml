@@ -1,3 +1,12 @@
 backstagePort: 7007
 ingressPort: 80
 baseUrl: https://backstage.frontside.services
+# any randomly generated string
+authSessionClientSecret: abcde
+# auth0 client secret
+auth0ClientSecret:
+auth0DomainId:
+auth0ClientId: 
+auth0Audience: 
+auth0Connection: 
+auth0ConnectionScope: 
