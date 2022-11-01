@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-effection-inspector-backend
 
+## 0.1.3
+
+### Patch Changes
+
+- ad0fde9: Upgrade backstage to 1.7 and bump effection dependencies
+
 ## 0.1.2
 
 ### Patch Changes

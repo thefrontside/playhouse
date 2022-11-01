@@ -1,5 +1,15 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.3.0
+
+### Minor Changes
+
+- c2152b6: sync backstage-plugin-incremental-ingestion-backend with backstage PR
+
+### Patch Changes
+
+- ad0fde9: Upgrade backstage to 1.7 and bump effection dependencies
+
 ## 0.2.1
 
 ### Patch Changes
