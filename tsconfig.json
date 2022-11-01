@@ -6,7 +6,10 @@
     "plugins/*/dev",
     "plugins/*/migrations"
   ],
-  "exclude": ["node_modules", "packages/graphgen"],
+  "exclude": [
+    "node_modules", 
+    "packages/graphgen"
+  ],
   "compilerOptions": {
     "outDir": "dist-types",
     "rootDir": "."

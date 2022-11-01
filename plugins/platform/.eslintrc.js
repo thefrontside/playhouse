@@ -1,5 +1,6 @@
 module.exports = require('@backstage/cli/config/eslint-factory')(__dirname, {
   rules: {
-    'prefer-const': 'off'
+    'no-else-return': 'off',
+    'prefer-const': 'off',
   }
 });

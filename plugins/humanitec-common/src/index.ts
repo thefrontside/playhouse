@@ -5,3 +5,5 @@ export * from './types/resources';
 export * from './types/runtime';
 export * from './clients/fetch-app-info';
 export * from './clients/humanitec';
+export * from './platform-api';
+export * from './constants';
