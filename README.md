@@ -8,7 +8,17 @@ yarn install
 yarn dev
 ```
 
-To start Backstage in your local cluster using minikube, run:
+## Running with simulation
+
+We're using the [Auth0 Simulator](https://www.npmjs.com/package/@simulacrum/auth0-simulator) for local development. 
+
+It's automatically started by `yarn dev`.
+
+Keep an eye for user information in the log output.
+
+![Log output with user information](https://user-images.githubusercontent.com/74687/199505266-1519969d-d5b3-4f4a-93a0-943b47d0d13b.jpg)
+
+## Running in minikube
 
 ```
 TAG=whatever
