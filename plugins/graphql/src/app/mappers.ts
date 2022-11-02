@@ -25,12 +25,12 @@ import {
 } from 'graphql';
 import type { ResolverContext } from './types';
 
-function filterEntities(entity: Entity | undefined, relationName: string, targetKind?: string): { id: string }[] {
+function filterEntities(entity: Entity | undefined, relationType: string, targetKind?: string): { id: string }[] {
   return entity
     ?.relations
     ?.filter(({ type, targetRef }) => {
       const { kind } = parseEntityRef(targetRef)
-      return type === relationName && (targetKind ? kind.toLowerCase() === targetKind.toLowerCase() : true)
+      return type === relationType && (targetKind ? kind.toLowerCase() === targetKind.toLowerCase() : true)
     })
     .map(({ targetRef }) => ({ id: targetRef })) ?? [];
 }
@@ -102,29 +102,29 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
     const isList = isListType(fieldType) || (isNonNullType(fieldType) && isListType(fieldType.ofType))
 
     if (isConnectionType(fieldType)) {
-      if (directive.type) {
-        const nodeType = schema.getType(directive.type)
+      if (directive.interface) {
+        const nodeType = schema.getType(directive.interface)
 
         if (!nodeType) {
-          throw new Error(`The type "${directive.type}" is not defined in the schema.`)
+          throw new Error(`The interface "${directive.interface}" is not defined in the schema.`)
         }
         if (isInputType(nodeType)) {
-          throw new Error(`The type "${directive.type}" is an input type and can't be used as a node type.`)
+          throw new Error(`The interface "${directive.interface}" is an input type and can't be used as a node type.`)
         }
         if (isUnionType(nodeType)) {
-          const iface = (typesToAdd.get(directive.type) ?? new GraphQLInterfaceType({
-            name: directive.type,
+          const iface = (typesToAdd.get(directive.interface) ?? new GraphQLInterfaceType({
+            name: directive.interface,
             interfaces: [schema.getType('Node') as GraphQLInterfaceType],
             fields: { id: { type: new GraphQLNonNull(GraphQLID) } },
             resolveType: (...args) => resolversMap.Node(...args)
           })) as GraphQLInterfaceType
-          typesToAdd.set(directive.type, iface)
+          typesToAdd.set(directive.interface, iface)
           nodeType.getTypes().forEach(type => {
             additionalInterfaces[type.name] = (additionalInterfaces[type.name] ?? new Set()).add(iface)
           })
-          field.type = createConnectionType(directive.type, fieldType, iface)
+          field.type = createConnectionType(directive.interface, fieldType, iface)
         } else {
-          field.type = createConnectionType(directive.type, fieldType, nodeType)
+          field.type = createConnectionType(directive.interface, fieldType, nodeType)
         }
       }
       const mandatoryArgs: [string, string][] = [
@@ -147,12 +147,12 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
       field.args = args
 
       field.resolve = async ({ id }, args, { loader }) => {
-        const entities = filterEntities(await loader.load(id), directive.name ?? fieldName, directive.kind);
+        const entities = filterEntities(await loader.load(id), directive.type ?? fieldName, directive.kind);
         return connectionFromArray(entities, args);
       };
     } else {
       field.resolve = async ({ id }, _, { loader }) => {
-        const entities = filterEntities(await loader.load(id), directive.name ?? fieldName, directive.kind);
+        const entities = filterEntities(await loader.load(id), directive.type ?? fieldName, directive.kind);
         return isList ? entities : entities[0] ?? null;
       }
     }
@@ -160,12 +160,12 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
 
   function validateExtendDirective(directive: Record<string, any>) {
     if ('when' in directive !== 'is' in directive) {
-      throw new Error(`The @extend directive of "${directive.type}" should have both "when" and "is" arguments or none of them`)
+      throw new Error(`The @extend directive of "${directive.interface}" should have both "when" and "is" arguments or none of them`)
     }
-    if (!('when' in directive) && 'type' in directive && extendsWithoutArgs.has(directive.type)) {
-      throw new Error(`The @extend directive of "${directive.type}" without "when" and "is" arguments could be used only once`)
+    if (!('when' in directive) && 'interface' in directive && extendsWithoutArgs.has(directive.interface)) {
+      throw new Error(`The @extend directive of "${directive.interface}" without "when" and "is" arguments could be used only once`)
     } else {
-      extendsWithoutArgs.add(directive.type)
+      extendsWithoutArgs.add(directive.interface)
     }
     if ('when' in directive && (typeof directive.when !== 'string' || (Array.isArray(directive.when) && directive.when.some(a => typeof a !== 'string')))) {
       throw new Error(`The "when" argument of @extend directive should be a string or an array of strings`)
@@ -175,7 +175,7 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
   function defineResolver(type: GraphQLInterfaceType, extendDirective: Record<string, any>, schema: GraphQLSchema) {
     if (!resolversMap[type.name]) resolversMap[type.name] = () => `${type.name}Impl`
 
-    const extendType = schema.getType(extendDirective.type)
+    const extendType = schema.getType(extendDirective.interface)
     if (!extendType) return
 
     const resolveType = resolversMap[extendType.name] ?? (
@@ -274,13 +274,13 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
 function traverseExtends(type: GraphQLInterfaceType, schema: GraphQLSchema): GraphQLInterfaceType[] {
   const [extendDirective] = getDirective(schema, type, 'extend') ?? []
   const interfaces = [type, ...type.getInterfaces().flatMap(iface => traverseExtends(iface, schema))]
-  if (extendDirective && 'type' in extendDirective) {
-    const extendType = schema.getType(extendDirective.type)
+  if (extendDirective && 'interface' in extendDirective) {
+    const extendType = schema.getType(extendDirective.interface)
     if (!isInterfaceType(extendType)) {
-      throw new Error(`"${extendDirective.type}" type described in @extend directive for "${type.name}" isn't abstract type or doesn't exist`)
+      throw new Error(`The interface "${extendDirective.interface}" described in @extend directive for "${type.name}" isn't abstract type or doesn't exist`)
     }
     if (interfaces.includes(extendType)) {
-      throw new Error(`The interface "${extendDirective.type}" described in @extend directive for "${type.name}" is already implemented`)
+      throw new Error(`The interface "${extendDirective.interface}" described in @extend directive for "${type.name}" is already implemented`)
     }
 
     interfaces.push(...traverseExtends(extendType, schema))

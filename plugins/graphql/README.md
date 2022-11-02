@@ -53,7 +53,7 @@ You can install the GraphQL Plugin using the same process that you would use to 
     ): Promise<Router> {
       return await createRouter({
         logger: env.logger,
-        database: env.databaseManager,
+        databaseManager: env.databaseManager,
       });
     }
     ```
@@ -87,12 +87,13 @@ You can extend the schema from inside of Backstage Backend by creating a [GraphQ
 
   ```ts
   import { resolvePackagePath } from '@backstage/backend-common'
+  import { loadFilesSync } from '@graphql-tools/load-files';
   import { createModule } from 'graphql-modules'
 
   export const myModule = createModule({
     id: 'my-module',
     dirname: resolvePackagePath('backend', 'src/graphql'),
-    typeDefs: resolvePackagePath('backend', 'src/graphql/my-module.graphql'),
+    typeDefs: loadFilesSync(resolvePackagePath('backend', 'src/graphql/my-module.graphql')),
     resolvers: {
       Query: {
         hello: () => 'world'
@@ -168,14 +169,14 @@ Every GraphQL API consists of two things - a schema and resolvers. The schema de
 
 #### `@relation`
 
-`@relation` directive allows you to resolve relationships between entities. Similar to `@field` directive, it provides the resolver from the schema so you do not have to write a resolver yourself. It assumes that relationships are defined as standard `Entity` relationships. The `name` argument allows you to specify the name of the relationship. It will automatically look up the entity in the catalog. For example, here is how we define `owner` of an Component - `owner: Owner @relation(name: "ownedBy")`. If you have more than one relationship of specific type you might want to use a [relay connection](https://relay.dev/graphql/connections.htm). In that case you specify the `Connection` type as a field type and use `type` argument to specify which connection type you would like to resolve to. `contributors: Connection @relation(name: "contributedBy", type: "User")`. Or you can just use an array of entities `contributors: [User] @relation(name: "contributedBy")`. If you have different types of relationships with the same name you can filter them by `kind` argument. For example, `resources: Connection @relation(name: "hasPart", type: "Resource", kind: "resource")`.
+`@relation` directive allows you to resolve relationships between entities. Similar to `@field` directive, it provides the resolver from the schema so you do not have to write a resolver yourself. It assumes that relationships are defined as standard `Entity` relationships. The `type` argument allows you to specify the type of the relationship. It will automatically look up the entity in the catalog. For example, here is how we define `owner` of an Component - `owner: Owner @relation(type: "ownedBy")`. If you have more than one relationship of specific type you might want to use a [relay connection](https://relay.dev/graphql/connections.htm). In that case you specify the `Connection` type as a field type and use `interface` argument to specify which connection type you would like to resolve to. `contributors: Connection @relation(type: "contributedBy", interface: "User")`. Or you can just use an array of entities `contributors: [User] @relation(type: "contributedBy")`. If you have different kinds of relationships with the same type you can filter them by `kind` argument. For example, `resources: Connection @relation(type: "hasPart", interface: "Resource", kind: "resource")`.
 
 #### `@extend`
 
 `@extend` directive allows you to inherit fields from another entity. We created this directive to make it easier to implement interfaces that extend from `Entity` and other interfaces. It makes GraphQL types similar to extending types in TypeScript. In TypeScript, when a class extends another class, the child class automatically inherits properties and methods of the parent class. This functionality doesn't have an equivalent in GraphQL. Without this directive, the `Component` interface in GraphQL would need to reimplement many fields that are defined on Entity which leads to lots of duplication. Using this directive, you can easily create a new interface that includes all of the properties of the parent. For example, if you wanted to create a `Repository` interface, you can do the following,
 
 ```graphql
-interface Repository @extends(type: "Entity", when: "kind", is: "Repository") {
+interface Repository @extends(interface: "Entity", when: "kind", is: "Repository") {
   languages: [String] @field(at: "spec.languages")
 }
 ```
