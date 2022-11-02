@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.3.2
+
+### Patch Changes
+
+- b1a2d5d: Revert change to the prepack script based on https://github.com/thefrontside/actions/pull/89
+
 ## 0.3.1
 
 ### Patch Changes
