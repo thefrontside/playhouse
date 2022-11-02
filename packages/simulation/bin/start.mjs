@@ -1,10 +1,11 @@
 import { main } from 'effection';
 import { createAuth0Server } from '@simulacrum/auth0-simulator';
-import { Auth0Store } from '@simulacrum/auth0-simulator/dist/handlers/auth0-handlers';
+
+import { default as faker } from '@faker-js/faker';
 
 main(function* () {
 
-  const store: Auth0Store = new Map();
+  const store = new Map();
 
   const serviceUrl = new URL('https://localhost:4400');
   const people = [
@@ -13,7 +14,7 @@ main(function* () {
       name: 'Paul Waters',
       password: 'password',
       email: 'paulwaters@placeholder.com',
-      picture: 'http://www.gravatar.com/avatar/?d=identicon'
+      picture: faker.image.avatar(),
     }
   ];
 
@@ -32,6 +33,9 @@ main(function* () {
   console.log(`🚀 Auth0 is running on ${serviceUrl}`);
   console.log("Accounts:")
   console.table(people)
-  yield;
-
+  try {
+    yield;
+  } finally {
+    console.log("\n⏬ Auth0 shutting down");
+  }
 });

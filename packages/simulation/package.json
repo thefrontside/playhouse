@@ -2,24 +2,21 @@
   "name": "simulation",
   "version": "1.0.0",
   "description": "Simulate Acme Corp Backend Services",
-  "main": "dist/server.js",
   "private": true,
   "scripts": {
-    "start": "ts-node bin/start.ts",
+    "start": "node bin/start.mjs",
     "watch": "nodemon",
     "test": "echo noop",
-    "prepack": "tsc",
-    "lint": "eslint src bin"
+    "lint": "eslint bin"
   },
   "license": "ISC",
   "dependencies": {
-    "@frontside/tsconfig": "^1.2.0",
+    "@faker-js/faker": "^3.0.0",
     "@frontside/graphgen": "^1.1.0",
+    "@frontside/tsconfig": "^1.2.0",
     "@simulacrum/auth0-simulator": "^0.8.0",
     "@types/seedrandom": "3.0.1",
     "effection": "^2.0.6",
-    "nodemon": "latest",
-    "typescript": "^4.6.4",
-    "ts-node": "^10.9.1"
+    "nodemon": "latest"
   }
 }
