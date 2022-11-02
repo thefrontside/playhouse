@@ -6427,10 +6427,10 @@
   resolved "https://registry.yarnpkg.com/@sideway/pinpoint/-/pinpoint-2.0.0.tgz#cff8ffadc372ad29fd3f78277aeb29e632cc70df"
   integrity sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==
 
-"@simulacrum/auth0-simulator@^0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@simulacrum/auth0-simulator/-/auth0-simulator-0.7.1.tgz#63db9af2210ed071b96858492dafd23a49ba9a85"
-  integrity sha512-V9/lUylw0uJupyf7PaZJ5NX6OhrjCEdA1o9qB52JaM7bxu4Dmhc/VszA9/0+bvy27rzOC8KaZqWQo3WqaQbkWA==
+"@simulacrum/auth0-simulator@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@simulacrum/auth0-simulator/-/auth0-simulator-0.8.0.tgz#c5610999a396abc395303a396d48dc87737987b6"
+  integrity sha512-wS3vOrSUDXqvefVw5vp3vsWpNF5J0Qew170nZFYyufFfnFPUg5ZfYMVfqM0z0cKpGyO2T+/h1qIcd7tA95J1FQ==
   dependencies:
     "@effection/process" "^2.0.1"
     "@simulacrum/client" "0.5.4"
@@ -6447,7 +6447,7 @@
     jsonwebtoken "^8.5.1"
     zod "^3.14.2"
 
-"@simulacrum/client@0.5.4", "@simulacrum/client@^0.5.4":
+"@simulacrum/client@0.5.4":
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/@simulacrum/client/-/client-0.5.4.tgz#fc7cc353a8a5052cd5bc3821d64fb434ce2d6637"
   integrity sha512-9uElVdBzi1IwKOCbAGqnrlNZz0lxeSDLhCt5wRxN9ePoyJpEd+69mY9s+kZNxPkamwC74YK3bbdDqkqndVRf4w==
@@ -6456,7 +6456,7 @@
     graphql-ws "^4.2.3"
     isomorphic-ws "^4.0.1"
 
-"@simulacrum/server@0.6.2", "@simulacrum/server@^0.6.2":
+"@simulacrum/server@0.6.2":
   version "0.6.2"
   resolved "https://registry.yarnpkg.com/@simulacrum/server/-/server-0.6.2.tgz#b4e7addcd223feb7143b48c867ac6e4bb1ba3000"
   integrity sha512-gRNA1HWTvIo7fDOoCVxJNbWtCrRjllh9TnvQLWKIoATCmdY+VCuGeXNUIixGPQ1UxE8eTMfRInPelFkQ+tJ7WA==
