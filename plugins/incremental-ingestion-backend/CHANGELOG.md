@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.4.0
+
+### Minor Changes
+
+- bde7974: ensure completion_ticket is used for incremental ingestions
+
 ## 0.3.2
 
 ### Patch Changes
