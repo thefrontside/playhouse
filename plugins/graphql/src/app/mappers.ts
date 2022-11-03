@@ -1,6 +1,6 @@
 import { get, isEqual } from 'lodash';
 import { connectionFromArray } from 'graphql-relay';
-import { Entity, parseEntityRef } from '@backstage/catalog-model';
+import { CompoundEntityRef, Entity, parseEntityRef } from '@backstage/catalog-model';
 import { getDirective, MapperKind, addTypes, mapSchema, getImplementingTypes } from '@graphql-tools/utils';
 import {
   GraphQLFieldConfig,
@@ -25,14 +25,14 @@ import {
 } from 'graphql';
 import type { ResolverContext } from './types';
 
-function filterEntities(entity: Entity | undefined, relationType: string, targetKind?: string): { id: string }[] {
+function filterEntityRefs(entity: Entity | undefined, relationType: string, targetKind?: string): CompoundEntityRef[] {
   return entity
     ?.relations
-    ?.filter(({ type, targetRef }) => {
-      const { kind } = parseEntityRef(targetRef)
-      return type === relationType && (targetKind ? kind.toLowerCase() === targetKind.toLowerCase() : true)
-    })
-    .map(({ targetRef }) => ({ id: targetRef })) ?? [];
+    ?.filter(({ type }) => type === relationType)
+    .flatMap(({ targetRef }) => {
+      const ref = parseEntityRef(targetRef)
+      return !targetKind || ref.kind.toLowerCase() === targetKind.toLowerCase() ? [ref] : []
+    }) ?? []
 }
 
 function isConnectionType(type: unknown): type is GraphQLInterfaceType {
@@ -146,14 +146,16 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
       })
       field.args = args
 
-      field.resolve = async ({ id }, args, { loader }) => {
-        const entities = filterEntities(await loader.load(id), directive.type ?? fieldName, directive.kind);
-        return connectionFromArray(entities, args);
+      field.resolve = async ({ id }, args, { loader, refToId }) => {
+        const ids = filterEntityRefs(await loader.load(id), directive.type ?? fieldName, directive.kind)
+          .map(ref => ({ id: refToId(ref) }));
+        return connectionFromArray(ids, args);
       };
     } else {
-      field.resolve = async ({ id }, _, { loader }) => {
-        const entities = filterEntities(await loader.load(id), directive.type ?? fieldName, directive.kind);
-        return isList ? entities : entities[0] ?? null;
+      field.resolve = async ({ id }, _, { loader, refToId }) => {
+        const ids = filterEntityRefs(await loader.load(id), directive.type ?? fieldName, directive.kind)
+          .map(ref => ({ id: refToId(ref) }));
+        return isList ? ids : ids[0] ?? null;
       }
     }
   }
