@@ -8,7 +8,6 @@ export type {
   IterationEngine,
   IterationEngineOptions,
   IngestionUpsertIFace,
-  IngestionRecordInsert,
   IngestionRecordUpdate,
   IngestionRecord,
   MarkRecordInsert
