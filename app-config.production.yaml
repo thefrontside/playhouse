@@ -12,3 +12,12 @@ integrations:
     - host: github.com
       apps:
         - $include: credentials/backstage-app-credentials.yaml
+
+catalog:
+  locations:
+    - type: url
+      target: https://github.com/thefrontside/playhouse/blob/main/catalog-info.yaml
+    - type: url
+      target: https://github.com/thefrontside/playhouse/blob/main/templates/standard-microservice/template.yaml
+      rules:
+        - allow: [Template]
