@@ -1,5 +1,27 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.3.2
+
+### Patch Changes
+
+- b1a2d5d: Revert change to the prepack script based on https://github.com/thefrontside/actions/pull/89
+
+## 0.3.1
+
+### Patch Changes
+
+- b961522: call build from prepack in @frontside/backstage-plugin-incremental-ingestion-backend
+
+## 0.3.0
+
+### Minor Changes
+
+- c2152b6: sync backstage-plugin-incremental-ingestion-backend with backstage PR
+
+### Patch Changes
+
+- ad0fde9: Upgrade backstage to 1.7 and bump effection dependencies
+
 ## 0.2.1
 
 ### Patch Changes

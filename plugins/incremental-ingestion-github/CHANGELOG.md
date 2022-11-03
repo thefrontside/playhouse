@@ -1,5 +1,14 @@
 # @frontside/backstage-plugin-incremental-ingestion-github
 
+## 0.2.2
+
+### Patch Changes
+
+- ad0fde9: Upgrade backstage to 1.7 and bump effection dependencies
+- Updated dependencies [ad0fde9]
+- Updated dependencies [c2152b6]
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.3.0
+
 ## 0.2.1
 
 ### Patch Changes

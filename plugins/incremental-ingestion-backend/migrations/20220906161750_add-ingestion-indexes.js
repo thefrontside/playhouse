@@ -1,15 +1,13 @@
-/* eslint-disable func-names */
-const INCREMENTAL_ENTITY_PROVIDER_ANNOTATION = 'frontside/incremental-entity-provider';
+
 
 /**
  * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
  */
-exports.up = async function (knex) {
+exports.up = async function up(knex) {
   const schema = () => knex.schema.withSchema('ingestion');
 
   await knex.raw(
-    `CREATE INDEX IF NOT EXISTS increment_ingestion_provider_name_idx ON public.final_entities ((final_entity::json #>> '{metadata, annotations, ${INCREMENTAL_ENTITY_PROVIDER_ANNOTATION}}'));`,
+    `CREATE INDEX IF NOT EXISTS increment_ingestion_provider_name_idx ON public.final_entities ((final_entity::json #>> '{metadata, annotations, backstage.io/incremental-provider-name}'));`,
   );
 
   await knex.raw(`DROP VIEW IF EXISTS ingestion.current_entities`);
@@ -32,9 +30,8 @@ exports.up = async function (knex) {
 
 /**
  * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
  */
-exports.down = async function (knex) {
+exports.down = async function down(knex) {
   const schema = () => knex.schema.withSchema('ingestion');
 
   await schema().alterTable('ingestions', t => {
@@ -47,8 +44,11 @@ exports.down = async function (knex) {
     t.dropPrimary('id');
   });
 
-  await schema().alterTable('ingestion_mark_entities', t => {
-    t.dropIndex('ingestion_mark_id', 'ingestion_mark_entity_ingestion_mark_id_idx');
+  await schema().alterTable('ingestions_mark_entities', t => {
+    t.dropIndex(
+      'ingestion_mark_id',
+      'ingestion_mark_entity_ingestion_mark_id_idx',
+    );
     t.dropPrimary('id');
   });
 
