@@ -189,6 +189,7 @@ export interface IngestionUpsertIFace {
   attempts?: number;
   ingestion_completed_at?: Date;
   rest_completed_at?: Date;
+  completion_ticket: string;
 }
 
 /**

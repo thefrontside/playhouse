@@ -242,6 +242,7 @@ export class IncrementalIngestionDatabaseManager {
           next_action_at,
           ingestion_completed_at: new Date(),
           status: 'resting',
+          completion_ticket: 'open'
         },
       });
 
@@ -263,6 +264,7 @@ export class IncrementalIngestionDatabaseManager {
         next_action: nextAction,
         provider_name: provider,
         status: 'bursting',
+        completion_ticket: 'open'
       },
     });
     return { ingestionId, nextAction, attempts: 0, nextActionAt: Date.now() };
@@ -360,6 +362,7 @@ export class IncrementalIngestionDatabaseManager {
           next_action_at,
           ingestion_completed_at: new Date(),
           status: 'resting',
+          completion_ticket: v4()  // NOT SURE IF THIS IS RIGHT
         },
       });
     }
@@ -407,6 +410,7 @@ export class IncrementalIngestionDatabaseManager {
         next_action: 'nothing (done)',
         rest_completed_at: new Date(),
         status: 'complete',
+        completion_ticket: v4()
       },
     });
   }
@@ -450,6 +454,7 @@ export class IncrementalIngestionDatabaseManager {
       last_error: message ? message : undefined,
       next_action_at: new Date(),
       status: 'canceling',
+      completion_ticket: v4()
     };
     await this.updateIngestionRecordById({ ingestionId, update });
   }
@@ -465,6 +470,7 @@ export class IncrementalIngestionDatabaseManager {
         next_action: 'nothing (canceled)',
         rest_completed_at: new Date(),
         status: 'complete',
+        completion_ticket: v4()
       },
     });
   }
