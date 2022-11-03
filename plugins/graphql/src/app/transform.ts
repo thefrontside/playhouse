@@ -9,13 +9,13 @@ export function transformSchema(source: TypeSource) {
   const schema = transformDirectives(
     buildASTSchema(
       mergeTypeDefs([
+        source,
         loadFilesSync(
           resolvePackagePath(
             '@frontside/backstage-plugin-graphql',
             'src/app/modules/**/*.graphql'
           )
         ),
-        source
       ])
     ),
   );

@@ -75,14 +75,22 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
   const typesToAdd = new Map<string, GraphQLNamedType>()
   const additionalInterfaces: Record<string, Set<GraphQLInterfaceType>> = {};
 
-  function handleFieldDirective(field: GraphQLFieldConfig<{ id: string }, ResolverContext>, directive: Record<string, any>) {
-    if (typeof directive.at !== 'string' || (Array.isArray(directive.at) && directive.at.every(a => typeof a !== 'string'))) {
+  function handleFieldDirective(
+    field: GraphQLFieldConfig<{ id: string }, ResolverContext>,
+    fieldName: string,
+    directive: Record<string, any>
+  ) {
+    if (
+      'at' in directive
+      && typeof directive.at !== 'string'
+      && (!Array.isArray(directive.at) || directive.at.some(a => typeof a !== 'string'))
+    ) {
       throw new Error(`The "at" argument of @field directive must be a string or an array of strings`);
     }
     field.resolve = async ({ id }, _, { loader }) => {
       const entity = await loader.load(id);
       if (!entity) return null;
-      return get(entity, directive.at);
+      return get(entity, directive.at ?? fieldName);
     };
   }
 
@@ -109,7 +117,7 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
           throw new Error(`The interface "${directive.interface}" is not defined in the schema.`)
         }
         if (isInputType(nodeType)) {
-          throw new Error(`The interface "${directive.interface}" is an input type and can't be used as a node type.`)
+          throw new Error(`The interface "${directive.interface}" is an input type and can't be used in a Connection.`)
         }
         if (isUnionType(nodeType)) {
           const iface = (typesToAdd.get(directive.interface) ?? new GraphQLInterfaceType({
@@ -160,17 +168,31 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
     }
   }
 
-  function validateExtendDirective(directive: Record<string, any>) {
+  function validateExtendDirective(interfaceType: GraphQLInterfaceType, directive: Record<string, any>, schema: GraphQLSchema) {
     if ('when' in directive !== 'is' in directive) {
-      throw new Error(`The @extend directive of "${directive.interface}" should have both "when" and "is" arguments or none of them`)
+      throw new Error(`The @extend directive for "${interfaceType.name}" should have both "when" and "is" arguments or none of them`)
     }
-    if (!('when' in directive) && 'interface' in directive && extendsWithoutArgs.has(directive.interface)) {
-      throw new Error(`The @extend directive of "${directive.interface}" without "when" and "is" arguments could be used only once`)
-    } else {
-      extendsWithoutArgs.add(directive.interface)
+    if (!('when' in directive)) {
+      if ('interface' in directive && extendsWithoutArgs.has(directive.interface)) {
+        throw new Error(`The @extend directive of "${directive.interface}" without "when" and "is" arguments could be used only once`)
+      } else {
+        extendsWithoutArgs.add(directive.interface)
+      }
+      const parentType = schema.getType(directive.interface)
+      if (parentType) {
+        const [extendDirective] = getDirective(schema, parentType, 'extend') ?? []
+        if (
+          extendDirective &&
+          'interface' in extendDirective &&
+          !('when' in extendDirective) &&
+          Object.values(interfaceType.getFields()).some(field => isNonNullType(field.type))
+        ) {
+          throw new Error(`The interface "${interfaceType.name}" has required fields and can't be extended from "${directive.interface}" without "when" and "is" arguments, because "${directive.interface}" has already been extended without them`)
+        }
+      }
     }
     if ('when' in directive && (typeof directive.when !== 'string' || (Array.isArray(directive.when) && directive.when.some(a => typeof a !== 'string')))) {
-      throw new Error(`The "when" argument of @extend directive should be a string or an array of strings`)
+      throw new Error(`The "when" argument of @extend directive must be a string or an array of strings`)
     }
   }
 
@@ -211,7 +233,7 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
 
       try {
         if (fieldDirective) {
-          handleFieldDirective(fieldConfig, fieldDirective)
+          handleFieldDirective(fieldConfig, fieldName, fieldDirective)
         } else if (relationDirective) {
           handleRelationDirective(fieldConfig, fieldName, relationDirective, schema)
         }
@@ -228,7 +250,7 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
       }
       const [extendDirective] = getDirective(schema, interfaceType, 'extend') ?? []
       if (!extendDirective) return interfaceType;
-      validateExtendDirective(extendDirective)
+      validateExtendDirective(interfaceType, extendDirective, schema)
       defineResolver(interfaceType, extendDirective, schema)
 
       const extendInterfaces = traverseExtends(interfaceType, schema)
@@ -282,7 +304,7 @@ function traverseExtends(type: GraphQLInterfaceType, schema: GraphQLSchema): Gra
       throw new Error(`The interface "${extendDirective.interface}" described in @extend directive for "${type.name}" isn't abstract type or doesn't exist`)
     }
     if (interfaces.includes(extendType)) {
-      throw new Error(`The interface "${extendDirective.interface}" described in @extend directive for "${type.name}" is already implemented`)
+      throw new Error(`The interface "${extendDirective.interface}" described in @extend directive for "${type.name}" is already implemented by the type`)
     }
 
     interfaces.push(...traverseExtends(extendType, schema))

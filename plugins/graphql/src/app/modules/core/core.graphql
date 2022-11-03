@@ -1,4 +1,4 @@
-directive @field(at: FieldAtArgument!) on FIELD_DEFINITION
+directive @field(at: FieldAtArgument) on FIELD_DEFINITION
 directive @relation(type: String, interface: String, kind: String) on FIELD_DEFINITION
 directive @extend(interface: String, when: ExtendWhenArgument, is: ExtendIsArgument) on INTERFACE
 
