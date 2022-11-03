@@ -8,6 +8,7 @@ import type { Module } from 'graphql-modules';
 import { createGraphQLApp } from './app';
 import { createLoader } from './loaders';
 import type { EnvelopPlugins } from './types';
+import { BatchLoader } from '@frontside/backstage-plugin-batch-loader';
 
 export * from './app';
 export * from './loaders';
@@ -25,10 +26,11 @@ export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
   const { logger } = options;
+  const batchLoader = new BatchLoader(options)
 
   const { run, application } = createGraphQLApp({
     modules: options.modules,
-    loader: () => createLoader(options),
+    loader: () => createLoader(batchLoader),
     plugins: options.plugins,
   });
 
