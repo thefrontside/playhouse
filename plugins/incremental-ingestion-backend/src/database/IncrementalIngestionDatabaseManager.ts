@@ -1,4 +1,3 @@
-
 import { Knex } from 'knex';
 import type { DeferredEntity } from '@backstage/plugin-catalog-backend';
 import { stringifyEntityRef } from '@backstage/catalog-model';
@@ -7,7 +6,6 @@ import { v4 } from 'uuid';
 import {
   INCREMENTAL_ENTITY_PROVIDER_ANNOTATION,
   IngestionRecord,
-  IngestionRecordInsert,
   IngestionRecordUpdate,
   IngestionUpsertIFace,
   MarkRecord,
@@ -45,18 +43,17 @@ export class IncrementalIngestionDatabaseManager {
     await this.client.transaction(async tx => {
       await tx('ingestion.ingestions')
         .where('provider_name', provider)
-        .andWhere('rest_completed_at', null)
+        .andWhere('completion_ticket', 'open')
         .update(update);
     });
   }
 
   /**
    * Performs an insert into the `ingestion.ingestions` table with the supplied values.
-   * @param options - IngestionRecordInsert
+   * @param record - IngestionUpsertIFace
    */
-  async insertIngestionRecord(options: IngestionRecordInsert) {
+  async insertIngestionRecord(record: IngestionUpsertIFace) {
     await this.client.transaction(async tx => {
-      const { record } = options;
       await tx('ingestion.ingestions').insert(record);
     });
   }
@@ -95,7 +92,7 @@ export class IncrementalIngestionDatabaseManager {
     return await this.client.transaction(async tx => {
       const record = await tx<IngestionRecord>('ingestion.ingestions')
         .where('provider_name', provider)
-        .andWhere('rest_completed_at', null)
+        .andWhere('completion_ticket', 'open')
         .first();
       return record;
     });
@@ -103,7 +100,7 @@ export class IncrementalIngestionDatabaseManager {
 
   /**
    * Removes all entries from `ingestion_marks_entities`, `ingestion_marks`, and `ingestions`
-   * for prior ingestions that completed (i.e., have a value for `rest_completed_at`).
+   * for prior ingestions that completed (i.e., have a `completion_ticket` value other than 'open').
    * @param provider - string
    * @returns A count of deletions for each record type.
    */
@@ -120,7 +117,7 @@ export class IncrementalIngestionDatabaseManager {
               tx('ingestion.ingestions')
                 .select('id')
                 .where('provider_name', provider)
-                .andWhereNot('rest_completed_at', null),
+                .andWhereNot('completion_ticket', 'open'),
             ),
         );
 
@@ -131,13 +128,13 @@ export class IncrementalIngestionDatabaseManager {
           tx('ingestion.ingestions')
             .select('id')
             .where('provider_name', provider)
-            .andWhereNot('rest_completed_at', null),
+            .andWhereNot('completion_ticket', 'open'),
         );
 
       const ingestionsDeleted = await tx('ingestion.ingestions')
         .delete()
         .where('provider_name', provider)
-        .andWhereNot('rest_completed_at', null);
+        .andWhereNot('completion_ticket', 'open');
 
       return {
         deletions: {
@@ -234,16 +231,14 @@ export class IncrementalIngestionDatabaseManager {
       const next_action_at = new Date();
       next_action_at.setTime(next_action_at.getTime() + 24 * 60 * 60 * 1000);
 
-      await this.insertRecord({
-        record: {
-          id: v4(),
-          next_action: 'rest',
-          provider_name: provider,
-          next_action_at,
-          ingestion_completed_at: new Date(),
-          status: 'resting',
-          completion_ticket: 'open'
-        },
+      await this.insertIngestionRecord({
+        id: v4(),
+        next_action: 'rest',
+        provider_name: provider,
+        next_action_at,
+        ingestion_completed_at: new Date(),
+        status: 'resting',
+        completion_ticket: v4(),
       });
 
       return { provider, ingestionsDeleted, marksDeleted, markEntitiesDeleted };
@@ -258,16 +253,19 @@ export class IncrementalIngestionDatabaseManager {
   async createProviderIngestionRecord(provider: string) {
     const ingestionId = v4();
     const nextAction = 'ingest';
-    await this.insertIngestionRecord({
-      record: {
+    try {
+      await this.insertIngestionRecord({
         id: ingestionId,
         next_action: nextAction,
         provider_name: provider,
         status: 'bursting',
-        completion_ticket: 'open'
-      },
-    });
-    return { ingestionId, nextAction, attempts: 0, nextActionAt: Date.now() };
+        completion_ticket: 'open',
+      });
+      return { ingestionId, nextAction, attempts: 0, nextActionAt: Date.now() };
+    } catch (_e) {
+      // Creating the ingestion record failed. Return undefined.
+      return undefined;
+    }
   }
 
   /**
@@ -355,15 +353,13 @@ export class IncrementalIngestionDatabaseManager {
 
     for (const provider of providers) {
       await this.insertIngestionRecord({
-        record: {
-          id: v4(),
-          next_action: 'rest',
-          provider_name: provider,
-          next_action_at,
-          ingestion_completed_at: new Date(),
-          status: 'resting',
-          completion_ticket: v4()  // NOT SURE IF THIS IS RIGHT
-        },
+        id: v4(),
+        next_action: 'rest',
+        provider_name: provider,
+        next_action_at,
+        ingestion_completed_at: new Date(),
+        status: 'resting',
+        completion_ticket: v4(),
       });
     }
 
@@ -410,7 +406,7 @@ export class IncrementalIngestionDatabaseManager {
         next_action: 'nothing (done)',
         rest_completed_at: new Date(),
         status: 'complete',
-        completion_ticket: v4()
+        completion_ticket: v4(),
       },
     });
   }
@@ -454,7 +450,6 @@ export class IncrementalIngestionDatabaseManager {
       last_error: message ? message : undefined,
       next_action_at: new Date(),
       status: 'canceling',
-      completion_ticket: v4()
     };
     await this.updateIngestionRecordById({ ingestionId, update });
   }
@@ -470,7 +465,7 @@ export class IncrementalIngestionDatabaseManager {
         next_action: 'nothing (canceled)',
         rest_completed_at: new Date(),
         status: 'complete',
-        completion_ticket: v4()
+        completion_ticket: v4(),
       },
     });
   }
@@ -577,8 +572,5 @@ export class IncrementalIngestionDatabaseManager {
 
   async updateByName(provider: string, update: Partial<IngestionUpsertIFace>) {
     await this.updateIngestionRecordByProvider(provider, update);
-  }
-  async insertRecord(options: IngestionRecordInsert) {
-    await this.insertIngestionRecord(options);
   }
 }
