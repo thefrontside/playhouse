@@ -81,7 +81,7 @@ Backstage GraphQL Plugin allows developers to extend the schema provided by the 
 
 You can extend the schema from inside of Backstage Backend by creating a [GraphQL Module](https://www.graphql-modules.com) that you can pass to the GraphQL API plugin's router. Here are step-by-step instructions on how to set up your GraphQL API plugin to provide a custom GraphQL Module.
 
-1. Add `graphql-modules` to your backend packages in `packages/backend` with `yarn add graphql-modules`
+1. Add `graphql-modules` and `@graphql-tools/load-files` to your backend packages in `packages/backend` with `yarn add graphql-modules @graphql-tools/load-files`
 1. Create `packages/backend/src/graphql` directory that will contain your modules
 1. Create a file for your first GraphQL module called `packages/backend/src/graphql/my-module.ts` with the following content
 
@@ -138,7 +138,29 @@ You can extend the schema from inside of Backstage Backend by creating a [GraphQ
 
 1. Start your backend and you should be able to query your API with `{ hello }` query to get `{ data: { hello: 'world' } }`
 
-1. If you use TypeScript and generate types from your GraphQL modules you should create `packages/backend/src/schema.ts` file:
+1. (Optional) You can also extend existing basic node types. For example, you can add a new field to the `Component` interface. Here is what the result should look like.
+
+  ```ts
+  // ./src/graphql/extensions.ts
+  import { resolvePackagePath } from '@backstage/backend-common'
+  import { loadFilesSync } from '@graphql-tools/load-files';
+  import { createModule } from 'graphql-modules'
+
+  export const extensionsModule = createModule({
+    id: 'extensions',
+    dirname: resolvePackagePath('backend', 'src/graphql'),
+    typeDefs: loadFilesSync(resolvePackagePath('backend', 'src/graphql/extensions.graphql')),
+  });
+  ```
+
+  ```graphql
+  # ./src/graphql/extensions.graphql
+  interface Component {
+    type: String @field(at: "spec.type")
+  }
+  ```
+
+1. (Optional) If you use TypeScript and generate types from your GraphQL modules you should create `packages/backend/src/schema.ts` file:
 ```ts
 import { resolvePackagePath } from '@backstage/backend-common';
 import { transformSchema } from '@frontside/backstage-plugin-graphql';
