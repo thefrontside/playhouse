@@ -552,10 +552,4 @@ describe('Transformer', () => {
       }
     })
   })
-
-  // TODO Tests:
-  // resolvers?
-  // relation to Connection
-  // relation `kind` argument
-  // relation Connection to union
 });
