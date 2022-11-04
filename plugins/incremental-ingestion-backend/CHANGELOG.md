@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.4.1
+
+### Patch Changes
+
+- 83910a8: catch handler in the IncrementalIngestianEngine is wrongly assuming an error to be a string
+
 ## 0.4.0
 
 ### Minor Changes
