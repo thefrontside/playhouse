@@ -32,7 +32,7 @@ export async function createRouter(
   router.use(express.json());
 
   router.get('/health', (_, response) => {
-    logger.info('PONG!');
+    logger.info('PONG!!!');
     response.send({ status: 'ok' });
   });
   router.use(errorHandler());
