@@ -1,14 +1,24 @@
 import { Entity, EntityRelation, stringifyEntityRef } from '@backstage/catalog-model';
-import type { CatalogApi } from '../app/types';
+import type { Loader } from '../app/types';
 import type { JsonObject } from '@backstage/types';
 import type { Operation } from 'effection';
 import type { Node } from '@frontside/graphgen';
 
-import { PromiseOrValue } from '@envelop/core';
+import { envelop, EnvelopError, PromiseOrValue, useExtendContext } from '@envelop/core';
 import { createGraphQLApp } from '..';
 
 import type { Factory, World } from '@frontside/graphgen-backstage';
 import { createFactory } from '@frontside/graphgen-backstage';
+import DataLoader from 'dataloader';
+import { createApplication, Module } from 'graphql-modules';
+import { transformDirectives } from '../app/mappers';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { Core } from '../app/modules/core/core';
+import { useGraphQLModules } from '@envelop/graphql-modules';
+import { useDataLoader } from '@envelop/dataloader';
+import type { CatalogClient } from '@backstage/catalog-client';
+
+export type CatalogApi = Pick<CatalogClient, "getEntityByRef">;
 
 export interface GraphQLHarness {
   query(query: string): Operation<JsonObject>;
@@ -16,13 +26,51 @@ export interface GraphQLHarness {
   all(...params: Parameters<Factory["all"]>): ReturnType<Factory["all"]>;
 }
 
+export function createGraphQLTestApp(TestModule: Module, loader: () => DataLoader<any, any>): (query: string) => Operation<JsonObject> {
+  const application = createApplication({
+    schemaBuilder: ({ typeDefs, resolvers }) =>
+      transformDirectives(
+        makeExecutableSchema({ typeDefs, resolvers }),
+      ),
+    modules: [Core, TestModule],
+  });
+  const run = envelop({
+    plugins: [
+      useGraphQLModules(application),
+      useDataLoader('loader', loader),
+      useExtendContext(() => ({ refToId: stringifyEntityRef })),
+    ],
+  });
+  return (query: string): Operation<JsonObject> => {
+    return function* Query() {
+      const { parse, validate, contextFactory, execute, schema } = run();
+      let document = parse(`{ ${query} }`);
+      let errors = validate(schema, document);
+      if (errors.length) {
+        throw errors[0];
+      }
+      let contextValue = yield* unwrap(contextFactory());
 
+      let result = yield* unwrap(execute({
+        schema,
+        document,
+        contextValue,
+      }));
+      if (result.errors) {
+        throw result.errors[0];
+      } else {
+        return result.data as JsonObject
+      }
+    }
+  }
+}
 
 export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
+  let catalog = createSimulatedCatalog(factory)
   let { run, application } = createGraphQLApp({
-    catalog: createSimulatedCatalog(factory),
-    modules: []
+    plugins: [useExtendContext(() => ({ catalog }))],
+    loader: () => createSimulatedLoader(catalog),
   });
 
   return {
@@ -58,6 +106,15 @@ export function createGraphQLAPI(): GraphQLHarness {
     },
     all: factory.all,
   };
+}
+
+export function createSimulatedLoader(catalog: CatalogApi): Loader {
+  return new DataLoader<string, Entity>(function fetch(refs): Promise<Array<Entity | Error>> {
+    return Promise.all(refs.map(async ref => {
+      let entity = await catalog.getEntityByRef(ref);
+      return entity ?? new EnvelopError(`no such node with ref: '${ref}'`);
+    }));
+  });
 }
 
 export function createSimulatedCatalog(factory: Factory): CatalogApi {

@@ -22,14 +22,18 @@
     "postpack": "backstage-cli package postpack",
     "clean": "backstage-cli clean"
   },
+  "peerDependencies": {
+    "graphql": ">15.0.0"
+  },
   "dependencies": {
     "@backstage/backend-common": "^0.15.2",
-    "@backstage/catalog-client": "^1.1.1",
     "@backstage/catalog-model": "^1.1.2",
-    "@backstage/config": "^1.0.3",
     "@envelop/core": "^2.3.0",
+    "@envelop/dataloader": "^3.3.2",
     "@envelop/graphql-modules": "^3.3.0",
+    "@frontside/backstage-plugin-batch-loader": "^0.2.1",
     "@graphql-tools/load-files": "^6.5.3",
+    "@graphql-tools/merge": "^8.3.6",
     "@graphql-tools/schema": "^8.3.6",
     "@graphql-tools/utils": "^8.6.5",
     "@types/express": "*",
@@ -38,34 +42,27 @@
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "express-promise-router": "^4.1.0",
-    "graphql": "^16.3.0",
     "graphql-modules": "^2.0.0",
     "graphql-relay": "^0.10.0",
     "graphql-type-json": "^0.3.2",
-    "graphql-ws": "^5.6.4",
     "lodash": "^4.17.21",
-    "winston": "^3.2.1",
-    "yn": "^4.0.0"
+    "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@backstage/catalog-client": "^1.1.1",
     "@backstage/cli": "^0.20.0",
     "@effection/jest": "^2.0.4",
-    "@effection/process": "^2.1.2",
-    "@faker-js/faker": "^7.6.0",
     "@frontside/graphgen": "^1.7.0",
     "@frontside/graphgen-backstage": "*",
     "@graphql-codegen/add": "^3.1.1",
-    "@graphql-codegen/cli": "^2.6.2",
-    "@graphql-codegen/graphql-modules-preset": "^2.3.8",
-    "@graphql-codegen/typescript": "^2.4.8",
-    "@graphql-codegen/typescript-resolvers": "^2.6.1",
+    "@graphql-codegen/cli": "^2.11.5",
+    "@graphql-codegen/graphql-modules-preset": "^2.3.14",
+    "@graphql-codegen/typescript": "^2.7.4",
+    "@graphql-codegen/typescript-resolvers": "^2.7.4",
     "@types/graphql": "^14.5.0",
-    "@types/supertest": "^2.0.8",
     "effection": "^2.0.6",
-    "jest": "^29.2.2",
-    "knex": "^2.0.0",
-    "msw": "^0.35.0",
-    "supertest": "^4.0.2"
+    "graphql": "^16.3.0",
+    "jest": "^29.2.2"
   },
   "files": [
     "dist",

@@ -1,9 +1,5 @@
 import { DatabaseManager } from '@backstage/backend-common';
-import {
-  CompoundEntityRef,
-  Entity,
-  stringifyEntityRef,
-} from '@backstage/catalog-model';
+import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
 import type { Knex } from 'knex';
 import { Logger } from 'winston';
 
@@ -29,8 +25,8 @@ export class BatchLoader {
   }
 
   public async getEntitiesByRefs(
-    refs: (string | CompoundEntityRef)[],
-  ): Promise<Entity[]> {
+    refs: (string | { kind: string; namespace?: string; name: string })[],
+  ): Promise<(Entity | undefined)[]> {
     this.logger.info(`Loading entities for refs: ${refs}`);
     const client = await this.getClient();
     const stringifiedRefs = refs.map(ref => typeof ref === 'string' ? ref : stringifyEntityRef(ref))

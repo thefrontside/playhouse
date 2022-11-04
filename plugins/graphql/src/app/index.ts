@@ -1,30 +1,37 @@
-import { errorHandler } from '@backstage/backend-common';
+import { DatabaseManager, errorHandler } from '@backstage/backend-common';
 import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { graphqlHTTP } from 'express-graphql';
-import { CatalogClient } from '@backstage/catalog-client';
 import { printSchema } from 'graphql';
 import type { Module } from 'graphql-modules';
-
-export interface RouterOptions {
-  logger: Logger;
-  catalog: CatalogClient;
-  modules?: Module[]
-}
-
 import { createGraphQLApp } from './app';
+import { createLoader } from './loaders';
+import type { EnvelopPlugins } from './types';
+import { BatchLoader } from '@frontside/backstage-plugin-batch-loader';
 
 export * from './app';
+export * from './loaders';
+export type { Loader as EntityLoader } from './types';
+export { transformSchema } from './transform';
+
+export type RouterOptions = {
+  logger: Logger;
+  databaseManager: DatabaseManager;
+  modules?: Module[]
+  plugins?: EnvelopPlugins
+};
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
   const { logger } = options;
+  const batchLoader = new BatchLoader(options)
 
-  const { run, application } = createGraphQLApp({ 
-    catalog: options.catalog, 
-    modules: options.modules ?? []
+  const { run, application } = createGraphQLApp({
+    modules: options.modules,
+    loader: () => createLoader(batchLoader),
+    plugins: options.plugins,
   });
 
   const router = Router();
@@ -38,7 +45,7 @@ export async function createRouter(
     response.send(printSchema(application.schema))
   });
 
-  router.use('/',  graphqlHTTP(async () => {
+  router.use('/', graphqlHTTP(async () => {
     const { parse, validate, contextFactory, execute } = run();
     return {
       schema: application.schema,
