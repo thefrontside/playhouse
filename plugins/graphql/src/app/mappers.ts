@@ -89,7 +89,7 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
     field.resolve = async ({ id }, _, { loader }) => {
       const entity = await loader.load(id);
       if (!entity) return null;
-      return get(entity, directive.at);
+      return get(entity, directive.at) ?? directive.default;
     };
   }
 
