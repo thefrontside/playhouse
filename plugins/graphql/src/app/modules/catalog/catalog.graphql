@@ -47,8 +47,8 @@ interface Component @extend(interface: "Entity", when: "kind", is: "Component") 
   system: System @relation(type: "partOf", kind: "system")
   component: Component @relation(type: "partOf", kind: "component")
   subComponents: Connection @relation(type: "hasPart", interface: "Component")
-  providesApi: Connection @relation(interface: "API")
-  consumesApi: Connection @relation(interface: "API")
+  providesApi: Connection @relation(type: "providesApi", interface: "API")
+  consumesApi: Connection @relation(type: "consumesApi", interface: "API")
   dependencies: Connection @relation(type: "dependsOn", interface: "Dependency")
 }
 
@@ -93,15 +93,15 @@ interface Group @extend(interface: "Entity", when: "kind", is: "Group") {
   parent: Group @relation(type: "childOf")
   children: Connection @relation(type: "parentOf", interface: "Group")
   members: Connection @relation(type: "hasMember", interface: "User")
-  ownerOf: Connection @relation(interface: "Ownable")
+  ownerOf: Connection @relation(type: "ownerOf", interface: "Ownable")
 }
 
 interface User @extend(interface: "Entity", when: "kind", is: "User") {
   displayName: String @field(at: "spec.profile.displayName")
   email: String @field(at: "spec.profile.email")
   picture: String @field(at: "spec.profile.picture")
-  memberOf: Connection @relation(interface: "Group")
-  ownerOf: Connection @relation(interface: "Ownable")
+  memberOf: Connection @relation(type: "memberOf", interface: "Group")
+  ownerOf: Connection @relation(type: "ownerOf", interface: "Ownable")
 }
 
 extend type Query {

@@ -25,10 +25,10 @@ import {
 } from 'graphql';
 import type { ResolverContext } from './types';
 
-function filterEntityRefs(entity: Entity | undefined, relationType: string, targetKind?: string): CompoundEntityRef[] {
+function filterEntityRefs(entity: Entity | undefined, relationType?: string, targetKind?: string): CompoundEntityRef[] {
   return entity
     ?.relations
-    ?.filter(({ type }) => type === relationType)
+    ?.filter(({ type }) => !relationType || type === relationType)
     .flatMap(({ targetRef }) => {
       const ref = parseEntityRef(targetRef)
       return !targetKind || ref.kind.toLowerCase() === targetKind.toLowerCase() ? [ref] : []
@@ -77,7 +77,6 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
 
   function handleFieldDirective(
     field: GraphQLFieldConfig<{ id: string }, ResolverContext>,
-    fieldName: string,
     directive: Record<string, any>
   ) {
     if (
@@ -90,13 +89,12 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
     field.resolve = async ({ id }, _, { loader }) => {
       const entity = await loader.load(id);
       if (!entity) return null;
-      return get(entity, directive.at ?? fieldName);
+      return get(entity, directive.at);
     };
   }
 
   function handleRelationDirective(
     field: GraphQLFieldConfig<{ id: string }, ResolverContext>,
-    fieldName: string,
     directive: Record<string, any>,
     schema: GraphQLSchema
   ) {
@@ -155,13 +153,13 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
       field.args = args
 
       field.resolve = async ({ id }, args, { loader, refToId }) => {
-        const ids = filterEntityRefs(await loader.load(id), directive.type ?? fieldName, directive.kind)
+        const ids = filterEntityRefs(await loader.load(id), directive.type, directive.kind)
           .map(ref => ({ id: refToId(ref) }));
         return connectionFromArray(ids, args);
       };
     } else {
       field.resolve = async ({ id }, _, { loader, refToId }) => {
-        const ids = filterEntityRefs(await loader.load(id), directive.type ?? fieldName, directive.kind)
+        const ids = filterEntityRefs(await loader.load(id), directive.type, directive.kind)
           .map(ref => ({ id: refToId(ref) }));
         return isList ? ids : ids[0] ?? null;
       }
@@ -233,9 +231,9 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
 
       try {
         if (fieldDirective) {
-          handleFieldDirective(fieldConfig, fieldName, fieldDirective)
+          handleFieldDirective(fieldConfig, fieldDirective)
         } else if (relationDirective) {
-          handleRelationDirective(fieldConfig, fieldName, relationDirective, schema)
+          handleRelationDirective(fieldConfig, relationDirective, schema)
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : error
