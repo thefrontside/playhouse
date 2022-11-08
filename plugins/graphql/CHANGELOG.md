@@ -1,5 +1,14 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.5.1
+
+### Patch Changes
+
+- d64bccf: Remove using field name as a fallback for @relation and @field directives
+- 832d838: Make `PageInfo` as an object type instead of interface
+- 82b23f0: Add ability to specify default value for `@field` directive
+- af44f87: Make cursor fields for PageInfo interface optional
+
 ## 0.5.0
 
 ### Minor Changes
