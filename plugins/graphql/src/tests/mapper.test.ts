@@ -379,10 +379,10 @@ describe('Transformer', () => {
         group: Group @relation(type: "ownedBy", kind: "Group")
       }
       interface User @extend(interface: "Node", when: "kind", is: "User") {
-        name: String! @field
+        name: String! @field(at: "name")
       }
       interface Group @extend(interface: "Node", when: "kind", is: "Group") {
-        name: String! @field
+        name: String! @field(at: "name")
       }
       `,
     })
@@ -551,6 +551,73 @@ describe('Transformer', () => {
           { node: { username: 'Team A' } }
         ] },
         groups: { edges: [{ node: { groupname: 'Team B' } }, { node: { groupname: 'Team A' } }] },
+      }
+    })
+  })
+
+  it('resolver for @relation without `type` argument should return all relations', function* () {
+    const TestModule = createModule({
+      id: 'test',
+      typeDefs: gql`
+      interface Entity @extend(interface: "Node", when: "kind", is: "Entity") {
+        assets: [Node] @relation
+      }
+      interface User @extend(interface: "Node", when: "kind", is: "User") {
+        username: String! @field(at: "name")
+      }
+      interface Group @extend(interface: "Node", when: "kind", is: "Group") {
+        groupname: String! @field(at: "name")
+      }
+      interface Component @extend(interface: "Node", when: "kind", is: "Component") {
+        name: String! @field(at: "name")
+      }
+      interface Resource @extend(interface: "Node", when: "kind", is: "Resource") {
+        domain: String! @field(at: "name")
+      }
+      `,
+    })
+    const entity = {
+      kind: 'Entity',
+      relations: [
+        { type: 'partOf', targetRef: 'resource:default/website' },
+        { type: 'hasPart', targetRef: 'component:default/backend' },
+        { type: 'ownedBy', targetRef: 'user:default/john' },
+        { type: 'ownedBy', targetRef: 'group:default/team-b' },
+      ]
+    };
+    const john = { kind: 'User', name: 'John' };
+    const backend = { kind: 'Component', name: 'Backend' };
+    const website = { kind: 'Resource', name: 'example.com' };
+    const teamB = { kind: 'Group', name: 'Team B' };
+    const loader = () => new DataLoader(async (ids) => ids.map(id => {
+      if (id === 'user:default/john') return john
+      if (id === 'component:default/backend') return backend
+      if (id === 'resource:default/website') return website
+      if (id === 'group:default/team-b') return teamB
+      return entity
+    }));
+    const query = createGraphQLTestApp(TestModule, loader)
+    const result = yield query(/* GraphQL */`
+      node(id: "entity") {
+        ...on Entity {
+          assets {
+            id
+            ...on User { username }
+            ...on Group { groupname }
+            ...on Component { name }
+            ...on Resource { domain }
+          }
+        }
+      }
+    `)
+    expect(result).toEqual({
+      node: {
+     assets: [
+         { domain: "example.com", id: "resource:default/website" },
+         { id: "component:default/backend", name: "Backend" },
+         { id: "user:default/john", username: "John" },
+         { groupname: "Team B", id: "group:default/team-b" },
+       ],
       }
     })
   })
