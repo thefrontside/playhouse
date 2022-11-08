@@ -347,6 +347,7 @@ describe('Transformer', () => {
       interface Entity @extend(interface: "Node") {
         first: String! @field(at: "metadata.name")
         second: String! @field(at: ["spec", "path.to.name"])
+        third: String! @field(at: "nonexisting.path", default: "defaultValue")
       }
       `,
     })
@@ -357,12 +358,13 @@ describe('Transformer', () => {
     const loader = () => new DataLoader(async () => [entity]);
     const query = createGraphQLTestApp(TestModule, loader)
     const result = yield query(/* GraphQL */`
-      node(id: "test") { ...on Entity { first, second } }
+      node(id: "test") { ...on Entity { first, second, third } }
     `)
     expect(result).toEqual({
       node: {
         first: 'hello',
-        second: 'world'
+        second: 'world',
+        third: 'defaultValue',
       }
     })
   })

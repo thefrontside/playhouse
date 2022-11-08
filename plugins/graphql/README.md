@@ -187,7 +187,7 @@ Every GraphQL API consists of two things - a schema and resolvers. The schema de
 
 #### `@field`
 
-`@field` directive allows you to access properties on the object using a given path. It allows you to specify a resolver for a field from the schema without actually writing a real resolver. Under the hood, it's creating the resolver for you. It's used extensively in the [`catalog.graphql`](https://github.com/thefrontside/backstage/blob/main/plugins/graphql/src/app/modules/catalog/catalog.graphql) module to retrieve properties like `namespace`, `title` and others. For example, here is how we define the resolver for the `Entity#name` field `name: String! @field(at: "metadata.name")`. It also accepts an array of strings, it useful when path tokens contain dots: `label: String! @field(at: ["spec", "data.label"])`.
+`@field` directive allows you to access properties on the object using a given path. It allows you to specify a resolver for a field from the schema without actually writing a real resolver. Under the hood, it's creating the resolver for you. It's used extensively in the [`catalog.graphql`](https://github.com/thefrontside/backstage/blob/main/plugins/graphql/src/app/modules/catalog/catalog.graphql) module to retrieve properties like `namespace`, `title` and others. For example, here is how we define the resolver for the `Entity#name` field `name: String! @field(at: "metadata.name")`. It also accepts an array of strings, it useful when path tokens contain dots: `label: String! @field(at: ["spec", "data.label"])`. You can specify default value as a fallback if the field is not found: `label: String! @field(at: "spec.label", default: "N/A")`.
 
 #### `@relation`
 
