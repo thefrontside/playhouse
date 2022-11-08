@@ -17,8 +17,8 @@ interface Connection @extend {
 interface PageInfo @extend {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
-  startCursor: String!
-  endCursor: String!
+  startCursor: String
+  endCursor: String
 }
 
 interface Edge @extend {
