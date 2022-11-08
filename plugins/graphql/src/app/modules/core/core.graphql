@@ -15,7 +15,7 @@ interface Connection @extend {
   total: Int
 }
 
-interface PageInfo @extend {
+type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
