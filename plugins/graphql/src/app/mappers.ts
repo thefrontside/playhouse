@@ -155,7 +155,10 @@ export function transformDirectives(sourceSchema: GraphQLSchema) {
       field.resolve = async ({ id }, args, { loader, refToId }) => {
         const ids = filterEntityRefs(await loader.load(id), directive.type, directive.kind)
           .map(ref => ({ id: refToId(ref) }));
-        return connectionFromArray(ids, args);
+        return {
+          ...connectionFromArray(ids, args),
+          count: ids.length,
+        };
       };
     } else {
       field.resolve = async ({ id }, _, { loader, refToId }) => {
