@@ -12,7 +12,7 @@ interface Node { id: ID! }
 interface Connection @extend {
   pageInfo: PageInfo!
   edges: [Edge!]!
-  total: Int
+  count: Int
 }
 
 type PageInfo {

@@ -79,7 +79,7 @@ describe('Transformer', () => {
       '  foobar: String!',
       '  pageInfo: PageInfo!',
       '  edges: [Edge!]!',
-      '  total: Int',
+      '  count: Int',
       '}'
     ]);
   })
@@ -204,7 +204,7 @@ describe('Transformer', () => {
       'type OwnableConnection implements Connection {',
       '  pageInfo: PageInfo!',
       '  edges: [OwnableEdge!]!',
-      '  total: Int',
+      '  count: Int',
       '}'
     ]);
     expect(printType(schema.getType('User') as GraphQLNamedType).split('\n')).toEqual([
@@ -534,7 +534,7 @@ describe('Transformer', () => {
           ownedBy(first: 2) { edges { node { ...on User { username }, ...on Group { groupname } } } }
           nodes(first: 2, after: "YXJyYXljb25uZWN0aW9uOjE=") { edges { node { ...on Group { groupname }, ...on User { username } } } }
           owners(last: 2) { edges { node { id, ...on User { username } } } }
-          users { edges { node { username } } }
+          users { count, edges { node { username } } }
           groups { edges { node { groupname } } }
         }
       }
@@ -544,12 +544,15 @@ describe('Transformer', () => {
         ownedBy: { edges: [{ node: { username: 'John' } }, { node: { groupname: 'Team B' } }] },
         nodes: { edges: [{ node: { username: 'Mark' } }, { node: { groupname: 'Team A' } }] },
         owners: { edges: [{ node: { id: 'user:default/mark', username: 'Mark' } }, { node: { id: 'group:default/team-a' } }] },
-        users: { edges: [
-          { node: { username: 'John' } },
-          { node: { username: 'Team B' } },
-          { node: { username: 'Mark' } },
-          { node: { username: 'Team A' } }
-        ] },
+        users: {
+          count: 4,
+          edges: [
+            { node: { username: 'John' } },
+            { node: { username: 'Team B' } },
+            { node: { username: 'Mark' } },
+            { node: { username: 'Team A' } }
+          ]
+        },
         groups: { edges: [{ node: { groupname: 'Team B' } }, { node: { groupname: 'Team A' } }] },
       }
     })
