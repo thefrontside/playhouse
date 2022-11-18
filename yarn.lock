@@ -20789,6 +20789,13 @@ pkginfo@0.4.x, pkginfo@^0.4.1:
   resolved "https://registry.yarnpkg.com/pkginfo/-/pkginfo-0.4.1.tgz#b5418ef0439de5425fc4995042dced14fb2a84ff"
   integrity sha512-8xCNE/aT/EXKenuMDZ+xTVwkT8gsoHN2z/Q29l80u0ppGEXVvsKRzNMbtKhg8LS8k1tJLAHHylf6p4VFmP6XUQ==
 
+platformscript@^1.0.0-alapha.3:
+  version "1.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/platformscript/-/platformscript-1.0.0-alpha.3.tgz#b1765087a74cd0d7c5f06d37536d2b4b15152842"
+  integrity sha512-/oGpknF1dncZ3MggBuMIh9CAiaTwzmbIPRqIMeVvxfWtCQdsqC83IbgLy9HS5oDuvF/dayhMrHqLw9/OmeEwBQ==
+  dependencies:
+    yaml-ast-parser "0.0.43"
+
 pluralize@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-8.0.0.tgz#1a6fa16a38d12a1901e0320fa017051c539ce3b1"
