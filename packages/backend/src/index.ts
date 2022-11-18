@@ -81,6 +81,12 @@ function makeCreateEnv(config: Config) {
   };
 }
 
+import { resolvePackagePath } from '@backstage/backend-common';
+import express from 'express';
+import path from 'path';
+
+const libps = express.static(path.join(resolvePackagePath('backend'), 'ps', 'lib'))
+
 async function main() {
   const config = await loadBackendConfig({
     argv: process.argv,
@@ -111,6 +117,7 @@ async function main() {
   apiRouter.use('/effection-inspector', await effectionInspector(effectionInspectorEnv));
   apiRouter.use('/humanitec', await humanitec(humanitecEnv));
   apiRouter.use('/graphql', await graphql(graphqlEnv));
+  apiRouter.use('/ps/lib', libps);
   apiRouter.use(notFoundHandler());
 
   const service = createServiceBuilder(module)

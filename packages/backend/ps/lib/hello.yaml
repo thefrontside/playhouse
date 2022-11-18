@@ -1,0 +1,2 @@
+greet:
+  $(thing): "Hello, $thing"
