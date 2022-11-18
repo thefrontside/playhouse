@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec
 
+## 0.3.3
+
+### Patch Changes
+
+- da0b58f: Fix Humanitec package distribution
+
 ## 0.3.2
 
 ### Patch Changes
