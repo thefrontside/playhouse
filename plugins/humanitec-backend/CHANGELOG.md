@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.3
+
+### Patch Changes
+
+- da0b58f: Fix Humanitec package distribution
+- Updated dependencies [da0b58f]
+  - @frontside/backstage-plugin-humanitec-common@0.3.1
+
 ## 0.3.2
 
 ### Patch Changes

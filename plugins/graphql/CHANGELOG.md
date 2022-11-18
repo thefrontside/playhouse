@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.5.2
+
+### Patch Changes
+
+- a8da69a: Rename Connection field `total`->`count`
+
 ## 0.5.1
 
 ### Patch Changes
