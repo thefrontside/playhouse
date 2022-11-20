@@ -1,2 +1,2 @@
-greet:
-  $(thing): "Hello, $thing"
+-
+  $Button: Press Me
