@@ -35,7 +35,7 @@
     "@frontside/backstage-plugin-humanitec": "^0.3.2",
     "@material-ui/core": "^4.12.2",
     "@material-ui/icons": "^4.9.1",
-    "@monaco-editor/react": "^4.4.6",
+    "@monaco-editor/react": "4.4.5",
     "history": "^5.0.0",
     "platformscript": "^1.0.0-alapha.4",
     "react": "^17.0.2",
