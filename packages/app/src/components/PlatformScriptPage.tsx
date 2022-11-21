@@ -1,37 +1,54 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import * as ps from 'platformscript';
 import { Button } from '@material-ui/core';
-import { YAMLEditor } from './yaml-editor/YamlEditor';
-import type { MonacoEditor } from './yaml-editor/YamlEditor';
+import { MonacoEditor, YAMLEditor } from './yaml-editor/YamlEditor';
 import { useAsync } from 'react-use';
+import type { PSMap, PSValue } from 'platformscript';
+
+const DefultYaml = `$Button:
+  text: 'Press Me'`;
+
+export function lookup(key: string, map: PSMap): PSValue | void {
+  for (const entry of map.value.entries()) {
+    const [k, value] = entry;
+    if (k.value.toString() === key) {
+      return value;
+    }
+  }
+  return void 0;
+}
 
 export function PlatformScriptPage() {
+  const editorRef = useRef<MonacoEditor>(null);
   const globals = useMemo(() => ps.map({
-    Button: ps.fn(function*({ arg }) {
-      return ps.external(<Button>{String(arg.value)}</Button>);
+    Button: ps.fn(function* ({ arg, env }) {
+      const $arg = yield* env.eval(arg);
+      let children = '';
+      switch($arg.type) {
+        case 'string':
+          children = $arg.value;
+          break;
+        case 'map':
+          children = lookup('text', $arg)?.value ?? '';
+          break;
+        default:
+          children = String($arg.type);
+      }
+
+      return ps.external(<Button >{children}</Button>);
     },
     ),
   }), []);
 
-  const [yaml, setYaml] = useState<string | undefined>(`$Button: "Press Me"`);
+  const [yaml, setYaml] = useState<string | undefined>(DefultYaml);
 
-  const editorRef = useRef<MonacoEditor>(null);
-  
   const handleEditorMount = useCallback((editor: MonacoEditor) => {
     editorRef.current = editor;
   }, []);
 
-  function handleEditorChange(value?: string) {
-    if(!yaml) {
-      return;
-    }
-    
-    setYaml(value);
-  };
-  
   const platformscript = useMemo(() => ps.createPlatformScript(globals), [globals]);
 
-  const result = useAsync(async () => {
+  const result = useAsync(async (): Promise<PSValue | undefined> => {
     const program = platformscript.parse(yaml as string);
 
     const mod = await platformscript.eval(program);
@@ -39,20 +56,18 @@ export function PlatformScriptPage() {
     return mod.value;
   }, [yaml]);
 
-  if (result.loading) {
-    return <h1>...loading</h1>
-  } else if (result.error) {
-    return <h1>{result.error.message}</h1>
-  }   
-
   return (
-  <>
+    <>
       <div>
+        {result.loading && (<h2>...loading</h2>)}
+        {result.error && <h2>{result.error.message}</h2>}
         {result.value}
         <YAMLEditor
+          key="one"
+          defaultValue={DefultYaml}
           onMount={handleEditorMount}
-          onChange={handleEditorChange}
-          defaultValue={yaml}
+          onChange={(value) => setYaml(value)}
+          value={yaml}
         />
       </div>
     </>
