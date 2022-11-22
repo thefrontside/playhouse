@@ -4,7 +4,7 @@ import type { ComponentType } from 'react';
 import type { PlatformScript, PSMap, PSValue } from 'platformscript';
 import * as ps from 'platformscript';
 import { Button, Typography } from '@material-ui/core';
-
+import { CodeSnippet } from '@backstage/core-components';
 
 type TypographyProps = typeof Typography extends ComponentType<infer P>
   ? P
@@ -21,7 +21,6 @@ export function lookup(key: string, map: PSMap): PSValue | void {
   }
   return void 0;
 }
-
 
 export function globals(interpreter: PlatformScript) {
   return ps.map({
@@ -61,6 +60,30 @@ export function globals(interpreter: PlatformScript) {
       }
 
       return ps.external(<div>{children.value}</div>)
+    }),
+    CodeSnippet: ps.fn(function* ({ arg, env }) {
+      const $arg = yield* env.eval(arg);
+      let text = '';
+      let showLineNumbers: boolean | undefined = undefined;
+      let highlightedNumbers: number[] = [];
+      let language = ''
+
+      if ($arg.type === 'map') {
+        text = lookup('text', $arg)?.value;
+        showLineNumbers = lookup('showLineNumbers', $arg)?.value;
+        highlightedNumbers = lookup('highlightedNumbers', $arg)?.value.map((v: any) => v.value);
+        language = lookup('language', $arg)?.value;
+      }
+
+      return ps.external(
+        <CodeSnippet
+          text={text}
+          language={language}
+          showLineNumbers={showLineNumbers}
+          highlightedNumbers={highlightedNumbers}
+          customStyle={{ background: 'inherit', fontSize: '115%' }}
+        />
+      )
     }),
     Typography: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);

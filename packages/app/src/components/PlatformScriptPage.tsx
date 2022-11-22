@@ -13,7 +13,17 @@ const DefultYaml = `$<>:
   - $div:
       className: 'whatever'
       children:
-        "children"    
+        $CodeSnippet:
+          language: 'yaml'
+          text: >-
+            metadata:
+              name: example
+              links:
+                - url: https://dashboard.example.com
+                  title: My Dashboard
+                  icon: dashboard
+          showLineNumbers: true
+          highlightedNumbers: [3, 4, 5, 6]
 `;
 
 export function PlatformScriptPage() {
@@ -34,9 +44,6 @@ export function PlatformScriptPage() {
 
     return mod.value;
   }, [yaml]);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  // result.error && console.log(result.error);
   
   return (
     <>
