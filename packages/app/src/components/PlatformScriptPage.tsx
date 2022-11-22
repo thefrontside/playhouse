@@ -25,8 +25,9 @@ export function lookup(key: string, map: PSMap): PSValue | void {
 
 export function PlatformScriptPage() {
   const editorRef = useRef<MonacoEditor>(null);
+
   const globals = useMemo(() => ps.map({
-    alert: ps.fn(function * ({arg, env}) {
+    alert: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
 
       const message = String($arg.value);
@@ -38,19 +39,20 @@ export function PlatformScriptPage() {
     }),
     Button: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
+
       let children = '';
-      // TODO: fix return type
-      let clickHandler = (): any => void 0;
-      switch($arg.type) {
+      let clickHandler = (): void => void 0;
+
+      switch ($arg.type) {
         case 'string':
           children = $arg.value;
           break;
-        case 'map':{
+        case 'map': {
           children = lookup('text', $arg)?.value ?? '';
 
           const psClickHandler = lookup('onClick', $arg);
 
-          if(psClickHandler) {
+          if (psClickHandler) {
             assert(psClickHandler.type === 'fn', `onClick must be a function but is ${psClickHandler.type}`);
 
             clickHandler = () => {
@@ -68,12 +70,12 @@ export function PlatformScriptPage() {
           children = String($arg.type);
       }
 
-      
+
       return ps.external(<Button onClick={clickHandler}>{children}</Button>);
     },
     ),
   }), []);
-  
+
   const platformscript = useMemo(() => ps.createPlatformScript(globals), [globals]);
 
   const [yaml, setYaml] = useState<string | undefined>(DefultYaml);
@@ -81,7 +83,6 @@ export function PlatformScriptPage() {
   const handleEditorMount = useCallback((editor: MonacoEditor) => {
     editorRef.current = editor;
   }, []);
-
 
   const result = useAsync(async (): Promise<PSValue | undefined> => {
     const program = platformscript.parse(yaml as string);
@@ -95,15 +96,14 @@ export function PlatformScriptPage() {
     <>
       <div>
         {result.loading && (<h2>...loading</h2>)}
-        {result.error && <h2>{result.error.message}</h2>}
-        {result.value}
+        {/* {result.error && <h2>{result.error.message}</h2>} */}
         <YAMLEditor
-          key="one"
           defaultValue={DefultYaml}
           onMount={handleEditorMount}
           onChange={(value) => setYaml(value)}
           value={yaml}
         />
+        {result.value}
       </div>
     </>
   );
