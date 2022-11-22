@@ -1,17 +1,27 @@
+
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { ComponentType } from 'react';
 import * as ps from 'platformscript';
-import { Button } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import { MonacoEditor, YAMLEditor } from './yaml-editor/YamlEditor';
 import { useAsync } from 'react-use';
 import type { PSMap, PSValue } from 'platformscript';
 import { assert } from 'assert-ts';
 
-const DefultYaml = `$Button:
-  text: 'Press Me'
-  onClick:
-    $():
-      $alert: "Pressed!"
-  `;
+type TypographyProps = typeof Typography extends ComponentType<infer P>
+  ? P
+  : never;
+
+type Variant = TypographyProps['variant'];
+
+const DefultYaml = `$Typography:
+  variant: 'body1'
+  children:
+    "No links defined for this entity. You can add links to your entity YAML
+    as shown in the highlighted example below:"
+  div:
+    className: 'whatever'
+`;
 
 export function lookup(key: string, map: PSMap): PSValue | void {
   for (const entry of map.value.entries()) {
@@ -37,6 +47,29 @@ export function PlatformScriptPage() {
 
       return ps.boolean(true);
     }),
+    Typography: ps.fn(function* ({ arg, env }) {
+      const $arg = yield* env.eval(arg);
+      let variant = '';
+      let children: any = '';
+
+      switch ($arg.type) {
+        case 'string':
+          variant = $arg.value;
+          break;
+        case 'map':
+          children = lookup('children', $arg);
+
+          if (children) {
+            children = yield* env.eval(children);
+          }
+
+          break;
+        default:
+          children = String($arg.type);
+      }
+
+      return ps.external(<Typography variant={variant as Variant}>{children.value}</Typography>);
+    },),
     Button: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
 
@@ -72,8 +105,7 @@ export function PlatformScriptPage() {
 
 
       return ps.external(<Button onClick={clickHandler}>{children}</Button>);
-    },
-    ),
+    },)
   }), []);
 
   const platformscript = useMemo(() => ps.createPlatformScript(globals), [globals]);
@@ -92,11 +124,11 @@ export function PlatformScriptPage() {
     return mod.value;
   }, [yaml]);
 
+
   return (
     <>
       <div>
         {result.loading && (<h2>...loading</h2>)}
-        {/* {result.error && <h2>{result.error.message}</h2>} */}
         <YAMLEditor
           defaultValue={DefultYaml}
           onMount={handleEditorMount}
