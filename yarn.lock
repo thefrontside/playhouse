@@ -18841,10 +18841,10 @@ pkginfo@0.4.x, pkginfo@^0.4.1:
   resolved "https://registry.yarnpkg.com/pkginfo/-/pkginfo-0.4.1.tgz#b5418ef0439de5425fc4995042dced14fb2a84ff"
   integrity sha512-8xCNE/aT/EXKenuMDZ+xTVwkT8gsoHN2z/Q29l80u0ppGEXVvsKRzNMbtKhg8LS8k1tJLAHHylf6p4VFmP6XUQ==
 
-platformscript@^1.0.0-cl-exported-run.0:
-  version "1.0.0-cl-exported-run.0"
-  resolved "https://registry.yarnpkg.com/platformscript/-/platformscript-1.0.0-cl-exported-run.0.tgz#097f037f0bbe39c594b976532e34454d402b6500"
-  integrity sha512-sgOksrHaG5YARa4EK7EfUqOf0VJkxaiaXLshvO2YrotfE3p5H3YPqBsKvWQYd3L6IgHr3AuYXIJmVyQbSY6ITw==
+platformscript@1.0.0-alpha.6:
+  version "1.0.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/platformscript/-/platformscript-1.0.0-alpha.6.tgz#b995c514b769b587d6879f45ab6b249dc05ae83a"
+  integrity sha512-QSsY/yTBjj408NYMVyWAL0mDM9Ft3CvVc1O8F7xNzyg5pRl9GE8v7Hl+la2ZC/iYKNcByNc9j1FgHxkFfcpvSw==
   dependencies:
     yaml-ast-parser "0.0.43"
 
