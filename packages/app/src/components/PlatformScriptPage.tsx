@@ -1,4 +1,3 @@
-
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ComponentType } from 'react';
 import * as ps from 'platformscript';
@@ -14,13 +13,11 @@ type TypographyProps = typeof Typography extends ComponentType<infer P>
 
 type Variant = TypographyProps['variant'];
 
-const DefultYaml = `$Typography:
-  variant: 'body1'
-  children:
-    "No links defined for this entity. You can add links to your entity YAML
-    as shown in the highlighted example below:"
-  div:
-    className: 'whatever'
+const DefultYaml = `$<>:
+  - $Typography:
+      variant: 'body1'
+      children:
+        "No links defined for this entity. You can add links to your entity YAML as shown in the highlighted example below:"
 `;
 
 export function lookup(key: string, map: PSMap): PSValue | void {
@@ -47,21 +44,30 @@ export function PlatformScriptPage() {
 
       return ps.boolean(true);
     }),
+    '<>': ps.fn(function* ({ arg, env }) {
+      const $arg = yield* env.eval(arg);
+      
+      assert($arg.type === 'list', `a fragment must contain a list, found ${$arg.type}`);
+
+
+      const elements = $arg.value.map(value => value.value);
+
+      return ps.external(<>{elements}</>);
+    }),
     Typography: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
       let variant = '';
       let children: any = '';
 
       switch ($arg.type) {
-        case 'string':
-          variant = $arg.value;
-          break;
         case 'map':
           children = lookup('children', $arg);
 
           if (children) {
             children = yield* env.eval(children);
           }
+
+          variant = lookup('variant', $arg)?.value;
 
           break;
         default:
@@ -124,7 +130,9 @@ export function PlatformScriptPage() {
     return mod.value;
   }, [yaml]);
 
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  result.error && console.log(result.error);
+  
   return (
     <>
       <div>
