@@ -24,6 +24,12 @@ const DefultYaml = `$<>:
                   icon: dashboard
           showLineNumbers: true
           highlightedNumbers: [3, 4, 5, 6]
+  - $Button:
+      text: "Read More"
+      variant: "contained"
+      color: "primary"
+      target: "_blank"
+      href: "https://backstage.io/docs/features/software-catalog/descriptor-format#links-optional"
 `;
 
 export function PlatformScriptPage() {
@@ -44,7 +50,7 @@ export function PlatformScriptPage() {
 
     return mod.value;
   }, [yaml]);
-  
+
   return (
     <>
       <div>
