@@ -4,9 +4,14 @@ import { Button } from '@material-ui/core';
 import { MonacoEditor, YAMLEditor } from './yaml-editor/YamlEditor';
 import { useAsync } from 'react-use';
 import type { PSMap, PSValue } from 'platformscript';
+import { assert } from 'assert-ts';
 
 const DefultYaml = `$Button:
-  text: 'Press Me'`;
+  text: 'Press Me'
+  onClick:
+    $():
+      $alert: "Pressed!"
+  `;
 
 export function lookup(key: string, map: PSMap): PSValue | void {
   for (const entry of map.value.entries()) {
@@ -21,24 +26,55 @@ export function lookup(key: string, map: PSMap): PSValue | void {
 export function PlatformScriptPage() {
   const editorRef = useRef<MonacoEditor>(null);
   const globals = useMemo(() => ps.map({
+    alert: ps.fn(function * ({arg, env}) {
+      const $arg = yield* env.eval(arg);
+
+      const message = String($arg.value);
+
+      // eslint-disable-next-line no-alert
+      window.alert(message);
+
+      return ps.boolean(true);
+    }),
     Button: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
       let children = '';
+      // TODO: fix return type
+      let clickHandler = (): any => void 0;
       switch($arg.type) {
         case 'string':
           children = $arg.value;
           break;
-        case 'map':
+        case 'map':{
           children = lookup('text', $arg)?.value ?? '';
+
+          const psClickHandler = lookup('onClick', $arg);
+
+          if(psClickHandler) {
+            assert(psClickHandler.type === 'fn', `onClick must be a function but is ${psClickHandler.type}`);
+
+            clickHandler = () => {
+              ps.run(() => env.call(psClickHandler, {
+                arg: ps.boolean(true),
+                rest: ps.map({}),
+                env
+              }));
+            }
+          }
+
           break;
+        }
         default:
           children = String($arg.type);
       }
 
-      return ps.external(<Button >{children}</Button>);
+      
+      return ps.external(<Button onClick={clickHandler}>{children}</Button>);
     },
     ),
   }), []);
+  
+  const platformscript = useMemo(() => ps.createPlatformScript(globals), [globals]);
 
   const [yaml, setYaml] = useState<string | undefined>(DefultYaml);
 
@@ -46,7 +82,6 @@ export function PlatformScriptPage() {
     editorRef.current = editor;
   }, []);
 
-  const platformscript = useMemo(() => ps.createPlatformScript(globals), [globals]);
 
   const result = useAsync(async (): Promise<PSValue | undefined> => {
     const program = platformscript.parse(yaml as string);
