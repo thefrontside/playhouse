@@ -55,13 +55,13 @@ export function PlatformScriptPage() {
     <>
       <div>
         {result.loading && (<h2>...loading</h2>)}
+        {result.value}
         <YAMLEditor
           defaultValue={DefultYaml}
           onMount={handleEditorMount}
           onChange={(value) => setYaml(value)}
           value={yaml}
         />
-        {result.value}
       </div>
     </>
   );
