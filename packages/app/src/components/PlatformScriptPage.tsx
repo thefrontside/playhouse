@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import * as ps from 'platformscript';
 import { MonacoEditor, YAMLEditor } from './yaml-editor/YamlEditor';
 import { useAsync } from 'react-use';
@@ -32,15 +32,9 @@ const DefultYaml = `$<>:
       href: "https://backstage.io/docs/features/software-catalog/descriptor-format#links-optional"
 `;
 
-export function PlatformScriptPage() {
-  const editorRef = useRef<MonacoEditor>(null);
-
-  const platformscript = ps.createPlatformScript(globals);
-
-  const [yaml, setYaml] = useState<string | undefined>(DefultYaml);
-
-  const handleEditorMount = useCallback((editor: MonacoEditor) => {
-    editorRef.current = editor;
+export function usePlatformScript(yaml: string) {
+  const platformscript = useMemo(() => {
+    return ps.createPlatformScript(globals);
   }, []);
 
   const result = useAsync(async (): Promise<PSValue | undefined> => {
@@ -50,6 +44,21 @@ export function PlatformScriptPage() {
 
     return mod.value;
   }, [yaml]);
+
+  return result;
+}
+
+export function PlatformScriptPage() {
+  const editorRef = useRef<MonacoEditor>(null);
+
+  const [yaml, setYaml] = useState<string | undefined>(DefultYaml);
+
+  const handleEditorMount = useCallback((editor: MonacoEditor) => {
+    editorRef.current = editor;
+  }, []);
+
+
+  const result = usePlatformScript(yaml ?? 'false');
 
   return (
     <>

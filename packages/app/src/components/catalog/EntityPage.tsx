@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button, Grid } from '@material-ui/core';
 import {
   EntityApiDefinitionCard,
@@ -58,8 +58,9 @@ import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
-import { PlatformScriptPage } from '../PlatformScriptPage';
-import { InfoCard } from '@backstage/core-components';
+import { useEntity } from '@backstage/plugin-catalog-react';
+import { PSOverviewContent } from './PSOverviewContent';
+import { stringify } from 'yaml';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -116,30 +117,46 @@ const entityWarningContent = (
   </>
 );
 
-const overviewContent = (
-  <Grid container spacing={3} alignItems="stretch">
-    {entityWarningContent}
-    <Grid item md={6}>
-      <EntityAboutCard variant="gridItem" />
+function OverviewContent() {
+  const { entity } = useEntity();
+
+  console.log(entity)
+  
+  const overviewContentLayout = useMemo(() => {
+    return stringify(entity?.spec?.overviewContentLayout)
+  }, [entity?.spec?.overviewContentLayout])
+
+  if (overviewContentLayout) {
+    return <PSOverviewContent yaml={overviewContentLayout} />
+  }
+
+  return (
+    <Grid container spacing={3} alignItems="stretch">
+      {entityWarningContent}
+      <Grid item md={6}>
+        <EntityAboutCard variant="gridItem" />
+      </Grid>
+      <Grid item md={6}>
+        <HumanitecCardComponent />
+      </Grid>
+      <Grid item md={4} xs={12}>
+        <EntityLinksCard />
+        {/* <InfoCard title="Links">
+          <PlatformScriptPage />
+        </InfoCard> */}
+      </Grid>
+      <Grid item md={8} xs={12}>
+        <EntityHasSubcomponentsCard variant="gridItem" />
+      </Grid>
     </Grid>
-    <Grid item md={6}>
-      <HumanitecCardComponent />
-    </Grid>
-    <Grid item md={4} xs={12}>
-      <InfoCard title="Links">
-        <PlatformScriptPage />
-      </InfoCard>
-    </Grid>
-    <Grid item md={8} xs={12}>
-      <EntityHasSubcomponentsCard variant="gridItem" />
-    </Grid>
-  </Grid>
-);
+  )
+}
+
 
 const serviceEntityPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      {overviewContent}
+      <OverviewContent />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/ci-cd" title="CI/CD">
@@ -177,7 +194,7 @@ const serviceEntityPage = (
 const websiteEntityPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      {overviewContent}
+      <OverviewContent />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/ci-cd" title="CI/CD">
@@ -211,7 +228,7 @@ const websiteEntityPage = (
 const defaultEntityPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      {overviewContent}
+      <OverviewContent />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/docs" title="Docs">

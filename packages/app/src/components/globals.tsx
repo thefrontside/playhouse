@@ -3,7 +3,7 @@ import { assert } from 'assert-ts';
 import type { ComponentType } from 'react';
 import type { PlatformScript, PSMap, PSValue } from 'platformscript';
 import * as ps from 'platformscript';
-import { Button, Typography } from '@material-ui/core';
+import { Button, Grid, Typography } from '@material-ui/core';
 import { CodeSnippet } from '@backstage/core-components';
 
 type ComponentProps<C extends ComponentType> = C extends ComponentType<infer P>
@@ -25,8 +25,46 @@ export function lookup(key: string, map: PSMap): PSValue | void {
   return void 0;
 }
 
+function createReactComponent(type: any) {
+  return ps.fn(function* ({ arg, env, rest }) {
+
+    const $arg: PSValue = yield* env.eval(arg);
+    const $options = (yield* env.eval(rest)) as PSMap;
+
+    let props = {};
+    let children = [];
+
+    switch ($arg.type) {
+      case "map": {
+        props = [...$arg.value.entries()]
+          .reduce((result, [key, value]) => {
+            return { ...result, [String(key.value)]: value.value }
+          }, {});
+        const _children = lookup('children', $options);
+        if (!!_children) {
+          if (_children.type === "list") {
+            children = _children.value.map(value => value.value)
+          } else {
+            children = _children.value;
+          }
+        }
+      }
+        break;
+      case "list":
+        children = $arg.value.map(value => value.value);
+        break;
+      default:
+        children = $arg.value;
+
+    }
+
+    return ps.external(React.createElement(type, props, children))
+  });
+};
+
 export function globals(interpreter: PlatformScript) {
   return ps.map({
+    Grid: createReactComponent(Grid),
     alert: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
 
@@ -48,22 +86,7 @@ export function globals(interpreter: PlatformScript) {
 
       return ps.external(<>{elements}</>);
     }),
-    div: ps.fn(function* ({ arg, env }) {
-      const $arg = yield* env.eval(arg);
-
-      let children: any = '';
-
-      switch ($arg.type) {
-        case 'map':
-          children = lookup('children', $arg);
-
-          break;
-        default:
-          children = String($arg.type);
-      }
-
-      return ps.external(<div>{children.value}</div>)
-    }),
+    div: createReactComponent('div'),
     CodeSnippet: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
       let text = '';

@@ -27,8 +27,8 @@
     "@backstage/plugin-search-react": "^1.2.0",
     "@backstage/plugin-tech-radar": "^0.5.17",
     "@backstage/plugin-techdocs": "^1.3.3",
-    "@backstage/plugin-techdocs-react": "^1.0.5",
     "@backstage/plugin-techdocs-module-addons-contrib": "^1.0.5",
+    "@backstage/plugin-techdocs-react": "^1.0.5",
     "@backstage/plugin-user-settings": "^0.5.0",
     "@backstage/theme": "^0.2.16",
     "@frontside/backstage-plugin-effection-inspector": "^0.1.3",
@@ -44,7 +44,8 @@
     "react-dom": "^17.0.2",
     "react-router": "^6.3.0",
     "react-router-dom": "^6.3.0",
-    "react-use": "^17.2.4"
+    "react-use": "^17.2.4",
+    "yaml": "^2.1.3"
   },
   "devDependencies": {
     "@backstage/test-utils": "^1.2.1",
