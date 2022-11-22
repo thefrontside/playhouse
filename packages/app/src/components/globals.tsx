@@ -6,9 +6,12 @@ import * as ps from 'platformscript';
 import { Button, Typography } from '@material-ui/core';
 import { CodeSnippet } from '@backstage/core-components';
 
-type TypographyProps = typeof Typography extends ComponentType<infer P>
-  ? P
-  : never;
+type ComponentProps<C extends ComponentType> = C extends ComponentType<infer P>
+? P
+: never;
+
+type TypographyProps = ComponentProps<typeof Typography>;
+type ButtonProps = ComponentProps<typeof Button>;
 
 type Variant = TypographyProps['variant'];
 
@@ -108,6 +111,9 @@ export function globals(interpreter: PlatformScript) {
 
       let children = '';
       let clickHandler = (): void => void 0;
+      let variant: Variant = undefined;
+      let color = '';
+      let href: string | undefined = undefined;
 
       switch ($arg.type) {
         case 'string':
@@ -115,6 +121,9 @@ export function globals(interpreter: PlatformScript) {
           break;
         case 'map': {
           children = lookup('text', $arg)?.value ?? '';
+          variant = lookup('variant', $arg)?.value ?? '';
+          color = lookup('color', $arg)?.value ?? '';
+          href = lookup('href', $arg)?.value ?? '';
 
           const psClickHandler = lookup('onClick', $arg);
 
@@ -132,7 +141,13 @@ export function globals(interpreter: PlatformScript) {
           children = String($arg.type);
       }
 
-      return ps.external(<Button onClick={clickHandler}>{children}</Button>);
+      return ps.external(
+        <Button
+          href={href}
+          color={color as ButtonProps['color']}
+          variant={variant as ButtonProps['variant']}
+          onClick={clickHandler}>{children}
+        </Button>);
     },)
   })
 }
