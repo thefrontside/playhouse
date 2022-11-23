@@ -26,7 +26,14 @@ spec:
       spacing: 3
       alignItems: stretch
     children:
-      - $div: Hello World
+      - $Grid:
+          item: true
+          md: 6
+        children:
+          - $EntityAboutCard:
+              variant: gridItem
+
+
 
 ---
 apiVersion: backstage.io/v1alpha1

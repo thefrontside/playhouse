@@ -5,6 +5,7 @@ import type { PlatformScript, PSMap, PSValue } from 'platformscript';
 import * as ps from 'platformscript';
 import { Button, Grid, Typography } from '@material-ui/core';
 import { CodeSnippet } from '@backstage/core-components';
+import { EntityAboutCard } from '@backstage/plugin-catalog';
 
 type ComponentProps<C extends ComponentType> = C extends ComponentType<infer P>
 ? P
@@ -29,26 +30,27 @@ function createReactComponent(type: any) {
   return ps.fn(function* ({ arg, env, rest }) {
 
     const $arg: PSValue = yield* env.eval(arg);
-    const $options = (yield* env.eval(rest)) as PSMap;
+    const $options = yield* env.eval(rest);
 
     let props = {};
     let children = [];
 
     switch ($arg.type) {
-      case "map": {
+      case "map": 
         props = [...$arg.value.entries()]
           .reduce((result, [key, value]) => {
             return { ...result, [String(key.value)]: value.value }
           }, {});
-        const _children = lookup('children', $options);
-        if (!!_children) {
-          if (_children.type === "list") {
-            children = _children.value.map(value => value.value)
-          } else {
-            children = _children.value;
+        if ($options.type === "map") {
+          const _children = lookup('children', $options);
+          if (!!_children) {
+            if (_children.type === "list") {
+              children = _children.value.map(value => value.value)
+            } else {
+              children = _children.value;
+            }
           }
         }
-      }
         break;
       case "list":
         children = $arg.value.map(value => value.value);
@@ -64,7 +66,9 @@ function createReactComponent(type: any) {
 
 export function globals(interpreter: PlatformScript) {
   return ps.map({
+    div: createReactComponent('div'),
     Grid: createReactComponent(Grid),
+    EntityAboutCard: createReactComponent(EntityAboutCard),
     alert: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
 
@@ -86,7 +90,6 @@ export function globals(interpreter: PlatformScript) {
 
       return ps.external(<>{elements}</>);
     }),
-    div: createReactComponent('div'),
     CodeSnippet: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
       let text = '';
