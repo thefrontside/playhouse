@@ -5,7 +5,7 @@ import type { PlatformScript, PSMap, PSValue } from 'platformscript';
 import * as ps from 'platformscript';
 import { Button, Grid, Typography } from '@material-ui/core';
 import { CodeSnippet } from '@backstage/core-components';
-import { EntityAboutCard, EntityLinksCard } from '@backstage/plugin-catalog';
+import { EntityAboutCard, EntityHasSubcomponentsCard, EntityLinksCard } from '@backstage/plugin-catalog';
 import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 type ComponentProps<C extends ComponentType> = C extends ComponentType<infer P>
@@ -87,7 +87,6 @@ function createReactComponent(type: any) {
         break;
       default:
         children = $arg.value;
-
     }
 
     return ps.external(React.createElement(type, props, children))
@@ -101,6 +100,7 @@ export function globals(interpreter: PlatformScript) {
     EntityAboutCard: createReactComponent(EntityAboutCard),
     HumanitecCardComponent: createReactComponent(HumanitecCardComponent),
     EntityLinksCard: createReactComponent(EntityLinksCard),
+    EntityHasSubcomponentsCard: createReactComponent(EntityHasSubcomponentsCard),
     alert: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
 

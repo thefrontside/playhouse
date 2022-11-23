@@ -35,14 +35,23 @@ spec:
       - $Grid:
           item: true
           md: 6
-        # children:
-        #   - $HumanitecCardComponent
+        children:
+          - $HumanitecCardComponent:
+              key: "0"
       - $Grid:
           item: true
           md: 4
           xs: 12
-        # children:
-        #  - $EntityLinksCard
+        children:
+          - $EntityLinksCard:
+              key: "0"
+      - $Grid:
+          item: true
+          md: 8
+          xs: 12
+        children:
+          - $EntityHasSubcomponentsCard:
+              variant: gridItem
 
 
 
