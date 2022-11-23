@@ -10,16 +10,14 @@ export type Monaco = Parameters<BeforeMount>[0];
 
 export function YAMLEditor({ onMount, onChange, defaultValue, value }: YAMLEditorProps): JSX.Element {
   return (
-    <div style={{marginTop: '1rem'}}>
-      <Editor
-        height="50vh"
-        defaultLanguage={LanguageId}
-        defaultValue={defaultValue}
-        onMount={onMount}
-        onChange={onChange}
-        beforeMount={handleEditorWillMount}
-        value={value}
-      />
-    </div>
+    <Editor
+      height="50vh"
+      defaultLanguage={LanguageId}
+      defaultValue={defaultValue}
+      onMount={onMount}
+      onChange={onChange}
+      beforeMount={handleEditorWillMount}
+      value={value}
+    />
   );
 }
