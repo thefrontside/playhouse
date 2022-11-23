@@ -165,9 +165,9 @@ You can extend the schema from inside of Backstage Backend by creating a [GraphQ
 import { resolvePackagePath } from '@backstage/backend-common';
 import { transformSchema } from '@frontside/backstage-plugin-graphql';
 import { loadFilesSync } from '@graphql-tools/load-files';
-import { printSchema } from 'graphql';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
 
-export default printSchema(
+export default printSchemaWithDirectives(
   transformSchema(
     loadFilesSync(
       resolvePackagePath('backend', 'src/graphql/*.graphql')
