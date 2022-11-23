@@ -53,9 +53,6 @@ spec:
           - $EntityHasSubcomponentsCard:
               variant: gridItem
 
-
-
-
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API

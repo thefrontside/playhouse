@@ -5,7 +5,7 @@ import { useAsync } from 'react-use';
 import type { PSValue } from 'platformscript';
 import { globals } from './globals';
 
-const DefultYaml = `$<>:
+const defaultYaml = `$<>:
   - $Typography:
       variant: 'body1'
       children:
@@ -48,15 +48,14 @@ export function usePlatformScript(yaml: string) {
   return result;
 }
 
-export function PlatformScriptPage() {
+export function PlatformScriptEditor({ initialYaml }: { initialYaml: string }) {
   const editorRef = useRef<MonacoEditor>(null);
 
-  const [yaml, setYaml] = useState<string | undefined>(DefultYaml);
+  const [yaml, setYaml] = useState<string | undefined>(initialYaml);
 
   const handleEditorMount = useCallback((editor: MonacoEditor) => {
     editorRef.current = editor;
   }, []);
-
 
   const result = usePlatformScript(yaml ?? 'false');
 
@@ -64,9 +63,8 @@ export function PlatformScriptPage() {
     <>
       <div>
         {result.loading && (<h2>...loading</h2>)}
-        {result.value}
         <YAMLEditor
-          defaultValue={DefultYaml}
+          defaultValue={initialYaml}
           onMount={handleEditorMount}
           onChange={(value) => setYaml(value)}
           value={yaml}

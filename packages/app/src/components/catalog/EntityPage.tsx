@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Button, Grid } from '@material-ui/core';
 import {
   EntityApiDefinitionCard,
@@ -29,7 +29,6 @@ import {
   EntityDependsOnResourcesCard,
   EntityHasComponentsCard,
   EntityHasResourcesCard,
-  EntityHasSubcomponentsCard,
   EntityHasSystemsCard,
   EntityLayout,
   EntityLinksCard,
@@ -54,15 +53,13 @@ import {
 } from '@backstage/plugin-org';
 import { EntityTechdocsContent } from '@backstage/plugin-techdocs';
 import { EmptyState } from '@backstage/core-components';
-import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
-import { useEntity } from '@backstage/plugin-catalog-react';
-import { PSOverviewContent } from './PSOverviewContent';
-import { stringify } from 'yaml';
+import { OverviewContent } from './OverviewContent';
+import { WebsiteLayout } from './WebsiteLayout';
 
-const techdocsContent = (
+export const techdocsContent = (
   <EntityTechdocsContent>
     <TechDocsAddons>
       <ReportIssue />
@@ -70,7 +67,7 @@ const techdocsContent = (
   </EntityTechdocsContent>
 );
 
-const cicdContent = (
+export const cicdContent = (
   // This is an example of how you can implement your company's logic in entity page.
   // You can for example enforce that all components of type 'service' should use GitHubActions
   <EntitySwitch>
@@ -97,7 +94,7 @@ const cicdContent = (
   </EntitySwitch>
 );
 
-const entityWarningContent = (
+export const entityWarningContent = (
   <>
     <EntitySwitch>
       <EntitySwitch.Case if={isOrphan}>
@@ -116,42 +113,6 @@ const entityWarningContent = (
     </EntitySwitch>
   </>
 );
-
-function OverviewContent() {
-  const { entity } = useEntity();
-
-  console.log(entity)
-  
-  const overviewContentLayout = useMemo(() => {
-    return stringify(entity?.spec?.overviewContentLayout)
-  }, [entity?.spec?.overviewContentLayout])
-
-  if (overviewContentLayout) {
-    return <PSOverviewContent yaml={overviewContentLayout} />
-  }
-
-  return (
-    <Grid container spacing={3} alignItems="stretch">
-      {entityWarningContent}
-      <Grid item md={6}>
-        <EntityAboutCard variant="gridItem" />
-      </Grid>
-      <Grid item md={6}>
-        <HumanitecCardComponent />
-      </Grid>
-      <Grid item md={4} xs={12}>
-        <EntityLinksCard />
-        {/* <InfoCard title="Links">
-          <PlatformScriptPage />
-        </InfoCard> */}
-      </Grid>
-      <Grid item md={8} xs={12}>
-        <EntityHasSubcomponentsCard variant="gridItem" />
-      </Grid>
-    </Grid>
-  )
-}
-
 
 const serviceEntityPage = (
   <EntityLayout>
@@ -172,33 +133,6 @@ const serviceEntityPage = (
           <EntityConsumedApisCard />
         </Grid>
       </Grid>
-    </EntityLayout.Route>
-
-    <EntityLayout.Route path="/dependencies" title="Dependencies">
-      <Grid container spacing={3} alignItems="stretch">
-        <Grid item md={6}>
-          <EntityDependsOnComponentsCard variant="gridItem" />
-        </Grid>
-        <Grid item md={6}>
-          <EntityDependsOnResourcesCard variant="gridItem" />
-        </Grid>
-      </Grid>
-    </EntityLayout.Route>
-
-    <EntityLayout.Route path="/docs" title="Docs">
-      {techdocsContent}
-    </EntityLayout.Route>
-  </EntityLayout>
-);
-
-const websiteEntityPage = (
-  <EntityLayout>
-    <EntityLayout.Route path="/" title="Overview">
-      <OverviewContent />
-    </EntityLayout.Route>
-
-    <EntityLayout.Route path="/ci-cd" title="CI/CD">
-      {cicdContent}
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
@@ -244,7 +178,7 @@ const componentPage = (
     </EntitySwitch.Case>
 
     <EntitySwitch.Case if={isComponentType('website')}>
-      {websiteEntityPage}
+      <WebsiteLayout />
     </EntitySwitch.Case>
 
     <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
