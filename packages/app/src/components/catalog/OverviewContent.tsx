@@ -49,14 +49,20 @@ export function OverviewContent({ isEditing }: { isEditing?: boolean }) {
     return defaultOverviewContent;
   }, [entity?.spec?.overviewContentLayout]);
 
+  const [yaml, setYaml] = useState<string>(overviewContentLayout);
+
   if (isEditing) {
     return (
       <Grid container spacing={3}>
         <Grid item md={8}>
-          <PSOverviewContent yaml={overviewContentLayout} />
+          <PSOverviewContent yaml={yaml} />
         </Grid>
         <Grid item md={4}>
-          <PlatformScriptEditor initialYaml={overviewContentLayout} />
+          <PlatformScriptEditor 
+            yaml={yaml} 
+            onChange={setYaml} 
+            initialYaml={overviewContentLayout} 
+          />
         </Grid>
       </Grid>
     )

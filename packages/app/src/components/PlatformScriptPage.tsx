@@ -42,22 +42,27 @@ export function usePlatformScript(yaml: string) {
 
     const mod = await platformscript.eval(program);
 
-    return mod.value;
+  return mod.value;
   }, [yaml]);
 
   return result;
 }
 
-export function PlatformScriptEditor({ initialYaml }: { initialYaml: string }) {
+interface PlatformScriptOptions {
+  yaml: string;
+  initialYaml: string
+  onChange: (value: string) => void 
+}
+
+export function PlatformScriptEditor({ yaml, initialYaml, onChange }: PlatformScriptOptions) {
   const editorRef = useRef<MonacoEditor>(null);
 
-  const [yaml, setYaml] = useState<string | undefined>(initialYaml);
 
   const handleEditorMount = useCallback((editor: MonacoEditor) => {
     editorRef.current = editor;
   }, []);
 
-  const result = usePlatformScript(yaml ?? 'false');
+  const result = usePlatformScript(yaml);
 
   return (
     <>
@@ -66,7 +71,7 @@ export function PlatformScriptEditor({ initialYaml }: { initialYaml: string }) {
         <YAMLEditor
           defaultValue={initialYaml}
           onMount={handleEditorMount}
-          onChange={(value) => setYaml(value)}
+          onChange={(value = '"false"') => onChange(value)}
           value={yaml}
         />
       </div>

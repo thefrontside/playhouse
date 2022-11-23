@@ -20,39 +20,7 @@ spec:
   lifecycle: production
   providesApis:
     - backstage-graphql-api
-  overviewContentLayout:
-    $Grid:
-      container: true
-      spacing: 3
-      alignItems: stretch
-    children:
-      - $Grid:
-          item: true
-          md: 6
-        children:
-          - $EntityAboutCard:
-              variant: gridItem
-      - $Grid:
-          item: true
-          md: 6
-        children:
-          - $HumanitecCardComponent:
-              key: "0"
-      - $Grid:
-          item: true
-          md: 4
-          xs: 12
-        children:
-          - $EntityLinksCard:
-              key: "0"
-      - $Grid:
-          item: true
-          md: 8
-          xs: 12
-        children:
-          - $EntityHasSubcomponentsCard:
-              variant: gridItem
-
+#  overviewContentLayout:
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
