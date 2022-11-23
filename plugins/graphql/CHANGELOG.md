@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.5.3
+
+### Patch Changes
+
+- e32fcc1: Mark some Entity fields required
+
 ## 0.5.2
 
 ### Patch Changes
