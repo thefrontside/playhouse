@@ -13,9 +13,10 @@ union Owner = User | Group
 
 interface Entity @extend(interface: "Node") {
   name: String! @field(at: "metadata.name")
-  namespace: String @field(at: "metadata.namespace")
-  title: String @field(at: "metadata.title")
-  description: String @field(at: "metadata.description")
+  kind: String! @field(at: "kind")
+  namespace: String! @field(at: "metadata.namespace", default: "default")
+  title: String! @field(at: "metadata.title", default: "")
+  description: String! @field(at: "metadata.description", default: "")
   tags: [String] @field(at: "metadata.tags")
   links: [EntityLink] @field(at: "metadata.links")
 }
