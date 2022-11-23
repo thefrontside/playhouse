@@ -20,23 +20,21 @@ children:
   - $Grid:
       item: true
       md: 6
-    children:
-      - $HumanitecCardComponent:
-          key: "0"
+    children: 
+      $HumanitecCardComponent: true
   - $Grid:
       item: true
       md: 4
       xs: 12
     children:
-      - $EntityLinksCard:
-          key: "0"
+      $EntityLinksCard: true
   - $Grid:
       item: true
       md: 8
       xs: 12
     children:
-      - $EntityHasSubcomponentsCard:
-          variant: gridItem  
+      $EntityHasSubcomponentsCard:
+        variant: gridItem  
 `
 
 export function OverviewContent({ isEditing }: { isEditing?: boolean }) {
