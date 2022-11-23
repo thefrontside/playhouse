@@ -5,33 +5,6 @@ import { useAsync } from 'react-use';
 import type { PSValue } from 'platformscript';
 import { globals } from './globals';
 
-const defaultYaml = `$<>:
-  - $Typography:
-      variant: 'body1'
-      children:
-        "No links defined for this entity. You can add links to your entity YAML as shown in the highlighted example below:"
-  - $div:
-      className: 'whatever'
-      children:
-        $CodeSnippet:
-          language: 'yaml'
-          text: >-
-            metadata:
-              name: example
-              links:
-                - url: https://dashboard.example.com
-                  title: My Dashboard
-                  icon: dashboard
-          showLineNumbers: true
-          highlightedNumbers: [3, 4, 5, 6]
-  - $Button:
-      text: "Read More"
-      variant: "contained"
-      color: "primary"
-      target: "_blank"
-      href: "https://backstage.io/docs/features/software-catalog/descriptor-format#links-optional"
-`;
-
 export function usePlatformScript(yaml: string) {
   const platformscript = useMemo(() => {
     return ps.createPlatformScript(globals);
