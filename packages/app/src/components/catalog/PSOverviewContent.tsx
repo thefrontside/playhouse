@@ -4,8 +4,6 @@ import { usePlatformScript } from '../PlatformScriptPage';
 export function PSOverviewContent({ yaml }: { yaml: string; }) {
   const result = usePlatformScript(yaml);
 
-  console.log(result)
-
   if (result.loading) {
     return <>Loading...</>;
   }

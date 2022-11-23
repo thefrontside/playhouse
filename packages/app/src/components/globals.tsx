@@ -5,7 +5,8 @@ import type { PlatformScript, PSMap, PSValue } from 'platformscript';
 import * as ps from 'platformscript';
 import { Button, Grid, Typography } from '@material-ui/core';
 import { CodeSnippet } from '@backstage/core-components';
-import { EntityAboutCard } from '@backstage/plugin-catalog';
+import { EntityAboutCard, EntityLinksCard } from '@backstage/plugin-catalog';
+import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 type ComponentProps<C extends ComponentType> = C extends ComponentType<infer P>
 ? P
@@ -30,18 +31,47 @@ function createReactComponent(type: any) {
   return ps.fn(function* ({ arg, env, rest }) {
 
     const $arg: PSValue = yield* env.eval(arg);
+    if (rest.type === "map") {
+      // add key prop to each item in children array 
+      for (const [key, value] of rest.value.entries()) {
+        if (key.type === "string" && key.value === "children" && value.type === "list") {
+          let index = 0;
+          for (const item of value.value) {
+            if (item.type === "map") {
+              let found;
+              for (const [propKey] of item.value.entries()) {
+                if (propKey.value === "key") {
+                  found = true;
+                  break;
+                }
+              }
+              if (!found) {
+                item.value.set(
+                  { type: "string", value: "key" }, 
+                  { type: "string", value: String(index) }
+                )
+              }
+            }
+            index++;
+          }
+        }
+      }
+    }
     const $options = yield* env.eval(rest);
 
-    let props = {};
+    const props: Record<string, any> = {};
     let children = [];
 
     switch ($arg.type) {
       case "map": 
-        props = [...$arg.value.entries()]
-          .reduce((result, [key, value]) => {
-            return { ...result, [String(key.value)]: value.value }
-          }, {});
+        for (const [key, value] of $arg.value.entries()) {
+          props[String(key.value)] = value.value
+        }        
         if ($options.type === "map") {
+          const key = lookup('key', $options);
+          if (!!key) {
+            props.key = key.value
+          }
           const _children = lookup('children', $options);
           if (!!_children) {
             if (_children.type === "list") {
@@ -69,6 +99,8 @@ export function globals(interpreter: PlatformScript) {
     div: createReactComponent('div'),
     Grid: createReactComponent(Grid),
     EntityAboutCard: createReactComponent(EntityAboutCard),
+    HumanitecCardComponent: createReactComponent(HumanitecCardComponent),
+    EntityLinksCard: createReactComponent(EntityLinksCard),
     alert: ps.fn(function* ({ arg, env }) {
       const $arg = yield* env.eval(arg);
 

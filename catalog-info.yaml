@@ -32,6 +32,18 @@ spec:
         children:
           - $EntityAboutCard:
               variant: gridItem
+      - $Grid:
+          item: true
+          md: 6
+        # children:
+        #   - $HumanitecCardComponent
+      - $Grid:
+          item: true
+          md: 4
+          xs: 12
+        # children:
+        #  - $EntityLinksCard
+
 
 
 
