@@ -12,7 +12,7 @@ export function* clearTestDatabases(config: JsonObject): Operation<void> {
     dbconfig,
     connection =>
       function* () {
-        const result = yield connection.raw(`
+        const result: { rows: { datname: string }[] } = yield connection.raw(`
 SELECT datname
 FROM pg_catalog.pg_database
 WHERE datname LIKE '${prefix}%'
@@ -55,7 +55,7 @@ export function* findFinalEntity(
     dbconfig,
     connection =>
       function* () {
-        const result = yield connection.raw(`
+        const result: { rows: unknown[] } = yield connection.raw(`
 SELECT
   name_final_entity,
   kind_final_entity

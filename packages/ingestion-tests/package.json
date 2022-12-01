@@ -1,5 +1,5 @@
 {
-  "name": "@frontside/backstage-integration-tests",
+  "name": "@frontside/backstage-ingestion-tests",
   "version": "0.1.0",
   "scripts": {
     "start": "backstage-cli package start",

@@ -1,7 +1,5 @@
 ---
-'@frontside/backstage-integration-tests': minor
-'@frontside/backstage-plugin-graphql': patch
-'@frontside/backstage-plugin-incremental-ingestion-github': patch
+'@frontside/backstage-ingestion-tests': minor
 ---
 
-add @frontside/backstage-integration-tests package
+add @frontside/backstage-ingestion-tests package

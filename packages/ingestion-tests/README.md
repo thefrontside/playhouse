@@ -1,4 +1,4 @@
-# @frontside/backstage-integration-tests
+# @frontside/backstage-ingestion-tests
 
 Common integration test helpers.
 
