@@ -55,7 +55,7 @@
     "@frontside/graphgen": "^1.7.0",
     "@frontside/graphgen-backstage": "*",
     "@graphql-codegen/add": "^3.1.1",
-    "@graphql-codegen/cli": "^2.11.6",
+    "@graphql-codegen/cli": "^2.11.5",
     "@graphql-codegen/graphql-modules-preset": "^2.3.14",
     "@graphql-codegen/typescript": "^2.7.4",
     "@graphql-codegen/typescript-resolvers": "^2.7.4",
