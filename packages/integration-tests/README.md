@@ -1,3 +1,5 @@
 # @frontside/backstage-integration-tests
 
-WIP
+Common integration test helpers.
+
+Very WIP.
