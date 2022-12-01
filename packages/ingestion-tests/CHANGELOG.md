@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.3.1
+
+### Patch Changes
+
+- 00756f7: Add createBackstageHarness to @frontside/backstage-ingestion-tests
+
 ## 0.3.0
 
 ### Minor Changes
