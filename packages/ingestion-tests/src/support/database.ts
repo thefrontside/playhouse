@@ -5,6 +5,11 @@ import type { JsonValue, JsonObject } from '@backstage/types';
 
 export function* clearTestDatabases(config: JsonObject): Operation<void> {
   const reader = new ConfigReader(config);
+  
+  if (reader.getString('backend.database.client') !== 'pg') {
+    return;
+  }
+
   const dbconfig = reader.get('backend.database');
   const prefix = reader.getString('backend.database.prefix');
 
