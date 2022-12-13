@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.4.1
+
+### Patch Changes
+
+- 632259b: bail if the client is no pg in clearTestDatabases
+
 ## 0.4.0
 
 ### Minor Changes
