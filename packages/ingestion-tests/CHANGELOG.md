@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.4.0
+
+### Minor Changes
+
+- 9b212b5: createBackstageHarness now takes an npm script to start the backstage process
+
 ## 0.3.1
 
 ### Patch Changes
