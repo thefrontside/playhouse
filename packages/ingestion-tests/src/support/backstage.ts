@@ -7,6 +7,7 @@ import { CatalogApi, CatalogClient } from '@backstage/catalog-client';
 import { ProcessLog } from './log';
 
 export interface BackstageOptions {
+  npmScript: string;
   log?: boolean | ProcessLog;
   config: JsonObject;
 }
@@ -21,7 +22,7 @@ export function createBackstage(
     labels: { baseUrl: reader.get('backend.baseUrl') },
     *init(_, init) {
       const { JEST_WORKER_ID, ...env } = process.env;
-      const proc: Process = yield daemon('yarn workspace backend start', {
+      const proc: Process = yield daemon(options.npmScript, {
         env: {
           ...env,
           NODE_ENV: 'development',

@@ -38,8 +38,11 @@ export interface BackstageHarness {
 
 export function createBackstageHarness(
   factory: Factory,
+  npmScript: string,
   ...configs: JsonObject[]
 ): BackstageHarness {
+  assert(!!npmScript, 'you must supply an npm script e.g. yarn workspace backend start')
+  
   const start = () => ({
     name: 'Backstage',
     *init() {
@@ -97,6 +100,7 @@ export function createBackstageHarness(
       };
 
       const catalog: CatalogApi = yield createBackstage({
+        npmScript,
         config,
         log,
       });
