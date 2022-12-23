@@ -39,13 +39,13 @@ You can install the GraphQL Plugin using the same process that you would use to 
 
     ```ts
     import { createRouter } from '@frontside/backstage-plugin-graphql';
+    import { CatalogClient } from '@backstage/catalog-client';
     import { Router } from 'express';
     import { Logger } from 'winston';
-    import { DatabaseManager } from '@backstage/backend-common';
 
     interface PluginEnvironment {
         logger: Logger;
-        databaseManager: DatabaseManager;
+        catalog: CatalogClient
     }
 
     export default async function createPlugin(
@@ -53,7 +53,7 @@ You can install the GraphQL Plugin using the same process that you would use to 
     ): Promise<Router> {
       return await createRouter({
         logger: env.logger,
-        databaseManager: env.databaseManager,
+        catalog: env.catalog,
       });
     }
     ```

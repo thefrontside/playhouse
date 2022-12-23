@@ -9,6 +9,6 @@ export default async function createPlugin(
   return await createRouter({
     modules: [myModule],
     logger: env.logger,
-    databaseManager: env.databaseManager,
+    catalog: env.catalog
   });
 }
