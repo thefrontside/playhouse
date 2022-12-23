@@ -1,5 +1,14 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.5.4
+
+### Patch Changes
+
+- f35c094: Update readme to use `printSchemaWithDirectives` instead of `printSchema`
+- d62b0ad: Upgraded to Backstage 1.9
+- Updated dependencies [d62b0ad]
+  - @frontside/backstage-plugin-batch-loader@0.2.4
+
 ## 0.5.3
 
 ### Patch Changes
