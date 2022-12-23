@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: volta-cli/action@v3
       - name: Install Dependencies
         run: yarn
       - name: Create Release Pull Request
