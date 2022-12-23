@@ -1,12 +1,13 @@
 import type { EntityRef, Loader } from './types';
-import type { Entity } from '@backstage/catalog-model';
+import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
 import DataLoader from 'dataloader';
 import { EnvelopError } from '@envelop/core';
-import type { BatchLoader } from '@frontside/backstage-plugin-batch-loader';
+import type { CatalogClient } from '@backstage/catalog-client';
 
-export function createLoader(loader: Pick<BatchLoader,'getEntitiesByRefs'>): Loader {
+export function createLoader(catalog: Pick<CatalogClient,'getEntitiesByRefs'>): Loader {
   return new DataLoader<EntityRef, Entity>(async (refs): Promise<Array<Entity | Error>> => {
-    const entities = await loader.getEntitiesByRefs(refs as EntityRef[])
-    return entities.map((entity, index) => entity ?? new EnvelopError(`no such node with ref: '${refs[index]}'`));
+    const entityRefs: string[] = refs.map((ref) => typeof ref === 'string' ? ref : stringifyEntityRef(ref))
+    const result = await catalog.getEntitiesByRefs({ entityRefs });
+    return result.items.map((entity, index) => entity ?? new EnvelopError(`no such node with ref: '${refs[index]}'`));
   });
 }
