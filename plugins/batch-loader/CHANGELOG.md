@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-batch-loader
 
+## 0.2.4
+
+### Patch Changes
+
+- d62b0ad: Upgraded to Backstage 1.9
+
 ## 0.2.3
 
 ### Patch Changes

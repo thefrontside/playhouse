@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.4.2
+
+### Patch Changes
+
+- d62b0ad: Upgraded to Backstage 1.9
+
 ## 0.4.1
 
 ### Patch Changes

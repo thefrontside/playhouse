@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-incremental-ingestion-github
 
+## 0.2.3
+
+### Patch Changes
+
+- d62b0ad: Upgraded to Backstage 1.9
+- Updated dependencies [d62b0ad]
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.2
+
 ## 0.2.2
 
 ### Patch Changes
