@@ -1,5 +1,20 @@
 # backend
 
+## 0.0.12
+
+### Patch Changes
+
+- d62b0ad: Upgraded to Backstage 1.9
+- Updated dependencies [f35c094]
+- Updated dependencies [d62b0ad]
+  - @frontside/backstage-plugin-graphql@0.5.4
+  - app@0.0.5
+  - @frontside/backstage-plugin-batch-loader@0.2.4
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.4
+  - @internal/plugin-healthcheck@0.1.3
+  - @frontside/backstage-plugin-humanitec-backend@0.3.4
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.2
+
 ## 0.0.11
 
 ### Patch Changes
