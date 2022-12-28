@@ -1,5 +1,25 @@
 # backend
 
+## 0.0.13
+
+### Patch Changes
+
+- f99de6d: Replacing batch-loader with getEntitiesByRefs from Backtage Catalog Client
+
+  Backstage Catalog REST API is now providing an endpoint for querying entities by refs.
+  This was in introduced in https://github.com/backstage/backstage/pull/14354 and
+  it's available via the [Catalog API Client getEntitiesByRefs method](https://backstage.io/docs/reference/catalog-client.catalogapi.getentitiesbyrefs).
+
+  This changes makes our `@frontside/backstage-plugin-batch-loader` unnecessary. In this release, we're deprecating
+  `@frontside/backstage-plugin-batch-loader` and replacing it with native loader.
+
+  You'll need to change your graphql plugin to pass the catalog client to the GraphQL plugin router.
+
+- Updated dependencies [f99de6d]
+- Updated dependencies [6502a7e]
+  - @frontside/backstage-plugin-batch-loader@0.3.0
+  - @frontside/backstage-plugin-graphql@0.6.0
+
 ## 0.0.12
 
 ### Patch Changes
