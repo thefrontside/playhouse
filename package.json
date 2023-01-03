@@ -6,9 +6,10 @@
     "node": "16 || 18"
   },
   "scripts": {
-    "dev": "concurrently \"yarn start\" \"yarn start-backend\"",
+    "dev": "concurrently \"yarn start\" \"yarn start-backend\" \"yarn start-sim\"",
     "start": "yarn workspace app start",
     "start-backend": "yarn workspace backend start",
+    "start-sim": "yarn workspace simulation watch",
     "build": "yarn tsc && backstage-cli repo build --all",
     "build-image": "yarn workspace backend build-image",
     "pretsc": "lerna run generate",

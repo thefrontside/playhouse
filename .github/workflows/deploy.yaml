@@ -69,7 +69,12 @@ jobs:
           -f ./charts/backstage/Values.yaml \
           --set backstageImage="$IMAGE:$TAG" \
           --set backstageGithubCredentials="$CREDENTIALS" \
-          --set humanitecToken="$HUMANITEC_TOKEN"
+          --set humanitecToken="$HUMANITEC_TOKEN" \
+          --set authSessionClientSecret="$AUTH_SESSION_CLIENT_SECRET" \
+          --set auth0ClientSecret="$AUTH0_CLIENT_SECRET" \
+          --set auth0DomainId="$AUTH0_DOMAIN_ID" \
+          --set auth0ClientId="$AUTH0_CLIENT_ID"
+
       env:
         CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
         HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_TOKEN }}

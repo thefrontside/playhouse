@@ -13,6 +13,21 @@ integrations:
       apps:
         - $include: credentials/backstage-app-credentials.yaml
 
+auth:
+  # see https://backstage.io/docs/auth/ to learn about auth providers
+  session:
+    secret: ${AUTH_SESSION_CLIENT_SECRET}
+  environment: production
+  providers:
+    auth0:
+      production:
+        domain: ${AUTH_AUTH0_DOMAIN_ID}
+        clientId: ${AUTH_AUTH0_CLIENT_ID}
+        clientSecret: ${AUTH_AUTH0_CLIENT_SECRET}
+        audience: ${AUTH_AUTH0_AUDIENCE}
+        connection: ${AUTH_AUTH0_CONNECTION}
+        connectionScope: ${AUTH_AUTH0_CONNECTION_SCOPE}
+
 catalog:
   locations:
     - type: url

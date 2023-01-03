@@ -21,7 +21,10 @@ import {
 } from '@backstage/plugin-techdocs';
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
-import { UserSettingsPage } from '@backstage/plugin-user-settings';
+import {
+  ProviderSettingsItem,
+  UserSettingsPage,
+} from '@backstage/plugin-user-settings';
 import { apis } from './apis';
 import { entityPage } from './components/catalog/EntityPage';
 import { searchPage } from './components/search/SearchPage';
@@ -34,8 +37,28 @@ import { orgPlugin } from '@backstage/plugin-org';
 import { InspectorPage } from '@frontside/backstage-plugin-effection-inspector';
 import { GraphiQLPage } from '@backstage/plugin-graphiql';
 
+import { SignInPage } from '@backstage/core-components';
+import { auth0AuthApiRef } from './internal';
+import Star from '@material-ui/icons/Star';
+
 const app = createApp({
   apis,
+  components: {
+    SignInPage: props => (
+      <SignInPage
+        {...props}
+        providers={[
+          'guest',
+          {
+            id: 'auth0-auth-provider',
+            title: 'Auth0',
+            message: 'Sign in using Auth0',
+            apiRef: auth0AuthApiRef,
+          },
+        ]}
+      />
+    ),
+  },
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
       createComponent: scaffolderPlugin.routes.root,
@@ -87,7 +110,21 @@ const routes = (
     <Route path="/search" element={<SearchPage />}>
       {searchPage}
     </Route>
-    <Route path="/settings" element={<UserSettingsPage />} />
+    <Route
+      path="/settings"
+      element={
+        <UserSettingsPage
+          providerSettings={
+            <ProviderSettingsItem
+              title="Auth0"
+              description="Provides sign-in via Auth0"
+              apiRef={auth0AuthApiRef}
+              icon={Star}
+            />
+          }
+        />
+      }
+    />
     <Route path="/effection-inspector" element={<InspectorPage />} />
     <Route path="/graphiql" element={<GraphiQLPage />} />
   </FlatRoutes>

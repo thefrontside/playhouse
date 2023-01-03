@@ -39,12 +39,9 @@ spec:
           - mountPath: "/app/credentials"
             name: "backstage-app-credentials"
             readOnly: true
-        env:
-          - name: APP_CONFIG_app_baseUrl
-            value: {{ .Values.baseUrl }}
-          - name: APP_CONFIG_backend_baseUrl
-            value: {{ .Values.baseUrl }}
         envFrom:
+          - configMapRef:
+              name: backstage-configmap
           - secretRef:
               name: postgres-secrets
           - secretRef:
