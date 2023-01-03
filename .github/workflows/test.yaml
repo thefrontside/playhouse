@@ -9,9 +9,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
-        with:
-          cache: 'yarn'
+      - uses: volta-cli/action@v3
       # Installing yarn globaly so the workflow will work in `act`
       - run: npm install --global yarn
       - run: yarn install --frozen-lockfile # optional, --immutable

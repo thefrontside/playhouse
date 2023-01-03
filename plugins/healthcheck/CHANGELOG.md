@@ -1,5 +1,11 @@
 # @internal/plugin-healthcheck
 
+## 0.1.3
+
+### Patch Changes
+
+- d62b0ad: Upgraded to Backstage 1.9
+
 ## 0.1.2
 
 ### Patch Changes

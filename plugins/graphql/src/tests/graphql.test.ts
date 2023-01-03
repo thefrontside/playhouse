@@ -145,14 +145,18 @@ describe('querying the graphql API', () => {
         entity(kind: "Component", name: "backstage") {
           name
           ...on Component {
-            subComponents { name }
+            subComponents {
+              edges {
+                node { name }
+              }
+            }
           }
         }
       `),
     ).toMatchObject({
       entity: {
         name: 'backstage',
-        subComponents: [{ name: 'lighting' }]
+        subComponents: { edges: [{ node: { name: 'lighting' } }] }
       }
     });
   });
@@ -163,20 +167,24 @@ describe('querying the graphql API', () => {
         entity(kind: "Component", name: "backstage") {
           name
           ...on Component {
-            providesApi { name }
-            consumesApi { name }
+            providesApi {
+              edges {
+                node { name }
+              }
+            }
+            consumesApi {
+              edges {
+                node { name }
+              }
+            }
           }
         }
       `),
     ).toMatchObject({
       entity: {
         name: 'backstage',
-        providesApi: expect.arrayContaining([{
-          name: 'backstage-backend-api',
-        }]),
-        consumesApi: expect.arrayContaining([{
-          name: 'github-enterprise',
-        }])
+        providesApi: { edges: expect.arrayContaining([{ node: { name: 'backstage-backend-api' } }]) },
+        consumesApi: { edges: expect.arrayContaining([{ node: { name: 'github-enterprise' } }]) }
       }
     });
   });
@@ -188,7 +196,11 @@ describe('querying the graphql API', () => {
           name
           ...on Component {
             dependencies {
-              ...on Resource { name }
+              edges {
+                node {
+                  ... on Resource { name }
+                }
+              }
             }
           }
         }
@@ -196,15 +208,15 @@ describe('querying the graphql API', () => {
     ).toMatchObject({
       entity: {
         name: 'backstage',
-        dependencies: expect.arrayContaining([{ name: 'artists-db' }]),
+        dependencies: { edges: expect.arrayContaining([{ node: { name: 'artists-db' } }]) },
       }
     });
   });
 
-  it.skip("can look up components hierarchy", function* () {
+  it("can look up components hierarchy", function* () {
     expect(
       yield harness.query(/* GraphQL */`
-        entity(kind: "Component", name: "wayback-archive-storage") {
+        entity(kind: "Component", name: "backstage") {
           description
           ...on Component {
             component {
@@ -216,8 +228,8 @@ describe('querying the graphql API', () => {
       `),
     ).toMatchObject({
       entity: {
-        description: 'Storage subsystem of the Wayback Archive',
-        component: { name: 'wayback-archive', description: 'Archive of the wayback machine' }
+        description: 'An example of a Backstage application.',
+        component: { name: 'culpa-vel-voluptates', description: 'Officiis necessitatibus a debitis a facere error.' }
       }
     });
   });
@@ -249,9 +261,13 @@ describe('querying the graphql API', () => {
           name
           ...on User {
             memberOf {
-              name
-              displayName
-              email
+              edges {
+                node {
+                  name
+                  displayName
+                  email
+                }
+              }
             }
           }
         }
@@ -291,8 +307,12 @@ describe('querying the graphql API', () => {
           name
           ...on Group {
             children {
-              name
-              displayName
+              edges {
+                node {
+                  name
+                  displayName
+                }
+              }
             }
           }
         }
@@ -318,8 +338,12 @@ describe('querying the graphql API', () => {
           name
           ...on Group {
             members {
-              name
-              email
+              edges {
+                node {
+                  name
+                  email
+                }
+              }
             }
           }
         }

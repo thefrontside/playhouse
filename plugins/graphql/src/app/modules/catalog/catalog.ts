@@ -1,18 +1,13 @@
 import { resolvePackagePath } from "@backstage/backend-common";
-import { CompoundEntityRef, stringifyEntityRef } from '@backstage/catalog-model';
 import { createModule } from "graphql-modules";
 import { loadFilesSync } from '@graphql-tools/load-files'
 import GraphQLJSON, { GraphQLJSONObject } from "graphql-type-json";
-import { resolveType } from "../../resolver";
+import { ResolverContext } from "../../types";
 
 export const Catalog = createModule({
   id: 'catalog',
   typeDefs: loadFilesSync(resolvePackagePath('@frontside/backstage-plugin-graphql', 'src/app/modules/catalog/catalog.graphql')),
   resolvers: {
-    Entity: { __resolveType: resolveType },
-    Owner: { __resolveType: resolveType },
-    Ownable: { __resolveType: resolveType },
-    Dependency: { __resolveType: resolveType },
     Lifecycle: {
       EXPERIMENTAL: 'experimental',
       PRODUCTION: 'production',
@@ -23,8 +18,9 @@ export const Catalog = createModule({
     Query: {
       entity: (
         _: any,
-        { name, kind, namespace = 'default' }: CompoundEntityRef,
-      ): { id: string } => ({ id: stringifyEntityRef({ name, kind, namespace }) }),
+        { name, kind, namespace }: { name: string; kind: string; namespace?: string },
+        { refToId }: ResolverContext
+      ): { id: string } => ({ id: refToId({ name, kind, namespace }) }),
     }
   },
 })

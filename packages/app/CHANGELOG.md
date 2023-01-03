@@ -1,5 +1,14 @@
 # app
 
+## 0.0.5
+
+### Patch Changes
+
+- d62b0ad: Upgraded to Backstage 1.9
+- Updated dependencies [d62b0ad]
+  - @frontside/backstage-plugin-effection-inspector@0.1.4
+  - @frontside/backstage-plugin-humanitec@0.3.4
+
 ## 0.0.4
 
 ### Patch Changes

@@ -1,4 +1,3 @@
-
 import type { DeferredEntity } from '@backstage/plugin-catalog-backend';
 import {
   INCREMENTAL_ENTITY_PROVIDER_ANNOTATION,
@@ -12,7 +11,6 @@ import { performance } from 'perf_hooks';
 import { Duration, DurationObjectUnits } from 'luxon';
 import { v4 } from 'uuid';
 
-/** @public */
 export class IncrementalIngestionEngine implements IterationEngine {
   restLength: Duration;
   backoff: DurationObjectUnits[];
@@ -45,97 +43,106 @@ export class IncrementalIngestionEngine implements IterationEngine {
   async handleNextAction(signal: AbortSignal) {
     await this.options.ready;
 
-    const { ingestionId, nextActionAt, nextAction, attempts } =
-      await this.getCurrentAction();
+    const result = await this.getCurrentAction();
+    if (result) {
+      const { ingestionId, nextActionAt, nextAction, attempts } = result;
 
-    switch (nextAction) {
-      case 'rest':
-        if (Date.now() > nextActionAt) {
-          await this.manager.clearFinishedIngestions(
-            this.options.provider.getProviderName(),
-          );
-          this.options.logger.info(
-            `incremental-engine: Ingestion ${ingestionId} rest period complete. Ingestion will start again`,
-          );
-
-          await this.manager.setProviderComplete(ingestionId);
-        } else {
-          this.options.logger.info(
-            `incremental-engine: Ingestion '${ingestionId}' rest period continuing`,
-          );
-        }
-        break;
-      case 'ingest':
-        try {
-          await this.manager.setProviderBursting(ingestionId);
-          const done = await this.ingestOneBurst(ingestionId, signal);
-          if (done) {
-            this.options.logger.info(
-              `incremental-engine: Ingestion '${ingestionId}' complete, transitioning to rest period of ${this.restLength.toHuman()}`,
+      switch (nextAction) {
+        case 'rest':
+          if (Date.now() > nextActionAt) {
+            await this.manager.clearFinishedIngestions(
+              this.options.provider.getProviderName(),
             );
-            await this.manager.setProviderResting(ingestionId, this.restLength);
-          } else {
-            await this.manager.setProviderInterstitial(ingestionId);
             this.options.logger.info(
-              `incremental-engine: Ingestion '${ingestionId}' continuing`,
+              `incremental-engine: Ingestion ${ingestionId} rest period complete. Ingestion will start again`,
+            );
+
+            await this.manager.setProviderComplete(ingestionId);
+          } else {
+            this.options.logger.info(
+              `incremental-engine: Ingestion '${ingestionId}' rest period continuing`,
             );
           }
-        } catch (error) {
-          if (
-            (error as Error).message &&
-            (error as Error).message === 'CANCEL'
-          ) {
+          break;
+        case 'ingest':
+          try {
+            await this.manager.setProviderBursting(ingestionId);
+            const done = await this.ingestOneBurst(ingestionId, signal);
+            if (done) {
+              this.options.logger.info(
+                `incremental-engine: Ingestion '${ingestionId}' complete, transitioning to rest period of ${this.restLength.toHuman()}`,
+              );
+              await this.manager.setProviderResting(
+                ingestionId,
+                this.restLength,
+              );
+            } else {
+              await this.manager.setProviderInterstitial(ingestionId);
+              this.options.logger.info(
+                `incremental-engine: Ingestion '${ingestionId}' continuing`,
+              );
+            }
+          } catch (error) {
+            if (
+              (error as Error).message &&
+              (error as Error).message === 'CANCEL'
+            ) {
+              this.options.logger.info(
+                `incremental-engine: Ingestion '${ingestionId}' canceled`,
+              );
+              await this.manager.setProviderCanceling(
+                ingestionId,
+                (error as Error).message,
+              );
+            } else {
+              const currentBackoff = Duration.fromObject(
+                this.backoff[Math.min(this.backoff.length - 1, attempts)],
+              );
+
+              const backoffLength = currentBackoff.as('milliseconds');
+              this.options.logger.error(error);
+
+              const truncatedError = typeof error === 'string' ? error.substring(0, 700) : `${error}`;
+              this.options.logger.error(
+                `incremental-engine: Ingestion '${ingestionId}' threw an error during ingestion burst. Ingestion will backoff for ${currentBackoff.toHuman()} (${truncatedError})`,
+              );
+
+              await this.manager.setProviderBackoff(
+                ingestionId,
+                attempts,
+                error as Error,
+                backoffLength,
+              );
+            }
+          }
+          break;
+        case 'backoff':
+          if (Date.now() > nextActionAt) {
             this.options.logger.info(
-              `incremental-engine: Ingestion '${ingestionId}' canceled`,
+              `incremental-engine: Ingestion '${ingestionId}' backoff complete, will attempt to resume`,
             );
-            await this.manager.setProviderCanceling(
-              ingestionId,
-              (error as Error).message,
-            );
+            await this.manager.setProviderIngesting(ingestionId);
           } else {
-            const currentBackoff = Duration.fromObject(
-              this.backoff[Math.min(this.backoff.length - 1, attempts)],
-            );
-
-            const backoffLength = currentBackoff.as('milliseconds');
-            this.options.logger.error(error);
-
-            const truncatedError = (error as string).substring(0, 700);
-            this.options.logger.error(
-              `incremental-engine: Ingestion '${ingestionId}' threw an error during ingestion burst. Ingestion will backoff for ${currentBackoff.toHuman()} (${truncatedError})`,
-            );
-
-            await this.manager.setProviderBackoff(
-              ingestionId,
-              attempts,
-              error as Error,
-              backoffLength,
+            this.options.logger.info(
+              `incremental-engine: Ingestion '${ingestionId}' backoff continuing`,
             );
           }
-        }
-        break;
-      case 'backoff':
-        if (Date.now() > nextActionAt) {
+          break;
+        case 'cancel':
           this.options.logger.info(
-            `incremental-engine: Ingestion '${ingestionId}' backoff complete, will attempt to resume`,
+            `incremental-engine: Ingestion '${ingestionId}' canceling, will restart`,
           );
-          await this.manager.setProviderIngesting(ingestionId);
-        } else {
-          this.options.logger.info(
-            `incremental-engine: Ingestion '${ingestionId}' backoff continuing`,
+          await this.manager.setProviderCanceled(ingestionId);
+          break;
+        default:
+          this.options.logger.error(
+            `incremental-engine: Ingestion '${ingestionId}' received unknown action '${nextAction}'`,
           );
-        }
-        break;
-      case 'cancel':
-        this.options.logger.info(
-          `incremental-engine: Ingestion '${ingestionId}' canceling, will restart`,
-        );
-        await this.manager.setProviderCanceled(ingestionId);
-        break;
-      default:
-        this.options.logger.error(
-          `incremental-engine: Ingestion '${ingestionId}' received unknown action '${nextAction}'`,
-        );
+      }
+    } else {
+      this.options.logger.error(
+        `incremental-engine: Engine tried to create duplicate ingestion record for provider '${this.options.provider.getProviderName()}'.`,
+      );
     }
   }
 
@@ -156,9 +163,11 @@ export class IncrementalIngestionEngine implements IterationEngine {
     const result = await this.manager.createProviderIngestionRecord(
       providerName,
     );
-    this.options.logger.info(
-      `incremental-engine: Ingestion record created: '${result.ingestionId}'`,
-    );
+    if (result) {
+      this.options.logger.info(
+        `incremental-engine: Ingestion record created: '${result.ingestionId}'`,
+      );
+    }
     return result;
   }
 

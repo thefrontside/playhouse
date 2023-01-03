@@ -1,5 +1,23 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.4.2
+
+### Patch Changes
+
+- d62b0ad: Upgraded to Backstage 1.9
+
+## 0.4.1
+
+### Patch Changes
+
+- 83910a8: catch handler in the IncrementalIngestianEngine is wrongly assuming an error to be a string
+
+## 0.4.0
+
+### Minor Changes
+
+- bde7974: ensure completion_ticket is used for incremental ingestions
+
 ## 0.3.2
 
 ### Patch Changes
