@@ -11,10 +11,10 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@faker-js/faker": "^3.0.0",
-    "@frontside/graphgen": "^1.1.0",
+    "@faker-js/faker": "^7.6.0",
+    "@frontside/graphgen": "^1.8.0",
     "@frontside/tsconfig": "^1.2.0",
-    "@simulacrum/auth0-simulator": "^0.8.0",
+    "@simulacrum/auth0-simulator": "^0.8.3",
     "@types/seedrandom": "3.0.1",
     "effection": "^2.0.6",
     "nodemon": "latest"

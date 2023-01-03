@@ -4779,11 +4779,6 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@faker-js/faker@^3.0.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-3.1.0.tgz#21bf8ca468b685ad3a5a91ebdecb771f0c7be795"
-  integrity sha512-BpY+/kxwCtVWwal/3bX606duGF7uGGjcQFrTocbwj2HTIZ+Rm1yng4kqvW3VUxiejP1/gjBfot5VAvQAxlIEkQ==
-
 "@faker-js/faker@^7.6.0":
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-7.6.0.tgz#9ea331766084288634a9247fcd8b84f16ff4ba07"
@@ -4796,10 +4791,20 @@
   dependencies:
     yaml-ast-parser "0.0.43"
 
-"@frontside/graphgen@^1.1.0", "@frontside/graphgen@^1.6.0", "@frontside/graphgen@^1.7.0":
+"@frontside/graphgen@^1.6.0", "@frontside/graphgen@^1.7.0":
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/@frontside/graphgen/-/graphgen-1.7.0.tgz#8c475107f123e64e89318e054655f663a1295324"
   integrity sha512-KE4IXH+CyzSyVT7+37vd4ysK0JkEuuw1Ex8LGx7q8mr4MEyAsSWTkO6BPrWsuJNka4hhDaev78SePMTBkb+TOA==
+  dependencies:
+    alea "1.0.1"
+    glob-to-regexp "0.4.1"
+    graphql "16.5.0"
+    hash.js "1.1.7"
+
+"@frontside/graphgen@^1.8.0":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@frontside/graphgen/-/graphgen-1.8.1.tgz#e26a7f553f4276823b5ec067493ca2f160584320"
+  integrity sha512-YtKGMEWWPI+AcqJkuElZBjmmtQ/Tf2mXVz3dkgjSRNabtPFBvt/apPTcxzLdgem/ONZpbRx6tibScRWAI+TanA==
   dependencies:
     alea "1.0.1"
     glob-to-regexp "0.4.1"
@@ -7956,14 +7961,14 @@
   resolved "https://registry.yarnpkg.com/@sideway/pinpoint/-/pinpoint-2.0.0.tgz#cff8ffadc372ad29fd3f78277aeb29e632cc70df"
   integrity sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==
 
-"@simulacrum/auth0-simulator@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@simulacrum/auth0-simulator/-/auth0-simulator-0.8.0.tgz#c5610999a396abc395303a396d48dc87737987b6"
-  integrity sha512-wS3vOrSUDXqvefVw5vp3vsWpNF5J0Qew170nZFYyufFfnFPUg5ZfYMVfqM0z0cKpGyO2T+/h1qIcd7tA95J1FQ==
+"@simulacrum/auth0-simulator@^0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@simulacrum/auth0-simulator/-/auth0-simulator-0.8.3.tgz#451c444a6361861b222c5a2afb2da682d1bbd320"
+  integrity sha512-JvrC51TAUlnWeFS9aSjpfhVfoM+sLB7dJB0vWDSfahLAaY6D5NUf1qcMbAvxDOldxUFhv/cIEh4tg1eZo9+zfQ==
   dependencies:
     "@effection/process" "^2.0.1"
     "@simulacrum/client" "0.5.4"
-    "@simulacrum/server" "0.6.2"
+    "@simulacrum/server" "0.6.3"
     "@types/faker" "^5.1.7"
     assert-ts "^0.3.2"
     base64-url "^2.3.3"
@@ -8000,10 +8005,10 @@
     graphql-type-json "^0.3.2"
     lodash.omit "^4.5.0"
 
-"@simulacrum/server@0.6.2":
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/@simulacrum/server/-/server-0.6.2.tgz#b4e7addcd223feb7143b48c867ac6e4bb1ba3000"
-  integrity sha512-gRNA1HWTvIo7fDOoCVxJNbWtCrRjllh9TnvQLWKIoATCmdY+VCuGeXNUIixGPQ1UxE8eTMfRInPelFkQ+tJ7WA==
+"@simulacrum/server@0.6.3":
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/@simulacrum/server/-/server-0.6.3.tgz#05671583e650781db8b2e3254eb4276895ffc49d"
+  integrity sha512-FiU59+uFC7tAkthfD18uRDIXaiocfoe1qfH6RfhhJRy1VmGWEKthtO8aKuIuaNmzj7RiKpGxAGcKe37NV1txuQ==
   dependencies:
     "@effection/atom" "^2.0.1"
     "@effection/process" "^2.0.1"
