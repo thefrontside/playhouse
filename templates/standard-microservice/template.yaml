@@ -12,6 +12,7 @@ spec:
       required:
         - repoUrl
         - componentName
+        - visibility
       properties:
         componentName: # for catalog metadata, description of the repo, used for "repo" of octokit (must match what goes into repourl)
           title: Component Name
@@ -35,6 +36,13 @@ spec:
               - github.com
             allowedOwners:
               - thefrontside
+        visibility:
+          title: Repo Visibility
+          type: string
+          enum:
+            - public
+            - private
+          description: The repository visibility on Github
 
   steps:
     - name: Read Environment
@@ -60,6 +68,8 @@ spec:
         repoUrl: ${{ parameters.repoUrl }}
         defaultBranch: main
         token: ${{ secrets.USER_OAUTH_TOKEN }}
+        repoVisibility: ${{ parameters.visibility }}
+        hasWiki: false
     - name: Create Humanitec App
       id: humanitec-create-app
       action: humanitec:create-app
@@ -71,3 +81,11 @@ spec:
       input:
         repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
         catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps['publish'].output.remoteUrl }} # link to the remote repository
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }} # link to the entity that has been ingested to the catalog
