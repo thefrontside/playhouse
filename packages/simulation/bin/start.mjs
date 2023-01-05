@@ -9,10 +9,10 @@ main(function* () {
   const serviceURL = new URL('https://localhost:4400');
   const people = [
     {
-      id: 'paulwaters',
-      name: 'Paul Waters',
+      id: 'testuser',
+      name: 'Test User',
       password: 'password',
-      email: 'paulwaters@placeholder.com',
+      email: 'test@frontside.com',
       picture: faker.image.avatar(),
     },
   ];

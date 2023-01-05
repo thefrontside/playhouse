@@ -1,3 +1,4 @@
+import { stringifyEntityRef } from '@backstage/catalog-model';
 import {
   createRouter,
   providers,
@@ -42,10 +43,7 @@ export default async function createPlugin({
 
             // Next we verify the email domain. It is recommended to include this
             // kind of check if you don't look up the user in an external service.
-            if (
-              domain !== 'frontside.com' &&
-              config.getString('auth.environment') === 'production'
-            ) {
+            if (domain !== 'frontside.com') {
               throw new Error(
                 `Login failed, this email ${profile.email} does not belong to the expected domain`,
               );
@@ -55,7 +53,7 @@ export default async function createPlugin({
             const userEntity = stringifyEntityRef({
               kind: 'User',
               name,
-              namespace: DEFAULT_NAMESPACE,
+              namespace: 'frontside',
             });
             return ctx.issueToken({
               claims: {
