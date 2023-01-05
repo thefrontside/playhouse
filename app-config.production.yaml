@@ -7,12 +7,6 @@ backend:
       user: ${POSTGRES_USER}
       password: ${POSTGRES_PASSWORD}
 
-integrations:
-  github:
-    - host: github.com
-      apps:
-        - $include: credentials/backstage-app-credentials.yaml
-
 auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
   session:
@@ -29,6 +23,10 @@ auth:
         # if added, we need to update ./charts/backstage/Values.yaml
         # connection: ${AUTH_AUTH0_CONNECTION}
         # connectionScope: ${AUTH_AUTH0_CONNECTION_SCOPE}
+    github:
+      production:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
 
 catalog:
   locations:

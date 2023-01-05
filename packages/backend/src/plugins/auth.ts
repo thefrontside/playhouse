@@ -1,8 +1,8 @@
 import {
-  DEFAULT_NAMESPACE,
-  stringifyEntityRef,
-} from '@backstage/catalog-model';
-import { createRouter, providers } from '@backstage/plugin-auth-backend';
+  createRouter,
+  providers,
+  defaultAuthProviderFactories,
+} from '@backstage/plugin-auth-backend';
 import { Router } from 'express';
 import { PluginEnvironment } from '../types';
 
@@ -20,6 +20,7 @@ export default async function createPlugin({
     discovery,
     tokenManager,
     providerFactories: {
+      ...defaultAuthProviderFactories,
       auth0: providers.auth0.create({
         signIn: {
           resolver: async ({ profile }, ctx) => {
