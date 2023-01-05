@@ -25,8 +25,17 @@ spec:
           type: string
           ui:field: RepoUrlPicker
           ui:options:
+            # https://backstage.io/docs/features/software-templates/writing-templates#using-the-users-oauth-token
+            requestUserCredentials:
+              secretsKey: USER_OAUTH_TOKEN
+              additionalScopes:
+                github:
+                  - workflow
             allowedHosts:
               - github.com
+            allowedOwners:
+              - thefrontside
+
   steps:
     - name: Read Environment
       id: environment
@@ -49,6 +58,8 @@ spec:
         allowedHosts: ['github.com']
         description: Created from a Standard Microservice template
         repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        token: ${{ secrets.USER_OAUTH_TOKEN }}
     - name: Create Humanitec App
       id: humanitec-create-app
       action: humanitec:create-app
