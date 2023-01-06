@@ -28,6 +28,8 @@ jobs:
 
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
+        with:
+          install_components: gke-gcloud-auth-plugin
 
       - name: Install/Build Backstage
         run: yarn && yarn tsc && yarn build
@@ -54,8 +56,9 @@ jobs:
       - name: Authenticate to GKE Cluster
         uses: google-github-actions/get-gke-credentials@v1
         with:
-          cluster_name: 'backstage-cluster'
-          location: 'northamerica-northeast1-a'
+          cluster_name: backstage-cluster
+          location: northamerica-northeast1-a
+          use_auth_provider: true
 
       - name: Helm Upgrade Postgres
         run: |-
