@@ -6,7 +6,7 @@ metadata:
   description: Frontside's Backstage Developer Portal
   # Example for optional annotations
   annotations:
-    github.com/project-slug: thefrontside/backstage
+    github.com/project-slug: thefrontside/playhouse
     "humanitec.com/orgId": "the-frontside-software-inc"
     "humanitec.com/appId": "backstage"
     # backstage.io/techdocs-ref: dir:.
@@ -28,4 +28,3 @@ spec:
   lifecycle: production
   definition:
     $text: http://localhost:7007/api/graphql/schema
-  
