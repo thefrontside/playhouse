@@ -1,11 +1,3 @@
-/*
- * Hi!
- *
- * Note that this is an EXAMPLE Backstage backend. Please check the README.
- *
- * Happy hacking!
- */
-
 import Router from 'express-promise-router';
 import {
   createServiceBuilder,
@@ -22,6 +14,7 @@ import {
 import { TaskScheduler } from '@backstage/backend-tasks';
 import { ServerPermissionClient } from '@backstage/plugin-permission-node';
 import { DefaultIdentityClient } from '@backstage/plugin-auth-node';
+import { createAuthMiddleware } from './authMiddleware';
 import { Config } from '@backstage/config';
 import app from './plugins/app';
 import auth from './plugins/auth';
@@ -46,7 +39,7 @@ function makeCreateEnv(config: Config) {
 
   const cacheManager = CacheManager.fromConfig(config);
   const databaseManager = DatabaseManager.fromConfig(config, { logger: root });
-  const tokenManager = ServerTokenManager.noop();
+  const tokenManager = ServerTokenManager.fromConfig(config, { logger: root });
   const taskScheduler = TaskScheduler.fromConfig(config);
 
   const identity = DefaultIdentityClient.create({
@@ -100,18 +93,28 @@ async function main() {
   const appEnv = useHotMemoize(module, () => createEnv('app'));
   const humanitecEnv = useHotMemoize(module, () => createEnv('humanitec'));
 
+  const authMiddleware = await createAuthMiddleware(config, appEnv);
   const apiRouter = Router();
-  apiRouter.use('/catalog', await catalog(catalogEnv));
-  apiRouter.use('/scaffolder', await scaffolder(scaffolderEnv));
+  // The auth route must be publicly available as it is used during login
   apiRouter.use('/auth', await auth(authEnv));
-  apiRouter.use('/techdocs', await techdocs(techdocsEnv));
-  apiRouter.use('/proxy', await proxy(proxyEnv));
-  apiRouter.use('/search', await search(searchEnv));
-  apiRouter.use('/healthcheck', await healthcheck(healthcheckEnv));
+  // Add a simple endpoint to be used when setting a token cookie
+  apiRouter.use('/cookie', authMiddleware, (_req, res) => {
+    res.status(200).send(`Coming right up`);
+  });
+  // Only authenticated requests are allowed to the routes below
+  apiRouter.use('/catalog', authMiddleware, await catalog(catalogEnv));
+  apiRouter.use('/scaffolder', authMiddleware, await scaffolder(scaffolderEnv));
+  apiRouter.use('/techdocs', authMiddleware, await techdocs(techdocsEnv));
+  apiRouter.use('/proxy', authMiddleware, await proxy(proxyEnv));
+  apiRouter.use('/search', authMiddleware, await search(searchEnv));
+  apiRouter.use('/healthcheck', authMiddleware, await healthcheck(healthcheckEnv));
   apiRouter.use('/effection-inspector', await effectionInspector(effectionInspectorEnv));
+  // apiRouter.use('/effection-inspector', authMiddleware, await effectionInspector(effectionInspectorEnv));
   apiRouter.use('/humanitec', await humanitec(humanitecEnv));
+  // apiRouter.use('/humanitec', authMiddleware, await humanitec(humanitecEnv));
   apiRouter.use('/graphql', await graphql(graphqlEnv));
-  apiRouter.use(notFoundHandler());
+  // apiRouter.use('/graphql', authMiddleware, await graphql(graphqlEnv));
+  apiRouter.use(authMiddleware, notFoundHandler());
 
   const service = createServiceBuilder(module)
     .loadConfig(config)
