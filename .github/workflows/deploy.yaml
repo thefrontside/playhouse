@@ -7,9 +7,7 @@ on:
 concurrency: ${{ github.ref }}
 
 env:
-  IMAGE: "northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage"
-  CLUSTER: "backstage-cluster"
-  ZONE: "northamerica-northeast1-a"
+  IMAGE: 'northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage'
 
 jobs:
   deploy:
@@ -19,71 +17,73 @@ jobs:
       contents: 'read'
       id-token: 'write'
     steps:
-    - uses: actions/checkout@v2
-    - uses: volta-cli/action@v3
+      - uses: actions/checkout@v2
+      - uses: volta-cli/action@v3
 
-    - name: Google Cloud Workload Identity Federation
-      uses: google-github-actions/auth@v0
-      with:
-        workload_identity_provider: ${{ secrets.CLOUD_WORKLOAD_PROVIDER}}
-        service_account: ${{ secrets.CLOUD_SERVICE_ACCOUNT }}
+      - name: Google Cloud Workload Identity Federation
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.CLOUD_WORKLOAD_PROVIDER}}
+          service_account: ${{ secrets.CLOUD_SERVICE_ACCOUNT }}
 
-    - name: Setup Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v0
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
-    - name: Install/Build Backstage
-      run: yarn && yarn tsc && yarn build
+      - name: Install/Build Backstage
+        run: yarn && yarn tsc && yarn build
 
-    - name: Set Tag with SHA
-      run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
+      - name: Set Tag with SHA
+        run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
 
-    - name: Cloud Build & Push to Artifacts Registry
-      run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"
+      - name: Cloud Build & Push to Artifacts Registry
+        run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"
 
-    - name: Inform Humanitec
-      run: |-
-        curl \
-          --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID }}/images/backstage/builds' \
-          --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN }}' \
-          --header 'Content-Type: application/json' \
-          --data-raw '{
-              "branch": "'$GITHUB_REF_NAME'",
-              "commit": "'$GITHUB_SHA'",
-              "image": "'$IMAGE:$TAG'",
-              "tags": ["'$TAG'"]
-          }'
+      - name: Inform Humanitec
+        run: |-
+          curl \
+            --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID }}/images/backstage/builds' \
+            --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "branch": "'$GITHUB_REF_NAME'",
+                "commit": "'$GITHUB_SHA'",
+                "image": "'$IMAGE:$TAG'",
+                "tags": ["'$TAG'"]
+            }'
 
-    - name: Authenticate to GKE Cluster
-      run: gcloud container clusters get-credentials $CLUSTER --zone $ZONE
+      - name: Authenticate to GKE Cluster
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          cluster_name: 'backstage-cluster'
+          location: 'northamerica-northeast1-a'
 
-    - name: Helm Upgrade Postgres
-      run: |-
-        helm upgrade --install min-postgres-chart ./charts/postgres \
-          -f ./charts/postgres/Values.yaml \
-          --set postgresUsername=${{ secrets.POSTGRES_USER }} \
-          --set postgresPassword=${{ secrets.POSTGRES_PASSWORD }}
+      - name: Helm Upgrade Postgres
+        run: |-
+          helm upgrade --install min-postgres-chart ./charts/postgres \
+            -f ./charts/postgres/Values.yaml \
+            --set postgresUsername=${{ secrets.POSTGRES_USER }} \
+            --set postgresPassword=${{ secrets.POSTGRES_PASSWORD }}
 
-    - name: Helm Upgrade Backstage (backstage:${{ env.TAG }})
-      run: |-
-        helm upgrade --install min-backstage-chart ./charts/backstage \
-          -f ./charts/backstage/Values.yaml \
-          --set backstageImage="$IMAGE:$TAG" \
-          --set backstageGithubCredentials="$CREDENTIALS" \
-          --set humanitecToken="$HUMANITEC_TOKEN" \
-          --set authSessionClientSecret="$AUTH_SESSION_CLIENT_SECRET" \
-          --set auth0ClientSecret="$AUTH0_CLIENT_SECRET" \
-          --set auth0DomainId="$AUTH0_DOMAIN_ID" \
-          --set auth0ClientId="$AUTH0_CLIENT_ID"
+      - name: Helm Upgrade Backstage (backstage:${{ env.TAG }})
+        run: |-
+          helm upgrade --install min-backstage-chart ./charts/backstage \
+            -f ./charts/backstage/Values.yaml \
+            --set backstageImage="$IMAGE:$TAG" \
+            --set backstageGithubCredentials="$CREDENTIALS" \
+            --set humanitecToken="$HUMANITEC_TOKEN" \
+            --set authSessionClientSecret="$AUTH_SESSION_CLIENT_SECRET" \
+            --set auth0ClientSecret="$AUTH0_CLIENT_SECRET" \
+            --set auth0DomainId="$AUTH0_DOMAIN_ID" \
+            --set auth0ClientId="$AUTH0_CLIENT_ID"
+        env:
+          CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
+          HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_TOKEN }}
 
-      env:
-        CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
-        HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_TOKEN }}
+      - name: Confirm Deployment Status
+        id: deploy-status
+        continue-on-error: true
+        run: kubectl rollout status deployment/backstage
 
-    - name: Confirm Deployment Status
-      id: deploy-status
-      continue-on-error: true
-      run: kubectl rollout status deployment/backstage
-
-    - name: Rollback Deployment
-      if: steps.deploy-status.outcome == 'failure'
-      run: helm rollback min-backstage-chart
+      - name: Rollback Deployment
+        if: steps.deploy-status.outcome == 'failure'
+        run: helm rollback min-backstage-chart
