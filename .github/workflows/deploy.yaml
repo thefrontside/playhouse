@@ -82,6 +82,7 @@ jobs:
         env:
           CREDENTIALS: ${{ secrets.BACKSTAGE_GITHUB_APP_CREDENTIALS }}
           HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_TOKEN }}
+          AUTH_SESSION_CLIENT_SECRET: ${{ secrets.AUTH_SESSION_CLIENT_SECRET }}
 
       - name: Confirm Deployment Status
         id: deploy-status
