@@ -2,11 +2,13 @@ backstagePort: 7007
 ingressPort: 80
 baseUrl: https://backstage.frontside.services
 # any randomly generated string
-authSessionClientSecret: abcde
-# auth0 client secret
-auth0ClientSecret:
-auth0DomainId:
-auth0ClientId: 
-auth0Audience: 
-auth0Connection: 
-auth0ConnectionScope: 
+authSessionClientSecret: backstage_auth0_client_secret
+# auth0 tenant information
+auth0Domain: ''
+auth0ClientId: ''
+auth0ClientSecret: ''
+auth0Audience: 'https://frontside-backstage'
+# these are optional, and we are using the defaults
+#   however empty strings throw a config error
+# auth0Connection:
+# auth0ConnectionScope:

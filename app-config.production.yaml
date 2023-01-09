@@ -21,12 +21,14 @@ auth:
   providers:
     auth0:
       production:
-        domain: ${AUTH_AUTH0_DOMAIN_ID}
+        domain: ${AUTH_AUTH0_DOMAIN}
         clientId: ${AUTH_AUTH0_CLIENT_ID}
         clientSecret: ${AUTH_AUTH0_CLIENT_SECRET}
         audience: ${AUTH_AUTH0_AUDIENCE}
-        connection: ${AUTH_AUTH0_CONNECTION}
-        connectionScope: ${AUTH_AUTH0_CONNECTION_SCOPE}
+        # these are optional, and we are using the defaults
+        # if added, we need to update ./charts/backstage/Values.yaml
+        # connection: ${AUTH_AUTH0_CONNECTION}
+        # connectionScope: ${AUTH_AUTH0_CONNECTION_SCOPE}
 
 catalog:
   locations:
