@@ -5,7 +5,7 @@ metadata:
 data:
   APP_CONFIG_app_baseUrl: {{ .Values.baseUrl }}
   APP_CONFIG_backend_baseUrl: {{ .Values.baseUrl }}
-  AUTH_AUTH0_DOMAIN_ID: {{ required "You must provide a Auth0 Domain ID" .Values.auth0DomainId }}
+  AUTH_AUTH0_DOMAIN: {{ required "You must provide a Auth0 Domain" .Values.auth0Domain }}
   AUTH_AUTH0_CLIENT_ID: {{ required "You must provide a Auth0 Client ID" .Values.auth0ClientId }}
   AUTH_AUTH0_AUDIENCE: {{ .Values.auth0Audience }}
   AUTH_AUTH0_CONNECTION: {{ .Values.auth0Connection }}
