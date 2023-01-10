@@ -3,6 +3,8 @@ ingressPort: 80
 baseUrl: https://backstage.frontside.services
 # any randomly generated string
 authSessionClientSecret: backstage_auth0_client_secret
+# github scaffolder token
+githubToken: ''
 # auth0 tenant information
 auth0Domain: ''
 auth0ClientId: ''
@@ -12,3 +14,6 @@ auth0Audience: 'https://frontside-backstage'
 #   however empty strings throw a config error
 # auth0Connection:
 # auth0ConnectionScope:
+# github app information
+githubClientId: ''
+githubClientSecret: ''
