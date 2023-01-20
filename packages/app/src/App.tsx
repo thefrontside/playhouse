@@ -40,24 +40,41 @@ import { GraphiQLPage } from '@backstage/plugin-graphiql';
 import { SignInPage } from '@backstage/core-components';
 import { auth0AuthApiRef } from './internal';
 import Star from '@material-ui/icons/Star';
+import {
+  discoveryApiRef,
+  useApi,
+} from '@backstage/core-plugin-api';
+import type { IdentityApi } from '@backstage/core-plugin-api';
+import { setTokenCookie } from './cookieAuth';
 
 const app = createApp({
   apis,
   components: {
-    SignInPage: props => (
-      <SignInPage
-        {...props}
-        providers={[
-          'guest',
-          {
+    SignInPage: props => {
+      const discoveryApi = useApi(discoveryApiRef);
+      return (
+        <SignInPage
+          {...props}
+          provider={{
             id: 'auth0-auth-provider',
             title: 'Auth0',
             message: 'Sign in using Auth0',
             apiRef: auth0AuthApiRef,
-          },
-        ]}
-      />
-    ),
+          }}
+          onSignInSuccess={async (identityApi: IdentityApi) => {
+            // As techdocs HTML pages load assets without an Authorization header
+            //   the code below also sets a token cookie when the user logs in
+            //   (and when the token is about to expire).
+            setTokenCookie(
+              await discoveryApi.getBaseUrl('cookie'),
+              identityApi,
+            );
+
+            props.onSignInSuccess(identityApi);
+          }}
+        />
+      );
+    },
   },
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
