@@ -1,4 +1,7 @@
 backend:
+  auth:
+    keys:
+      - secret: ${AUTH_BACKEND_SECRET}
   database:
     client: pg
     connection:
