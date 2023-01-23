@@ -40,6 +40,7 @@ import { GraphiQLPage } from '@backstage/plugin-graphiql';
 import { SignInPage } from '@backstage/core-components';
 import { auth0AuthApiRef } from './internal';
 import Star from '@material-ui/icons/Star';
+import { githubAuthApiRef } from '@backstage/core-plugin-api';
 
 const app = createApp({
   apis,
@@ -47,15 +48,12 @@ const app = createApp({
     SignInPage: props => (
       <SignInPage
         {...props}
-        providers={[
-          'guest',
-          {
-            id: 'auth0-auth-provider',
-            title: 'Auth0',
-            message: 'Sign in using Auth0',
-            apiRef: auth0AuthApiRef,
-          },
-        ]}
+        provider={{
+          id: 'auth0-auth-provider',
+          title: 'Auth0',
+          message: 'Sign in using Auth0',
+          apiRef: auth0AuthApiRef,
+        }}
       />
     ),
   },
@@ -115,12 +113,20 @@ const routes = (
       element={
         <UserSettingsPage
           providerSettings={
-            <ProviderSettingsItem
-              title="Auth0"
-              description="Provides sign-in via Auth0"
-              apiRef={auth0AuthApiRef}
-              icon={Star}
-            />
+            <>
+              <ProviderSettingsItem
+                title="Auth0"
+                description="Provides sign-in via Auth0"
+                apiRef={auth0AuthApiRef}
+                icon={Star}
+              />
+              <ProviderSettingsItem
+                title="GitHub"
+                description="Provides authentication towards GitHub APIs"
+                apiRef={githubAuthApiRef}
+                icon={Star}
+              />
+            </>
           }
         />
       }

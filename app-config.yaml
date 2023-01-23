@@ -44,15 +44,6 @@ backend:
     allow:
       - host: localhost:7007
 
-integrations:
-  github:
-    - host: github.com
-      token: ${GITHUB_TOKEN}
-    ### Example for how to add your GitHub Enterprise instance using the API:
-    # - host: ghe.example.net
-    #   apiBaseUrl: https://ghe.example.net/api/v3
-    #   token: ${GHE_TOKEN}
-
 proxy:
   '/test':
     target: 'https://example.com'
@@ -69,6 +60,11 @@ techdocs:
   publisher:
     type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
 
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+
 auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
   session:
@@ -84,6 +80,10 @@ auth:
         clientId: backstage_auth0_client_id
         clientSecret: backstage_auth0_client_secret
         audience: https://frontside-backstage
+    github:
+      development:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
