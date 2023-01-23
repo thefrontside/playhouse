@@ -7,7 +7,7 @@ on:
 concurrency: ${{ github.ref }}
 
 env:
-  IMAGE: 'northamerica-northeast1-docker.pkg.dev/frontside-humanitec/frontside-artifacts/backstage'
+  IMAGE: 'northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage'
   USE_GKE_GCLOUD_AUTH_PLUGIN: true
 
 jobs:
