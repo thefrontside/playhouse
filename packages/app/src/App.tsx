@@ -48,6 +48,7 @@ const app = createApp({
     SignInPage: props => (
       <SignInPage
         {...props}
+        auto
         provider={{
           id: 'auth0-auth-provider',
           title: 'Auth0',

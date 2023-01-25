@@ -20,10 +20,10 @@ auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
   session:
     secret: ${AUTH_SESSION_CLIENT_SECRET}
-  environment: production
+  environment: development
   providers:
     auth0:
-      production:
+      development:
         domain: ${AUTH_AUTH0_DOMAIN}
         clientId: ${AUTH_AUTH0_CLIENT_ID}
         clientSecret: ${AUTH_AUTH0_CLIENT_SECRET}
@@ -33,7 +33,7 @@ auth:
         # connection: ${AUTH_AUTH0_CONNECTION}
         # connectionScope: ${AUTH_AUTH0_CONNECTION_SCOPE}
     github:
-      production:
+      development:
         clientId: ${AUTH_GITHUB_CLIENT_ID}
         clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
 
