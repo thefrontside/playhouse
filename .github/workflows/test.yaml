@@ -16,3 +16,5 @@ jobs:
       - run: yarn tsc
       - run: docker-compose up &
       - run: yarn test
+        env:
+          GITHUB_TOKEN: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
