@@ -1,5 +1,5 @@
 {
-  "name": "backstage-plugin-scaffolder-frontend-workflow",
+  "name": "@frontside/backstage-plugin-scaffolder-workflow",
   "version": "0.1.0",
   "main": "src/index.ts",
   "types": "src/index.ts",

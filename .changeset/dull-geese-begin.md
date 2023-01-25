@@ -1,5 +1,5 @@
 ---
-'backstage-plugin-scaffolder-frontend-workflow': minor
+'@frontside/backstage-plugin-scaffolder-workflow': minor
 ---
 
 Add EmbeddedScaffolderWorkflow package
