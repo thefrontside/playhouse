@@ -79,7 +79,7 @@ auth:
         domain: localhost:4400
         clientId: backstage_auth0_client_id
         clientSecret: backstage_auth0_client_secret
-        audience: https://frontside-backstage
+        # audience: https://frontside-backstage
     github:
       development:
         clientId: ${AUTH_GITHUB_CLIENT_ID}
