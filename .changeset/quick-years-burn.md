@@ -1,17 +1,17 @@
 ---
-'app': minor
-'backend': minor
-'@frontside/backstage-ingestion-tests': minor
-'@frontside/backstage-plugin-batch-loader': minor
-'@frontside/backstage-plugin-effection-inspector': minor
-'@frontside/backstage-plugin-effection-inspector-backend': minor
-'@frontside/backstage-plugin-graphql': minor
-'@internal/plugin-healthcheck': minor
-'@frontside/backstage-plugin-humanitec': minor
-'@frontside/backstage-plugin-humanitec-backend': minor
-'@frontside/backstage-plugin-humanitec-common': minor
-'@frontside/backstage-plugin-incremental-ingestion-backend': minor
-'@frontside/backstage-plugin-incremental-ingestion-github': minor
+'app': patch
+'backend': patch
+'@frontside/backstage-ingestion-tests': patch
+'@frontside/backstage-plugin-batch-loader': patch
+'@frontside/backstage-plugin-effection-inspector': patch
+'@frontside/backstage-plugin-effection-inspector-backend': patch
+'@frontside/backstage-plugin-graphql': patch
+'@internal/plugin-healthcheck': patch
+'@frontside/backstage-plugin-humanitec': patch
+'@frontside/backstage-plugin-humanitec-backend': patch
+'@frontside/backstage-plugin-humanitec-common': patch
+'@frontside/backstage-plugin-incremental-ingestion-backend': patch
+'@frontside/backstage-plugin-incremental-ingestion-github': patch
 ---
 
 upgrade backstage dependencies
