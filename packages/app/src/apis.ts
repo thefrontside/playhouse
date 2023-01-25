@@ -36,7 +36,7 @@ export const apis: AnyApiFactory[] = [
           title: 'Auth0',
           icon: () => null,
         },
-        defaultScopes: ['openid', 'email', 'profile'],
+        defaultScopes: ['openid', 'email', 'profile', 'offline_access'],
         environment: configApi.getOptionalString('auth.environment'),
       }),
   }),
