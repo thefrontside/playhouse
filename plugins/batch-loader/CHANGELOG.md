@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-batch-loader
 
+## 0.3.1
+
+### Patch Changes
+
+- d803873: upgrade backstage dependencies
+
 ## 0.3.0
 
 ### Minor Changes

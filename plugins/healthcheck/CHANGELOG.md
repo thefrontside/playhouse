@@ -1,5 +1,11 @@
 # @internal/plugin-healthcheck
 
+## 0.1.4
+
+### Patch Changes
+
+- d803873: upgrade backstage dependencies
+
 ## 0.1.3
 
 ### Patch Changes

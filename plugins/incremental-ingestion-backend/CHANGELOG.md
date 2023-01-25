@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.4.3
+
+### Patch Changes
+
+- d803873: upgrade backstage dependencies
+
 ## 0.4.2
 
 ### Patch Changes

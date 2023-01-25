@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-effection-inspector-backend
 
+## 0.1.5
+
+### Patch Changes
+
+- d803873: upgrade backstage dependencies
+
 ## 0.1.4
 
 ### Patch Changes
