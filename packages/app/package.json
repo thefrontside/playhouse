@@ -35,11 +35,7 @@
     "@frontside/backstage-plugin-humanitec": "^0.3.5",
     "@material-ui/core": "^4.12.2",
     "@material-ui/icons": "^4.9.1",
-    "@monaco-editor/react": "4.4.5",
-    "assert-ts": "^0.3.4",
-    "effection": "^2.0.6",
     "history": "^5.0.0",
-    "platformscript": "1.0.0-alpha.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router": "^6.3.0",
@@ -84,8 +80,5 @@
   },
   "files": [
     "dist"
-  ],
-  "volta": {
-    "extend": "../../package.json"
-  }
+  ]
 }

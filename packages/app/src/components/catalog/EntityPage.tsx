@@ -58,8 +58,6 @@ import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
-import { PlatformScriptPage } from '../PlatformScriptPage';
-import { InfoCard } from '@backstage/core-components';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -126,9 +124,7 @@ const overviewContent = (
       <HumanitecCardComponent />
     </Grid>
     <Grid item md={4} xs={12}>
-      <InfoCard title="Links">
-        <PlatformScriptPage />
-      </InfoCard>
+      <EntityLinksCard />
     </Grid>
     <Grid item md={8} xs={12}>
       <EntityHasSubcomponentsCard variant="gridItem" />
