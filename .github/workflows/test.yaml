@@ -10,8 +10,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: volta-cli/action@v3
-      # Installing yarn globaly so the workflow will work in `act`
-      - run: npm install --global yarn
       - run: yarn install --frozen-lockfile # optional, --immutable
       - run: yarn tsc
       - run: docker-compose up &
