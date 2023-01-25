@@ -1,13 +1,48 @@
 # scaffolder-frontend-workflow
 
-Welcome to the scaffolder-frontend-workflow plugin!
+A simple wrapper around the [@backstage/plugin-scaffolder-react Workflow](https://github.com/backstage/backstage/blob/master/plugins/scaffolder-react/src/next/components/Workflow/Workflow.tsx) that various overrides of the workflow component properties and allows a `frontPage` or `finishPage` of markup to be added.
 
-_This plugin was created through the Backstage CLI_
+e.g.
 
-## Getting started
-
-Your plugin has been added to the example app in this repository, meaning you'll be able to access it by running `yarn start` in the root directory, and then navigating to [/scaffolder-frontend-workflow](http://localhost:3000/scaffolder-frontend-workflow).
-
-You can also serve the plugin in isolation by running `yarn start` in the plugin directory.
-This method of serving the plugin provides quicker iteration speed and a faster startup and hot reloads.
-It is only meant for local development, and the setup for it can be found inside the [/dev](./dev) directory.
+```tsx
+<EmbeddedScaffolderWorkflow
+  title="Different title than template"
+  description={`
+## This is markdown
+- overriding the template description
+    `}
+  onCreate={onComplete}
+  onError={onError}
+  namespace="default"
+  templateName="docs-template"
+  initialState={{
+    name: 'prefilled-name',
+  }}
+  extensions={[]}
+  frontPage={
+    <>
+      <h1>Front Page to workflow</h1>
+      <p>
+        Security insights actionable advice to improve security posture
+        of your application
+      </p>
+      <p>
+        You must complete on-boarding process to activate security
+        insights on this project.
+      </p>
+    </>
+  }
+  finishPage={
+    <>
+      <h1>Congratulations, this application is complete!</h1>
+    </>
+  }
+  components={{
+    ReviewStateComponent:() => (
+      <h1>This is a different wrapper for the review page</h1>
+    ),
+    reviewButtonText: "Changed Review button text",
+    createButtonText: "Changed Create button text",
+  }}
+/>
+```

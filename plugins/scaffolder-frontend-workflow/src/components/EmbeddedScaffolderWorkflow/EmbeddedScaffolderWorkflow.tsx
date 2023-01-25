@@ -16,62 +16,46 @@
 
 import React, { useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import type { JsonValue } from '@backstage/types';
-import { EmbeddableWorkflow, type WorkflowProps } from '../Workflow/Workflow';
-import { FormProps } from '@backstage/plugin-scaffolder-react';
+import { EmbeddableWorkflow, type WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Box, Button } from '@material-ui/core';
 
 /**
  * @alpha
  */
-export type EmbeddedScaffolderWorkflowProps = Omit<
-  WorkflowProps,
-  'onComplete' | 'FormProps'
-> & {
-  customExtensionsElement?: React.ReactNode;
-  initialFormState?: Record<string, JsonValue>;
-  onComplete: (values: Record<string, JsonValue>) => Promise<void>;
+export type EmbeddedScaffolderWorkflowProps = WorkflowProps & {
   onError(error: Error | undefined): JSX.Element | null;
-  FormProps?: FormProps;
   frontPage: ReactNode;
   finishPage: ReactNode;
-} & Partial<Pick<WorkflowProps, 'onComplete'>>;
+} & Partial<Pick<WorkflowProps, 'onCreate'>>;
 
 type Display = 'front' | 'workflow' | 'finish';
 
 type DisplayComponents = Record<Display, JSX.Element>;
 
-type OnCompleteArgs = Parameters<WorkflowProps['onComplete']>[0];
+type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];
 
 /**
  * Allows the EmbeddableWorkflow to be called from outside of a normal scaffolder workflow
  * @alpha
  */
 export function EmbeddedScaffolderWorkflow({
-  namespace,
-  templateName,
   frontPage,
   finishPage,
-  onComplete = async (_values: OnCompleteArgs) => void 0,
+  onCreate = async (_values: OnCompleteArgs) => void 0,
   onError,
-  title,
-  description,
-  ReviewStateWrapper,
-  initialFormState,
-  customFieldExtensions,
-  FormProps: formProps = {},
+  ...props
 }: EmbeddedScaffolderWorkflowProps): JSX.Element {
   const [display, setDisplay] = useState<Display>('front');
 
   const startTemplate = useCallback(() => setDisplay('workflow'), []);
 
-  const onWorkFlowComplete = useCallback(
+  const onWorkFlowCreacte = useCallback(
     async (values: OnCompleteArgs) => {
       setDisplay('finish');
 
-      await onComplete(values);
+      await onCreate(values);
     },
-    [onComplete],
+    [onCreate],
   );
 
   const DisplayElements: DisplayComponents = {
@@ -85,16 +69,9 @@ export function EmbeddedScaffolderWorkflow({
     ),
     workflow: (
       <EmbeddableWorkflow
-        title={title}
-        description={description}
-        namespace={namespace}
-        templateName={templateName}
-        onComplete={onWorkFlowComplete}
+        onCreate={onWorkFlowCreacte}
         onError={onError}
-        customFieldExtensions={customFieldExtensions}
-        ReviewStateWrapper={ReviewStateWrapper}
-        initialFormState={initialFormState}
-        FormProps={formProps}
+        {...props}
       />
     ),
     finish: (

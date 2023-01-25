@@ -73,27 +73,22 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
         <EmbeddedScaffolderWorkflow
           title="Different title than template"
           description={`
-      ## This is markdown
-      - overriding the template description
+        ## This is markdown
+        - overriding the template description
             `}
-          onComplete={onComplete}
+          onCreate={onComplete}
           onError={onError}
           namespace="default"
           templateName="docs-template"
-          initialFormState={{
+          initialState={{
             name: 'prefilled-name',
           }}
-          customFieldExtensions={[]}
+          extensions={[]}
           frontPage={
             <>
-              <h1>Security Insights</h1>
+              <h1>Front Page to workflow</h1>
               <p>
-                Security insights actionable advice to improve security posture
-                of your application
-              </p>
-              <p>
-                You must complete on-boarding process to activate security
-                insights on this project.
+                Introduction page text.
               </p>
             </>
           }
@@ -102,15 +97,20 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
               <h1>Congratulations, this application is complete!</h1>
             </>
           }
-          ReviewStateWrapper={() => (
-            <h1>This is a different wrapper for the review page</h1>
-          )}
+          components={{
+            ReviewStateComponent:() => (
+              <h1>This is a different wrapper for the review page</h1>
+            ),
+            reviewButtonText: "Changed Review",
+            createButtonText: "Changed Create",
+          }
+          }
         />
       </ApiProvider>,
     );
 
     // frontPage is rendered
-    expect(getByRole('heading').innerHTML).toBe('Security Insights');
+    expect(getByRole('heading', { level: 1 }).innerHTML).toBe('Front Page to workflow');
 
     // move to workflow
     await act(async () => {
@@ -118,7 +118,7 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     });
 
     // Test template title is overriden
-    expect(getByRole('heading').innerHTML).toBe(
+    expect(getByRole('heading', {level: 2}).innerHTML).toBe(
       'Different title than template',
     );
 
@@ -129,17 +129,21 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     // The initial state of the form can be set
     expect(input.value).toBe('prefilled-name');
 
+    const reviewButton = getByRole('button', {name: "Changed Review"}) as HTMLButtonElement;
+
     await act(async () => {
-      fireEvent.click(getAllByRole('button')[1] as HTMLButtonElement);
+      fireEvent.click(reviewButton);
     });
+
+    const createButton = getByRole('button', {name: "Changed Create"}) as HTMLButtonElement;
 
     // Can supply a different Review wrapper
     expect(
-      getByText('This is a different wrapper for the review page'),
+      getByText('This is a different wrapper for the review page') as HTMLButtonElement,
     ).toBeDefined();
 
     await act(async () => {
-      fireEvent.click(getAllByRole('button')[1] as HTMLButtonElement);
+      fireEvent.click(createButton);
     });
 
     // the final page is inserted after the workflow
