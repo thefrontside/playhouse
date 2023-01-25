@@ -1,1 +1,1 @@
-export { scaffolderFrontendWorkflowPlugin, ScaffolderFrontendWorkflowPage } from './plugin';
+export * from './components/EmbeddedScaffolderWorkflow';
