@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.5
+
+### Patch Changes
+
+- d803873: upgrade backstage dependencies
+- Updated dependencies [d803873]
+  - @frontside/backstage-plugin-humanitec-common@0.3.3
+
 ## 0.3.4
 
 ### Patch Changes

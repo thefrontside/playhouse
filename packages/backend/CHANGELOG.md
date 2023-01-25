@@ -1,5 +1,19 @@
 # backend
 
+## 0.0.14
+
+### Patch Changes
+
+- d803873: upgrade backstage dependencies
+- Updated dependencies [d803873]
+  - app@0.0.6
+  - @frontside/backstage-plugin-batch-loader@0.3.1
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.5
+  - @frontside/backstage-plugin-graphql@0.6.1
+  - @internal/plugin-healthcheck@0.1.4
+  - @frontside/backstage-plugin-humanitec-backend@0.3.5
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.3
+
 ## 0.0.13
 
 ### Patch Changes

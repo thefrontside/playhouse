@@ -1,5 +1,14 @@
 # app
 
+## 0.0.6
+
+### Patch Changes
+
+- d803873: upgrade backstage dependencies
+- Updated dependencies [d803873]
+  - @frontside/backstage-plugin-effection-inspector@0.1.5
+  - @frontside/backstage-plugin-humanitec@0.3.5
+
 ## 0.0.5
 
 ### Patch Changes
