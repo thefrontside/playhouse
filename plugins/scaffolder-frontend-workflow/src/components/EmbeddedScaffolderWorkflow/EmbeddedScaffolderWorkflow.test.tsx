@@ -68,7 +68,7 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
       title: 'React JSON Schema Form Test',
     });
 
-    const { getByRole, getAllByRole, getByText } = await renderInTestApp(
+    const { getByRole, getByText } = await renderInTestApp(
       <ApiProvider apis={apis}>
         <EmbeddedScaffolderWorkflow
           title="Different title than template"
