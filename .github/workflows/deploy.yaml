@@ -7,7 +7,7 @@ on:
 concurrency: ${{ github.ref }}
 
 env:
-  IMAGE: 'northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts/backstage'
+  IMAGE: 'us-central1-docker.pkg.dev/frontside-humanitec/frontside-artifacts/backstage'
   USE_GKE_GCLOUD_AUTH_PLUGIN: true
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - name: Google Cloud Workload Identity Federation
         uses: google-github-actions/auth@v1
         with:
-          workload_identity_provider: ${{ secrets.CLOUD_WORKLOAD_PROVIDER}}
+          workload_identity_provider: ${{ secrets.CLOUD_WORKLOAD_PROVIDER }}
           service_account: ${{ secrets.CLOUD_SERVICE_ACCOUNT }}
 
       - name: Setup Google Cloud SDK
