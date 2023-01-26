@@ -27,7 +27,7 @@ auth:
         domain: ${AUTH_AUTH0_DOMAIN}
         clientId: ${AUTH_AUTH0_CLIENT_ID}
         clientSecret: ${AUTH_AUTH0_CLIENT_SECRET}
-        # audience: ${AUTH_AUTH0_AUDIENCE}
+        audience: ${AUTH_AUTH0_AUDIENCE}
         # these are optional, and we are using the defaults
         # if added, we need to update ./charts/backstage/Values.yaml
         # connection: ${AUTH_AUTH0_CONNECTION}
