@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "concurrently \"yarn start\" \"yarn start-backend\" \"yarn start-sim\"",
+    "dev:config": "concurrently \"yarn start --config ../../app-config.yaml --config ../../app-config-credentials.yaml\" \"yarn start-backend --config ../../app-config.yaml --config ../../app-config-credentials.yaml\"",
     "start": "yarn workspace app start",
     "start-backend": "yarn workspace backend start",
     "start-sim": "yarn workspace simulation watch",
