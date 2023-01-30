@@ -65,7 +65,6 @@ jobs:
         run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:pr$PR_NUMBER-$TAG"
 
       - name: Inform Humanitec
-        if: false
         run: |-
           curl \
             --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID }}/images/backstage/builds' \
