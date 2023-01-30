@@ -62,7 +62,6 @@ jobs:
           echo $TAG
 
       - name: Cloud Build & Push to Artifacts Registry
-        if: false
         run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:pr$PR_NUMBER-$TAG"
 
       - name: Inform Humanitec
