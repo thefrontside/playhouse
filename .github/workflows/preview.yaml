@@ -24,7 +24,7 @@ jobs:
   deploy:
     name: Cloud Build & Deploy
     runs-on: ubuntu-latest
-    if: true # use a tag
+    if: contains( github.event.pull_request.labels.*.name, 'deploy-preview')
     permissions:
       contents: 'read'
       id-token: 'write'
