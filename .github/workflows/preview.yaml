@@ -73,9 +73,9 @@ jobs:
         # for config which happens only at build time injection
         run: yarn workspace app build
         env:
-          APP_CONFIG_app_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
-          APP_CONFIG_backend_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
-          APP_CONFIG_backend_cors_origin: https://${PR_NUMBER}--backstage.frontside.services
+          APP_CONFIG_app_baseUrl: https://pr$PR_NUMBER--backstage.frontside.services
+          APP_CONFIG_backend_baseUrl: https://pr$PR_NUMBER--backstage.frontside.services
+          APP_CONFIG_backend_cors_origin: https://pr$PR_NUMBER--backstage.frontside.services
 
       - name: Build Backstage Backend
         run: yarn build
