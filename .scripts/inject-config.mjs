@@ -9,7 +9,7 @@ import { ConfigReader } from '@backstage/config';
 async function inject() {
   const config = await readConfig(process.argv);
   await injectConfig({
-    staticDir: './packages/app/dist/static',
+    staticDir: './dist/static',
     logger: console,
     appConfigs: config,
   });
