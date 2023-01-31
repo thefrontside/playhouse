@@ -76,7 +76,7 @@ jobs:
           APP_CONFIG_app_baseUrl: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
           APP_CONFIG_backend_baseUrl: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
           APP_CONFIG_backend_cors_origin: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
-          AUTH_AUTH0_DOMAIN: frontside.us.auth0.com
+          APP_CONFIG_auth_providers_auth0_domain: ${{ secrets.AUTH_AUTH0_DOMAIN }}
 
       - name: Build Backstage Backend
         run: yarn build
