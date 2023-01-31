@@ -51,7 +51,7 @@ jobs:
         run: echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
 
       - name: Set Tag With SHA
-        run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
+        run: echo "TAG=`echo ${{ github.event.pull_request.head.sha }} | cut -c 1-7`" >> $GITHUB_ENV
 
       - name: Check Tag And PR Number Output
         run: |

@@ -33,7 +33,7 @@ jobs:
           install_components: gke-gcloud-auth-plugin
 
       - name: Set Tag with SHA
-        run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
+        run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-7`" >> $GITHUB_ENV
 
       - run: yarn
       - run: yarn tsc
