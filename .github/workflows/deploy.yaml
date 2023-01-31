@@ -50,6 +50,7 @@ jobs:
         # for config which happens only at build time injection
         run: yarn workspace app build
         env:
+          NODE_ENV: production
           APP_CONFIG_app_baseUrl: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
           APP_CONFIG_backend_baseUrl: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
           APP_CONFIG_backend_cors_origin: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
@@ -57,6 +58,8 @@ jobs:
 
       - name: Build Backstage Backend
         run: yarn build
+        env:
+          NODE_ENV: production
 
       - name: Cloud Build & Push to Artifacts Registry
         run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"
