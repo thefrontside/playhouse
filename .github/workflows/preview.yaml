@@ -58,13 +58,22 @@ jobs:
           echo $PR_NUMBER
           echo $TAG
 
-      - name: Install/Build Backstage
-        run: yarn && yarn tsc && yarn build
-        # the frontend app needs envs for config for build time injection
+      - run: yarn
+      - run: yarn tsc
+
+      - name: Build Backstage Frontend
+        # this is skipped by the main `yarn build` command as
+        # it is different from the others, run it separate with
+        # the envs that it needs for injection in the frontend
+        # for config which happens only at build time injection
+        run: yarn workspace app build
         env:
           APP_CONFIG_app_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
           APP_CONFIG_backend_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
           APP_CONFIG_backend_cors_origin: https://${PR_NUMBER}--backstage.frontside.services
+
+      - name: Build Backstage Backend
+        run: yarn build
 
       - name: Cloud Build & Push to Artifacts Registry
         run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:pr$PR_NUMBER-$TAG"

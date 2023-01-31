@@ -32,16 +32,25 @@ jobs:
         with:
           install_components: gke-gcloud-auth-plugin
 
-      - name: Install/Build Backstage
-        run: yarn && yarn tsc && yarn build
-        # the frontend app needs envs for config for build time injection
-        env:
-          APP_CONFIG_app_baseUrl: https://backstage.frontside.services
-          APP_CONFIG_backend_baseUrl: https://backstage.frontside.services
-          APP_CONFIG_backend_cors_origin: https://backstage.frontside.services
-
       - name: Set Tag with SHA
         run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
+
+      - run: yarn
+      - run: yarn tsc
+
+      - name: Build Backstage Frontend
+        # this is skipped by the main `yarn build` command as
+        # it is different from the others, run it separate with
+        # the envs that it needs for injection in the frontend
+        # for config which happens only at build time injection
+        run: yarn workspace app build
+        env:
+          APP_CONFIG_app_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
+          APP_CONFIG_backend_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
+          APP_CONFIG_backend_cors_origin: https://${PR_NUMBER}--backstage.frontside.services
+
+      - name: Build Backstage Backend
+        run: yarn build
 
       - name: Cloud Build & Push to Artifacts Registry
         run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:$TAG"
