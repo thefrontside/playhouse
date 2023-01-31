@@ -34,6 +34,11 @@ jobs:
 
       - name: Install/Build Backstage
         run: yarn && yarn tsc && yarn build
+        # the frontend app needs envs for config for build time injection
+        env:
+          APP_CONFIG_app_baseUrl: https://backstage.frontside.services
+          APP_CONFIG_backend_baseUrl: https://backstage.frontside.services
+          APP_CONFIG_backend_cors_origin: https://backstage.frontside.services
 
       - name: Set Tag with SHA
         run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
