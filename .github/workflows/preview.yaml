@@ -53,6 +53,11 @@ jobs:
       - name: Set Tag With SHA
         run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
 
+      - name: Check Tag And PR Number Output
+        run: |
+          echo $PR_NUMBER
+          echo $TAG
+
       - name: Install/Build Backstage
         run: yarn && yarn tsc && yarn build
         # the frontend app needs envs for config for build time injection
@@ -60,11 +65,6 @@ jobs:
           APP_CONFIG_app_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
           APP_CONFIG_backend_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
           APP_CONFIG_backend_cors_origin: https://${PR_NUMBER}--backstage.frontside.services
-
-      - name: Check Tag And PR Number Output
-        run: |
-          echo $PR_NUMBER
-          echo $TAG
 
       - name: Cloud Build & Push to Artifacts Registry
         run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:pr$PR_NUMBER-$TAG"

@@ -18,26 +18,4 @@ jobs:
         run: echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
 
       - name: Create Environment
-        run: |-
-          curl \
-            --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID }}/apps/backstage/envs' \
-            --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN }}' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "from_deploy_id": "'development'",
-                "id": "'pr$PR_NUMBER'",
-                "name": "'pr$PR_NUMBER'",
-                "type": "'preview'",
-            }'
-      - name: Add Automation Rule
-        run: |-
-          curl \
-            --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID }}/apps/backstage/envs/pr${{ env.PR_NUMBER }}/rules' \
-            --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN }}' \
-            --header 'Content-Type: application/json' \
-            --data-raw '{
-                "active": "'true'",
-                "artefacts_filter": "'$ARTEFACTS_FILTER'",
-                "match_ref": "'refs/heads/$PR_NUMBER/merge'",
-                "type": "'update'",
-            }'
+        run: ./.scripts/humanitec.mjs clone-environment $PR_NUMBER
