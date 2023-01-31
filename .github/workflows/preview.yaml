@@ -47,14 +47,19 @@ jobs:
         with:
           install_components: gke-gcloud-auth-plugin
 
-      - name: Install/Build Backstage
-        run: yarn && yarn tsc && yarn build
-
       - name: Set PR Number
         run: echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
 
       - name: Set Tag With SHA
         run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-6`" >> $GITHUB_ENV
+
+      - name: Install/Build Backstage
+        run: yarn && yarn tsc && yarn build
+        # the frontend app needs envs for config for build time injection
+        env:
+          APP_CONFIG_app_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
+          APP_CONFIG_backend_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
+          APP_CONFIG_backend_cors_origin: https://${PR_NUMBER}--backstage.frontside.services
 
       - name: Check Tag And PR Number Output
         run: |
