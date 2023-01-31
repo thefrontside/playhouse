@@ -37,6 +37,11 @@ jobs:
 
       - run: yarn
       - run: yarn tsc
+      - name: create empty credentials config file
+        run: |
+          echo "creating empty creds file to avoid build time injection error"
+          mkdir credentials
+          touch credentials/backstage-app-credentials.yaml
 
       - name: Build Backstage Frontend
         # this is skipped by the main `yarn build` command as
