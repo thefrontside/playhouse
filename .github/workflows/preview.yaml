@@ -71,7 +71,7 @@ jobs:
         # it is different from the others, run it separate with
         # the envs that it needs for injection in the frontend
         # for config which happens only at build time injection
-        run: yarn workspace app build
+        run: yarn build-frontend
         env:
           APP_CONFIG_app_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
           APP_CONFIG_backend_baseUrl: https://${PR_NUMBER}--backstage.frontside.services
