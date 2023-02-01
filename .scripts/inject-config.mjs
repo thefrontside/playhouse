@@ -11,7 +11,7 @@ async function inject() {
   await injectConfig({
     staticDir: './dist/static',
     logger: console,
-    appConfigs: config,
+    appConfigs: config.frontendAppConfigs,
   });
 }
 
