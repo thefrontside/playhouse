@@ -46,14 +46,14 @@ function* cloneEnvironment({ newEnvName }) {
   if (!process.env.HUMANITEC_ORG_ID)
     throw new Error('HUMANITEC_ORG_ID env need to be set');
 
-  let devEnvUrl = `https://api.humanitec.io/orgs/${HUMANITEC_ORG_ID}/apps/backstage/envs/development`;
+  let devEnvUrl = `https://api.humanitec.io/orgs/${HUMANITEC_ORG_ID}/apps/backstage/envs/production`;
   let devEnvResult = yield fetch(devEnvUrl, {
     method: 'GET',
     ...createHeaders(),
   });
   let devEnv = yield processResponse({
     result: devEnvResult,
-    label: `development env metadata\n${quotes}`,
+    label: `production env metadata\n${quotes}`,
   });
 
   let url = `https://api.humanitec.io/orgs/${HUMANITEC_ORG_ID}/apps/backstage/envs`;
