@@ -6,6 +6,35 @@ import { loadConfig, loadConfigSchema } from '@backstage/config-loader';
 import { getPackages } from '@manypkg/get-packages';
 import { ConfigReader } from '@backstage/config';
 
+/*
+ * This function is a small CLI using packages relied upon within backstage.
+ * It injects the config into the frontend. It is valuable for when it is
+ *  deployed separately from the backend (removal of `app-backend`).
+ * The `app-backend` may also pass `disableConfigInjection: true` for use
+ *  in read only containers which files cannot be created in the container
+ *  to allow the runtime config injection.
+ *
+ * This script needs to be run _after_ the frontend build, but _before_ backend build.
+ * The backend build copies the frontend dist and bundles it in the tar zip.
+ * In this repo, we modified the frontend package.json build script to call the injection script.
+ * This means that the root `yarn build` process skips the frontend build as it has
+ *  a different build script. A separate step is included in the CI workflow to build the frontend first.
+ * Note that the config variables and env vars for use in the frontend need to be available when
+ *  the frontend is built.
+ *
+ * Use with
+ * ```
+ * node ../../.scripts/inject-config.mjs --config ../../app-config.yaml --config ../../app-config.production.yaml
+ * ```
+ *
+ * or by updating the frontend package.json scripts with
+ * ```
+ * - "build":  "backstage-cli package build",
+ * + "build": "yarn backstage-build && yarn inject-config",
+ * + "backstage-build": "backstage-cli package build",
+ * + "inject-config": "node ../../.scripts/inject-config.mjs --config ../../app-config.yaml --config ../../app-config.production.yaml",
+ * ```
+ */
 async function inject() {
   const config = await readConfig(process.argv);
   await injectConfig({
