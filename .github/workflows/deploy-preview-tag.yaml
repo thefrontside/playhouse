@@ -16,6 +16,6 @@ jobs:
     steps:
       - name: Set PR Number
         run: echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
-
+      - run: yarn
       - name: Create Environment
         run: ./.scripts/humanitec.mjs clone-environment $PR_NUMBER

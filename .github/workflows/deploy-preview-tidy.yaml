@@ -1,0 +1,15 @@
+name: Tidy Deploy Preview Environment
+
+on:
+  schedule:
+    # Runs "daily at 7:45 PM ET" (see https://crontab.guru)
+    - cron: '45 0 * * *'
+
+jobs:
+  clean-environments:
+    name: Clean Deployments
+    runs-on: ubuntu-latest
+    steps:
+      - run: yarn
+      - name: Create Environment
+        run: ./.scripts/humanitec.mjs tidy-previews
