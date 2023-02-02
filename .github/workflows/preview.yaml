@@ -7,16 +7,96 @@ jobs:
     name: Publish Previews
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - uses: volta-cli/action@v3
-    - uses: actions/setup-node@v2
-      with:
-        registry-url: https://registry.npmjs.org
-    - uses: thefrontside/actions/publish-pr-preview@v2
-      with:
-        INSTALL_SCRIPT: yarn install --frozen-lockfile && yarn tsc && yarn build
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: volta-cli/action@v3
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: https://registry.npmjs.org
+      - uses: thefrontside/actions/publish-pr-preview@v2
+        with:
+          INSTALL_SCRIPT: yarn install --frozen-lockfile && yarn tsc && yarn build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
+
+  deploy:
+    name: Cloud Build & Deploy
+    runs-on: ubuntu-latest
+    if: contains( github.event.pull_request.labels.*.name, 'deploy-preview')
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    concurrency: ${{ github.ref }}
+    env:
+      IMAGE: 'us-central1-docker.pkg.dev/frontside-humanitec/frontside-artifacts/backstage'
+      USE_GKE_GCLOUD_AUTH_PLUGIN: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: volta-cli/action@v3
+
+      - name: Google Cloud Workload Identity Federation
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.CLOUD_WORKLOAD_PROVIDER }}
+          service_account: ${{ secrets.CLOUD_SERVICE_ACCOUNT }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          install_components: gke-gcloud-auth-plugin
+
+      - name: Set PR Number
+        run: echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
+
+      - name: Set Tag With SHA
+        run: echo "TAG=`echo ${{ github.event.pull_request.head.sha }} | cut -c 1-7`" >> $GITHUB_ENV
+
+      - name: Check Tag And PR Number Output
+        run: |
+          echo $PR_NUMBER
+          echo $TAG
+
+      - run: yarn
+      - run: yarn tsc
+      - name: create empty credentials config file
+        run: |
+          echo "creating empty creds file to avoid build time injection error"
+          mkdir credentials
+          touch credentials/backstage-app-credentials.yaml
+
+      - name: Build Backstage Frontend
+        # this is skipped by the main `yarn build` command as
+        # it is different from the others, run it separate with
+        # the envs that it needs for injection in the frontend
+        # for config which happens only at build time injection
+        run: yarn workspace app build
+        env:
+          NODE_ENV: production
+          APP_CONFIG_app_baseUrl: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
+          APP_CONFIG_backend_baseUrl: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
+          APP_CONFIG_backend_cors_origin: https://pr${{ env.PR_NUMBER }}--backstage.frontside.services
+          APP_CONFIG_auth_providers_auth0_development_domain: ${{ secrets.AUTH_AUTH0_DOMAIN }}
+          APP_CONFIG_auth_providers_auth0_development_clientId: ${{ secrets.AUTH_AUTH0_CLIENT_ID }}
+
+      - name: Build Backstage Backend
+        run: yarn build
+        env:
+          NODE_ENV: production
+
+      - name: Cloud Build & Push to Artifacts Registry
+        run: gcloud builds submit . --config=cloudbuild.yaml --substitutions=_IMAGE="$IMAGE:pr$PR_NUMBER-$TAG"
+
+      - name: Inform Humanitec
+        run: |-
+          curl \
+            --request POST 'https://api.humanitec.io/orgs/${{ secrets.HUMANITEC_ORG_ID }}/images/backstage/builds' \
+            --header 'Authorization: Bearer ${{ secrets.HUMANITEC_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "branch": "'$GITHUB_REF_NAME'",
+                "commit": "'$GITHUB_SHA'",
+                "image": "'$IMAGE:pr$PR_NUMBER-$TAG'",
+                "tags": ["'$TAG'"]
+            }'

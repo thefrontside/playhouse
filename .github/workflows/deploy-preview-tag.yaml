@@ -1,0 +1,21 @@
+name: Create Deploy Preview Environment
+
+on:
+  pull_request:
+    types:
+      - labeled
+
+env:
+  ARTEFACTS_FILTER: us-central1-docker.pkg.dev/frontside-humanitec/frontside-artifacts/backstage
+
+jobs:
+  create-environment:
+    name: Create And Setup Automation
+    if: github.event.label.name == 'deploy-preview'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set PR Number
+        run: echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
+      - run: yarn
+      - name: Create Environment
+        run: ./.scripts/humanitec.mjs clone-environment $PR_NUMBER

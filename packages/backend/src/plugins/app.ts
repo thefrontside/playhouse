@@ -10,5 +10,6 @@ export default async function createPlugin({
     logger,
     config,
     appPackageName: 'app',
+    disableConfigInjection: true,
   });
 }
