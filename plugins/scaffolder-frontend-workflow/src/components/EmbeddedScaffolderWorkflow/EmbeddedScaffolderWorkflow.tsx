@@ -2,6 +2,12 @@ import React, { useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { EmbeddableWorkflow, type WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Box, Button } from '@material-ui/core';
+import {
+  scaffolderApiRef,
+  useTemplateSecrets,
+} from '@backstage/plugin-scaffolder-react';
+import { useApi } from '@backstage/core-plugin-api';
+import { stringifyEntityRef } from '@backstage/catalog-model';
 
 export type EmbeddedScaffolderWorkflowProps = WorkflowProps & {
   onError(error: Error | undefined): JSX.Element | null;
@@ -26,6 +32,14 @@ export function EmbeddedScaffolderWorkflow({
   ...props
 }: EmbeddedScaffolderWorkflowProps): JSX.Element {
   const [display, setDisplay] = useState<Display>('front');
+  const { secrets } = useTemplateSecrets();
+  const scaffolderApi = useApi(scaffolderApiRef);
+
+  const templateRef = stringifyEntityRef({
+    kind: 'Template',
+    namespace: props.namespace,
+    name: props.templateName,
+  });
 
   const startTemplate = useCallback(() => setDisplay('workflow'), []);
 
@@ -33,9 +47,15 @@ export function EmbeddedScaffolderWorkflow({
     async (values: OnCompleteArgs) => {
       setDisplay('finish');
 
-      await onCreate(values);
+      const { taskId } = await scaffolderApi.scaffold({
+        templateRef,
+        values,
+        secrets,
+      });
+
+      await onCreate({...values, taskId});
     },
-    [onCreate],
+    [onCreate, scaffolderApi, secrets, templateRef],
   );
 
   const DisplayElements: DisplayComponents = {

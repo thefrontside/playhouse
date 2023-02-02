@@ -9,6 +9,7 @@ import React from 'react';
 import { EmbeddedScaffolderWorkflow } from './EmbeddedScaffolderWorkflow';
 import {
   scaffolderApiRef,
+  SecretsContextProvider,
   type ScaffolderApi,
 } from '@backstage/plugin-scaffolder-react';
 import { analyticsApiRef } from '@backstage/core-plugin-api';
@@ -54,42 +55,44 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
 
     const { getByRole, getByText } = await renderInTestApp(
       <ApiProvider apis={apis}>
-        <EmbeddedScaffolderWorkflow
-          title="Different title than template"
-          description={`
+        <SecretsContextProvider>
+          <EmbeddedScaffolderWorkflow
+            title="Different title than template"
+            description={`
         ## This is markdown
         - overriding the template description
             `}
-          onCreate={onComplete}
-          onError={onError}
-          namespace="default"
-          templateName="docs-template"
-          initialState={{
-            name: 'prefilled-name',
-          }}
-          extensions={[]}
-          frontPage={
-            <>
-              <h1>Front Page to workflow</h1>
-              <p>
-                Introduction page text.
-              </p>
-            </>
-          }
-          finishPage={
-            <>
-              <h1>Congratulations, this application is complete!</h1>
-            </>
-          }
-          components={{
-            ReviewStateComponent:() => (
-              <h1>This is a different wrapper for the review page</h1>
-            ),
-            reviewButtonText: "Changed Review",
-            createButtonText: "Changed Create",
-          }
-          }
-        />
+            onCreate={onComplete}
+            onError={onError}
+            namespace="default"
+            templateName="docs-template"
+            initialState={{
+              name: 'prefilled-name',
+            }}
+            extensions={[]}
+            frontPage={
+              <>
+                <h1>Front Page to workflow</h1>
+                <p>
+                  Introduction page text.
+                </p>
+              </>
+            }
+            finishPage={
+              <>
+                <h1>Congratulations, this application is complete!</h1>
+              </>
+            }
+            components={{
+              ReviewStateComponent: () => (
+                <h1>This is a different wrapper for the review page</h1>
+              ),
+              reviewButtonText: "Changed Review",
+              createButtonText: "Changed Create",
+            }
+            }
+          />
+        </SecretsContextProvider>
       </ApiProvider>,
     );
 
@@ -102,7 +105,7 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     });
 
     // Test template title is overriden
-    expect(getByRole('heading', {level: 2}).innerHTML).toBe(
+    expect(getByRole('heading', { level: 2 }).innerHTML).toBe(
       'Different title than template',
     );
 
@@ -113,13 +116,13 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     // The initial state of the form can be set
     expect(input.value).toBe('prefilled-name');
 
-    const reviewButton = getByRole('button', {name: "Changed Review"}) as HTMLButtonElement;
+    const reviewButton = getByRole('button', { name: "Changed Review" }) as HTMLButtonElement;
 
     await act(async () => {
       fireEvent.click(reviewButton);
     });
 
-    const createButton = getByRole('button', {name: "Changed Create"}) as HTMLButtonElement;
+    const createButton = getByRole('button', { name: "Changed Create" }) as HTMLButtonElement;
 
     // Can supply a different Review wrapper
     expect(
@@ -130,10 +133,13 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
       fireEvent.click(createButton);
     });
 
+    expect(scaffolderApiMock.scaffold).toHaveBeenCalled()
+
     // the final page is inserted after the workflow
     expect(
       getByText('Congratulations, this application is complete!'),
     ).toBeDefined();
+
   });
 });
 
