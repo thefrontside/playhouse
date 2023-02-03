@@ -166,7 +166,7 @@ function* spinDownEnvironment({ previews }) {
       let lastDeployDT = new Date(preview.last_deploy.created_at);
 
       let minutesSinceLastDeploy = (new Date() - lastDeployDT) / 1000 / 60;
-      let minutesInDay = 24 * 60 - 9999;
+      let minutesInDay = 12 * 60; // 12 hours * 60 minutes
       if (minutesSinceLastDeploy > minutesInDay) envsToSpinDown.push(preview);
     }
   }
