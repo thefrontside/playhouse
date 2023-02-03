@@ -40,9 +40,9 @@
     "@spotify/prettier-config": "^12.0.0",
     "concurrently": "^7.5.0",
     "lerna": "^4.0.0",
+    "node-gyp": "^9.0.0",
     "prettier": "^2.3.2",
-    "typescript": "~4.6.4",
-    "node-gyp": "^9.0.0"
+    "typescript": "~4.6.4"
   },
   "resolutions": {
     "@types/react": "^17",
@@ -62,5 +62,6 @@
   "volta": {
     "node": "18.12.1",
     "yarn": "1.22.19"
-  }
+  },
+  "packageManager": "yarn@3.4.1"
 }

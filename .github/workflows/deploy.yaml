@@ -35,7 +35,7 @@ jobs:
       - name: Set Tag with SHA
         run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-7`" >> $GITHUB_ENV
 
-      - run: yarn
+      - run: yarn install --immutable
       - run: yarn tsc
       - name: create empty credentials config file
         run: |
