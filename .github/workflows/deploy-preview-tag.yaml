@@ -21,3 +21,6 @@ jobs:
       - run: yarn
       - name: Create Environment
         run: ./.scripts/humanitec.mjs clone-environment $PR_NUMBER
+        env:
+          HUMANITEC_ORG_ID: ${{ secrets.HUMANITEC_ORG_ID }}
+          HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_TOKEN }}
