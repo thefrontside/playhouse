@@ -14,6 +14,8 @@ jobs:
     if: github.event.label.name == 'deploy-preview'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - uses: volta-cli/action@v3
       - name: Set PR Number
         run: echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
       - run: yarn
