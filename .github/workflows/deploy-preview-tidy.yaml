@@ -14,7 +14,7 @@ jobs:
       - uses: volta-cli/action@v3
       - run: yarn
       - name: Create Environment
-        run: ./.scripts/humanitec.mjs tidy-previews
+        run: node ./.scripts/humanitec.mjs tidy-previews
         env:
           HUMANITEC_ORG_ID: ${{ secrets.HUMANITEC_ORG_ID }}
           HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_TOKEN }}
