@@ -16,5 +16,7 @@ jobs:
       - name: Create Environment
         run: node ./.scripts/humanitec.mjs tidy-previews
         env:
+          # using built-in token for restricted access to only this repo
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HUMANITEC_ORG_ID: ${{ secrets.HUMANITEC_ORG_ID }}
           HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_TOKEN }}
