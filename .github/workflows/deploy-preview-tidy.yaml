@@ -10,10 +10,10 @@ jobs:
     name: Clean Deployments
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: volta-cli/action@v3
       - run: yarn
-      - name: Create Environment
+      - name: Tidy Previews
         run: node ./.scripts/humanitec.mjs tidy-previews
         env:
           # using built-in token for restricted access to only this repo
