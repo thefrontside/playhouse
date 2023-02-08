@@ -47,5 +47,9 @@ catalog:
         - allow: [Template]
 
 techdocs:
-  googleGcs:
-    bucketName: frontside-techdocs
+  publisher:
+    type: googleGcs
+    googleGcs:
+      bucketName: ${TECHDOCS_STORAGE_BUCKET}
+      credentials:
+        $file: /app/credentials/techdocs-bucket-credentials.json
