@@ -22,7 +22,7 @@ auth:
 
 humanitec:
   orgId: the-frontside-software-inc
-  registryUrl: 'northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts'
+  registryUrl: us-central1-docker.pkg.dev/frontside-humanitec/frontside-artifacts
   token: {{ op://shared/Humanitec Token/credential }}
 
 techdocs:
