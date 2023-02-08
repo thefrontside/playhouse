@@ -45,3 +45,13 @@ catalog:
       target: https://github.com/thefrontside/playhouse/blob/main/templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]
+
+techdocs:
+  builder: external
+  publisher:
+    type: googleGcs
+    googleGcs:
+      bucketName: ${TECHDOCS_STORAGE_BUCKET}
+      projectId: ${TECHDOCS_GCLOUD_PROJECT}
+      credentials:
+        $include: credentials/techdocs-bucket-credentials.json

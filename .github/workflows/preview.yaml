@@ -65,6 +65,7 @@ jobs:
           echo "creating empty creds file to avoid build time injection error"
           mkdir credentials
           touch credentials/backstage-app-credentials.yaml
+          echo '"{}"' > credentials/techdocs-bucket-credentials.json
 
       - name: Build Backstage Frontend
         # this is skipped by the main `yarn build` command as

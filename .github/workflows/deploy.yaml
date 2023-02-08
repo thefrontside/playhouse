@@ -36,12 +36,14 @@ jobs:
         run: echo "TAG=`echo $GITHUB_SHA | cut -c 1-7`" >> $GITHUB_ENV
 
       - run: yarn
+
       - run: yarn tsc
-      - name: create empty credentials config file
+
+      - name: creating empty creds file to avoid build time injection error
         run: |
-          echo "creating empty creds file to avoid build time injection error"
           mkdir credentials
           touch credentials/backstage-app-credentials.yaml
+          echo '"{}"' > credentials/techdocs-bucket-credentials.json
 
       - name: Build Backstage Frontend
         # this is skipped by the main `yarn build` command as
