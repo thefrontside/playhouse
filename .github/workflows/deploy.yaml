@@ -45,9 +45,6 @@ jobs:
           touch credentials/backstage-app-credentials.yaml
           echo '"{}"' > credentials/techdocs-bucket-credentials.json
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Build Backstage Frontend
         # this is skipped by the main `yarn build` command as
         # it is different from the others, run it separate with
