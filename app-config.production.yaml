@@ -54,4 +54,4 @@ techdocs:
       bucketName: ${TECHDOCS_STORAGE_BUCKET}
       projectId: ${TECHDOCS_GCLOUD_PROJECT}
       credentials:
-        $file: /app/credentials/techdocs-bucket-credentials.json
+        $include: credentials/techdocs-bucket-credentials.json
