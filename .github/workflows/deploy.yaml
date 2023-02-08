@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir credentials
           touch credentials/backstage-app-credentials.yaml
-          touch credentials/techdocs-bucket-credentials.json
+          echo '"{}"' > credentials/techdocs-bucket-credentials.json
 
       - name: Build Backstage Frontend
         # this is skipped by the main `yarn build` command as
