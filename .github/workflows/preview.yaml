@@ -58,7 +58,7 @@ jobs:
           echo $PR_NUMBER
           echo $TAG
 
-      - run: yarn
+      - run: yarn install --immutable
       - run: yarn tsc
       - name: create empty credentials config file
         run: |
