@@ -3012,6 +3012,19 @@
     "@backstage/errors" "^1.1.4"
     cross-fetch "^3.1.5"
 
+"@backstage/catalog-model@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@backstage/catalog-model/-/catalog-model-1.1.5.tgz#83203771f2fc04353d0d84e20d354f0cef15403f"
+  integrity sha512-rE1KFhpLlli0A7marJpbd4MCGWG+5vIRj49XZBbEdhevl7HfCCJMAA6IKyj8U7LJjwRVygppSkc8V2yAyEU/2A==
+  dependencies:
+    "@backstage/config" "^1.0.6"
+    "@backstage/errors" "^1.1.4"
+    "@backstage/types" "^1.0.2"
+    ajv "^8.10.0"
+    json-schema "^0.4.0"
+    lodash "^4.17.21"
+    uuid "^8.0.0"
+
 "@backstage/catalog-model@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@backstage/catalog-model/-/catalog-model-1.2.0.tgz#ff72246e5b5bbbbd82a7e876db7761ecc25f1d5c"
@@ -8202,16 +8215,6 @@
   resolved "https://registry.yarnpkg.com/@repeaterjs/repeater/-/repeater-3.0.4.tgz#a04d63f4d1bf5540a41b01a921c9a7fddc3bd1ca"
   integrity sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==
 
-"@rjsf/core-v5@npm:@rjsf/core@5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@rjsf/core/-/core-5.1.0.tgz#431e45c273f51badbffe4359ff294d927852ff58"
-  integrity sha512-n2FeSk9iDuCF+Zo6nMLPuWsGsHCRiWnfohLNoyl1ll/tv6Ac5Oh0W3cwClIUEmJwaUFPaU/2O4ihFvSCdXwHlw==
-  dependencies:
-    lodash "^4.17.15"
-    lodash-es "^4.17.15"
-    nanoid "^3.3.4"
-    prop-types "^15.7.2"
-
 "@rjsf/core@^3.2.1":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@rjsf/core/-/core-3.2.1.tgz#8a7b24c9a6f01f0ecb093fdfc777172c12b1b009"
@@ -8226,11 +8229,6 @@
     nanoid "^3.1.23"
     prop-types "^15.7.2"
     react-is "^16.9.0"
-
-"@rjsf/material-ui-v5@npm:@rjsf/material-ui@5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@rjsf/material-ui/-/material-ui-5.1.0.tgz#b2ce079d768018945982ec390f3bc99198da9fb4"
-  integrity sha512-nvu8PsyOo7ypuH6ZNNPbdK0LkzMkCNzUuEAib5jWoAuMb9NNVqI3OoEu1DAVQv3trrWi8BxV3hU+7917PcdmRA==
 
 "@rjsf/material-ui@^3.2.1":
   version "3.2.1"

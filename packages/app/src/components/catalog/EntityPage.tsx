@@ -58,6 +58,7 @@ import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
+import { AddAnnotation } from '../AddAnnotation/AddAnnotation';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -192,7 +193,7 @@ const websiteEntityPage = (
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/docs" title="Docs">
-      {techdocsContent}
+      <AddAnnotation/>
     </EntityLayout.Route>
   </EntityLayout>
 );
