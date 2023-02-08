@@ -47,6 +47,7 @@ catalog:
         - allow: [Template]
 
 techdocs:
+  builder: external
   publisher:
     type: googleGcs
     googleGcs:

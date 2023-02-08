@@ -24,3 +24,12 @@ humanitec:
   orgId: the-frontside-software-inc
   registryUrl: 'northamerica-northeast1-docker.pkg.dev/frontside-backstage/frontside-artifacts'
   token: {{ op://shared/Humanitec Token/credential }}
+
+techdocs:
+  builder: external
+  publisher:
+    type: googleGcs
+    googleGcs:
+      bucketName: {{ op://shared/frontside-techdocs-reader/bucketName }}
+      projectId: {{ op://shared/frontside-techdocs-reader/projectId }}
+      credentials: '{{ op://shared/frontside-techdocs-reader/credentials }}'
