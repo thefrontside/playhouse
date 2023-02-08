@@ -45,3 +45,7 @@ catalog:
       target: https://github.com/thefrontside/playhouse/blob/main/templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]
+
+techdocs:
+  googleGcs:
+    bucketName: frontside-techdocs
