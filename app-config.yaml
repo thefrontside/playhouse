@@ -90,8 +90,8 @@ scaffolder:
 
 catalog:
   locations:
-    - type: file
-      target: ../../catalog-info.yaml
+    - type: url
+      target: https://github.com/thefrontside/playhouse/blob/main/catalog-info.yaml
     - type: file
       target: ../../templates/standard-microservice/template.yaml
       rules:
