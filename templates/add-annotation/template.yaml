@@ -1,0 +1,44 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: add-annotation
+  title: Add annotation to a catalog-info.yaml file
+  description: Opens a PR with updates to a catalog-info.yaml file.
+
+spec:
+  owner: john@example.com
+  type: service
+  parameters:
+    - title: catalog-info.yaml
+      required: ['value']
+      properties:
+        value:
+          title: The catalog-info.yaml url
+          type: string
+          description: The catalog-info.yaml file to add the annotation to
+
+  steps:
+    - id: fetchPlain
+      name: Fetch the file
+      action: fetch:plain
+      input:
+        url: ${{ parameters.value }}
+
+    - id: update
+      name: Update
+      action: backend:add-annotation
+      input:
+        # This file must exist at this path in the repo referenced above
+        url: ${{ parameters.value }}
+
+    - id: publish
+      name: Publish
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?repo=playhouse&owner=frontside
+        title: Add annotation to config-info.yaml
+        description: update description
+        targetPath: not-sure-what-goes-here
+        branchName: update-config-info # TODO parameterise?
+
+

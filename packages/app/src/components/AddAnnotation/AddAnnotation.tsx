@@ -2,6 +2,7 @@ import React from 'react';
 import { EmbeddedScaffolderWorkflow } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { Box } from '@material-ui/core';
 import { JsonValue } from '@backstage/types';
+import { useEntity } from '@backstage/plugin-catalog-react';
 
 const ReviewStateComponent = () => {
   return (
@@ -18,6 +19,10 @@ export function AddAnnotation({
 }): JSX.Element | null {
   // eslint-disable-next-line no-console
   const onComplete = async () => console.log('we can add to onComplete here');
+
+  const entity = useEntity();
+
+  console.log(entity);
 
   const onError = (error: Error | undefined) => (
     <h2>{error?.message ?? 'Houston we have a problem.'}</h2>
