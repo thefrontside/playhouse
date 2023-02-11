@@ -10,26 +10,32 @@ spec:
   type: service
   parameters:
     - title: catalog-info.yaml
-      required: ['value']
+      required: ['catalogInfoUrl', 'branch']
       properties:
-        value:
+        catalogInfoUrl:
           title: The catalog-info.yaml url
           type: string
           description: The catalog-info.yaml file to add the annotation to
+          ui:readonly: true
+        branch:
+          title: Branch
+          type: string
+          description: the branch name for the pull request
+          default: add-annotation-to-catalog-info
 
   steps:
     - id: fetchPlain
       name: Fetch the file
       action: fetch:plain
       input:
-        url: ${{ parameters.value }}
+        url: ${{ parameters.catalogInfoUrl }}
 
-    - id: update
-      name: Update
+    - id: add-annotation
+      name: AddAnnotation
       action: backend:add-annotation
       input:
         # This file must exist at this path in the repo referenced above
-        url: ${{ parameters.value }}
+        url: ${{ parameters.catalogInfoUrl }}
 
     - id: publish
       name: Publish
@@ -39,6 +45,6 @@ spec:
         title: Add annotation to config-info.yaml
         description: update description
         targetPath: not-sure-what-goes-here
-        branchName: update-config-info # TODO parameterise?
+        branchName: ${{ steps.fetchPlain.output.branch }}
 
 

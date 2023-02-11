@@ -93,6 +93,10 @@ catalog:
     - type: url
       target: https://github.com/thefrontside/playhouse/blob/main/catalog-info.yaml
     - type: file
+      target: ../../templates/add-annotation/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
       target: ../../templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]

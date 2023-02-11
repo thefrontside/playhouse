@@ -1,8 +1,8 @@
 import React from 'react';
 import { EmbeddedScaffolderWorkflow } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { Box } from '@material-ui/core';
-import { JsonValue } from '@backstage/types';
 import { useEntity } from '@backstage/plugin-catalog-react';
+import { assert } from 'assert-ts';
 
 const ReviewStateComponent = () => {
   return (
@@ -12,17 +12,17 @@ const ReviewStateComponent = () => {
   );
 };
 
-export function AddAnnotation({
-  initialState = {},
-}: {
-  initialState?: Record<string, JsonValue>;
-}): JSX.Element | null {
+export function AddAnnotation(): JSX.Element | null {
   // eslint-disable-next-line no-console
   const onComplete = async () => console.log('we can add to onComplete here');
 
-  const entity = useEntity();
+  const { entity } = useEntity();
 
-  console.log(entity);
+  const catalogInfoUrl = entity.metadata?.annotations?.['backstage.io/managed-by-origin-location'].replace(/^url:/, '')
+
+  assert(!!catalogInfoUrl, `no catalog-info.yaml url in 'backstage.io/managed-by-origin-location' annotation`);
+
+  console.log(catalogInfoUrl)
 
   const onError = (error: Error | undefined) => (
     <h2>{error?.message ?? 'Houston we have a problem.'}</h2>
@@ -30,34 +30,13 @@ export function AddAnnotation({
 
   return (
     <EmbeddedScaffolderWorkflow
-      title="Altered title"
-      description={`
-## This is markdown
-- overriding the template description
-      `}
+      title="You are missing some annotation, create a PR?"
       extensions={[]}
       onCreate={onComplete}
       onError={onError}
       namespace="default"
-      templateName="standard-microservice"
-      /** ***
-        initialState will prefill the fields in the workflow
-      ******/
-      // initialState={{
-      //   name: 'prefilled-name',
-      //   description: 'prefilled description',
-      //   owner: 'acme-corp',
-      //   repoUrl: 'github.com?owner=component&repo=component',
-      // }}
-      initialState={initialState}
-      frontPage={
-        <>
-          <h1>Optional Front page</h1>
-          <p>
-            Some text
-          </p>
-        </>
-      }
+      templateName="add-annotation"
+      initialState={{ catalogInfoUrl }}
       finishPage={
         <>
           <h1>Optional Finish page</h1>

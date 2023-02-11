@@ -11,8 +11,8 @@ import { stringifyEntityRef } from '@backstage/catalog-model';
 
 export type EmbeddedScaffolderWorkflowProps = WorkflowProps & {
   onError(error: Error | undefined): JSX.Element | null;
-  frontPage: ReactNode;
-  finishPage: ReactNode;
+  frontPage?: ReactNode;
+  finishPage?: ReactNode;
 } & Partial<Pick<WorkflowProps, 'onCreate'>>;
 
 type Display = 'front' | 'workflow' | 'finish';
@@ -31,7 +31,7 @@ export function EmbeddedScaffolderWorkflow({
   onError,
   ...props
 }: EmbeddedScaffolderWorkflowProps): JSX.Element {
-  const [display, setDisplay] = useState<Display>('front');
+  const [display, setDisplay] = useState<Display>(frontPage ? 'front' : 'workflow');
   const { secrets } = useTemplateSecrets();
   const scaffolderApi = useApi(scaffolderApiRef);
 

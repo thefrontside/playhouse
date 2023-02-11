@@ -18,7 +18,7 @@ main(function* () {
   ];
 
   yield createAuth0Server({
-    debug: false,
+    debug: true,
     config: {
       clientID: 'backstage_auth0_client_id',
       scope: 'openid user profile offline_access',

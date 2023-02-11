@@ -6,10 +6,10 @@
     "node": "16 || 18"
   },
   "scripts": {
-    "dev": "concurrently \"yarn start\" \"yarn start-backend\" \"yarn start-sim\"",
+    "dev": "concurrently \"yarn start\" \"yarn start-backend --inspect\" \"yarn start-sim\"",
     "dev:config": "concurrently \"yarn start --config ../../app-config.yaml --config ../../app-config-credentials.yaml\" \"yarn start-backend --config ../../app-config.yaml --config ../../app-config-credentials.yaml\"",
     "start": "yarn workspace app start",
-    "start-backend": "yarn workspace backend start",
+    "start-backend": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" yarn workspace backend start",
     "start-sim": "yarn workspace simulation watch",
     "build": "yarn tsc && backstage-cli repo build --all",
     "build-image": "yarn workspace backend build-image",
