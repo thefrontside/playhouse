@@ -25,7 +25,7 @@ export default async function createPlugin({
   });
   const actions = [
     ...builtInActions,
-    createAddAnnotation(),
+    createAddAnnotation({ integrations, config, logger }),
     createGetEnvironmentAction({
       orgId: config.getString('humanitec.orgId'),
       registryUrl: config.getString('humanitec.registryUrl'),

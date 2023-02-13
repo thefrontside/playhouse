@@ -1,22 +1,44 @@
 import { createTemplateAction } from '@backstage/plugin-scaffolder-backend';
-import { resolveSafeChildPath } from '@backstage/backend-common';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { Entity } from '@backstage/catalog-model';
+import { type ScmIntegrations } from '@backstage/integration';
+import { Octokit } from 'octokit';
+import { resolveSafeChildPath } from '@backstage/backend-common';
+import path from 'path';
 
+const getOctokit = ({
+  integrations,
+}: {
+  integrations: ScmIntegrations;
+}) => {
+  const gitHubConfig = integrations.github.byUrl(
+    'github.com',
+  )?.config;
+  return new Octokit({
+    baseUrl: gitHubConfig?.apiBaseUrl,
+    auth: gitHubConfig?.token,
+  });
+};
 
-export function createAddAnnotation() {
-  return createTemplateAction<{ path: string; }>({
+interface AddAnnotationOptions {
+  integrations: ScmIntegrations;
+}
+
+export function createAddAnnotation({
+  integrations,
+}: AddAnnotationOptions) {
+  return createTemplateAction<{ url: string; }>({
     id: 'backend:add-annotation',
     description: 'Add annotation to catalog-info.yaml.',
     schema: {
       input: {
         type: 'object',
-        required: ['path'],
+        required: ['url'],
         properties: {
-          path: {
-            title: 'Path',
-            description: 'Path to catalog-info.yaml file to add annotation.',
+          url: {
+            title: 'url',
+            description: 'Url to catalog-info.yaml file to add annotation.',
             type: 'string',
           },
         },
@@ -24,32 +46,42 @@ export function createAddAnnotation() {
       output: {
         type: 'object',
         properties: {
-          path: {
-            title: 'Path',
+          url: {
+            title: 'url',
             type: 'string',
           },
         },
       },
     },
     async handler(ctx) {
-      const sourceFilepath = resolveSafeChildPath(
-        ctx.workspacePath,
-        ctx.input.path,
-      );
+      const githubClient = getOctokit({ integrations });
 
-      if (!fs.existsSync(sourceFilepath)) {
-        ctx.logger.error(`The file ${sourceFilepath} does not exist.`);
-        throw new Error(`The file ${sourceFilepath} does not exist.`);
-      }
-      const contentInfo = yaml.load(fs.readFileSync(sourceFilepath).toString()) as Entity;
+      const filePath = 'catalog-info.yaml';
+
+      const { data } = await githubClient.rest.repos.getContent({ 
+        owner: 'thefrontside',
+        repo: 'playhouse',
+        path: filePath,
+        headers: {
+          accept: "application/vnd.github.v3.raw",
+        }
+      });
+
+      // TODO: type narrow data to correct type
+      const contentInfo = yaml.loadAll(data as unknown as string)[0] as Entity;
 
       contentInfo.metadata.annotations = contentInfo.metadata.annotations ?? {};
 
       contentInfo.metadata.annotations["some-domain.com/website-url"] = "some-value";
 
+      const sourceFilepath = resolveSafeChildPath(
+        ctx.workspacePath,
+        filePath,
+      );
+
       fs.writeFileSync(sourceFilepath, yaml.dump(contentInfo));
       
-      ctx.output('path', sourceFilepath);
+      ctx.output('path', path.dirname(sourceFilepath));
     },
   });
 }
