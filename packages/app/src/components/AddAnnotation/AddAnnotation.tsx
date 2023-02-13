@@ -1,28 +1,16 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { EmbeddedScaffolderWorkflow } from '@frontside/backstage-plugin-scaffolder-workflow';
-import { Box } from '@material-ui/core';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { assert } from 'assert-ts';
 
-const ReviewStateComponent = () => {
-  return (
-    <Box display="flex" alignItems="center" flexDirection="column">
-      <h1>This is a different wrapper for the review page</h1>
-    </Box>
-  );
-};
 
-export function AddAnnotation(): JSX.Element | null {
-  // eslint-disable-next-line no-console
-  const onComplete = async () => console.log('we can add to onComplete here');
+export function AddAnnotation({ children }: {children?: ReactNode}): JSX.Element | null {
 
   const { entity } = useEntity();
 
   const catalogInfoUrl = entity.metadata?.annotations?.['backstage.io/managed-by-origin-location'].replace(/^url:/, '')
 
   assert(!!catalogInfoUrl, `no catalog-info.yaml url in 'backstage.io/managed-by-origin-location' annotation`);
-
-  console.log(catalogInfoUrl)
 
   const onError = (error: Error | undefined) => (
     <h2>{error?.message ?? 'Houston we have a problem.'}</h2>
@@ -31,8 +19,6 @@ export function AddAnnotation(): JSX.Element | null {
   return (
     <EmbeddedScaffolderWorkflow
       title="You are missing some annotation, create a PR?"
-      extensions={[]}
-      onCreate={onComplete}
       onError={onError}
       namespace="default"
       templateName="add-annotation"
@@ -43,9 +29,8 @@ export function AddAnnotation(): JSX.Element | null {
           <p>You are finished!</p>
         </>
       }
-      components={{
-        ReviewStateComponent,
-      }}
-    />
+    >
+      {children}
+    </EmbeddedScaffolderWorkflow>
   );
 }
