@@ -25,6 +25,8 @@ interface AddAnnotationOptions {
   integrations: ScmIntegrations;
 }
 
+const GitUrlRegex = /(?<host>(git@|https:\/\/)([\w\.@]+)(\/|:))(?<owner>[\w,\-,\_]+)\/(?<repo>[\w,\-,\_]+)\/blob\/(?<branch>[\w,\-,\_]+)\/(?<filePath>.*$)/g;
+
 export function createAddAnnotation({
   integrations,
 }: AddAnnotationOptions) {
@@ -56,11 +58,15 @@ export function createAddAnnotation({
     async handler(ctx) {
       const githubClient = getOctokit({ integrations });
 
-      const filePath = 'catalog-info.yaml';
+      const url = ctx.input.url;
+
+      const matches = url.matchAll(GitUrlRegex);
+
+      const { owner, repo, filePath } = [...matches][0].groups as { owner: string, repo: string; filePath: string };
 
       const { data } = await githubClient.rest.repos.getContent({ 
-        owner: 'thefrontside',
-        repo: 'playhouse',
+        owner,
+        repo,
         path: filePath,
         headers: {
           accept: "application/vnd.github.v3.raw",
