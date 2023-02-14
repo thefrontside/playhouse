@@ -1,11 +1,13 @@
 import { createTemplateAction } from '@backstage/plugin-scaffolder-backend';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import * as yaml from 'yaml';
 import { Entity } from '@backstage/catalog-model';
 import { type ScmIntegrations } from '@backstage/integration';
 import { Octokit } from 'octokit';
 import { resolveSafeChildPath } from '@backstage/backend-common';
 import path from 'path';
+import { stringifyEntityRef } from '@backstage/catalog-model';
+import { assert } from 'assert-ts';
 
 const getOctokit = ({
   integrations,
@@ -30,19 +32,24 @@ const GitUrlRegex = /(?<host>(git@|https:\/\/)([\w\.@]+)(\/|:))(?<owner>[\w,\-,\
 export function createAddAnnotation({
   integrations,
 }: AddAnnotationOptions) {
-  return createTemplateAction<{ url: string; }>({
+  return createTemplateAction<{ url: string; entityRef: string }>({
     id: 'backend:add-annotation',
     description: 'Add annotation to catalog-info.yaml.',
     schema: {
       input: {
         type: 'object',
-        required: ['url'],
+        required: ['url', 'entityRef'],
         properties: {
           url: {
             title: 'url',
             description: 'Url to catalog-info.yaml file to add annotation.',
             type: 'string',
           },
+          entityRef: {
+            title: 'entityRef',
+            description: 'entityRef',
+            type: 'string'
+          }
         },
       },
       output: {
@@ -64,7 +71,7 @@ export function createAddAnnotation({
 
       const { owner, repo, filePath } = [...matches][0].groups as { owner: string, repo: string; filePath: string };
 
-      const { data } = await githubClient.rest.repos.getContent({ 
+      const { data } = await githubClient.rest.repos.getContent({
         owner,
         repo,
         path: filePath,
@@ -73,20 +80,40 @@ export function createAddAnnotation({
         }
       });
 
-      // TODO: type narrow data to correct type
-      const contentInfo = yaml.loadAll(data as unknown as string)[0] as Entity;
+      const documents = yaml.parseAllDocuments(data as unknown as string);
 
-      contentInfo.metadata.annotations = contentInfo.metadata.annotations ?? {};
+      for (const document of documents) {
+        assert(yaml.isMap(document.contents));
 
-      contentInfo.metadata.annotations["some-domain.com/website-url"] = "some-value";
+        const documentEntityRef = stringifyEntityRef(document.contents.toJSON());
+
+        if (documentEntityRef !== ctx.input.entityRef) {
+          continue;
+        }
+
+        const metadata = document.contents.get('metadata') as yaml.YAMLMap;
+
+        assert(yaml.isMap(metadata));
+
+        let annotations = metadata.get('annotations');
+
+        if (!annotations) {
+          annotations = new yaml.YAMLMap();
+          metadata.set(document.createNode('annotations'), annotations);
+        }
+
+        assert(yaml.isMap(annotations));
+
+        annotations.set(document.createNode("backstage.io/techdocs-ref"), document.createNode("file:./docs"));
+      }
 
       const sourceFilepath = resolveSafeChildPath(
         ctx.workspacePath,
         filePath,
       );
 
-      fs.writeFileSync(sourceFilepath, yaml.dump(contentInfo));
-      
+      fs.writeFileSync(sourceFilepath, documents.map(document => document.toString()).join(''));
+
       ctx.output('path', path.dirname(sourceFilepath));
     },
   });

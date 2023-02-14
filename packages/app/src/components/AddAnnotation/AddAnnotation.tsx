@@ -2,11 +2,14 @@ import React, { type ReactNode } from 'react';
 import { EmbeddedScaffolderWorkflow } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { assert } from 'assert-ts';
+import { stringifyEntityRef } from '@backstage/catalog-model';
 
 
 export function AddAnnotation({ children }: {children?: ReactNode}): JSX.Element | null {
 
   const { entity } = useEntity();
+
+  const entityRef = stringifyEntityRef(entity);
 
   const catalogInfoUrl = entity.metadata?.annotations?.['backstage.io/managed-by-origin-location'].replace(/^url:/, '')
 
@@ -22,7 +25,7 @@ export function AddAnnotation({ children }: {children?: ReactNode}): JSX.Element
       onError={onError}
       namespace="default"
       templateName="add-annotation"
-      initialState={{ catalogInfoUrl }}
+      initialState={{ catalogInfoUrl, entityRef }}
       finishPage={
         <>
           <h1>Optional Finish page</h1>

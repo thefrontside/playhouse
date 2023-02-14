@@ -47,6 +47,7 @@
     "@internal/plugin-healthcheck": "0.1.5",
     "@octokit/rest": "^19.0.5",
     "app": "*",
+    "assert-ts": "^0.3.4",
     "async-wait-until": "^2.0.12",
     "cross-fetch": "^3.1.5",
     "dockerode": "^3.3.1",
@@ -59,7 +60,8 @@
     "octokit": "^2.0.9",
     "pg": "^8.3.0",
     "smee-client": "^1.2.2",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "yaml": "^2.2.1"
   },
   "devDependencies": {
     "@backstage/cli": "^0.22.3",

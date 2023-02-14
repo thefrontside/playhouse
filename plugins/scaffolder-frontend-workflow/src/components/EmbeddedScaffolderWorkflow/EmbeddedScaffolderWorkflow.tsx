@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { EmbeddableWorkflow, type NextFieldExtensionOptions, type WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, makeStyles } from '@material-ui/core';
 import {
   scaffolderApiRef,
   useCustomFieldExtensions,
@@ -10,9 +10,12 @@ import {
 } from '@backstage/plugin-scaffolder-react';
 import { useApi, useRouteRef } from '@backstage/core-plugin-api';
 import { stringifyEntityRef } from '@backstage/catalog-model';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { nextScaffolderTaskRouteRef } from '@backstage/plugin-scaffolder/alpha';
 import { JsonValue } from '@backstage/types';
+import { Modal, Fade } from '@material-ui/core';
+import { Dialog } from "@reach/dialog";
+import "@reach/dialog/styles.css";
 
 export type EmbeddedScaffolderWorkflowProps = Omit<WorkflowProps, 'onCreate' | 'extensions' | 'layouts'> & {
   onError(error: Error | undefined): JSX.Element | null;
@@ -27,6 +30,17 @@ type Display = 'front' | 'workflow' | 'finish';
 type DisplayComponents = Record<Display, JSX.Element>;
 
 type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];
+
+const useStyles = makeStyles(() => ({
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    width: '85%',
+    height: '85%',
+    justifyContent: 'center',
+    margin: 'auto',
+  },
+}));
 
 /**
  * Allows the EmbeddableWorkflow to be called from outside of a normal scaffolder workflow
@@ -43,8 +57,13 @@ export function EmbeddedScaffolderWorkflow({
   const { secrets } = useTemplateSecrets();
   const scaffolderApi = useApi(scaffolderApiRef);
   const taskRoute = useRouteRef(nextScaffolderTaskRouteRef);
-
+  const classes = useStyles();
+  const [taskUrl, setTaskUrl] = useState<string>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const state = location.state as { backgroundLocation?: Location };
+
   const customFieldExtensions =
     useCustomFieldExtensions<NextFieldExtensionOptions>(children);
 
@@ -60,20 +79,24 @@ export function EmbeddedScaffolderWorkflow({
 
   const onWorkFlowCreate = useCallback(
     async (values: OnCompleteArgs) => {
-      setDisplay('finish');
-
       const { taskId } = await scaffolderApi.scaffold({
         templateRef,
         values,
         secrets,
       });
 
-      navigate(taskRoute({ taskId }));
+      setTaskUrl(taskRoute({ taskId }));
 
-      await onCreate({ ...values, taskId });
+      setTimeout(() => {
+        navigate('modal', { state: { backgroundLocation: location } });
+
+        onCreate({ ...values, taskId });
+      });
     },
-    [navigate, onCreate, scaffolderApi, secrets, taskRoute, templateRef],
+    [location, navigate, onCreate, scaffolderApi, secrets, taskRoute, templateRef],
   );
+
+  const handleClose = useCallback(() => navigate(-1), [navigate]);
 
   const DisplayElements: DisplayComponents = {
     front: (
@@ -100,5 +123,23 @@ export function EmbeddedScaffolderWorkflow({
     ),
   };
 
-  return <>{DisplayElements[display]}</>;
+  return (<>
+    <Routes location={state?.backgroundLocation || location}>
+      <Route path="/*" element={DisplayElements[display]} />
+    </Routes>
+
+    {state?.backgroundLocation && (
+      <Routes>
+        <Route path="/modal" element={
+          <Dialog
+            aria-labelledby="label"
+            onDismiss={handleClose}
+          >
+            {/* <h2 style={{color: '#000000'}}>Func</h2> */}
+            <Navigate to={taskUrl as string} />
+          </Dialog>}
+        />
+      </Routes>
+    )}
+  </>);
 }

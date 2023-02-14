@@ -17,6 +17,11 @@ spec:
           type: string
           description: The catalog-info.yaml file to add the annotation to
           ui:readonly: true
+        entityRef:
+          title: EntityRef
+          type: string
+          description: the entity ref of
+          ui:widget: hidden
         branch:
           title: Branch
           type: string
@@ -29,13 +34,14 @@ spec:
       action: fetch:plain
       input:
         url: ${{ parameters.catalogInfoUrl }}
-
+        
     - id: add-annotation
       name: AddAnnotation
       action: backend:add-annotation
       input:
         # This file must exist at this path in the repo referenced above
         url: ${{ parameters.catalogInfoUrl }}
+        entityRef: ${{ parameters.entityRef }}
 
     - id: publish
       name: Publish
