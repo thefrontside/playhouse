@@ -1,30 +1,16 @@
----
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: backstage
   description: Frontside's Backstage Developer Portal
-  # Example for optional annotations
   annotations:
     github.com/project-slug: thefrontside/playhouse
-    "humanitec.com/orgId": "the-frontside-software-inc"
-    "humanitec.com/appId": "backstage"
-    # backstage.io/techdocs-ref: dir:.
+    humanitec.com/orgId: the-frontside-software-inc
+    humanitec.com/appId: backstage
+    some-domain.com/website-url: some-value
 spec:
   type: website
   owner: engineering@frontside.com
   lifecycle: production
   providesApis:
     - backstage-graphql-api
----
-apiVersion: backstage.io/v1alpha1
-kind: API
-metadata:
-  name: backstage-graphql-api
-  description: GraphQL API provided by GraphQL Plugin
-spec:
-  type: graphql
-  owner: engineering@frontside.com
-  lifecycle: production
-  definition:
-    $text: http://localhost:7007/api/graphql/schema
