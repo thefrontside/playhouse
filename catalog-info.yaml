@@ -9,6 +9,7 @@ metadata:
     github.com/project-slug: thefrontside/playhouse
     "humanitec.com/orgId": "the-frontside-software-inc"
     "humanitec.com/appId": "backstage"
+    backstage.io/techdocs-ref: file:./docs
     # backstage.io/techdocs-ref: dir:.
 spec:
   type: website
@@ -16,12 +17,13 @@ spec:
   lifecycle: production
   providesApis:
     - backstage-graphql-api
----
+------
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
   name: backstage-graphql-api
   description: GraphQL API provided by GraphQL Plugin
+  annotations: {}
 spec:
   type: graphql
   owner: engineering@frontside.com
