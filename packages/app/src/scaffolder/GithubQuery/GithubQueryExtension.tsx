@@ -1,16 +1,15 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import React, { useCallback, useMemo, useState } from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import { FieldExtensionComponentProps } from '@backstage/plugin-scaffolder-react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import Autocomplete from '@material-ui/lab/Autocomplete';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { TextField } from '@material-ui/core';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import {
-  useFetchWithAuth,
+  useGithubApi,
   RequestUserCredentials,
 } from 'scaffolder-frontend-auth';
 
@@ -26,21 +25,9 @@ export const GithubQuery = (props: FieldExtensionComponentProps<string>) => {
       ? (uiOptions?.requestUserCredentials as RequestUserCredentials)
       : undefined;
 
-  const { value, loading, error } = useFetchWithAuth({
-    url: 'https://github.com',
+  const { value, loading } = useGithubApi({
     requestUserCredentials,
-    fetchOpts: {
-      url: `https://api.github.com/orgs/${owner}/repos`,
-      options: {
-        headers: {
-          Accept: 'application/vnd.github+json',
-          Authorization: 'Bearer ',
-          // this isn't allowed so *shrugs*
-          // per_page: '100',
-        },
-      },
-      headersRequiringToken: ['Authorization'],
-    },
+    queryUrl: `orgs/${owner}/repos`,
   });
 
   const onSelect = useCallback(

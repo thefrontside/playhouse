@@ -39,7 +39,7 @@ export const useAuth = ({
       setToken(token);
     },
     500,
-    [localToken],
+    [localToken, requestUserCredentials],
   );
 
   return localToken ? localToken : undefined;

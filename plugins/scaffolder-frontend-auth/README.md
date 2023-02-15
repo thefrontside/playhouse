@@ -2,11 +2,6 @@
 
 _This package was created through the Backstage CLI_.
 
-## Installation
+## About
 
-Install the package via Yarn:
-
-```sh
-cd <package-dir> # if within a monorepo
-yarn add scaffolder-frontend-auth
-```
+This plugin is not currently published, and intended as an experimentation in hooks to grab a token and use it in a fetch call within a scaffolder workflow.
