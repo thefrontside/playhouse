@@ -1,10 +1,11 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import React, { useMemo } from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import { FieldExtensionComponentProps } from '@backstage/plugin-scaffolder-react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { useAuth, RequestUserCredentials } from 'scaffolder-frontend-auth';
 
 export const GithubAuth = (props: FieldExtensionComponentProps<string>) => {
