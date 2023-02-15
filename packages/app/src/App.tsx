@@ -11,6 +11,7 @@ import {
   catalogImportPlugin,
 } from '@backstage/plugin-catalog-import';
 import { ScaffolderPage, scaffolderPlugin } from '@backstage/plugin-scaffolder';
+import { NextScaffolderPage } from '@backstage/plugin-scaffolder/alpha';
 import { SearchPage } from '@backstage/plugin-search';
 import { TechRadarPage } from '@backstage/plugin-tech-radar';
 import {
@@ -41,6 +42,7 @@ import { SignInPage } from '@backstage/core-components';
 import { auth0AuthApiRef } from './internal';
 import Star from '@material-ui/icons/Star';
 import { githubAuthApiRef } from '@backstage/core-plugin-api';
+import { SecretsContextProvider } from '@backstage/plugin-scaffolder-react';
 
 const app = createApp({
   apis,
@@ -99,7 +101,11 @@ const routes = (
         <ReportIssue />
       </TechDocsAddons>
     </Route>
-    <Route path="/create" element={<ScaffolderPage />} />
+    <Route
+      path="/create/legacy"
+      element={<ScaffolderPage groups={[]} />}
+    />
+    <Route path="/create" element={<NextScaffolderPage FormProps={{ noHtml5Validate: true }} />} />
     <Route path="/api-docs" element={<ApiExplorerPage />} />
     <Route
       path="/tech-radar"
@@ -139,11 +145,13 @@ const routes = (
 
 const App = () => (
   <AppProvider>
-    <AlertDisplay />
-    <OAuthRequestDialog />
-    <AppRouter>
-      <Root>{routes}</Root>
-    </AppRouter>
+    <SecretsContextProvider>
+      <AlertDisplay />
+      <OAuthRequestDialog />
+      <AppRouter>
+        <Root>{routes}</Root>
+      </AppRouter>
+    </SecretsContextProvider>
   </AppProvider>
 );
 
