@@ -8,16 +8,17 @@ import {
 } from '@backstage/plugin-scaffolder-react';
 import {
   EmbeddableWorkflow,
+  ScaffolderTaskOutput,
   type NextFieldExtensionOptions,
   type WorkflowProps
 } from '@backstage/plugin-scaffolder-react/alpha';
 import {
-  NextScaffolderPage
+  NextScaffolderPage,
 } from '@backstage/plugin-scaffolder/alpha';
 import { JsonValue } from '@backstage/types';
 import { Box, Button, withStyles } from '@material-ui/core';
 import '@reach/dialog/styles.css';
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
@@ -27,14 +28,12 @@ export type EmbeddedScaffolderWorkflowProps = Omit<
 > & {
   onError(error: Error | undefined): JSX.Element | null;
   frontPage?: ReactNode;
-  finishPage?: ReactNode;
+  finishPage?: ComponentType<{
+    output?: ScaffolderTaskOutput;
+  }>;
   onCreate?: (values: Record<string, JsonValue>) => Promise<void>;
   children?: ReactNode;
 };
-
-type Display = 'front' | 'form' | 'workflow' | 'finish';
-
-type DisplayComponents = Record<Display, JSX.Element>;
 
 type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];
 
@@ -94,41 +93,31 @@ export function EmbeddedScaffolderWorkflow({
     [navigate, onCreate, scaffolderApi, secrets, templateRef],
   );
 
-  const DisplayElements: DisplayComponents = {
-    front: (
-      <Box display="flex" alignItems="center" flexDirection="column">
-        {frontPage}
-        <Button variant="contained" onClick={() => navigate('form')}>
-          SETUP
-        </Button>
-      </Box>
-    ),
-    form: (
-      <EmbeddableWorkflow
-        onCreate={onWorkFlowCreate}
-        onError={onError}
-        extensions={customFieldExtensions}
-        layouts={customLayouts}
-        {...props}
-      />
-    ),
-    finish: (
-      <Box display="flex" alignItems="center" flexDirection="column">
-        {finishPage}
-      </Box>
-    ),
-    workflow: <></>,
-  };
-
   return (
     <>
       <Routes>
-        <Route index element={DisplayElements.front} />
-        <Route path="form" element={DisplayElements.form} />
+        <Route index element={<Box display="flex" alignItems="center" flexDirection="column">
+          {frontPage}
+          <Button variant="contained" onClick={() => navigate('form')}>
+            SETUP
+          </Button>
+        </Box>} />
+        <Route path="form" element={<EmbeddableWorkflow
+          onCreate={onWorkFlowCreate}
+          onError={onError}
+          extensions={customFieldExtensions}
+          layouts={customLayouts}
+          {...props}
+        />} />
       </Routes>
       {isTaskPage && <>
         <GlobalCss />
-        <NextScaffolderPage FormProps={{ noHtml5Validate: true }} />
+        <NextScaffolderPage
+          {...props}
+          components={{
+            TemplateOutputsComponent: finishPage
+          }}
+        />
       </>
       }
     </>
