@@ -1,22 +1,30 @@
-import React, { useState, useCallback } from 'react';
-import type { ReactNode } from 'react';
-import { EmbeddableWorkflow, type NextFieldExtensionOptions, type WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
-import { Box, Button } from '@material-ui/core';
+import { stringifyEntityRef } from '@backstage/catalog-model';
+import { useApi } from '@backstage/core-plugin-api';
 import {
   scaffolderApiRef,
   useCustomFieldExtensions,
   useCustomLayouts,
-  useTemplateSecrets,
+  useTemplateSecrets
 } from '@backstage/plugin-scaffolder-react';
-import { useApi, useRouteRef } from '@backstage/core-plugin-api';
-import { stringifyEntityRef } from '@backstage/catalog-model';
-import { Navigate, Route, Routes, useLocation, useNavigate, MemoryRouter } from 'react-router-dom';
-import { nextScaffolderTaskRouteRef } from '@backstage/plugin-scaffolder/alpha';
+import {
+  EmbeddableWorkflow,
+  type NextFieldExtensionOptions,
+  type WorkflowProps
+} from '@backstage/plugin-scaffolder-react/alpha';
+import {
+  NextScaffolderPage
+} from '@backstage/plugin-scaffolder/alpha';
 import { JsonValue } from '@backstage/types';
-import { Dialog } from "@reach/dialog";
-import "@reach/dialog/styles.css";
+import { Box, Button, withStyles } from '@material-ui/core';
+import '@reach/dialog/styles.css';
+import type { ReactNode } from 'react';
+import React, { useCallback } from 'react';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
-export type EmbeddedScaffolderWorkflowProps = Omit<WorkflowProps, 'onCreate' | 'extensions' | 'layouts'> & {
+export type EmbeddedScaffolderWorkflowProps = Omit<
+  WorkflowProps,
+  'onCreate' | 'extensions' | 'layouts'
+> & {
   onError(error: Error | undefined): JSX.Element | null;
   frontPage?: ReactNode;
   finishPage?: ReactNode;
@@ -24,7 +32,7 @@ export type EmbeddedScaffolderWorkflowProps = Omit<WorkflowProps, 'onCreate' | '
   children?: ReactNode;
 };
 
-type Display = 'front' | 'workflow' | 'finish';
+type Display = 'front' | 'form' | 'workflow' | 'finish';
 
 type DisplayComponents = Record<Display, JSX.Element>;
 
@@ -41,18 +49,25 @@ export function EmbeddedScaffolderWorkflow({
   children = <></>,
   ...props
 }: EmbeddedScaffolderWorkflowProps): JSX.Element {
-  const [display, setDisplay] = useState<Display>(frontPage ? 'front' : 'workflow');
   const { secrets } = useTemplateSecrets();
   const scaffolderApi = useApi(scaffolderApiRef);
-  const taskRoute = useRouteRef(nextScaffolderTaskRouteRef);
-  const [taskUrl, setTaskUrl] = useState<string>();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const state = location.state as { backgroundLocation?: Location };
+  const isTaskPage =
+    /tasks\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/.test(
+      location.pathname,
+    );
 
   const customFieldExtensions =
     useCustomFieldExtensions<NextFieldExtensionOptions>(children);
+
+  const GlobalCss = withStyles({
+    "@global": {
+      "main main header": {
+        // display: "none !important"
+      }
+    }
+  })(() => null);
 
   const customLayouts = useCustomLayouts(children);
 
@@ -62,39 +77,33 @@ export function EmbeddedScaffolderWorkflow({
     name: props.templateName,
   });
 
-  const startTemplate = useCallback(() => setDisplay('workflow'), []);
-
   const onWorkFlowCreate = useCallback(
     async (values: OnCompleteArgs) => {
-      const { taskId } = await scaffolderApi.scaffold({
+      const { taskId: _taskId } = await scaffolderApi.scaffold({
         templateRef,
         values,
         secrets,
       });
 
-      setTaskUrl(taskRoute({ taskId }));
-
       setTimeout(() => {
-        navigate('modal', { state: { backgroundLocation: location } });
+        navigate(`tasks/${_taskId}`);
 
-        onCreate({ ...values, taskId });
+        onCreate({ ...values, taskId: _taskId });
       });
     },
-    [location, navigate, onCreate, scaffolderApi, secrets, taskRoute, templateRef],
+    [navigate, onCreate, scaffolderApi, secrets, templateRef],
   );
-
-  const handleClose = useCallback(() => navigate(-1), [navigate]);
 
   const DisplayElements: DisplayComponents = {
     front: (
       <Box display="flex" alignItems="center" flexDirection="column">
         {frontPage}
-        <Button variant="contained" onClick={startTemplate}>
+        <Button variant="contained" onClick={() => navigate('form')}>
           SETUP
         </Button>
       </Box>
     ),
-    workflow: (
+    form: (
       <EmbeddableWorkflow
         onCreate={onWorkFlowCreate}
         onError={onError}
@@ -108,25 +117,20 @@ export function EmbeddedScaffolderWorkflow({
         {finishPage}
       </Box>
     ),
+    workflow: <></>,
   };
 
-  return (<>
-    <Routes location={state?.backgroundLocation || location}>
-      <Route path="/*" element={DisplayElements[display]} />
-    </Routes>
-
-    {state?.backgroundLocation && (
+  return (
+    <>
       <Routes>
-        <Route path="/modal" element={
-          <Dialog
-            aria-labelledby="label"
-            onDismiss={handleClose}
-          >
-            {/* <h2 style={{color: '#000000'}}>Func</h2> */}
-            <Navigate to={taskUrl as string} />
-          </Dialog>}
-        />
+        <Route index element={DisplayElements.front} />
+        <Route path="form" element={DisplayElements.form} />
       </Routes>
-    )}
-  </>);
+      {isTaskPage && <>
+        <GlobalCss />
+        <NextScaffolderPage FormProps={{ noHtml5Validate: true }} />
+      </>
+      }
+    </>
+  );
 }
