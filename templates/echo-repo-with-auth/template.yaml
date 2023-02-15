@@ -1,0 +1,74 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: echo-repo-with-auth
+  title: Echo Repo With Auth
+  description: A test template for working with the custom auth hook
+spec:
+  owner: john@example.com
+  type: service
+  parameters:
+    - title: Github Custom Auth
+      required:
+        - customRepoUrl
+      properties:
+        customRepoUrl: # creating github repo and for registering catalog component
+          title: Repository
+          type: string
+          ui:field: GithubAuth
+          ui:options:
+            requestUserCredentials:
+              secretsKey: USER_CUSTOM_OAUTH_TOKEN
+              additionalScopes:
+                github:
+                  - workflow
+            allowedHosts:
+              - github.com
+    - title: Github Auth And Query
+      required:
+        - customQueried
+      properties:
+        customQueried: # creating github repo and for registering catalog component
+          title: Repository
+          type: string
+          ui:field: GithubQuery
+          ui:options:
+            requestUserCredentials:
+              additionalScopes:
+                github:
+                  - workflow
+            allowedHosts:
+              - github.com
+    - title: RepoUrlPicker
+      required:
+        - builtInRepoUrl
+      properties:
+        builtInRepoUrl: # creating github repo and for registering catalog component
+          title: Repository
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            # https://backstage.io/docs/features/software-templates/writing-templates#using-the-users-oauth-token
+            requestUserCredentials:
+              secretsKey: USER_BUILTIN_OAUTH_TOKEN
+              additionalScopes:
+                github:
+                  - workflow
+            allowedHosts:
+              - github.com
+
+  steps:
+    - name: Read Environment
+      id: environment
+      action: backend:get-environment
+
+  output:
+    links:
+      - title: Repository Custom
+        url: ${{ parameters.customRepoUrl }} # link to the remote repository
+      - title: Repository Queried
+        url: ${{ parameters.customQueried }} # link to the remote repository
+      - title: Repository Built-In
+        url: ${{ parameters.builtInRepoUrl }} # link to the remote repository
+      - title: Environment Org ID
+        url: ${{ steps['environment'].output.orgId }} # link to the remote repository
