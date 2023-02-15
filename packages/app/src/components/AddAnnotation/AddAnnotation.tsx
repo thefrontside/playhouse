@@ -26,12 +26,6 @@ export function AddAnnotation({ children }: {children?: ReactNode}): JSX.Element
       namespace="default"
       templateName="add-annotation"
       initialState={{ catalogInfoUrl, entityRef }}
-      finishPage={
-        <>
-          <h1>Optional Finish page</h1>
-          <p>You are finished!</p>
-        </>
-      }
     >
       {children}
     </EmbeddedScaffolderWorkflow>

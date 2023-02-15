@@ -193,6 +193,7 @@ const websiteEntityPage = (
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/docs" title="Docs">
+      {/* {techdocsContent} */}
       <AddAnnotation/>
     </EntityLayout.Route>
   </EntityLayout>
