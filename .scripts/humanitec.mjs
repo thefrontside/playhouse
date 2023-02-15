@@ -95,7 +95,7 @@ function* cloneEnvironment({ newEnvName }) {
     body: JSON.stringify({
       active: true,
       artefacts_filter: [artefactsFilter],
-      match_ref: `refs/heads/${newEnvName}/merge`,
+      match_ref: `refs/heads/${newEnvName.startsWith('pr') ? newEnvName.slice(2) : newEnvName}/merge`,
       type: 'update',
     }),
   });
