@@ -14,7 +14,7 @@
     "@faker-js/faker": "^7.6.0",
     "@frontside/graphgen": "^1.8.0",
     "@frontside/tsconfig": "^1.2.0",
-    "@simulacrum/auth0-simulator": "^0.8.3",
+    "@simulacrum/auth0-simulator": "^0.9.0",
     "@types/seedrandom": "3.0.1",
     "effection": "^2.0.6",
     "nodemon": "latest"
