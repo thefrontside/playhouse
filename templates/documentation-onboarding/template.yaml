@@ -52,3 +52,8 @@ spec:
         targetPath: "."
         sourcePath: ${{ steps['add-annotation'].output.path }}
         branchName: ${{ parameters.branch }}
+
+  output:
+    links:
+      - title: Pull Request URL
+        url: ${{ steps['publish'].output.remoteUrl }}
