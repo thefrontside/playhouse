@@ -12,6 +12,8 @@ import {
 } from '@backstage/plugin-catalog-import';
 import { ScaffolderPage, scaffolderPlugin } from '@backstage/plugin-scaffolder';
 import { NextScaffolderPage } from '@backstage/plugin-scaffolder/alpha';
+import { ScaffolderFieldExtensions } from '@backstage/plugin-scaffolder-react';
+import { allFieldExtensions } from './scaffolder';
 import { SearchPage } from '@backstage/plugin-search';
 import { TechRadarPage } from '@backstage/plugin-tech-radar';
 import {
@@ -105,7 +107,13 @@ const routes = (
       path="/create/legacy"
       element={<ScaffolderPage groups={[]} />}
     />
-    <Route path="/create" element={<NextScaffolderPage FormProps={{ noHtml5Validate: true }} />} />
+    <Route path="/create" element={<NextScaffolderPage FormProps={{ noHtml5Validate: true }} />} >
+      <ScaffolderFieldExtensions>
+        {allFieldExtensions.map(Component => (
+          <Component />
+        ))}
+      </ScaffolderFieldExtensions>
+    </Route>
     <Route path="/api-docs" element={<ApiExplorerPage />} />
     <Route
       path="/tech-radar"

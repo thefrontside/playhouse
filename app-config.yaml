@@ -96,6 +96,10 @@ catalog:
       target: ../../templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]
+    - type: file
+      target: ../../templates/echo-repo-with-auth/template.yaml
+      rules:
+        - allow: [Template]
 
 humanitec:
   orgId: the-frontside-software-inc
