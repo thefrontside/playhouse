@@ -1,11 +1,11 @@
 import { Entity, EntityRelation, stringifyEntityRef } from '@backstage/catalog-model';
-import type { Loader } from '../app/types';
 import type { JsonObject } from '@backstage/types';
 import type { Operation } from 'effection';
 import type { Node } from '@frontside/graphgen';
 
-import { envelop, EnvelopError, PromiseOrValue, useExtendContext } from '@envelop/core';
-import { createGraphQLApp } from '..';
+import * as graphql from 'graphql';
+import { envelop, PromiseOrValue, useExtendContext, useEngine } from '@envelop/core';
+import { createGraphQLApp } from '../app/app';
 
 import type { Factory, World } from '@frontside/graphgen-backstage';
 import { createFactory } from '@frontside/graphgen-backstage';
@@ -36,6 +36,7 @@ export function createGraphQLTestApp(TestModule: Module, loader: () => DataLoade
   });
   const run = envelop({
     plugins: [
+      useEngine(graphql),
       useGraphQLModules(application),
       useDataLoader('loader', loader),
       useExtendContext(() => ({ refToId: stringifyEntityRef })),
@@ -68,9 +69,15 @@ export function createGraphQLTestApp(TestModule: Module, loader: () => DataLoade
 export function createGraphQLAPI(): GraphQLHarness {
   let factory = createFactory();
   let catalog = createSimulatedCatalog(factory)
-  let { run, application } = createGraphQLApp({
-    plugins: [useExtendContext(() => ({ catalog }))],
-    loader: () => createSimulatedLoader(catalog),
+  const application = createGraphQLApp({});
+
+  const run = envelop({
+    plugins: [
+      useEngine(graphql),
+      useGraphQLModules(application),
+      useExtendContext(() => ({ catalog })),
+      useDataLoader('loader', () => createSimulatedLoader(catalog)),
+    ],
   });
 
   return {
@@ -108,11 +115,11 @@ export function createGraphQLAPI(): GraphQLHarness {
   };
 }
 
-export function createSimulatedLoader(catalog: CatalogApi): Loader {
+export function createSimulatedLoader(catalog: CatalogApi) {
   return new DataLoader<string, Entity>(function fetch(refs): Promise<Array<Entity | Error>> {
     return Promise.all(refs.map(async ref => {
       let entity = await catalog.getEntityByRef(ref);
-      return entity ?? new EnvelopError(`no such node with ref: '${ref}'`);
+      return entity ?? new graphql.GraphQLError(`no such node with ref: '${ref}'`);
     }));
   });
 }
