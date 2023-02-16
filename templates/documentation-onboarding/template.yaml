@@ -55,5 +55,5 @@ spec:
 
   output:
     links:
-      - title: Pull Request URL
+      - title: View Pull Request
         url: ${{ steps['publish'].output.remoteUrl }}
