@@ -58,7 +58,7 @@ import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
-import { AddAnnotation } from '../AddAnnotation/AddAnnotation';
+import { EntityOnboardingWorkflow } from '../EntityOnboardingWorkflow/EntityOnboardingWorkflow';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -194,7 +194,18 @@ const websiteEntityPage = (
 
     <EntityLayout.Route path="/docs" title="Docs">
       {/* {techdocsContent} */}
-      <AddAnnotation/>
+      <EntityOnboardingWorkflow
+        title="Start using TechDocs"
+        description="Showing documentation in this tab requires an annotation to be added to the metadata. 
+          This form will onboard your project to use documentation as code by creating a pull request in
+          your component's repository. Once you merge that pull request, your docs will show up here.
+        "  
+        templateName="documentation-onboarding" 
+        namespace="default"
+        onError={(error: Error | undefined) => (
+          <h2>{error?.message ?? 'Houston we have a problem.'}</h2>
+        )}
+      />
     </EntityLayout.Route>
   </EntityLayout>
 );

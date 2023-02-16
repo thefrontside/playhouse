@@ -1,15 +1,14 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: add-annotation
-  title: Add annotation to a catalog-info.yaml file
-  description: Opens a PR with updates to a catalog-info.yaml file.
-
+  name: documentation-onboarding
+  title: Documentation Onboarding
+  description: Workflow that adds annotation to the component and add docs code.
 spec:
   owner: john@example.com
   type: service
   parameters:
-    - title: catalog-info.yaml
+    - title: Select file and ban
       required: ['catalogInfoUrl', 'branch']
       properties:
         catalogInfoUrl:

@@ -14,34 +14,26 @@ import {
 } from '@backstage/plugin-scaffolder-react/alpha';
 import { NextScaffolderPage } from '@backstage/plugin-scaffolder/alpha';
 import { JsonValue } from '@backstage/types';
-import { Button, withStyles } from '@material-ui/core';
-import '@reach/dialog/styles.css';
+import { withStyles } from '@material-ui/core';
 import type { ComponentType, ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-
-type FrontPageType = ComponentType<{
-  goToForm: () => void;
-}>;
 
 export type EmbeddedScaffolderWorkflowProps = Omit<
   WorkflowProps,
   'onCreate' | 'extensions' | 'layouts'
 > & {
+  components?: {
+    TemplateOutputsComponent?: ComponentType<{
+      output?: ScaffolderTaskOutput;
+    }>;
+  };
   onError(error: Error | undefined): JSX.Element | null;
-  frontPage?: FrontPageType;
-  finishPage?: ComponentType<{
-    output?: ScaffolderTaskOutput;
-  }>;
   onCreate?: (values: Record<string, JsonValue>) => Promise<void>;
   children?: ReactNode;
 };
 
 type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];
-
-const DefaultFrontPage: FrontPageType = ({ goToForm }) => {
-  return <Button onClick={goToForm}>Setup</Button>;
-};
 
 const TASK_REGEX =
   /tasks\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
@@ -50,10 +42,8 @@ const TASK_REGEX =
  * Allows the EmbeddableWorkflow to be called from outside of a normal scaffolder workflow
  */
 export function EmbeddedScaffolderWorkflow({
-  frontPage: FrontPage = DefaultFrontPage,
-  finishPage,
+  components,
   onCreate = async (_values: OnCompleteArgs) => void 0,
-  onError,
   children = <></>,
   ...props
 }: EmbeddedScaffolderWorkflowProps): JSX.Element {
@@ -99,18 +89,14 @@ export function EmbeddedScaffolderWorkflow({
     [navigate, onCreate, scaffolderApi, secrets, templateRef],
   );
 
-  const goToForm = useCallback(() => navigate('form'), [navigate])
-
   return (
     <>
       <Routes>
-        <Route index element={<FrontPage goToForm={goToForm}/>} />
         <Route
-          path="form"
+          index
           element={
             <EmbeddableWorkflow
               onCreate={onWorkFlowCreate}
-              onError={onError}
               extensions={customFieldExtensions}
               layouts={customLayouts}
               {...props}
@@ -121,12 +107,7 @@ export function EmbeddedScaffolderWorkflow({
       {isTaskPage && (
         <>
           <GlobalCss />
-          <NextScaffolderPage
-            {...props}
-            components={{
-              TemplateOutputsComponent: finishPage,
-            }}
-          />
+          <NextScaffolderPage {...props} components={components} />
         </>
       )}
     </>
