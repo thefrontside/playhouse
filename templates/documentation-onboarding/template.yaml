@@ -46,7 +46,7 @@ spec:
       name: Publish
       action: publish:github:pull-request
       input:
-        repoUrl: github.com?repo=playhouse&owner=thefrontside
+        repoUrl: ${{ steps['add-annotation'].output.repoUrl }}
         title: Add annotation to config-info.yaml
         description: update description
         targetPath: "."

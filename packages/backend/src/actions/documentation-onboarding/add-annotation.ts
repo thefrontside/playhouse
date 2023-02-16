@@ -1,21 +1,25 @@
 import { createTemplateAction } from '@backstage/plugin-scaffolder-backend';
-import fs from 'fs';
+import fs from 'fs-extra';
 import * as yaml from 'yaml';
-import { Entity } from '@backstage/catalog-model';
 import { type ScmIntegrations } from '@backstage/integration';
 import { Octokit } from 'octokit';
 import { resolveSafeChildPath } from '@backstage/backend-common';
 import path from 'path';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { assert } from 'assert-ts';
+import { Logger } from 'winston';
+
+export const TemplateDirectory = "documentation-onboarding";
 
 const getOctokit = ({
   integrations,
+  host
 }: {
   integrations: ScmIntegrations;
+  host: string;
 }) => {
   const gitHubConfig = integrations.github.byUrl(
-    'github.com',
+    host,
   )?.config;
   return new Octokit({
     baseUrl: gitHubConfig?.apiBaseUrl,
@@ -25,12 +29,14 @@ const getOctokit = ({
 
 interface AddAnnotationOptions {
   integrations: ScmIntegrations;
+  logger: Logger;
 }
 
-const GitUrlRegex = /(?<host>(git@|https:\/\/)([\w\.@]+)(\/|:))(?<owner>[\w,\-,\_]+)\/(?<repo>[\w,\-,\_]+)\/blob\/(?<branch>[\w,\-,\_]+)\/(?<filePath>.*$)/g;
+const GitUrlRegex = /(git@|https:\/\/)(?<host>([\w\.@]+))(\/|:)(?<owner>[\w,\-,\_]+)\/(?<repo>[\w,\-,\_]+)\/blob\/(?<branch>[\w,\-,\_]+)\/(?<filePath>.*$)/g;
 
 export function createAddAnnotation({
   integrations,
+  logger
 }: AddAnnotationOptions) {
   return createTemplateAction<{ url: string; entityRef: string }>({
     id: 'backend:add-annotation',
@@ -56,22 +62,27 @@ export function createAddAnnotation({
         type: 'object',
         properties: {
           url: {
-            title: 'url',
+            title: 'path',
             type: 'string',
           },
+          repoUrl: {
+            title: 'repoUrl',
+            type: 'string'
+          }
         },
       },
     },
     async handler(ctx) {
-      const githubClient = getOctokit({ integrations });
 
       const url = ctx.input.url;
 
       const matches = url.matchAll(GitUrlRegex);
 
-      const { owner, repo, filePath } = [...matches][0].groups as { owner: string, repo: string; filePath: string };
+      const { host, owner, repo, filePath } = [...matches][0].groups as { host: string; owner: string, repo: string; filePath: string };
 
-      const { data } = await githubClient.rest.repos.getContent({
+      const gitClient = getOctokit({ integrations, host });
+
+      const { data } = await gitClient.rest.repos.getContent({
         owner,
         repo,
         path: filePath,
@@ -114,6 +125,29 @@ export function createAddAnnotation({
 
       fs.writeFileSync(sourceFilepath, documents.map(document => document.toString()).join(''));
 
+      const docsDirectory = resolveSafeChildPath(
+        ctx.workspacePath,
+        'docs',
+      );
+      
+      fs.mkdirSync(docsDirectory, { mode: 0o744 });
+
+      const templateDirectory = resolveSafeChildPath("../..", path.join("templates", TemplateDirectory, "template"));
+
+      try {
+        await fs.copy(templateDirectory, ctx.workspacePath, { overwrite: true });
+      } catch (e) {
+        logger.error(e);
+
+        throw e;
+      }
+
+      const repoUrl = `${host}?repo=${repo}&owner=${owner}`;
+      
+      logger.info(`saved files to = ${ctx.workspacePath}`);
+      logger.info(`repoUrl = ${repoUrl}`)
+
+      ctx.output('repoUrl', repoUrl);
       ctx.output('path', path.dirname(sourceFilepath));
     },
   });
