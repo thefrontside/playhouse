@@ -1,0 +1,8 @@
+site_name: service-component
+site_description: Sample service for Humanitec demo
+
+nav:
+  - Introduction: index.md
+
+plugins:
+  - techdocs-core
