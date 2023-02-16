@@ -1,5 +1,13 @@
 # backend
 
+## 0.0.15
+
+### Patch Changes
+
+- 7064aab: Backport changes from backstage graphql-plugin PR#15519
+- Updated dependencies [7064aab]
+  - @frontside/backstage-plugin-graphql@0.7.0
+
 ## 0.0.14
 
 ### Patch Changes

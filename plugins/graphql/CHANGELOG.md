@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.7.0
+
+### Minor Changes
+
+- 7064aab: Backport changes from backstage graphql-plugin PR#15519
+
 ## 0.6.1
 
 ### Patch Changes
