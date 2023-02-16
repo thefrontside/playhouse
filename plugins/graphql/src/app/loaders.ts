@@ -1,13 +1,23 @@
-import type { EntityRef, Loader } from './types';
-import { Entity, stringifyEntityRef } from '@backstage/catalog-model';
-import DataLoader from 'dataloader';
-import { EnvelopError } from '@envelop/core';
 import type { CatalogClient } from '@backstage/catalog-client';
+import { Entity } from '@backstage/catalog-model';
+import { default as DataLoader, Options } from 'dataloader';
+import { GraphQLError } from 'graphql';
 
-export function createLoader(catalog: Pick<CatalogClient,'getEntitiesByRefs'>): Loader {
-  return new DataLoader<EntityRef, Entity>(async (refs): Promise<Array<Entity | Error>> => {
-    const entityRefs: string[] = refs.map((ref) => typeof ref === 'string' ? ref : stringifyEntityRef(ref))
-    const result = await catalog.getEntitiesByRefs({ entityRefs });
-    return result.items.map((entity, index) => entity ?? new EnvelopError(`no such node with ref: '${refs[index]}'`));
-  });
+export function createLoader(
+  { catalog }: { catalog: Pick<CatalogClient, 'getEntitiesByRefs'> },
+  options?: Options<string, Entity>,
+) {
+  return new DataLoader<string, Entity>(
+    async (entityRefs): Promise<Array<Entity | Error>> => {
+      const result = await catalog.getEntitiesByRefs({
+        entityRefs: entityRefs as string[],
+      });
+      return result.items.map(
+        (entity, index) =>
+          entity ??
+          new GraphQLError(`no such node with ref: '${entityRefs[index]}'`),
+      );
+    },
+    options,
+  );
 }

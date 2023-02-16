@@ -1,14 +1,16 @@
-import type { Entity } from '@backstage/catalog-model';
-import { envelop } from '@envelop/core';
+import { CatalogClient } from '@backstage/catalog-client';
+import { CompoundEntityRef } from '@backstage/catalog-model';
 import DataLoader from 'dataloader';
+import { Application } from 'graphql-modules';
 
-export type EntityRef = string | { kind: string; namespace?: string; name: string }
+export type PromiseOrValue<T> = T | Promise<T>;
 
-export type Loader = DataLoader<EntityRef, Entity>;
-
-export interface ResolverContext<TLoader extends DataLoader<any, any> = Loader> {
-  loader: TLoader
-  refToId: (ref: EntityRef) => string
+export interface ResolverContext {
+  application: Application;
+  loader: DataLoader<any, any>;
+  catalog: CatalogClient;
+  refToId?: (ref: CompoundEntityRef | string) => string;
 }
 
-export type EnvelopPlugins = Parameters<typeof envelop>[0]['plugins']
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type Logger = Record<LogLevel, (...args: any[]) => void>;

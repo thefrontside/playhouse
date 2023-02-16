@@ -27,9 +27,9 @@ describe('Transformer', () => {
     return schema
   }
 
-  it('should add object type if empty @extend directive is used', function* () {
+  it('should add object type if empty @inherit directive is used', function* () {
     const schema = transformSchema(gql`
-    interface IEntity @extend {
+    interface IEntity @inherit {
       totalCount: Int!
     }
     `)
@@ -40,9 +40,9 @@ describe('Transformer', () => {
     ]);
   })
 
-  it('should add object with name from `generatedTypeName` argument of @extend directive', function* () {
+  it('should add object with name from `generatedTypeName` argument of @inherit directive', function* () {
     const schema = transformSchema(gql`
-    interface Entity @extend(generatedTypeName: "NodeEntity") {
+    interface Entity @inherit(generatedTypeName: "NodeEntity") {
       totalCount: Int!
     }
     `)
@@ -53,9 +53,9 @@ describe('Transformer', () => {
     ]);
   })
 
-  it('should merge fields from interface in @extend directive type', function* () {
+  it('should merge fields from interface in @inherit directive type', function* () {
     const schema = transformSchema(gql`
-    interface IEntity @extend(interface: "Node") {
+    interface IEntity @inherit(interface: "Node") {
       name: String!
     }
     `)
@@ -69,7 +69,7 @@ describe('Transformer', () => {
 
   it('should add object type with merged fields from interfaces', function* () {
     const schema = transformSchema(gql`
-    interface IEntity @extend(interface: "Node") {
+    interface IEntity @inherit(interface: "Node") {
       name: String!
     }
     `)
@@ -99,10 +99,10 @@ describe('Transformer', () => {
 
   it('should merge union types', function* () {
     const schema = transformSchema(gql`
-    interface IComponent @extend {
+    interface IComponent @inherit {
       name: String!
     }
-    interface IResource @extend {
+    interface IResource @inherit {
       name: String!
     }
 
@@ -119,16 +119,16 @@ describe('Transformer', () => {
     const schema = transformSchema(gql`
     union Ownable = IEntity
 
-    interface IEntity @extend {
+    interface IEntity @inherit {
       name: String!
     }
-    interface IResource @extend(interface: "IEntity") {
+    interface IResource @inherit(interface: "IEntity") {
       location: String!
     }
-    interface IWebResource @extend(interface: "IResource", when: "spec.type", is: "website") {
+    interface IWebResource @inherit(interface: "IResource", when: "spec.type", is: "website") {
       url: String!
     }
-    interface IUser @extend {
+    interface IUser @inherit {
       ownerOf: [Ownable!]! @relation
     }
     `)
@@ -139,16 +139,16 @@ describe('Transformer', () => {
 
   it('should extend a types sequence', function* () {
     const schema = transformSchema(gql`
-    interface IEntity @extend(interface: "Node") {
+    interface IEntity @inherit(interface: "Node") {
       name: String!
     }
-    interface IResource @extend(interface: "IEntity", when: "kind", is: "Resource") {
+    interface IResource @inherit(interface: "IEntity", when: "kind", is: "Resource") {
       location: String!
     }
-    interface IWebResource @extend(interface: "IResource", when: "spec.type", is: "website") {
+    interface IWebResource @inherit(interface: "IResource", when: "spec.type", is: "website") {
       url: String!
     }
-    interface IExampleCom @extend(interface: "IWebResource", when: "spec.url", is: "example.com") {
+    interface IExampleCom @inherit(interface: "IWebResource", when: "spec.url", is: "example.com") {
       example: String!
     }
     `)
@@ -165,11 +165,11 @@ describe('Transformer', () => {
 
   it('should add arguments to the "Connection" type', function* () {
     const schema = transformSchema(gql`
-    interface IGroup @extend(interface: "Node") {
+    interface IGroup @inherit(interface: "Node") {
       users: Connection @relation(name: "hasMember", nodeType: "IUser")
     }
 
-    interface IUser @extend(interface: "Node", when: "kind", is: "User") {
+    interface IUser @inherit(interface: "Node", when: "kind", is: "User") {
       name: String!
     }
     `)
@@ -185,13 +185,13 @@ describe('Transformer', () => {
     const schema = transformSchema(gql`
     union Ownable = IEntity
 
-    interface IEntity @extend(interface: "Node") {
+    interface IEntity @inherit(interface: "Node") {
       name: String!
     }
-    interface IResource @extend(interface: "IEntity", when: "kind", is: "Resource") {
+    interface IResource @inherit(interface: "IEntity", when: "kind", is: "Resource") {
       location: String!
     }
-    interface IUser @extend {
+    interface IUser @inherit {
       owns: Connection @relation(name: "ownerOf", nodeType: "Ownable")
     }
     `)
@@ -229,31 +229,31 @@ describe('Transformer', () => {
 
   it('should fail if `at` argument of @field is not a valid type', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend {
+    interface IEntity @inherit {
       name: String! @field(at: 42)
     }
     `)).toThrow('The "at" argument of @field directive must be a string or an array of strings');
   })
 
-  it('should fail if `when` argument of @extend is not a valid type', function* () {
+  it('should fail if `when` argument of @inherit is not a valid type', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend(when: 42, is: "answer") {
+    interface IEntity @inherit(when: 42, is: "answer") {
       name: String!
     }
-    `)).toThrow('The "when" argument of @extend directive must be a string or an array of strings');
+    `)).toThrow('The "when" argument of @inherit directive must be a string or an array of strings');
   })
 
-  it('should fail if `when` argument is used without `is` in @extend directive', function* () {
+  it('should fail if `when` argument is used without `is` in @inherit directive', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend(when: "kind") {
+    interface IEntity @inherit(when: "kind") {
       name: String!
     }
-    `)).toThrow('The @extend directive for "IEntity" should have both "when" and "is" arguments or none of them');
+    `)).toThrow('The @inherit directive for "IEntity" should have both "when" and "is" arguments or none of them');
   })
 
   it("should fail if @relation interface doesn't exist", function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend {
+    interface IEntity @inherit {
       owners: Connection @relation(name: "ownedBy", nodeType: "Owner")
     }
     `)).toThrow('Error while processing directives on field "owners" of "IEntity":\nThe interface "Owner" is not defined in the schema.');
@@ -261,7 +261,7 @@ describe('Transformer', () => {
 
   it('should fail if @relation interface is input type', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend {
+    interface IEntity @inherit {
       owners: Connection @relation(name: "ownedBy", nodeType: "OwnerInput")
     }
     input OwnerInput {
@@ -270,36 +270,36 @@ describe('Transformer', () => {
     `)).toThrow(`Error while processing directives on field "owners" of "IEntity":\nThe interface "OwnerInput" is an input type and can't be used in a Connection.`);
   })
 
-  it("should fail if @extend interface doesn't exist", function* () {
+  it("should fail if @inherit interface doesn't exist", function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend(interface: "NonExistingInterface") {
+    interface IEntity @inherit(interface: "NonExistingInterface") {
       name: String!
     }
-    `)).toThrow(`The interface "NonExistingInterface" described in @extend directive for "IEntity" isn't abstract type or doesn't exist`);
+    `)).toThrow(`The interface "NonExistingInterface" described in @inherit directive for "IEntity" isn't abstract type or doesn't exist`);
   })
 
-  it("should fail if @extend interface isn't an interface", function* () {
+  it("should fail if @inherit interface isn't an interface", function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend(interface: "String") {
+    interface IEntity @inherit(interface: "String") {
       name: String!
     }
-    `)).toThrow(`The interface "String" described in @extend directive for "IEntity" isn't abstract type or doesn't exist`);
+    `)).toThrow(`The interface "String" described in @inherit directive for "IEntity" isn't abstract type or doesn't exist`);
   })
 
-  it('should fail if @extend interface is already implemented by the type', function* () {
+  it('should fail if @inherit interface is already implemented by the type', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity implements Node @extend(interface: "Node") {
+    interface IEntity implements Node @inherit(interface: "Node") {
       name: String!
     }
-    `)).toThrow(`The interface "Node" described in @extend directive for "IEntity" is already implemented by the type`);
+    `)).toThrow(`The interface "Node" described in @inherit directive for "IEntity" is already implemented by the type`);
   })
 
   it('should fail if Connection type is in a list', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend {
+    interface IEntity @inherit {
       owners: [Connection] @relation(name: "ownedBy", nodeType: "IOwner")
     }
-    interface IOwner @extend {
+    interface IOwner @inherit {
       name: String!
     }
     `)).toThrow(`Error while processing directives on field "owners" of "IEntity":\nIt's not possible to use a list of Connection type. Use either Connection type or list of specific type`);
@@ -307,10 +307,10 @@ describe('Transformer', () => {
 
   it('should fail if Connection has arguments are not valid types', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend {
+    interface IEntity @inherit {
       owners(first: String!, after: Int!): Connection @relation(name: "ownedBy", nodeType: "IOwner")
     }
-    interface IOwner @extend {
+    interface IOwner @inherit {
       name: String!
     }
     `)).toThrow(`Error while processing directives on field "owners" of "IEntity":\nThe field has mandatory argument \"first\" with different type than expected. Expected: Int`);
@@ -318,44 +318,44 @@ describe('Transformer', () => {
 
   it('should fail if @relation and @field are used on the same field', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend {
+    interface IEntity @inherit {
       owners: Connection @relation(name: "ownedBy", nodeType: "IOwner") @field(at: "name")
     }
-    interface IOwner @extend {
+    interface IOwner @inherit {
       name: String!
     }
     `)).toThrow(`The field "owners" of "IEntity" type has both @field and @relation directives at the same time`);
   })
 
-  it('should fail if @extend without when/is is used more than once', function* () {
+  it('should fail if @inherit without when/is is used more than once', function* () {
     expect(() => transformSchema(gql`
-    interface IEntity @extend(interface: "Node") {
+    interface IEntity @inherit(interface: "Node") {
       name: String!
     }
-    interface IComponent @extend(interface: "Node") {
+    interface IComponent @inherit(interface: "Node") {
       name: String!
     }
-    `)).toThrow(`The @extend directive of "Node" without "when" and "is" arguments could be used only once`);
+    `)).toThrow(`The @inherit directive of "Node" without "when" and "is" arguments could be used only once`);
   })
 
   it('should fail if subtype with required fields extends without when/is arguments from type without when/is arguments', function* () {
     const getSchema = () => transformSchema(gql`
-    interface IEntity @extend {
+    interface IEntity @inherit {
       name: String!
     }
-    interface IResource @extend(interface: "IEntity") {
+    interface IResource @inherit(interface: "IEntity") {
       location: String!
     }
-    interface IWebResource @extend(interface: "IResource") {
+    interface IWebResource @inherit(interface: "IResource") {
       url: String!
     }
     `)
-    expect(getSchema).toThrow(`The interface "IWebResource" has required fields and can't be extended from "IResource" without "when" and "is" arguments, because "IResource" has already been extended without them`);
+    expect(getSchema).toThrow(`The interface "IWebResource" has required fields and can't be inherited from "IResource" without "when" and "is" arguments, because "IResource" has already been inherited without them`);
   })
 
   it(`should fail if extending interface doesn't meet naming criteria`, function* () {
     const getSchema = () => transformSchema(gql`
-    interface Entity @extend {
+    interface Entity @inherit {
       name: String!
     }
     `)
@@ -364,7 +364,7 @@ describe('Transformer', () => {
 
   it(`should fail if "generatedTypeName" is declared`, function* () {
     const getSchema = () => transformSchema(gql`
-    interface Entity @extend(generatedTypeName: "EntityImpl") {
+    interface Entity @inherit(generatedTypeName: "EntityImpl") {
       name: String!
     }
 
@@ -372,14 +372,14 @@ describe('Transformer', () => {
       name: String!
     }
     `)
-    expect(getSchema).toThrow(`The type "EntityImpl" described in the @extend directive is already declared in the schema`)
+    expect(getSchema).toThrow(`The type "EntityImpl" described in the @inherit directive is already declared in the schema`)
   })
 
   it('should add resolver for @field directive', function* () {
     const TestModule = createModule({
       id: 'test',
       typeDefs: gql`
-      interface IEntity @extend(interface: "Node") {
+      interface IEntity @inherit(interface: "Node") {
         first: String! @field(at: "metadata.name")
         second: String! @field(at: ["spec", "path.to.name"])
         third: String! @field(at: "nonexisting.path", default: "defaultValue")
@@ -408,15 +408,15 @@ describe('Transformer', () => {
     const TestModule = createModule({
       id: 'test',
       typeDefs: gql`
-      interface IEntity @extend(interface: "Node", when: "kind", is: "Entity") {
+      interface IEntity @inherit(interface: "Node", when: "kind", is: "Entity") {
         ownedBy: IUser @relation
         owner: IUser @relation(name: "ownedBy")
         group: IGroup @relation(name: "ownedBy", kind: "Group")
       }
-      interface IUser @extend(interface: "Node", when: "kind", is: "User") {
+      interface IUser @inherit(interface: "Node", when: "kind", is: "User") {
         name: String! @field(at: "name")
       }
-      interface IGroup @extend(interface: "Node", when: "kind", is: "Group") {
+      interface IGroup @inherit(interface: "Node", when: "kind", is: "Group") {
         name: String! @field(at: "name")
       }
       `,
@@ -466,16 +466,16 @@ describe('Transformer', () => {
       typeDefs: gql`
       union Owner = IUser | IGroup
 
-      interface IEntity @extend(interface: "Node", when: "kind", is: "Entity") {
+      interface IEntity @inherit(interface: "Node", when: "kind", is: "Entity") {
         ownedBy: [Owner] @relation
         owners: [Owner] @relation(name: "ownedBy")
         users: [IUser] @relation(name: "ownedBy") # We intentionally don't specify kind here
         groups: [IGroup] @relation(name: "ownedBy", kind: "Group")
       }
-      interface IUser @extend(interface: "Node", when: "kind", is: "User") {
+      interface IUser @inherit(interface: "Node", when: "kind", is: "User") {
         username: String! @field(at: "name")
       }
-      interface IGroup @extend(interface: "Node", when: "kind", is: "Group") {
+      interface IGroup @inherit(interface: "Node", when: "kind", is: "Group") {
         groupname: String! @field(at: "name")
       }
       `,
@@ -527,17 +527,17 @@ describe('Transformer', () => {
       typeDefs: gql`
       union Owner = IUser | IGroup
 
-      interface IEntity @extend(interface: "Node", when: "kind", is: "Entity") {
+      interface IEntity @inherit(interface: "Node", when: "kind", is: "Entity") {
         ownedBy: Connection @relation
         nodes: Connection @relation(name: "ownedBy")
         owners: Connection @relation(name: "ownedBy", nodeType: "Owner")
         users: Connection @relation(name: "ownedBy", nodeType: "IUser") # We intentionally don't specify kind here
         groups: Connection @relation(name: "ownedBy", kind: "Group", nodeType: "IGroup")
       }
-      interface IUser @extend(interface: "Node", when: "kind", is: "User") {
+      interface IUser @inherit(interface: "Node", when: "kind", is: "User") {
         username: String! @field(at: "name")
       }
-      interface IGroup @extend(interface: "Node", when: "kind", is: "Group") {
+      interface IGroup @inherit(interface: "Node", when: "kind", is: "Group") {
         groupname: String! @field(at: "name")
       }
       `,
@@ -597,19 +597,19 @@ describe('Transformer', () => {
     const TestModule = createModule({
       id: 'test',
       typeDefs: gql`
-      interface IEntity @extend(interface: "Node", when: "kind", is: "Entity") {
+      interface IEntity @inherit(interface: "Node", when: "kind", is: "Entity") {
         assets: [Node] @relation
       }
-      interface IUser @extend(interface: "Node", when: "kind", is: "User") {
+      interface IUser @inherit(interface: "Node", when: "kind", is: "User") {
         username: String! @field(at: "name")
       }
-      interface IGroup @extend(interface: "Node", when: "kind", is: "Group") {
+      interface IGroup @inherit(interface: "Node", when: "kind", is: "Group") {
         groupname: String! @field(at: "name")
       }
-      interface IComponent @extend(interface: "Node", when: "kind", is: "Component") {
+      interface IComponent @inherit(interface: "Node", when: "kind", is: "Component") {
         name: String! @field(at: "name")
       }
-      interface IResource @extend(interface: "Node", when: "kind", is: "Resource") {
+      interface IResource @inherit(interface: "Node", when: "kind", is: "Resource") {
         domain: String! @field(at: "name")
       }
       `,

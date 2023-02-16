@@ -3,6 +3,7 @@ import { createModule } from "graphql-modules";
 import { loadFilesSync } from '@graphql-tools/load-files'
 import GraphQLJSON, { GraphQLJSONObject } from "graphql-type-json";
 import { ResolverContext } from "../../types";
+import { refToId as defaultRefToId } from "../../refToId";
 
 export const Catalog = createModule({
   id: 'catalog',
@@ -18,8 +19,8 @@ export const Catalog = createModule({
     Query: {
       entity: (
         _: any,
-        { name, kind, namespace }: { name: string; kind: string; namespace?: string },
-        { refToId }: ResolverContext
+        { name, kind, namespace = 'default' }: { name: string; kind: string; namespace: string },
+        { refToId = defaultRefToId }: ResolverContext
       ): { id: string } => ({ id: refToId({ name, kind, namespace }) }),
     }
   },

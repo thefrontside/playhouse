@@ -1,3 +1,4 @@
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
 import { transformSchema } from "./transform";
 
-export default transformSchema([]);
+export default printSchemaWithDirectives(transformSchema([]));
