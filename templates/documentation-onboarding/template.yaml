@@ -47,8 +47,8 @@ spec:
       action: publish:github:pull-request
       input:
         repoUrl: ${{ steps['add-annotation'].output.repoUrl }}
-        title: Add annotation to config-info.yaml
-        description: update description
+        title: Onboarding to TechDocs
+        description: Merge this pull request to setup documentation.
         targetPath: "."
         sourcePath: ${{ steps['add-annotation'].output.path }}
         branchName: ${{ parameters.branch }}
