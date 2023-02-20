@@ -8,7 +8,7 @@ spec:
   owner: john@example.com
   type: service
   parameters:
-    - title: Select file and ban
+    - title: Select file and branch
       required: ['catalogInfoUrl', 'branch']
       properties:
         catalogInfoUrl:
