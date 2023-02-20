@@ -23,7 +23,7 @@
     "generate": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.18.1",
+    "@backstage/backend-common": "^0.18.2",
     "@backstage/config": "^1.0.6",
     "@backstage/integration": "^1.4.2",
     "@frontside/backstage-plugin-incremental-ingestion-backend": "*",
@@ -41,7 +41,7 @@
     "yn": "^4.0.0"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.1",
+    "@backstage/cli": "^0.22.3",
     "@graphql-codegen/cli": "2.11.5",
     "@graphql-codegen/typescript": "2.7.3",
     "@graphql-codegen/typescript-document-nodes": "2.3.3",
