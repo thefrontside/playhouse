@@ -5,19 +5,20 @@ import {
   useCustomFieldExtensions,
   useCustomLayouts,
   useTemplateSecrets,
+  ScaffolderTaskOutput,
 } from '@backstage/plugin-scaffolder-react';
 import {
   EmbeddableWorkflow,
-  ScaffolderTaskOutput,
   type NextFieldExtensionOptions,
   type WorkflowProps,
 } from '@backstage/plugin-scaffolder-react/alpha';
-import { NextScaffolderPage } from '@backstage/plugin-scaffolder/alpha';
 import { JsonValue } from '@backstage/types';
 import type { ComponentType, ReactNode } from 'react';
 import React, { useCallback } from 'react';
-import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { Box, Button } from '@material-ui/core';
+import { nextScaffolderTaskRouteRef } from '@backstage/plugin-scaffolder/alpha';
+import { TaskProgress } from '../TaskProgress/TaskProgress';
 
 export type EmbeddedScaffolderWorkflowProps = Omit<
   WorkflowProps,
@@ -36,9 +37,6 @@ export type EmbeddedScaffolderWorkflowProps = Omit<
 };
 
 type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];
-
-const TASK_REGEX =
-  /tasks\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
 interface FrontPageWrapperProps {
   frontPageButtonText?: string;
@@ -66,9 +64,6 @@ export function EmbeddedScaffolderWorkflow({
   const { secrets } = useTemplateSecrets();
   const scaffolderApi = useApi(scaffolderApiRef);
   const navigate = useNavigate();
-  const location = useLocation();
-  const isTaskPage = TASK_REGEX.test(location.pathname);
-
   const customFieldExtensions =
     useCustomFieldExtensions<NextFieldExtensionOptions>(children);
 
@@ -120,10 +115,14 @@ export function EmbeddedScaffolderWorkflow({
             />
           }
         />
+        <Route
+          path={nextScaffolderTaskRouteRef.path}
+          element={
+            <TaskProgress />
+          }
+        />
+          
       </Routes>
-      {isTaskPage && (
-        <NextScaffolderPage {...props} />
-      )}
     </>
   );
 }

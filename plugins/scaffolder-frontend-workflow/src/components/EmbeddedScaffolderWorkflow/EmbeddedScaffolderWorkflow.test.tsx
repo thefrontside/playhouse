@@ -14,7 +14,8 @@ import {
   type ScaffolderApi,
 } from '@backstage/plugin-scaffolder-react';
 import { analyticsApiRef } from '@backstage/core-plugin-api';
-import { nextRouteRef, rootRouteRef, scaffolderPlugin } from '@backstage/plugin-scaffolder/alpha';
+import { nextRouteRef } from '@backstage/plugin-scaffolder/alpha';
+import { rootRouteRef, scaffolderPlugin } from '@backstage/plugin-scaffolder';
 
 const scaffolderApiMock: jest.Mocked<ScaffolderApi> = {
   scaffold: jest.fn(),
