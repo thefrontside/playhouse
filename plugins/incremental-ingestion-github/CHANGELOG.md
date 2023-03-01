@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-incremental-ingestion-github
 
+## 0.2.5
+
+### Patch Changes
+
+- 05f3423: Upgraded to Backstage 1.11.1
+- Updated dependencies [05f3423]
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.4
+
 ## 0.2.4
 
 ### Patch Changes

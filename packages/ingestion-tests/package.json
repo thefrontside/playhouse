@@ -1,6 +1,6 @@
 {
   "name": "@frontside/backstage-ingestion-tests",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "scripts": {
     "start": "backstage-cli package start",
     "build": "backstage-cli package build",

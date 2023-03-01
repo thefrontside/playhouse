@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-effection-inspector
 
+## 0.1.6
+
+### Patch Changes
+
+- 05f3423: Upgraded to Backstage 1.11.1
+
 ## 0.1.5
 
 ### Patch Changes
