@@ -15,3 +15,4 @@
  */
 
 export * from './app';
+export { transformSchema } from './app/transform';
