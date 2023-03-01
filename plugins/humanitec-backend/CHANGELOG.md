@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.6
+
+### Patch Changes
+
+- 05f3423: Upgraded to Backstage 1.11.1
+- Updated dependencies [05f3423]
+  - @frontside/backstage-plugin-humanitec-common@0.3.4
+
 ## 0.3.5
 
 ### Patch Changes

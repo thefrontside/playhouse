@@ -1,5 +1,12 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.7.1
+
+### Patch Changes
+
+- 05f3423: Upgraded to Backstage 1.11.1
+- 8df4163: The docs note that transformSchema is an exported function for use with codegen type safety. It was not previously exported, and has now been corrected.
+
 ## 0.7.0
 
 ### Minor Changes
