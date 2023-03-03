@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec-common
 
+## 0.3.5
+
+### Patch Changes
+
+- 883fc31: feat(humanitec): add user-agent
+
 ## 0.3.4
 
 ### Patch Changes
