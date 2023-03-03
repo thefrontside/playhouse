@@ -76,7 +76,8 @@ export function createHumanitecClient({ orgId, token }: { token: string; orgId: 
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Humanitec-User-Agent': 'app humanitec-backstage/latest; sdk humanitec-backstage/latest'
       }
     };
 
