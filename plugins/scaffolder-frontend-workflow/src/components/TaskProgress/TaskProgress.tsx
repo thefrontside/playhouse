@@ -3,16 +3,9 @@ import { useParams } from 'react-router-dom';
 import { assert } from 'assert-ts';
 import { useTaskEventStream } from '@backstage/plugin-scaffolder-react';
 import { TaskLogStream, TaskSteps } from '@backstage/plugin-scaffolder-react/alpha'
-import { Box, makeStyles, Paper } from '@material-ui/core';
+import { Box, Paper } from '@material-ui/core';
 import { DefaultTemplateOutputs as Outputs } from '@backstage/plugin-scaffolder-react/alpha';
-import { Content, ErrorPanel, Page } from '@backstage/core-components';
-
-const useStyles = makeStyles({
-  contentWrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-});
+import { ErrorPanel } from '@backstage/core-components';
 
 export function TaskProgress(): JSX.Element {
   const { taskId } = useParams();
@@ -20,7 +13,6 @@ export function TaskProgress(): JSX.Element {
   assert(!!taskId, `no taskId in path`);
 
   const taskStream = useTaskEventStream(taskId);
-  const classes = useStyles();
   const steps = useMemo(
     () =>
       taskStream.task?.spec.steps.map(step => ({
@@ -41,29 +33,27 @@ export function TaskProgress(): JSX.Element {
   }, [steps]);
 
   return (
-    <Page themeId="website">
-      <Content className={classes.contentWrapper}>
-        {taskStream.error ? (
-          <Box paddingBottom={2}>
-            <ErrorPanel
-              error={taskStream.error}
-              title={taskStream.error.message}
-            />
-          </Box>
-        ) : null}
-
-        <TaskSteps isComplete={taskStream.completed} steps={steps} activeStep={activeStep} />
-
-        <Outputs output={taskStream.output} />
-
-        <Box paddingBottom={2} height="100%">
-          <Paper style={{ height: '100%' }}>
-            <Box padding={2} height="100%">
-              <TaskLogStream logs={taskStream.stepLogs} />
-            </Box>
-          </Paper>
+    <>
+      {taskStream.error && (
+        <Box paddingBottom={2}>
+          <ErrorPanel
+            error={taskStream.error}
+            title={taskStream.error.message}
+          />
         </Box>
-      </Content>
-    </Page>
+      )}
+
+      <TaskSteps isComplete={taskStream.completed} steps={steps} activeStep={activeStep} />
+
+      <Outputs output={taskStream.output} />
+
+      <Box paddingBottom={2} height="100%">
+        <Paper style={{ height: '100%' }}>
+          <Box padding={2} height="100%">
+            <TaskLogStream logs={taskStream.stepLogs} />
+          </Box>
+        </Paper>
+      </Box>
+    </>
   );
 }
