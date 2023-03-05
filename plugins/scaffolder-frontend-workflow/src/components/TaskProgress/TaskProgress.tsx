@@ -3,11 +3,22 @@ import { useParams } from 'react-router-dom';
 import { assert } from 'assert-ts';
 import { useTaskEventStream } from '@backstage/plugin-scaffolder-react';
 import { TaskLogStream, TaskSteps } from '@backstage/plugin-scaffolder-react/alpha'
-import { Box, Paper } from '@material-ui/core';
+import { Box, makeStyles, Paper } from '@material-ui/core';
 import { DefaultTemplateOutputs as Outputs } from '@backstage/plugin-scaffolder-react/alpha';
 import { ErrorPanel } from '@backstage/core-components';
 
+const useStyles = makeStyles({
+  contentWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    '& [class^="MuiPaper-root"]:nth-child(2)': {
+      overflow: 'visible !important'
+    }
+  },
+});
+
 export function TaskProgress(): JSX.Element {
+  const classes = useStyles();
   const { taskId } = useParams();
 
   assert(!!taskId, `no taskId in path`);
@@ -33,7 +44,7 @@ export function TaskProgress(): JSX.Element {
   }, [steps]);
 
   return (
-    <>
+    <Box height="100%" className={classes.contentWrapper}>
       {taskStream.error && (
         <Box paddingBottom={2}>
           <ErrorPanel
@@ -48,12 +59,12 @@ export function TaskProgress(): JSX.Element {
       <Outputs output={taskStream.output} />
 
       <Box paddingBottom={2} height="100%">
-        <Paper style={{ height: '100%' }}>
+        <Paper style={{ height: '100%'}}>
           <Box padding={2} height="100%">
             <TaskLogStream logs={taskStream.stepLogs} />
           </Box>
         </Paper>
       </Box>
-    </>
+    </Box>
   );
 }
