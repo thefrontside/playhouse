@@ -1,39 +1,73 @@
-import React, { useState, useCallback } from 'react';
-import type { ReactNode } from 'react';
-import { EmbeddableWorkflow, type WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
-import { Box, Button } from '@material-ui/core';
+import { stringifyEntityRef } from '@backstage/catalog-model';
+import { useApi } from '@backstage/core-plugin-api';
 import {
   scaffolderApiRef,
+  useCustomFieldExtensions,
+  useCustomLayouts,
   useTemplateSecrets,
+  ScaffolderTaskOutput,
 } from '@backstage/plugin-scaffolder-react';
-import { useApi } from '@backstage/core-plugin-api';
-import { stringifyEntityRef } from '@backstage/catalog-model';
+import {
+  EmbeddableWorkflow,
+  type NextFieldExtensionOptions,
+  type WorkflowProps,
+} from '@backstage/plugin-scaffolder-react/alpha';
+import { JsonValue } from '@backstage/types';
+import type { ComponentType, ReactNode } from 'react';
+import React, { useCallback } from 'react';
+import { Link, Route, Routes, useNavigate } from 'react-router-dom';
+import { Box, Button } from '@material-ui/core';
+import { nextScaffolderTaskRouteRef } from '@backstage/plugin-scaffolder/alpha';
+import { TaskProgress } from '../TaskProgress/TaskProgress';
 
-export type EmbeddedScaffolderWorkflowProps = WorkflowProps & {
+export type EmbeddedScaffolderWorkflowProps = Omit<
+  WorkflowProps,
+  'onCreate' | 'extensions' | 'layouts'
+> & {
+  components?: {
+    TemplateOutputsComponent?: ComponentType<{
+      output?: ScaffolderTaskOutput;
+    }>;
+  };
+  frontPage?: ReactNode;
+  finishPage?: ReactNode;
   onError(error: Error | undefined): JSX.Element | null;
-  frontPage: ReactNode;
-  finishPage: ReactNode;
-} & Partial<Pick<WorkflowProps, 'onCreate'>>;
-
-type Display = 'front' | 'workflow' | 'finish';
-
-type DisplayComponents = Record<Display, JSX.Element>;
+  onCreate?: (values: Record<string, JsonValue>) => Promise<void>;
+  children?: ReactNode;
+};
 
 type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];
+
+interface FrontPageWrapperProps {
+  frontPageButtonText?: string;
+  children: ReactNode;
+}
+
+function FrontPageWrapper({ frontPageButtonText = "START", children }: FrontPageWrapperProps): JSX.Element {
+  return (<Box display="flex" alignItems="center" flexDirection="column">
+    {children}
+    <Button component={Link} variant="contained" to="form">
+      {frontPageButtonText}
+    </Button>
+  </Box>)
+}
 
 /**
  * Allows the EmbeddableWorkflow to be called from outside of a normal scaffolder workflow
  */
 export function EmbeddedScaffolderWorkflow({
   frontPage,
-  finishPage,
   onCreate = async (_values: OnCompleteArgs) => void 0,
-  onError,
+  children = <></>,
   ...props
 }: EmbeddedScaffolderWorkflowProps): JSX.Element {
-  const [display, setDisplay] = useState<Display>('front');
   const { secrets } = useTemplateSecrets();
   const scaffolderApi = useApi(scaffolderApiRef);
+  const navigate = useNavigate();
+  const customFieldExtensions =
+    useCustomFieldExtensions<NextFieldExtensionOptions>(children);
+
+  const customLayouts = useCustomLayouts(children);
 
   const templateRef = stringifyEntityRef({
     kind: 'Template',
@@ -41,45 +75,54 @@ export function EmbeddedScaffolderWorkflow({
     name: props.templateName,
   });
 
-  const startTemplate = useCallback(() => setDisplay('workflow'), []);
-
-  const onWorkFlowCreacte = useCallback(
+  const onWorkFlowCreate = useCallback(
     async (values: OnCompleteArgs) => {
-      setDisplay('finish');
-
       const { taskId } = await scaffolderApi.scaffold({
         templateRef,
         values,
         secrets,
       });
 
-      await onCreate({...values, taskId});
+      setTimeout(() => {
+        navigate(`tasks/${taskId}`);
+
+        onCreate({ ...values, taskId });
+      });
     },
-    [onCreate, scaffolderApi, secrets, templateRef],
+    [navigate, onCreate, scaffolderApi, secrets, templateRef],
   );
 
-  const DisplayElements: DisplayComponents = {
-    front: (
-      <Box display="flex" alignItems="center" flexDirection="column">
-        {frontPage}
-        <Button variant="contained" onClick={startTemplate}>
-          SETUP
-        </Button>
-      </Box>
-    ),
-    workflow: (
-      <EmbeddableWorkflow
-        onCreate={onWorkFlowCreacte}
-        onError={onError}
-        {...props}
-      />
-    ),
-    finish: (
-      <Box display="flex" alignItems="center" flexDirection="column">
-        {finishPage}
-      </Box>
-    ),
-  };
-
-  return <>{DisplayElements[display]}</>;
+  return (
+    <>
+      <Routes>
+        {frontPage && (
+          <Route
+            index
+            element={
+              <FrontPageWrapper>{frontPage}</FrontPageWrapper>
+            }
+          />
+        )}
+        <Route
+          path={frontPage ? 'form' : undefined}
+          index={!frontPage}
+          element={
+            <EmbeddableWorkflow
+              onCreate={onWorkFlowCreate}
+              extensions={customFieldExtensions}
+              layouts={customLayouts}
+              {...props}
+            />
+          }
+        />
+        <Route
+          path={nextScaffolderTaskRouteRef.path}
+          element={
+            <TaskProgress />
+          }
+        />
+          
+      </Routes>
+    </>
+  );
 }

@@ -90,8 +90,12 @@ scaffolder:
 
 catalog:
   locations:
+    - type: url
+      target: https://github.com/thefrontside/playhouse/blob/main/catalog-info.yaml
     - type: file
-      target: ../../catalog-info.yaml
+      target: ../../templates/documentation-onboarding/template.yaml
+      rules:
+        - allow: [Template]
     - type: file
       target: ../../templates/standard-microservice/template.yaml
       rules:

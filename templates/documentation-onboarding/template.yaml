@@ -1,0 +1,59 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: documentation-onboarding
+  title: Documentation Onboarding
+  description: Workflow that adds annotation to the component and add docs code.
+spec:
+  owner: john@example.com
+  type: service
+  parameters:
+    - title: Select file and branch
+      required: ['catalogInfoUrl', 'branch']
+      properties:
+        catalogInfoUrl:
+          title: The catalog-info.yaml url
+          type: string
+          description: The catalog-info.yaml file to add the annotation to
+          ui:readonly: true
+        entityRef:
+          title: EntityRef
+          type: string
+          description: the entity ref of
+          ui:widget: hidden
+        branch:
+          title: Branch
+          type: string
+          description: the branch name for the pull request
+          default: add-annotation-to-catalog-info
+
+  steps:
+    - id: fetchPlain
+      name: Fetch the file
+      action: fetch:plain
+      input:
+        url: ${{ parameters.catalogInfoUrl }}
+        
+    - id: add-annotation
+      name: AddAnnotation
+      action: backend:add-annotation
+      input:
+        # This file must exist at this path in the repo referenced above
+        url: ${{ parameters.catalogInfoUrl }}
+        entityRef: ${{ parameters.entityRef }}
+
+    - id: publish
+      name: Publish
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ steps['add-annotation'].output.repoUrl }}
+        title: Onboarding to TechDocs
+        description: Merge this pull request to setup documentation.
+        targetPath: "."
+        sourcePath: ${{ steps['add-annotation'].output.path }}
+        branchName: ${{ parameters.branch }}
+
+  output:
+    links:
+      - title: View Pull Request
+        url: ${{ steps['publish'].output.remoteUrl }}

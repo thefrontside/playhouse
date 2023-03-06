@@ -10,8 +10,8 @@ import {
   CatalogImportPage,
   catalogImportPlugin,
 } from '@backstage/plugin-catalog-import';
-import { ScaffolderPage, scaffolderPlugin } from '@backstage/plugin-scaffolder';
-import { NextScaffolderPage } from '@backstage/plugin-scaffolder/alpha';
+import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
+import { nextRouteRef, NextScaffolderPage } from '@backstage/plugin-scaffolder/alpha';
 import { SearchPage } from '@backstage/plugin-search';
 import { TechRadarPage } from '@backstage/plugin-tech-radar';
 import {
@@ -62,7 +62,7 @@ const app = createApp({
   },
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
-      createComponent: scaffolderPlugin.routes.root,
+      createComponent: nextRouteRef,
       viewTechDoc: techdocsPlugin.routes.docRoot,
     });
     bind(apiDocsPlugin.externalRoutes, {
@@ -101,10 +101,6 @@ const routes = (
         <ReportIssue />
       </TechDocsAddons>
     </Route>
-    <Route
-      path="/create/legacy"
-      element={<ScaffolderPage groups={[]} />}
-    />
     <Route path="/create" element={<NextScaffolderPage FormProps={{ noHtml5Validate: true }} />} />
     <Route path="/api-docs" element={<ApiExplorerPage />} />
     <Route

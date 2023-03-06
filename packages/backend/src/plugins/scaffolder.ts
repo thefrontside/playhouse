@@ -4,6 +4,7 @@ import { createBuiltinActions, createRouter } from '@backstage/plugin-scaffolder
 import { createHumanitecApp } from "@frontside/backstage-plugin-humanitec-backend";
 import { Router } from 'express';
 import { createGetEnvironmentAction } from '../actions/get-environment';
+import { createAddAnnotation } from '../actions/documentation-onboarding/add-annotation';
 import type { PluginEnvironment } from '../types';
 
 export default async function createPlugin({
@@ -24,6 +25,7 @@ export default async function createPlugin({
   });
   const actions = [
     ...builtInActions,
+    createAddAnnotation({ integrations, logger }),
     createGetEnvironmentAction({
       orgId: config.getString('humanitec.orgId'),
       registryUrl: config.getString('humanitec.registryUrl'),
