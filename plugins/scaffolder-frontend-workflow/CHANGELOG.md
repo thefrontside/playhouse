@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.3.0
+
+### Minor Changes
+
+- c9a3b3b: Add TaskProgress component with OngoingTask components
+
 ## 0.2.2
 
 ### Patch Changes
