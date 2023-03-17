@@ -23,17 +23,17 @@
     "clean": "backstage-cli clean"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.18.2",
-    "@backstage/catalog-model": "^1.2.0",
+    "@backstage/backend-common": "^0.18.3",
+    "@backstage/catalog-model": "^1.2.1",
     "knex": "^2.0.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.3",
-    "@backstage/config": "^1.0.6",
-    "@backstage/integration": "^1.4.2",
-    "@backstage/plugin-catalog-backend": "^1.7.2",
-    "@backstage/plugin-permission-node": "^0.7.5",
+    "@backstage/cli": "^0.22.4",
+    "@backstage/config": "^1.0.7",
+    "@backstage/integration": "^1.4.3",
+    "@backstage/plugin-catalog-backend": "^1.8.0",
+    "@backstage/plugin-permission-node": "^0.7.6",
     "@effection/jest": "^2.0.4",
     "effection": "^2.0.6",
     "jest": "^29.2.2"

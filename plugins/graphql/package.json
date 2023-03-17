@@ -26,9 +26,9 @@
     "graphql": ">15.0.0"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.18.2",
-    "@backstage/catalog-model": "^1.2.0",
-    "@backstage/catalog-client": "^1.3.1",
+    "@backstage/backend-common": "^0.18.3",
+    "@backstage/catalog-model": "^1.2.1",
+    "@backstage/catalog-client": "^1.4.0",
     "@envelop/dataloader": "^4.0.4",
     "@envelop/graphql-modules": "^4.0.4",
     "@graphql-tools/load-files": "^6.6.1",
@@ -47,7 +47,7 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.3",
+    "@backstage/cli": "^0.22.4",
     "@effection/jest": "^2.0.4",
     "@envelop/core": "^3.0.4",
     "@frontside/graphgen": "^1.7.0",
