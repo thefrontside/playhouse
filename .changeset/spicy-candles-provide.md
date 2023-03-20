@@ -15,4 +15,4 @@
 '@frontside/backstage-plugin-scaffolder-workflow': patch
 ---
 
-Upgraded to Backstage 1.12.0
+Upgraded to Backstage 1.12.1

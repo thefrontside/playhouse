@@ -47,7 +47,7 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.4",
+    "@backstage/cli": "^0.22.5",
     "@effection/jest": "^2.0.4",
     "@envelop/core": "^3.0.4",
     "@frontside/graphgen": "^1.7.0",
