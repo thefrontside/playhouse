@@ -6,8 +6,8 @@
     "node": "16 || 18"
   },
   "scripts": {
-    "dev": "concurrently \"yarn start\" \"yarn start-backend\" \"yarn start-sim\"",
-    "dev:config": "concurrently \"yarn start --config ../../app-config.yaml --config ../../app-config-credentials.yaml\" \"yarn start-backend --config ../../app-config.yaml --config ../../app-config-credentials.yaml\"",
+    "dev": "concurrently -n \"app,backend,sim\" \"yarn start\" \"yarn start-backend\" \"yarn start-sim\"",
+    "dev:config": "concurrently -n \"app,backend\" \"yarn start --config ../../app-config.yaml --config ../../app-config-credentials.yaml\" \"yarn start-backend --config ../../app-config.yaml --config ../../app-config-credentials.yaml\"",
     "start": "yarn workspace app start",
     "start-backend": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" yarn workspace backend start",
     "start-sim": "yarn workspace simulation watch",
@@ -35,7 +35,7 @@
     ]
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.3",
+    "@backstage/cli": "^0.22.5",
     "@changesets/cli": "^2.22.0",
     "@spotify/prettier-config": "^12.0.0",
     "concurrently": "^7.5.0",
