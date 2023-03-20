@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.7.2
+
+### Patch Changes
+
+- 1c1b178: Upgraded to Backstage 1.12.1
+
 ## 0.7.1
 
 ### Patch Changes

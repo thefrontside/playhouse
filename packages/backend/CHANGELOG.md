@@ -1,5 +1,19 @@
 # backend
 
+## 0.0.17
+
+### Patch Changes
+
+- 1c1b178: Upgraded to Backstage 1.12.1
+- Updated dependencies [1c1b178]
+  - app@0.0.9
+  - @frontside/backstage-plugin-batch-loader@0.3.3
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.7
+  - @frontside/backstage-plugin-graphql@0.7.2
+  - @internal/plugin-healthcheck@0.1.6
+  - @frontside/backstage-plugin-humanitec-backend@0.3.7
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.5
+
 ## 0.0.16
 
 ### Patch Changes

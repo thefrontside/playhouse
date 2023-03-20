@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec
 
+## 0.3.8
+
+### Patch Changes
+
+- 1c1b178: Upgraded to Backstage 1.12.1
+
 ## 0.3.7
 
 ### Patch Changes

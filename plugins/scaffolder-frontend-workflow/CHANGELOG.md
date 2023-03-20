@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.3.1
+
+### Patch Changes
+
+- 1c1b178: Upgraded to Backstage 1.12.1
+
 ## 0.3.0
 
 ### Minor Changes
