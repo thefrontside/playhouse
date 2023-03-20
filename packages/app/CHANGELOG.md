@@ -1,5 +1,15 @@
 # app
 
+## 0.0.9
+
+### Patch Changes
+
+- 1c1b178: Upgraded to Backstage 1.12.1
+- Updated dependencies [1c1b178]
+  - @frontside/backstage-plugin-effection-inspector@0.1.7
+  - @frontside/backstage-plugin-humanitec@0.3.8
+  - @frontside/backstage-plugin-scaffolder-workflow@0.3.1
+
 ## 0.0.8
 
 ### Patch Changes

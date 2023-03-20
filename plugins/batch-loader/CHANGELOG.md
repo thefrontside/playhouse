@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-batch-loader
 
+## 0.3.3
+
+### Patch Changes
+
+- 1c1b178: Upgraded to Backstage 1.12.1
+
 ## 0.3.2
 
 ### Patch Changes
