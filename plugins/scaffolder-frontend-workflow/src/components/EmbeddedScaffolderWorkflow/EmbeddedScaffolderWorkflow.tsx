@@ -115,7 +115,7 @@ export function EmbeddedScaffolderWorkflow({
           }
         />
         <Route
-          path="/tasks/:taskId"
+          path="tasks/:taskId"
           element={
             <TaskProgress />
           }
