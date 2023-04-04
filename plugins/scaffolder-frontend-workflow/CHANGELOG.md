@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.3.2
+
+### Patch Changes
+
+- 5076f9c: Eliminate route ref from embedded scaffolder workflow
+
 ## 0.3.1
 
 ### Patch Changes
