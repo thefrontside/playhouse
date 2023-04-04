@@ -17,7 +17,6 @@ import type { ComponentType, ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { Box, Button } from '@material-ui/core';
-import { nextScaffolderTaskRouteRef } from '@backstage/plugin-scaffolder/alpha';
 import { TaskProgress } from '../TaskProgress/TaskProgress';
 
 export type EmbeddedScaffolderWorkflowProps = Omit<
@@ -116,7 +115,7 @@ export function EmbeddedScaffolderWorkflow({
           }
         />
         <Route
-          path={nextScaffolderTaskRouteRef.path}
+          path="/tasks/:taskId"
           element={
             <TaskProgress />
           }
