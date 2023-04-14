@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.3.3
+
+### Patch Changes
+
+- 10104ef: Allow passing in useTemplateSecrets to enable use of context higher up in the component tree.
+
 ## 0.3.2
 
 ### Patch Changes
