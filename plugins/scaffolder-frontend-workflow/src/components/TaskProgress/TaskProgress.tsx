@@ -27,15 +27,8 @@ const useStyles = makeStyles(
       taskStepsBox: {
         paddingBottom: theme.spacing(2),
       },
-      logStreamOuterBox: {
-        flexGrow: 2,
-        paddingBottom: theme.spacing(2),
-      },
       logStreamPaper: {
-        height: '100%',
-      },
-      logStreamInnerBox: {
-        height: '100%',
+        flexGrow: 2,
         padding: theme.spacing(2),
       },
     };
@@ -94,13 +87,9 @@ export function TaskProgress(): JSX.Element {
         <Outputs output={taskStream.output} />
       )}
 
-      <Box className={classes.logStreamOuterBox}>
-        <Paper className={classes.logStreamPaper}>
-          <Box className={classes.logStreamInnerBox}>
-            <TaskLogStream logs={taskStream.stepLogs} />
-          </Box>
-        </Paper>
-      </Box>
+      <Paper className={classes.logStreamPaper}>
+        <TaskLogStream logs={taskStream.stepLogs} />
+      </Paper>
     </Box>
   );
 }
