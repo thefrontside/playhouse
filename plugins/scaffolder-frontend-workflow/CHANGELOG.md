@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.3.6
+
+### Patch Changes
+
+- 40bcaab: Unwrap LogViewer component to eliminate extra div
+
 ## 0.3.5
 
 ### Patch Changes
