@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.3.5
+
+### Patch Changes
+
+- 04dda7f: Renamed override type to match actual name EmbeddedScaffolderTaskProgress
+
 ## 0.3.4
 
 ### Patch Changes
