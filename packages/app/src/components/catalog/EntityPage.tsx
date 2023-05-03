@@ -193,7 +193,6 @@ const websiteEntityPage = (
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/docs" title="Docs">
-      {/* {techdocsContent} */}
       <EntityOnboardingWorkflow
         title="Start using TechDocs"
         description="Showing documentation in this tab requires an annotation to be added to the metadata. 
