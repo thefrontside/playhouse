@@ -2,13 +2,10 @@ import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { assert } from 'assert-ts';
 import { useTaskEventStream } from '@backstage/plugin-scaffolder-react';
-import {
-  TaskLogStream,
-  TaskSteps,
-} from '@backstage/plugin-scaffolder-react/alpha';
+import { TaskSteps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Box, makeStyles, Paper } from '@material-ui/core';
 import { DefaultTemplateOutputs as Outputs } from '@backstage/plugin-scaffolder-react/alpha';
-import { ErrorPanel } from '@backstage/core-components';
+import { ErrorPanel, LogViewer } from '@backstage/core-components';
 
 const useStyles = makeStyles(
   theme => {
@@ -90,7 +87,12 @@ export function TaskProgress(): JSX.Element {
       )}
 
       <Paper className={classes.logStreamPaper}>
-        <TaskLogStream logs={taskStream.stepLogs} />
+        <LogViewer
+          text={Object.values(taskStream.stepLogs)
+            .map(l => l.join('\n'))
+            .filter(Boolean)
+            .join('\n')}
+        />
       </Paper>
     </Box>
   );
