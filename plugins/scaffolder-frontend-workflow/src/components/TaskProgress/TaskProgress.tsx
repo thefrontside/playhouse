@@ -13,7 +13,7 @@ import { ErrorPanel } from '@backstage/core-components';
 const useStyles = makeStyles(
   theme => {
     return {
-      contentWrapper: {
+      root: {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
@@ -37,6 +37,8 @@ const useStyles = makeStyles(
     name: 'EmbeddedScaffolderTaskProgress',
   },
 );
+
+export type TaskProgressClassKey = 'root' | 'errorBox' | 'taskStepsBox' | 'logStreamPaper';
 
 export function TaskProgress(): JSX.Element {
   const classes = useStyles();
@@ -65,7 +67,7 @@ export function TaskProgress(): JSX.Element {
   }, [steps]);
 
   return (
-    <Box className={classes.contentWrapper}>
+    <Box className={classes.root}>
       {taskStream.error && (
         <Box className={classes.errorBox}>
           <ErrorPanel
