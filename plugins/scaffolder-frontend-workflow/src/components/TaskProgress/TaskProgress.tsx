@@ -2,20 +2,43 @@ import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { assert } from 'assert-ts';
 import { useTaskEventStream } from '@backstage/plugin-scaffolder-react';
-import { TaskLogStream, TaskSteps } from '@backstage/plugin-scaffolder-react/alpha'
+import {
+  TaskLogStream,
+  TaskSteps,
+} from '@backstage/plugin-scaffolder-react/alpha';
 import { Box, makeStyles, Paper } from '@material-ui/core';
 import { DefaultTemplateOutputs as Outputs } from '@backstage/plugin-scaffolder-react/alpha';
 import { ErrorPanel } from '@backstage/core-components';
 
-const useStyles = makeStyles({
-  contentWrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    '& [class^="MuiPaper-root"]:nth-child(2)': {
-      overflow: 'visible !important'
-    }
+const useStyles = makeStyles(
+  theme => {
+    return {
+      root: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        '& [class^="MuiPaper-root"]:nth-child(2)': {
+          overflow: 'visible !important',
+        },
+      },
+      errorBox: {
+        paddingBottom: theme.spacing(2),
+      },
+      taskStepsBox: {
+        paddingBottom: theme.spacing(2),
+      },
+      logStreamPaper: {
+        flexGrow: 2,
+        padding: theme.spacing(2),
+      },
+    };
   },
-});
+  {
+    name: 'EmbeddedScaffolderTaskProgress',
+  },
+);
+
+export type TaskProgressClassKey = 'root' | 'errorBox' | 'taskStepsBox' | 'logStreamPaper';
 
 export function TaskProgress(): JSX.Element {
   const classes = useStyles();
@@ -44,9 +67,9 @@ export function TaskProgress(): JSX.Element {
   }, [steps]);
 
   return (
-    <Box height="100%" className={classes.contentWrapper}>
+    <Box className={classes.root}>
       {taskStream.error && (
-        <Box paddingBottom={2}>
+        <Box className={classes.errorBox}>
           <ErrorPanel
             error={taskStream.error}
             title={taskStream.error.message}
@@ -54,17 +77,21 @@ export function TaskProgress(): JSX.Element {
         </Box>
       )}
 
-      <TaskSteps isComplete={taskStream.completed} steps={steps} activeStep={activeStep} />
-
-      <Outputs output={taskStream.output} />
-
-      <Box paddingBottom={2} height="100%">
-        <Paper style={{ height: '100%'}}>
-          <Box padding={2} height="100%">
-            <TaskLogStream logs={taskStream.stepLogs} />
-          </Box>
-        </Paper>
+      <Box className={classes.taskStepsBox}>
+        <TaskSteps
+          isComplete={taskStream.completed}
+          steps={steps}
+          activeStep={activeStep}
+        />
       </Box>
+
+      {taskStream.output && (
+        <Outputs output={taskStream.output} />
+      )}
+
+      <Paper className={classes.logStreamPaper}>
+        <TaskLogStream logs={taskStream.stepLogs} />
+      </Paper>
     </Box>
   );
 }
