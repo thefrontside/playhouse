@@ -3,16 +3,11 @@ import type { JsonObject } from '@backstage/types';
 import { CatalogApi } from '@backstage/catalog-client';
 import { mergeWith } from 'lodash';
 import { createBackstage } from './support/backstage';
-import { createGithubApi } from './support/github';
 
 import { clearTestDatabases } from './support/database';
 import { createProcessLog, ProcessLog } from './support/log';
-import { ConfigReader } from '@backstage/config';
 import { all, Operation } from 'effection';
 import { assert } from 'assert-ts';
-import { Factory } from '@simulacrum/github-api-simulator';
-
-export * from './support/github';
 
 export const overrides = {
   backend: {
@@ -31,18 +26,17 @@ export const overrides = {
 export interface BackstageHarness {
   /**
    * Actually fire up the entire backstage server. This will wipe the database,
-   * start all simulators, and then run backstage.
+   * and then run backstage.
    */
   start(): Operation<CatalogApi>;
 }
 
 export function createBackstageHarness(
-  factory: Factory,
   npmScript: string,
   ...configs: JsonObject[]
 ): BackstageHarness {
   assert(!!npmScript, 'you must supply an npm script e.g. yarn workspace backend start')
-  
+
   const start = () => ({
     name: 'Backstage',
     *init() {
@@ -50,23 +44,7 @@ export function createBackstageHarness(
         return Array.isArray(b) ? b : undefined;
       });
 
-      const reader = new ConfigReader(config);
-
       yield clearTestDatabases(config);
-
-      const host = reader
-        .getConfigArray('integrations.github')
-        .at(0)
-        ?.getString('apiBaseUrl');
-
-      assert(!!host, `no host at integrations.github.host`);
-
-      const port = Number(new URL(host).port);
-
-      yield createGithubApi({
-        factory,
-        port,
-      });
 
       const logs: ProcessLog[] = [
         yield createProcessLog({
