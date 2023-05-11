@@ -3,6 +3,7 @@ import { stringifyEntityRef } from '@backstage/catalog-model';
 import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
 import { assert } from 'assert-ts';
 import fs from 'fs-extra';
+import _path from 'path';
 import parseGitUrl from 'git-url-parse';
 import { Logger } from 'winston';
 import { parseAllDocuments, isMap, YAMLMap } from 'yaml';
@@ -28,13 +29,14 @@ export function createYamlUpdateAction({ logger }: CreateYamlUpdateActionOptions
     schema: {
       input: InputSchema,
       output: z.object({
+        repoUrl: z.string(),
         filePath: z.string()
       })
     },
     async handler(ctx) {
       const { url, entityRef, path, value } = ctx.input;
 
-      const { filepath } = parseGitUrl(url);
+      const { filepath, source, owner, name } = parseGitUrl(url);
 
       const sourceFilepath = resolveSafeChildPath(ctx.workspacePath, filepath);
 
@@ -48,6 +50,10 @@ export function createYamlUpdateAction({ logger }: CreateYamlUpdateActionOptions
       });
 
       await fs.writeFile(sourceFilepath, updated);
+
+      ctx.output('repoUrl', `${source}?repo=${name}&owner=${owner}`);
+      ctx.output('filePath', filepath);
+      ctx.output('path', _path.dirname(sourceFilepath));
     },
   });
 }
