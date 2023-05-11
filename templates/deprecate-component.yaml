@@ -1,23 +1,14 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: update-system
-  title: Update System
-  description: Workflow for updating system of a component
+  name: deprecate-component
+  title: Deprecate component
+  description: Workflow for deprecating a component
 spec:
   type: embed
   parameters:
-    - title: Select System
-      required: ['url']
+    - required: ['url']
       properties:
-        system:
-          title: Select System
-          type: string
-          ui:field: EntityPicker
-          ui:options:
-            catalogFilter:
-              kind: System
-            defaultKind: System
         url:
           title: Metadata file URL
           type: string
@@ -43,16 +34,16 @@ spec:
       input:
         url: ${{ parameters.url }}
         entityRef: ${{ parameters.entityRef }}
-        path: spec.system
-        value: ${{ parameters.system }}
+        path: spec.lifecycle
+        value: deprecated
 
     - id: publish
       name: Publish
       action: publish:github:pull-request
       input:
         repoUrl: ${{ steps['update'].output.repoUrl }}
-        title: Update System 
-        description: Merge this pull request to setup documentation.
+        title: Deprecate component
+        description: Merge this pull request to mark this component deprecated.
         targetPath: '.'
         sourcePath: ${{ steps['update'].output.path }}
 
@@ -60,10 +51,3 @@ spec:
     links:
       - title: View Pull Request
         url: ${{ steps['publish'].output.remoteUrl }}
----
-apiVersion: backstage.io/v1alpha1
-kind: System
-metadata:
-  name: frontside-website
-spec:
-  owner: default
