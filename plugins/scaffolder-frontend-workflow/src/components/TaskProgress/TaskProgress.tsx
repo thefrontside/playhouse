@@ -35,7 +35,11 @@ const useStyles = makeStyles(
   },
 );
 
-export type TaskProgressClassKey = 'root' | 'errorBox' | 'taskStepsBox' | 'logStreamPaper';
+export type TaskProgressClassKey =
+  | 'root'
+  | 'errorBox'
+  | 'taskStepsBox'
+  | 'logStreamPaper';
 
 export function TaskProgress(): JSX.Element {
   const classes = useStyles();
@@ -82,9 +86,7 @@ export function TaskProgress(): JSX.Element {
         />
       </Box>
 
-      {taskStream.output && (
-        <Outputs output={taskStream.output} />
-      )}
+      {taskStream.output && <Outputs output={taskStream.output} />}
 
       <Paper className={classes.logStreamPaper}>
         <LogViewer

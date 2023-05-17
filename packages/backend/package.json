@@ -37,7 +37,6 @@
     "@backstage/plugin-search-backend-node": "^1.2.1",
     "@backstage/plugin-search-backend-module-pg": "^0.5.6",
     "@backstage/plugin-techdocs-backend": "^1.6.2",
-    "@frontside/backstage-plugin-effection-inspector-backend": "0.1.7",
     "@frontside/backstage-plugin-batch-loader": "0.3.3",
     "@frontside/backstage-plugin-effection-inspector-backend": "0.1.7",
     "@frontside/backstage-plugin-graphql": "^0.7.2",

@@ -60,7 +60,10 @@
       }
       gtag('js', new Date());
 
-      gtag('config', '<%= config.getString("app.googleAnalyticsTrackingId") %>');
+      gtag(
+        'config',
+        '<%= config.getString("app.googleAnalyticsTrackingId") %>',
+      );
     </script>
     <% } %>
   </head>
