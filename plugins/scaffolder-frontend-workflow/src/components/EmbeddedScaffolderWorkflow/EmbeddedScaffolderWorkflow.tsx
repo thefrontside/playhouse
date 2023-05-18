@@ -19,6 +19,7 @@ import React, { useCallback } from 'react';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { Box, Button } from '@material-ui/core';
 import { TaskProgress } from '../TaskProgress/TaskProgress';
+import { type OnCompleteArgs } from '../../types';
 
 export type EmbeddedScaffolderWorkflowProps = Omit<
   WorkflowProps,
@@ -36,8 +37,6 @@ export type EmbeddedScaffolderWorkflowProps = Omit<
   useSecrets?: () => ScaffolderUseTemplateSecrets;
   children?: ReactNode;
 };
-
-type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];
 
 interface FrontPageWrapperProps {
   frontPageButtonText?: string;

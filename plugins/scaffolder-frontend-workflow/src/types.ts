@@ -1,6 +1,7 @@
 import { Overrides } from '@material-ui/core/styles/overrides';
 import { TaskProgressClassKey } from './components/TaskProgress/TaskProgress';
 import { StyleRules } from '@material-ui/core';
+import { type WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 
 export type PluginEmbeddedScaffolderComponentsNameToClassKey = {
   EmbeddedScaffolderTaskProgress: TaskProgressClassKey;
@@ -11,3 +12,5 @@ export type EmbeddedScaffolderOverrides = Overrides & {
     StyleRules<PluginEmbeddedScaffolderComponentsNameToClassKey[Name]>
   >;
 };
+
+export type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];

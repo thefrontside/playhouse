@@ -7,7 +7,6 @@ import {
   Tooltip,
   makeStyles,
 } from '@material-ui/core';
-import SystemUpdateIcon from '@material-ui/icons/SystemUpdate';
 import { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Workflow } from '../Form/Workflow';
 import cs from 'classnames';
@@ -39,12 +38,14 @@ type ModalWorkflowProps = Pick<
   title: string;
   tootip: ReactNode;
   tooltipIcon: ReactNode;
+  tooltipTitle?: string;
 };
 
 export function ModalWorkflow({
   title,
   tootip,
   tooltipIcon,
+  tooltipTitle = '',
   ...props
 }: ModalWorkflowProps): JSX.Element {
   const styles = useStyles();
@@ -55,7 +56,7 @@ export function ModalWorkflow({
       <h1>{title}</h1>
       <Box display="flex" alignItems="center">
         {tootip}
-        <Tooltip title="Assign System">
+        <Tooltip title={tooltipTitle}>
           <IconButton onClick={() => setModalOpen(true)}>
             {tooltipIcon}
           </IconButton>
@@ -69,10 +70,7 @@ export function ModalWorkflow({
       >
         <Fade in={modalOpen}>
           <div className={cs(styles.modal, styles.paper)}>
-            <h2 id="simple-modal-title">Text in a modal</h2>
-            <p id="simple-modal-description">
-              <Workflow {...props} />
-            </p>
+            <Workflow {...props} />
           </div>
         </Fade>
       </Modal>

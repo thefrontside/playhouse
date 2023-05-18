@@ -1,8 +1,5 @@
 import React, { ReactNode } from 'react';
-import {
-  ParsedTemplateSchema,
-  StepperProps,
-} from '@backstage/plugin-scaffolder-react/alpha';
+import { type StepperProps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Form } from './Form';
 import { assert } from 'assert-ts';
 import { JsonValue } from '@backstage/types';
@@ -21,9 +18,9 @@ export function FormWrapper({
   manifest,
   ...props
 }: FormWrapperProps): JSX.Element {
-  const { steps } = useStepper({ manifest });
+  const { steps, activeStep } = useStepper({ manifest });
 
   assert(steps.length > 0, `no steps`);
 
-  return <Form step={manifest.steps[0] as ParsedTemplateSchema} {...props} />;
+  return <Form step={steps[activeStep]} {...props} />;
 }

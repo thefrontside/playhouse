@@ -97,6 +97,7 @@ export const Form = (props: Props) => {
           showErrorList={false}
           onChange={handleChange}
           {...(props.FormProps ?? {})}
+          noHtml5Validate
         >
           <div className={styles.footer}>{props.children}</div>
         </RJSFForm>

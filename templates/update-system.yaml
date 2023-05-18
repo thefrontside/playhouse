@@ -16,8 +16,8 @@ spec:
           ui:field: EntityPicker
           ui:options:
             catalogFilter:
-              kind: System
-            defaultKind: System
+              kind: system
+            defaultKind: system
         url:
           title: Metadata file URL
           type: string
