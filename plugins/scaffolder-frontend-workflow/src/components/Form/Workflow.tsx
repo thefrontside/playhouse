@@ -55,7 +55,7 @@ export function Workflow({
   }, [error, errorApi]);
 
   // eslint-disable-next-line no-console
-  console.log({ state, taskId, execute });
+  console.log({ state, taskId });
 
   return (
     <>
