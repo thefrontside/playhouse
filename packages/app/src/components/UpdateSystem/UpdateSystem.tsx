@@ -43,7 +43,7 @@ export function UpdateSystem(): JSX.Element {
       onError={onError}
       namespace="default"
       templateName="update-system"
-      initialState={{ url: entityRef }}
+      initialState={{ url, entityRef }}
       tooltipIcon={
         <SystemUpdateIcon
           fontSize="small"
