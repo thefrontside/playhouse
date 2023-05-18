@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.3.7
+
+### Patch Changes
+
+- d8cbd21: bump backstage
+
 ## 0.3.6
 
 ### Patch Changes

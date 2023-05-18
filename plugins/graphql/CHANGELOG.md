@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.7.3
+
+### Patch Changes
+
+- d8cbd21: bump backstage
+
 ## 0.7.2
 
 ### Patch Changes

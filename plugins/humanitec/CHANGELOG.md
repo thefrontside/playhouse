@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec
 
+## 0.3.9
+
+### Patch Changes
+
+- d8cbd21: bump backstage
+
 ## 0.3.8
 
 ### Patch Changes

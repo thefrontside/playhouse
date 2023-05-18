@@ -1,5 +1,16 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.5.0
+
+### Minor Changes
+
+- ac51d05: Remove github API simulator from the backstage harness. It can
+  be started separately
+
+### Patch Changes
+
+- d8cbd21: bump backstage
+
 ## 0.4.5
 
 ### Patch Changes
