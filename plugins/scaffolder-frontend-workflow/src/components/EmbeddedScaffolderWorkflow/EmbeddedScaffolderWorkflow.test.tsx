@@ -14,8 +14,7 @@ import {
   type ScaffolderApi,
 } from '@backstage/plugin-scaffolder-react';
 import { analyticsApiRef } from '@backstage/core-plugin-api';
-import { nextRouteRef } from '@backstage/plugin-scaffolder/alpha';
-import { rootRouteRef, scaffolderPlugin } from '@backstage/plugin-scaffolder';
+import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
 
 const scaffolderApiMock: jest.Mocked<ScaffolderApi> = {
   scaffold: jest.fn(),
@@ -25,6 +24,7 @@ const scaffolderApiMock: jest.Mocked<ScaffolderApi> = {
   streamLogs: jest.fn(),
   listActions: jest.fn(),
   listTasks: jest.fn(),
+  cancelTask: jest.fn()
 };
 
 const analyticsMock = new MockAnalyticsApi();
@@ -97,8 +97,8 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
       </TestApiProvider>,
       {
         mountedRoutes: {
-          '/create': nextRouteRef,
-          '/create-legacy': rootRouteRef,
+          '/create': scaffolderPlugin.routes.root,
+          '/create-legacy': scaffolderPlugin.routes.root,
         },
       }
     );
@@ -196,8 +196,8 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
       </TestApiProvider>,
       {
         mountedRoutes: {
-          '/create': nextRouteRef,
-          '/create-legacy': rootRouteRef,
+          '/create': scaffolderPlugin.routes.root,
+          '/create-legacy': scaffolderPlugin.routes.root,
         },
       }
     );

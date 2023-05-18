@@ -14,7 +14,7 @@ export type ResourceState<T> = {
 }
 
 export function useResource<T>(resource: Operation<T>, deps: DependencyList = []): ResourceState<T> {
-  let [state, setState] = useState<ResourceState<T>>({ type: 'pending' });
+  const [state, setState] = useState<ResourceState<T>>({ type: 'pending' });
 
   useOperation(function*() {
     try {
