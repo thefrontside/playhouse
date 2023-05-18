@@ -19,5 +19,11 @@ export function useStepper({ manifest }: Props) {
     });
   };
 
-  return { steps, handleBack, handleForward, activeStep };
+  return {
+    steps,
+    handleBack,
+    handleForward,
+    activeStep,
+    currentStep: steps[activeStep],
+  };
 }

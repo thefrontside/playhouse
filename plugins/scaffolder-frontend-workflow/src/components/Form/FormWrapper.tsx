@@ -18,9 +18,9 @@ export function FormWrapper({
   manifest,
   ...props
 }: FormWrapperProps): JSX.Element {
-  const { steps, activeStep } = useStepper({ manifest });
+  const { currentStep } = useStepper({ manifest });
 
-  assert(steps.length > 0, `no steps`);
+  assert(!!currentStep, `no currentStep`);
 
-  return <Form step={steps[activeStep]} {...props} />;
+  return <Form step={currentStep} {...props} />;
 }

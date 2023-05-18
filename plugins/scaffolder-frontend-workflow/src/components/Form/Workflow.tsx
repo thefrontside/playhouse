@@ -38,6 +38,7 @@ export function Workflow({
 
   const handleNext = useCallback(
     async (formData: Record<string, JsonValue> | undefined) => {
+      // eslint-disable-next-line no-console
       console.log({ formData });
     },
     [],

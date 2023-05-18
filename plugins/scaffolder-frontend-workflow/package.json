@@ -33,6 +33,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "4.0.0-alpha.57",
     "@reach/dialog": "^0.18.0",
+    "@react-hookz/web": "20.0.3",
     "@rjsf/core-v5": "npm:@rjsf/core@5.1.0",
     "@rjsf/material-ui-v5": "npm:@rjsf/material-ui@5.1.0",
     "@rjsf/utils": "5.1.0",
