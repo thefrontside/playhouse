@@ -11,7 +11,7 @@ import {
   catalogImportPlugin,
 } from '@backstage/plugin-catalog-import';
 import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
-import { nextRouteRef, NextScaffolderPage } from '@backstage/plugin-scaffolder/alpha';
+import { NextScaffolderPage } from '@backstage/plugin-scaffolder/alpha';
 import { SearchPage } from '@backstage/plugin-search';
 import { TechRadarPage } from '@backstage/plugin-tech-radar';
 import {
@@ -62,7 +62,7 @@ const app = createApp({
   },
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
-      createComponent: nextRouteRef,
+      createComponent: scaffolderPlugin.routes.root,
       viewTechDoc: techdocsPlugin.routes.docRoot,
     });
     bind(apiDocsPlugin.externalRoutes, {
