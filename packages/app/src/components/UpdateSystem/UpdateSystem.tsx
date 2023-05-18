@@ -28,6 +28,7 @@ export function UpdateSystem(): JSX.Element {
       onError={onError}
       namespace="default"
       templateName="update-system"
+      initialState={{url: 'https://someurl'}}
       tooltipIcon={
         <SystemUpdateIcon
           fontSize="small"

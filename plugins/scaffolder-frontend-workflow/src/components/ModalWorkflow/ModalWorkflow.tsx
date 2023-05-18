@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
 
 type ModalWorkflowProps = Pick<
   WorkflowProps,
-  'namespace' | 'templateName' | 'onCreate' | 'onError'
+  'namespace' | 'templateName' | 'onCreate' | 'onError' | 'initialState'
 > & {
   children: ReactNode;
   title: string;

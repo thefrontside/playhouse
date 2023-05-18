@@ -59,6 +59,8 @@ interface Props {
 export const Form = (props: Props) => {
   const [formState, setFormState] = useFormDataFromQuery(props.initialState);
 
+  // eslint-disable-next-line no-console
+  console.log({ formState });
   const styles = useStyles();
 
   const extensions = useMemo(() => {
