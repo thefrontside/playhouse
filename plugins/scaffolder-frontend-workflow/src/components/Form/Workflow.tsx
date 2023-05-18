@@ -1,6 +1,5 @@
 import React from 'react';
 import { stringifyEntityRef } from '@backstage/catalog-model';
-import { Progress } from '@backstage/core-components';
 import { errorApiRef, useApi } from '@backstage/core-plugin-api';
 import { useCustomFieldExtensions } from '@backstage/plugin-scaffolder-react';
 import {
@@ -12,17 +11,20 @@ import { ReactNode, useCallback, useEffect } from 'react';
 import { FormWrapper } from './FormWrapper';
 import { JsonValue } from '@backstage/types';
 import { useRunWorkflow } from '../../hooks/useRunWorkflow';
+import { TaskProgress } from './Progress';
+import { Progress } from '@backstage/core-components';
 
 type Props = Pick<
   WorkflowProps,
   'namespace' | 'templateName' | 'onCreate' | 'onError' | 'initialState'
-> & { children: ReactNode };
+> & { onComplete?: () => void; children: ReactNode };
 
 export function Workflow({
   namespace,
   templateName,
   onError,
   children,
+  onComplete,
   ...props
 }: Props): JSX.Element {
   const errorApi = useApi(errorApiRef);
@@ -39,11 +41,8 @@ export function Workflow({
   const { state, execute, taskId } = useRunWorkflow({ templateRef });
 
   const handleNext = useCallback(
-    async (formData: Record<string, JsonValue> | undefined) => {
-      // eslint-disable-next-line no-console
-      console.log({ formData });
-
-      await execute(formData as any);
+    async (formData: Record<string, JsonValue>) => {
+      await execute(formData);
     },
     [execute],
   );
@@ -54,14 +53,13 @@ export function Workflow({
     }
   }, [error, errorApi]);
 
-  // eslint-disable-next-line no-console
-  console.log({ state, taskId });
-
   return (
     <>
       {loading && <Progress />}
       {error && onError(error)}
-      {manifest && (
+      {state.error && onError(state.error)}
+      {taskId && <TaskProgress taskId={taskId} onComplete={onComplete} />}
+      {manifest && !taskId && (
         <FormWrapper
           extensions={customFieldExtensions}
           handleNext={handleNext}

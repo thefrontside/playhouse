@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import {
   Box,
   Fade,
@@ -39,6 +39,7 @@ type ModalWorkflowProps = Pick<
   tootip: ReactNode;
   tooltipIcon: ReactNode;
   tooltipTitle?: string;
+  onComplete?: () => void;
 };
 
 export function ModalWorkflow({
@@ -46,10 +47,17 @@ export function ModalWorkflow({
   tootip,
   tooltipIcon,
   tooltipTitle = '',
+  onComplete,
   ...props
 }: ModalWorkflowProps): JSX.Element {
   const styles = useStyles();
   const [modalOpen, setModalOpen] = useState(false);
+
+  const onTaskComplete = useCallback(() => {
+    setModalOpen(false);
+
+    onComplete?.();
+  }, [onComplete]);
 
   return (
     <>
@@ -70,7 +78,7 @@ export function ModalWorkflow({
       >
         <Fade in={modalOpen}>
           <div className={cs(styles.modal, styles.paper)}>
-            <Workflow {...props} />
+            <Workflow {...props} onComplete={onTaskComplete} />
           </div>
         </Fade>
       </Modal>

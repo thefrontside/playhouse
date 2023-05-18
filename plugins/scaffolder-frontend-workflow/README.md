@@ -23,12 +23,12 @@ e.g.
     <>
       <h1>Front Page to workflow</h1>
       <p>
-        Security insights actionable advice to improve security posture of your
-        application
+        Security insights actionable advice to improve security posture
+        of your application
       </p>
       <p>
-        You must complete on-boarding process to activate security insights on
-        this project.
+        You must complete on-boarding process to activate security
+        insights on this project.
       </p>
     </>
   }
@@ -38,11 +38,11 @@ e.g.
     </>
   }
   components={{
-    ReviewStateComponent: () => (
+    ReviewStateComponent:() => (
       <h1>This is a different wrapper for the review page</h1>
     ),
-    reviewButtonText: 'Changed Review button text',
-    createButtonText: 'Changed Create button text',
+    reviewButtonText: "Changed Review button text",
+    createButtonText: "Changed Create button text",
   }}
 />
 ```

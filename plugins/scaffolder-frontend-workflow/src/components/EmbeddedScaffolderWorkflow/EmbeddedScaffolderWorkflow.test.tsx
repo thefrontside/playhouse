@@ -29,6 +29,7 @@ const scaffolderApiMock: jest.Mocked<ScaffolderApi> = {
 
 const analyticsMock = new MockAnalyticsApi();
 
+
 describe('<EmbeddedScaffolderWorkflow />', () => {
   it('should embed workflow inside another component', async () => {
     const onComplete = jest.fn();
@@ -52,12 +53,10 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     });
 
     const { getByRole, getByText } = await renderInTestApp(
-      <TestApiProvider
-        apis={[
-          [scaffolderApiRef, scaffolderApiMock],
-          [analyticsApiRef, analyticsMock],
-        ]}
-      >
+      <TestApiProvider apis={[
+        [scaffolderApiRef, scaffolderApiMock],
+        [analyticsApiRef, analyticsMock]
+        ]}>
         <SecretsContextProvider>
           <EmbeddedScaffolderWorkflow
             title="Different title than template"
@@ -75,7 +74,9 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
             frontPage={
               <>
                 <h1>Front Page to workflow</h1>
-                <p>Introduction page text.</p>
+                <p>
+                  Introduction page text.
+                </p>
               </>
             }
             finishPage={
@@ -87,9 +88,10 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
               ReviewStateComponent: () => (
                 <h1>This is a different wrapper for the review page</h1>
               ),
-              reviewButtonText: 'Changed Review',
-              createButtonText: 'Changed Create',
-            }}
+              reviewButtonText: "Changed Review",
+              createButtonText: "Changed Create",
+            }
+            }
           />
         </SecretsContextProvider>
       </TestApiProvider>,
@@ -98,13 +100,11 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
           '/create': scaffolderPlugin.routes.root,
           '/create-legacy': scaffolderPlugin.routes.root,
         },
-      },
+      }
     );
 
     // frontPage is rendered
-    expect(getByRole('heading', { level: 1 }).innerHTML).toBe(
-      'Front Page to workflow',
-    );
+    expect(getByRole('heading', { level: 1 }).innerHTML).toBe('Front Page to workflow');
 
     // move to workflow
     await act(async () => {
@@ -123,35 +123,30 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     // The initial state of the form can be set
     expect(input.value).toBe('prefilled-name');
 
-    const reviewButton = getByRole('button', {
-      name: 'Changed Review',
-    }) as HTMLButtonElement;
+    const reviewButton = getByRole('button', { name: "Changed Review" }) as HTMLButtonElement;
 
     await act(async () => {
       fireEvent.click(reviewButton);
     });
 
-    const createButton = getByRole('button', {
-      name: 'Changed Create',
-    }) as HTMLButtonElement;
+    const createButton = getByRole('button', { name: "Changed Create" }) as HTMLButtonElement;
 
     // Can supply a different Review wrapper
     expect(
-      getByText(
-        'This is a different wrapper for the review page',
-      ) as HTMLButtonElement,
+      getByText('This is a different wrapper for the review page') as HTMLButtonElement,
     ).toBeDefined();
 
     await act(async () => {
       fireEvent.click(createButton);
     });
 
-    expect(scaffolderApiMock.scaffold).toHaveBeenCalled();
+    expect(scaffolderApiMock.scaffold).toHaveBeenCalled()
 
     // // the final page is inserted after the workflow
     // expect(
     //   getByText('Congratulations, this application is complete!'),
     // ).toBeDefined();
+
   });
 
   it('should extract the fieldExtensions and pass them through', async () => {
@@ -165,7 +160,7 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
             properties: {
               name: {
                 type: 'string',
-                'ui:field': 'custom',
+                'ui:field': 'custom'
               },
             },
           },
@@ -181,13 +176,11 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
       }),
     );
 
-    const { getByRole } = await renderInTestApp(
-      <TestApiProvider
-        apis={[
-          [scaffolderApiRef, scaffolderApiMock],
-          [analyticsApiRef, analyticsMock],
-        ]}
-      >
+    const {getByRole} = await renderInTestApp(
+      <TestApiProvider apis={[
+        [scaffolderApiRef, scaffolderApiMock],
+        [analyticsApiRef, analyticsMock]
+        ]}>
         <SecretsContextProvider>
           <EmbeddedScaffolderWorkflow
             onCreate={jest.fn()}
@@ -195,7 +188,7 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
             namespace="default"
             templateName="docs-template"
           >
-            <ScaffolderFieldExtensions>
+           <ScaffolderFieldExtensions>
               <CustomFieldExtension />
             </ScaffolderFieldExtensions>
           </EmbeddedScaffolderWorkflow>
@@ -206,7 +199,7 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
           '/create': scaffolderPlugin.routes.root,
           '/create-legacy': scaffolderPlugin.routes.root,
         },
-      },
+      }
     );
 
     expect(getByRole('heading', { level: 5 }).innerHTML).toBe(
@@ -214,3 +207,5 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     );
   });
 });
+
+

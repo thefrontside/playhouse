@@ -19,7 +19,6 @@ import React, { useCallback } from 'react';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { Box, Button } from '@material-ui/core';
 import { TaskProgress } from '../TaskProgress/TaskProgress';
-import { type OnCompleteArgs } from '../../types';
 
 export type EmbeddedScaffolderWorkflowProps = Omit<
   WorkflowProps,
@@ -38,23 +37,20 @@ export type EmbeddedScaffolderWorkflowProps = Omit<
   children?: ReactNode;
 };
 
+type OnCompleteArgs = Parameters<WorkflowProps['onCreate']>[0];
+
 interface FrontPageWrapperProps {
   frontPageButtonText?: string;
   children: ReactNode;
 }
 
-function FrontPageWrapper({
-  frontPageButtonText = 'START',
-  children,
-}: FrontPageWrapperProps): JSX.Element {
-  return (
-    <Box display="flex" alignItems="center" flexDirection="column">
-      {children}
-      <Button component={Link} variant="contained" to="form">
-        {frontPageButtonText}
-      </Button>
-    </Box>
-  );
+function FrontPageWrapper({ frontPageButtonText = "START", children }: FrontPageWrapperProps): JSX.Element {
+  return (<Box display="flex" alignItems="center" flexDirection="column">
+    {children}
+    <Button component={Link} variant="contained" to="form">
+      {frontPageButtonText}
+    </Button>
+  </Box>)
 }
 
 /**
@@ -104,7 +100,9 @@ export function EmbeddedScaffolderWorkflow({
         {frontPage && (
           <Route
             index
-            element={<FrontPageWrapper>{frontPage}</FrontPageWrapper>}
+            element={
+              <FrontPageWrapper>{frontPage}</FrontPageWrapper>
+            }
           />
         )}
         <Route
@@ -119,7 +117,13 @@ export function EmbeddedScaffolderWorkflow({
             />
           }
         />
-        <Route path="tasks/:taskId" element={<TaskProgress />} />
+        <Route
+          path="tasks/:taskId"
+          element={
+            <TaskProgress />
+          }
+        />
+          
       </Routes>
     </>
   );

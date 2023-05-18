@@ -101,10 +101,7 @@ const routes = (
         <ReportIssue />
       </TechDocsAddons>
     </Route>
-    <Route
-      path="/create"
-      element={<NextScaffolderPage FormProps={{ noHtml5Validate: true }} />}
-    />
+    <Route path="/create" element={<NextScaffolderPage FormProps={{ noHtml5Validate: true }} />} />
     <Route path="/api-docs" element={<ApiExplorerPage />} />
     <Route
       path="/tech-radar"
