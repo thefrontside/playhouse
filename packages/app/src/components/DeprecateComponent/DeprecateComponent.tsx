@@ -24,7 +24,7 @@ export function DeprecateComponent(): JSX.Element {
   return (
     <WorkflowButton
       namespace="default"
-      templateName="deprecate-component"
+      templateName="update-system"
       initialState={{ url, entityRef }}
       buttonTexts={{
         default: 'Promote',

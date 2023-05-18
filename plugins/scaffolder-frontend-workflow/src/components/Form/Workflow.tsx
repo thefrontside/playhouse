@@ -1,13 +1,12 @@
 import React from 'react';
 import { stringifyEntityRef } from '@backstage/catalog-model';
-import { errorApiRef, useApi } from '@backstage/core-plugin-api';
 import { useCustomFieldExtensions } from '@backstage/plugin-scaffolder-react';
 import {
   NextFieldExtensionOptions,
   WorkflowProps,
   useTemplateParameterSchema,
 } from '@backstage/plugin-scaffolder-react/alpha';
-import { ReactNode, useCallback, useEffect } from 'react';
+import { ReactNode, useCallback } from 'react';
 import { FormWrapper } from './FormWrapper';
 import { JsonValue } from '@backstage/types';
 import { useRunWorkflow } from '../../hooks/useRunWorkflow';
@@ -27,7 +26,6 @@ export function Workflow({
   onComplete,
   ...props
 }: Props): JSX.Element {
-  const errorApi = useApi(errorApiRef);
   const customFieldExtensions =
     useCustomFieldExtensions<NextFieldExtensionOptions<any, any>>(children);
   const templateRef = stringifyEntityRef({
@@ -47,18 +45,18 @@ export function Workflow({
     [execute],
   );
 
-  useEffect(() => {
-    if (error) {
-      errorApi.post(new Error(`Failed to load template, ${error}`));
-    }
-  }, [error, errorApi]);
-
   return (
     <>
       {loading && <Progress />}
       {error && onError(error)}
       {state.error && onError(state.error)}
-      {taskId && <TaskProgress taskId={taskId} onComplete={onComplete} />}
+      {taskId && !state.error && (
+        <TaskProgress
+          taskId={taskId}
+          onComplete={onComplete}
+          onError={onError}
+        />
+      )}
       {manifest && !taskId && (
         <FormWrapper
           extensions={customFieldExtensions}

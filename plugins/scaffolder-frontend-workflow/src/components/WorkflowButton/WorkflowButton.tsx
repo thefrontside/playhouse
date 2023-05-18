@@ -4,6 +4,7 @@ import React, {
   useState,
   type MouseEvent,
   useEffect,
+  useMemo,
 } from 'react';
 import { Button, makeStyles } from '@material-ui/core';
 import { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
@@ -63,6 +64,18 @@ export function ButtonProgress({
   const [state, setState] = useState<State>('LOADING');
   const taskStream = useTaskEventStream(taskId);
 
+  const steps = useMemo(
+    () =>
+      taskStream.task?.spec.steps.map(step => ({
+        ...step,
+        ...taskStream?.steps?.[step.id],
+      })) ?? [],
+    [taskStream],
+  );
+
+  // eslint-disable-next-line no-console
+  console.log(steps);
+
   useEffect(() => {
     if (taskStream.error) {
       // eslint-disable-next-line no-console
@@ -91,7 +104,8 @@ export function ButtonProgress({
       disableFocusRipple
       size="medium"
     >
-      {buttonTexts[state.toLowerCase() as keyof typeof buttonTexts] ?? buttonTexts.loading}
+      {buttonTexts[state.toLowerCase() as keyof typeof buttonTexts] ??
+        buttonTexts.loading}
     </Button>
   );
 }
@@ -101,7 +115,7 @@ export function WorkflowButton({
   namespace,
   templateName,
   buttonTexts,
-  initialState
+  initialState,
 }: WorkflowButtonProps): JSX.Element {
   const styles = useStyles();
   const templateRef = stringifyEntityRef({
@@ -133,7 +147,7 @@ export function WorkflowButton({
           color="primary"
           className={cs({
             [styles.default]: !state.error,
-            [styles.error]: !!state.error
+            [styles.error]: !!state.error,
           })}
           type="button"
           onClick={clickHandler}

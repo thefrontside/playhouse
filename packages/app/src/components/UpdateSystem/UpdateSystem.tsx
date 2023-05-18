@@ -21,7 +21,6 @@ export function UpdateSystem(): JSX.Element {
   const onError = (error: any) => {
     // eslint-disable-next-line no-console
     console.error(error);
-    return <h1>{error.message}</h1>;
   };
 
   const entityRef = stringifyEntityRef(entity);

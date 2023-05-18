@@ -10,6 +10,7 @@ import {
 import { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Workflow } from '../Form/Workflow';
 import cs from 'classnames';
+import { ErrorPanel } from '@backstage/core-components';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -48,16 +49,25 @@ export function ModalWorkflow({
   tooltipIcon,
   tooltipTitle = '',
   onComplete,
+  onError,
   ...props
 }: ModalWorkflowProps): JSX.Element {
   const styles = useStyles();
   const [modalOpen, setModalOpen] = useState(false);
+  const [error, setError] = useState<Error>();
 
   const onTaskComplete = useCallback(() => {
     setModalOpen(false);
 
     onComplete?.();
   }, [onComplete]);
+
+  const onTaskError = useCallback(
+    (err: Error) => {
+      setError(err);
+    },
+    [setError],
+  );
 
   return (
     <>
@@ -78,7 +88,12 @@ export function ModalWorkflow({
       >
         <Fade in={modalOpen}>
           <div className={cs(styles.modal, styles.paper)}>
-            <Workflow {...props} onComplete={onTaskComplete} />
+            {error && <ErrorPanel error={error} />}
+            <Workflow
+              {...props}
+              onError={onTaskError}
+              onComplete={onTaskComplete}
+            />
           </div>
         </Fade>
       </Modal>

@@ -1,20 +1,29 @@
 import { useTaskEventStream } from '@backstage/plugin-scaffolder-react';
 import { Progress } from '@backstage/core-components';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
+import { WorkflowProps } from '@backstage/plugin-scaffolder-react/dist/alpha';
 
-interface Props {
+type Props = {
   taskId: string;
   onComplete?: () => void;
-}
+} & Pick<WorkflowProps, 'onError'>;
 
-export function TaskProgress({ taskId, onComplete }: Props) {
+export function TaskProgress({ taskId, onComplete, onError }: Props) {
   const taskStream = useTaskEventStream(taskId);
 
   useEffect(() => {
+    if (taskStream.error) {
+      // eslint-disable-next-line no-console
+      console.error(taskStream.error);
+
+      onError(taskStream.error);
+      return;
+    }
+
     if (taskStream.completed) {
       onComplete?.();
     }
-  }, [onComplete, taskStream.completed]);
+  }, [onComplete, onError, taskStream.completed, taskStream.error]);
 
   return <Progress />;
 }
