@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
 
 type ModalWorkflowProps = Pick<
   WorkflowProps,
-  'namespace' | 'templateName' | 'onCreate' | 'onError' | 'initialState'
+  'namespace' | 'templateName' | 'onCreate' | 'initialState'
 > & {
   children: ReactNode;
   title: string;
@@ -45,6 +45,7 @@ type ModalWorkflowProps = Pick<
   tooltipIcon: ReactNode;
   tooltipTitle?: string;
   onComplete?: () => void;
+  onError?: (e: Error) => void;
   className?: string;
 };
 

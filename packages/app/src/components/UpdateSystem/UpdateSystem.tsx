@@ -44,6 +44,10 @@ export function UpdateSystem(): JSX.Element {
         />
       }
       tooltipTitle="Assign System"
+      onError={(_e) => {
+        // eslint-disable-next-line no-console
+        console.log('optional error handler')
+      }}
     >
       <ScaffolderFieldExtensions>
         <EntityPickerFieldExtension />

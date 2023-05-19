@@ -15,8 +15,12 @@ import { TaskProgress } from '../TaskProgress/TaskProgress';
 
 type Props = Pick<
   WorkflowProps,
-  'namespace' | 'templateName' | 'onCreate' | 'onError' | 'initialState'
-> & { onComplete?: () => void; children: ReactNode };
+  'namespace' | 'templateName' | 'onCreate' | 'initialState'
+> & {
+  onComplete?: () => void;
+  children: ReactNode;
+  onError?: (e: Error) => void;
+};
 
 export function Workflow({
   namespace,
@@ -52,7 +56,7 @@ export function Workflow({
   return (
     <>
       {loading && <Progress />}
-      {manifest && (
+      {manifest && taskStream.loading === true && (
         <FormWrapper
           extensions={customFieldExtensions}
           handleNext={handleNext}

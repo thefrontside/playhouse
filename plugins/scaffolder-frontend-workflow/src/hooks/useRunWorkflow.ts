@@ -7,12 +7,12 @@ import { JsonValue } from '@backstage/types';
 import { useAsync } from '@react-hookz/web';
 import { useEffect, useState } from 'react';
 import { useTaskEventStream } from './useTaskEventStream';
-import type { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 
 type Props = {
   templateRef: string;
   onComplete?: () => void;
-} & Pick<WorkflowProps, 'onError'>;
+  onError?: (e: Error) => void;
+};
 
 type TaskStatus = 'not-executed' | 'pending' | 'error' | 'success';
 

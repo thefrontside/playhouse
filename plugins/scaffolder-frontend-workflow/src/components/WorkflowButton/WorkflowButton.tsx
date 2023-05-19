@@ -1,8 +1,4 @@
-import React, {
-  ReactNode,
-  useCallback,
-  type MouseEvent,
-} from 'react';
+import React, { ReactNode, useCallback, type MouseEvent } from 'react';
 import { Button, makeStyles } from '@material-ui/core';
 import { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import cs from 'classnames';
@@ -15,8 +11,9 @@ type WorkflowButtonProps = Pick<
   WorkflowProps,
   'namespace' | 'templateName' | 'initialState'
 > &
-  Partial<Pick<WorkflowProps, 'onCreate' | 'onError'>> & {
+  Partial<Pick<WorkflowProps, 'onCreate'>> & {
     onComplete?: () => void;
+    onError?: (e: Error) => void;
     buttonTexts: {
       default: ReactNode;
       loading: ReactNode;
@@ -51,7 +48,7 @@ export function WorkflowButton({
   templateName,
   buttonTexts,
   initialState,
-  onError
+  onError,
 }: WorkflowButtonProps): JSX.Element {
   const styles = useStyles();
   const templateRef = stringifyEntityRef({
@@ -60,14 +57,17 @@ export function WorkflowButton({
     name: templateName,
   });
 
-  const { taskStatus, execute, taskStream } = useRunWorkflow({ templateRef, onComplete, onError });
+  const { taskStatus, execute, taskStream } = useRunWorkflow({
+    templateRef,
+    onComplete,
+    onError,
+  });
 
   const clickHandler = useCallback(
     async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
 
       await execute(initialState as Record<string, JsonValue>);
-      
     },
     [execute, initialState],
   );
@@ -91,7 +91,9 @@ export function WorkflowButton({
       >
         {buttonTexts.default}
       </Button>
-      {taskStream.loading === false && <ModalTaskProgress taskStream={taskStream} />}
+      {taskStream.loading === false && (
+        <ModalTaskProgress taskStream={taskStream} />
+      )}
     </div>
   );
 }
