@@ -19,7 +19,6 @@ const useStyles = makeStyles(theme => ({
   },
   paper: {
     position: 'absolute',
-    width: 400,
     backgroundColor: theme.palette.background.paper,
     border: '2px solid #000',
     boxShadow: theme.shadows[5],
@@ -27,10 +26,10 @@ const useStyles = makeStyles(theme => ({
   },
   modal: {
     maxHeight: '100%',
+    maxWidth: '100%',
     position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(0, -50%)',
+    top: '10%',
+    left: '10%',
     overflowY: 'auto',
   },
 }));

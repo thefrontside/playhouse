@@ -53,8 +53,15 @@ export function Workflow({
     [execute],
   );
 
+  const { width, height } = taskStream.loading
+    ? { width: 'auto', height: 'auto' }
+    : {
+        width: Math.max(window.innerWidth / 2, 500),
+        height: Math.max(window.innerHeight / 2, 650),
+      };
+
   return (
-    <>
+    <div style={{ width, height }}>
       {loading && <Progress />}
       {manifest && taskStream.loading === true && (
         <FormWrapper
@@ -67,6 +74,6 @@ export function Workflow({
         </FormWrapper>
       )}
       {taskStream.loading === false && <TaskProgress taskStream={taskStream} />}
-    </>
+    </div>
   );
 }

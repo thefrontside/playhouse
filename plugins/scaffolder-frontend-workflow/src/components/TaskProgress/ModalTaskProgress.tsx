@@ -14,7 +14,6 @@ import ViewStream from '@material-ui/icons/ViewStream';
 const useStyles = makeStyles(theme => ({
   paper: {
     position: 'absolute',
-    width: 400,
     backgroundColor: theme.palette.background.paper,
     border: '2px solid #000',
     boxShadow: theme.shadows[5],
@@ -22,10 +21,10 @@ const useStyles = makeStyles(theme => ({
   },
   modal: {
     maxHeight: '100%',
+    maxWidth: '100%',
     position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(0, -50%)',
+    top: '10%',
+    left: '10%',
     overflowY: 'auto',
   },
   icon: {
@@ -38,6 +37,13 @@ export function ModalTaskProgress({
 }: TaskProgressProps): JSX.Element {
   const styles = useStyles();
   const [modalOpen, setModalOpen] = useState(false);
+
+  const { width, height } = taskStream.loading
+    ? { width: 'auto', height: 'auto' }
+    : {
+        width: Math.max(window.innerWidth / 2, 500),
+        height: Math.max(window.innerHeight / 2, 650),
+      };
 
   return (
     <>
@@ -62,7 +68,10 @@ export function ModalTaskProgress({
         style={{ overflow: 'scroll' }}
       >
         <Fade in={modalOpen}>
-          <div className={cs(styles.modal, styles.paper)}>
+          <div
+            style={{ width, height }}
+            className={cs(styles.modal, styles.paper)}
+          >
             <TaskProgress taskStream={taskStream} />
           </div>
         </Fade>
