@@ -10,6 +10,7 @@ import {
 import { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Workflow } from '../Form/Workflow';
 import cs from 'classnames';
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -22,7 +23,6 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.background.paper,
     border: '2px solid #000',
     boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
   },
   modal: {
     maxHeight: '100%',
@@ -32,6 +32,13 @@ const useStyles = makeStyles(theme => ({
     left: '10%',
     overflowY: 'auto',
   },
+  header: {
+    display: 'flex',
+    justifyContent: 'flex-end'
+  },
+  content: {
+    padding: theme.spacing(2, 4, 3),
+  }
 }));
 
 type ModalWorkflowProps = Pick<
@@ -86,7 +93,14 @@ export function ModalWorkflow({
       >
         <Fade in={modalOpen}>
           <div className={cs(styles.modal, styles.paper)}>
-            <Workflow {...props} onComplete={onTaskComplete} />
+            <Box className={styles.header}>
+              <IconButton onClick={() => setModalOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <div className={styles.content}>
+              <Workflow {...props} onComplete={onTaskComplete} />
+            </div>
           </div>
         </Fade>
       </Modal>

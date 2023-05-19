@@ -10,6 +10,7 @@ import {
 import cs from 'classnames';
 import { TaskProgress, TaskProgressProps } from './TaskProgress';
 import ViewStream from '@material-ui/icons/ViewStream';
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -29,6 +30,13 @@ const useStyles = makeStyles(theme => ({
   },
   icon: {
     paddingTop: '5px',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
+  content: {
+    padding: theme.spacing(2, 4, 3),
   },
 }));
 
@@ -72,6 +80,11 @@ export function ModalTaskProgress({
             style={{ width, height }}
             className={cs(styles.modal, styles.paper)}
           >
+            <Box className={styles.header}>
+              <IconButton onClick={() => setModalOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             <TaskProgress taskStream={taskStream} />
           </div>
         </Fade>
