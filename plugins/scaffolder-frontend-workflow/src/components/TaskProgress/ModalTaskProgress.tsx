@@ -29,14 +29,12 @@ const useStyles = makeStyles(theme => ({
     overflowY: 'auto',
   },
   icon: {
-    paddingTop: '5px'
-  }
+    paddingTop: '5px',
+  },
 }));
 
-
-
 export function ModalTaskProgress({
-  taskStream
+  taskStream,
 }: TaskProgressProps): JSX.Element {
   const styles = useStyles();
   const [modalOpen, setModalOpen] = useState(false);
@@ -47,7 +45,11 @@ export function ModalTaskProgress({
         <div>
           <span>View Logs</span>
           <Tooltip title="View Logs">
-            <IconButton style={{ color: 'lightblue', cursor: 'pointer' }} className={styles.icon} onClick={() => setModalOpen(true)}>
+            <IconButton
+              style={{ color: 'lightblue', cursor: 'pointer' }}
+              className={styles.icon}
+              onClick={() => setModalOpen(true)}
+            >
               <ViewStream />
             </IconButton>
           </Tooltip>

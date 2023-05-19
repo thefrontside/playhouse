@@ -11,7 +11,6 @@ import { FormWrapper } from './FormWrapper';
 import { JsonValue } from '@backstage/types';
 import { useRunWorkflow } from '../../hooks/useRunWorkflow';
 import { Progress } from '@backstage/core-components';
-import { ModalTaskProgress } from '../TaskProgress/ModalTaskProgress';
 import { TaskProgress } from '../TaskProgress/TaskProgress';
 
 type Props = Pick<
@@ -37,7 +36,11 @@ export function Workflow({
 
   const { loading, manifest } = useTemplateParameterSchema(templateRef);
 
-  const { execute, taskStream } = useRunWorkflow({ templateRef, onError, onComplete });
+  const { execute, taskStream } = useRunWorkflow({
+    templateRef,
+    onError,
+    onComplete,
+  });
 
   const handleNext = useCallback(
     async (formData: Record<string, JsonValue>) => {

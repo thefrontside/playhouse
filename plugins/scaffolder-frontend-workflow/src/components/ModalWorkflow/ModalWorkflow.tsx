@@ -14,8 +14,8 @@ import cs from 'classnames';
 const useStyles = makeStyles(theme => ({
   container: {
     '& h1': {
-      margin: 0
-    }
+      margin: 0,
+    },
   },
   paper: {
     position: 'absolute',
@@ -60,22 +60,12 @@ export function ModalWorkflow({
 }: ModalWorkflowProps): JSX.Element {
   const styles = useStyles();
   const [modalOpen, setModalOpen] = useState(false);
-  const [error, setError] = useState<Error>();
 
   const onTaskComplete = useCallback(() => {
     setModalOpen(false);
 
     onComplete?.();
   }, [onComplete]);
-
-  const onTaskError = useCallback(
-    (err: Error | undefined) => {
-      if (err) {
-        setError(err);
-      }
-    },
-    [setError],
-  );
 
   return (
     <>
@@ -96,11 +86,7 @@ export function ModalWorkflow({
       >
         <Fade in={modalOpen}>
           <div className={cs(styles.modal, styles.paper)}>
-            <Workflow
-              {...props}
-              onError={onTaskError}
-              onComplete={onTaskComplete}
-            />
+            <Workflow {...props} onComplete={onTaskComplete} />
           </div>
         </Fade>
       </Modal>
