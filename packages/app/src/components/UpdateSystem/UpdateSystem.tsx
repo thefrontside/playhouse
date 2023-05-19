@@ -18,11 +18,6 @@ export function UpdateSystem(): JSX.Element {
     console.log(values);
   }, []);
 
-  const onError = (error: any) => {
-    // eslint-disable-next-line no-console
-    console.error(error);
-  };
-
   const entityRef = stringifyEntityRef(entity);
 
   const url = entity.metadata?.annotations?.[
@@ -39,7 +34,6 @@ export function UpdateSystem(): JSX.Element {
       title="System"
       tootip="Unassigned"
       onCreate={onCreate}
-      onError={onError}
       namespace="default"
       templateName="update-system"
       initialState={{ url, entityRef }}

@@ -63,8 +63,10 @@ export function ModalWorkflow({
   }, [onComplete]);
 
   const onTaskError = useCallback(
-    (err: Error) => {
-      setError(err);
+    (err: Error | undefined) => {
+      if(err) {
+        setError(err);
+      }
     },
     [setError],
   );

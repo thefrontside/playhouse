@@ -6,7 +6,7 @@ import fs from 'fs-extra';
 import _path from 'path';
 import parseGitUrl from 'git-url-parse';
 import { Logger } from 'winston';
-import { parseAllDocuments, isMap, YAMLMap } from 'yaml';
+import { parseAllDocuments, isMap, YAMLMap, ParsedNode } from 'yaml';
 import { z } from 'zod';
 
 interface CreateYamlUpdateActionOptions {
@@ -92,19 +92,20 @@ function update({ content, path, value, entityRef }: { content: string; path: st
     let next = document.contents;
     for (let i = 0; i < keys.length; i++) {
       const isLast = (keys.length - 1) === i;
-      const key = keys[i];
+      const key = keys[i] as unknown as ParsedNode;
 
       if (isLast) {
-        next.set(key, document.createNode(value))
+        assert(!!value)
+        next.set(key, document.createNode(value) as ParsedNode)
         continue;
-      }
+      } 
 
       if (next.has(key)) {
-        next = next.get(key);
+        next = next.get(key) as YAMLMap.Parsed<ParsedNode, ParsedNode | null>;
       } else {
         const node = new YAMLMap();
-        next.set(key, node);
-        next = node;
+        next.set(key, node as ParsedNode | null);
+        next = node as YAMLMap.Parsed<ParsedNode, ParsedNode | null>
       }
     }
   }

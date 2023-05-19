@@ -48,8 +48,8 @@ export function Workflow({
   return (
     <>
       {loading && <Progress />}
-      {error && onError(error)}
-      {state.error && onError(state.error)}
+      {error && onError?.(error)}
+      {state.error && onError?.(state.error)}
       {taskId && !state.error && (
         <TaskProgress
           taskId={taskId}
