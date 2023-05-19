@@ -7706,6 +7706,16 @@
   resolved "https://registry.npmjs.org/@repeaterjs/repeater/-/repeater-3.0.4.tgz"
   integrity sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==
 
+"@rjsf/core-v5@npm:@rjsf/core@5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@rjsf/core/-/core-5.1.0.tgz#431e45c273f51badbffe4359ff294d927852ff58"
+  integrity sha512-n2FeSk9iDuCF+Zo6nMLPuWsGsHCRiWnfohLNoyl1ll/tv6Ac5Oh0W3cwClIUEmJwaUFPaU/2O4ihFvSCdXwHlw==
+  dependencies:
+    lodash "^4.17.15"
+    lodash-es "^4.17.15"
+    nanoid "^3.3.4"
+    prop-types "^15.7.2"
+
 "@rjsf/core-v5@npm:@rjsf/core@5.6.0":
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/@rjsf/core/-/core-5.6.0.tgz#2dd103fbd10b2c9ee7574753d152d1ce46880968"
@@ -7732,6 +7742,11 @@
     prop-types "^15.7.2"
     react-is "^16.9.0"
 
+"@rjsf/material-ui-v5@npm:@rjsf/material-ui@5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@rjsf/material-ui/-/material-ui-5.1.0.tgz#b2ce079d768018945982ec390f3bc99198da9fb4"
+  integrity sha512-nvu8PsyOo7ypuH6ZNNPbdK0LkzMkCNzUuEAib5jWoAuMb9NNVqI3OoEu1DAVQv3trrWi8BxV3hU+7917PcdmRA==
+
 "@rjsf/material-ui-v5@npm:@rjsf/material-ui@5.6.0":
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/@rjsf/material-ui/-/material-ui-5.6.0.tgz#f547dfd17e24036ba1e495760d16cbce6d5da985"
@@ -7741,6 +7756,17 @@
   version "3.2.1"
   resolved "https://registry.npmjs.org/@rjsf/material-ui/-/material-ui-3.2.1.tgz"
   integrity sha512-8UiDeDbjCImFSfOegGu13otQ7OdP9FOYpcLjeouppnhs+MPeIEAtYS+jCcBKmi3reyTagC15/KVSRhde1wS1vg==
+
+"@rjsf/utils@5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@rjsf/utils/-/utils-5.1.0.tgz#d96dea755a17f8d5758c49b87ad125e0cb0a7426"
+  integrity sha512-b6ZPl5H+1trBitFUfNY9eBClfxsHqsRDtw6fwxSwdVgseAnb33kGxO+/0KLzDfSY2L0b2yOwKGY4kyHmpBUThQ==
+  dependencies:
+    json-schema-merge-allof "^0.8.1"
+    jsonpointer "^5.0.1"
+    lodash "^4.17.15"
+    lodash-es "^4.17.15"
+    react-is "^18.2.0"
 
 "@rjsf/utils@5.6.0":
   version "5.6.0"
@@ -7752,6 +7778,16 @@
     lodash "^4.17.15"
     lodash-es "^4.17.15"
     react-is "^18.2.0"
+
+"@rjsf/validator-ajv8@5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@rjsf/validator-ajv8/-/validator-ajv8-5.1.0.tgz#e9c2cfa9c4aeec7df4ece7981701a31df4684a86"
+  integrity sha512-J3+cPT+saU2i4nOe8EDIMAWfrM4T48J8kgFL5O2mAObzlOI6O1UOSc0Rt82ag5zHhyAON0B6t0nG54/eDiCWfA==
+  dependencies:
+    ajv "^8.12.0"
+    ajv-formats "^2.1.1"
+    lodash "^4.17.15"
+    lodash-es "^4.17.15"
 
 "@rjsf/validator-ajv8@5.6.0":
   version "5.6.0"

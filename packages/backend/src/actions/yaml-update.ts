@@ -22,7 +22,7 @@ const InputSchema = z.object({
 
 type InputType = z.infer<typeof InputSchema>
 
-export function createYamlUpdateAction({ logger }: CreateYamlUpdateActionOptions) {
+export function createYamlUpdateAction(_options: CreateYamlUpdateActionOptions) {
   return createTemplateAction<InputType>({
     id: 'backend:yaml-update',
     description: 'Update properties of a YAML file',
@@ -102,7 +102,7 @@ function update({ content, path, value, entityRef }: { content: string; path: st
       if (next.has(key)) {
         next = next.get(key);
       } else {
-        let node = new YAMLMap();
+        const node = new YAMLMap();
         next.set(key, node);
         next = node;
       }
