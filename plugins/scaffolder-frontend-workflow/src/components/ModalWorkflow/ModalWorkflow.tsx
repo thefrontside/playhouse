@@ -10,9 +10,13 @@ import {
 import { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Workflow } from '../Form/Workflow';
 import cs from 'classnames';
-import { ErrorPanel } from '@backstage/core-components';
 
 const useStyles = makeStyles(theme => ({
+  container: {
+    '& h1': {
+      margin: 0
+    }
+  },
   paper: {
     position: 'absolute',
     width: 400,
@@ -41,6 +45,7 @@ type ModalWorkflowProps = Pick<
   tooltipIcon: ReactNode;
   tooltipTitle?: string;
   onComplete?: () => void;
+  className?: string;
 };
 
 export function ModalWorkflow({
@@ -50,6 +55,7 @@ export function ModalWorkflow({
   tooltipTitle = '',
   onComplete,
   onError,
+  className,
   ...props
 }: ModalWorkflowProps): JSX.Element {
   const styles = useStyles();
@@ -64,7 +70,7 @@ export function ModalWorkflow({
 
   const onTaskError = useCallback(
     (err: Error | undefined) => {
-      if(err) {
+      if (err) {
         setError(err);
       }
     },
@@ -73,8 +79,8 @@ export function ModalWorkflow({
 
   return (
     <>
-      <h1>{title}</h1>
-      <Box display="flex" alignItems="center">
+      <Box className={cs(styles.container, className)}>
+        <h1>{title}</h1>
         {tootip}
         <Tooltip title={tooltipTitle}>
           <IconButton onClick={() => setModalOpen(true)}>
@@ -90,7 +96,6 @@ export function ModalWorkflow({
       >
         <Fade in={modalOpen}>
           <div className={cs(styles.modal, styles.paper)}>
-            {error && <ErrorPanel error={error} />}
             <Workflow
               {...props}
               onError={onTaskError}

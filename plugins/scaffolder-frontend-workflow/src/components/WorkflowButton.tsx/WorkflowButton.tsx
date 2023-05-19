@@ -1,18 +1,15 @@
 import React, {
   ReactNode,
   useCallback,
-  useState,
   type MouseEvent,
-  useEffect,
-  useMemo,
 } from 'react';
 import { Button, makeStyles } from '@material-ui/core';
 import { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import cs from 'classnames';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { useRunWorkflow } from '../../hooks';
-import { useTaskEventStream } from '@backstage/plugin-scaffolder-react';
 import { JsonValue } from '@backstage/types';
+import { ModalTaskProgress } from '../TaskProgress/ModalTaskProgress';
 
 type WorkflowButtonProps = Pick<
   WorkflowProps,
@@ -48,74 +45,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-type State = 'LOADING' | 'SUCCESS' | 'ERROR';
-
-type ButtonProgressProps = {
-  taskId: string;
-  onComplete: () => void;
-} & Pick<WorkflowButtonProps, 'buttonTexts' | 'onComplete' | 'onError'>;
-
-export function ButtonProgress({
-  taskId,
-  onComplete,
-  buttonTexts,
-}: ButtonProgressProps) {
-  const styles = useStyles();
-  const [state, setState] = useState<State>('LOADING');
-  const taskStream = useTaskEventStream(taskId);
-
-  const steps = useMemo(
-    () =>
-      taskStream.task?.spec.steps.map(step => ({
-        ...step,
-        ...taskStream?.steps?.[step.id],
-      })) ?? [],
-    [taskStream],
-  );
-
-  // eslint-disable-next-line no-console
-  console.log(steps);
-
-  useEffect(() => {
-    if (taskStream.error) {
-      // eslint-disable-next-line no-console
-      console.error(taskStream.error);
-      setState('ERROR');
-      return;
-    }
-
-    if (taskStream.completed) {
-      setState('SUCCESS');
-      onComplete?.();
-      return;
-    }
-  }, [onComplete, taskStream.completed, taskStream.error]);
-
-  return (
-    <Button
-      variant="contained"
-      className={cs({
-        [styles.loading]: state === 'LOADING',
-        [styles.error]: state === 'ERROR',
-        [styles.success]: state === 'SUCCESS',
-      })}
-      type="button"
-      disableRipple
-      disableFocusRipple
-      size="medium"
-    >
-      {buttonTexts[state.toLowerCase() as keyof typeof buttonTexts] ??
-        buttonTexts.loading}
-    </Button>
-  );
-}
-
 export function WorkflowButton({
   onComplete,
   namespace,
   templateName,
   buttonTexts,
   initialState,
+  onError
 }: WorkflowButtonProps): JSX.Element {
   const styles = useStyles();
   const templateRef = stringifyEntityRef({
@@ -124,47 +60,38 @@ export function WorkflowButton({
     name: templateName,
   });
 
-  const { state, execute, taskId } = useRunWorkflow({ templateRef });
-
-  const taskCompleteHandler = useCallback(() => {
-    onComplete?.();
-  }, [onComplete]);
+  const { taskStatus, execute, taskStream } = useRunWorkflow({ templateRef, onComplete, onError });
 
   const clickHandler = useCallback(
     async (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
 
       await execute(initialState as Record<string, JsonValue>);
+      
     },
     [execute, initialState],
   );
 
   return (
-    <>
-      {!taskId && (
-        <Button
-          variant="contained"
-          color="primary"
-          className={cs({
-            [styles.default]: !state.error,
-            [styles.error]: !!state.error,
-          })}
-          type="button"
-          onClick={clickHandler}
-          disableRipple
-          disableFocusRipple
-          size="medium"
-        >
-          {buttonTexts.default}
-        </Button>
-      )}
-      {taskId && (
-        <ButtonProgress
-          taskId={taskId}
-          onComplete={taskCompleteHandler}
-          buttonTexts={buttonTexts}
-        />
-      )}
-    </>
+    <div>
+      <Button
+        variant="contained"
+        color="primary"
+        className={cs({
+          [styles.default]: taskStatus === 'not-executed',
+          [styles.loading]: taskStatus === 'pending',
+          [styles.error]: taskStatus === 'error',
+          [styles.success]: taskStatus === 'success',
+        })}
+        type="button"
+        onClick={clickHandler}
+        disableRipple
+        disableFocusRipple
+        size="medium"
+      >
+        {buttonTexts.default}
+      </Button>
+      {taskStream.loading === false && <ModalTaskProgress taskStream={taskStream} />}
+    </div>
   );
 }

@@ -5,20 +5,30 @@ import {
 } from '@backstage/plugin-scaffolder-react';
 import { JsonValue } from '@backstage/types';
 import { useAsync } from '@react-hookz/web';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTaskEventStream } from './useTaskEventStream';
+import type { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 
-interface Props {
+type Props = {
   templateRef: string;
-}
+  onComplete?: () => void;
+} & Pick<WorkflowProps, 'onError'>;
 
-export function useRunWorkflow({ templateRef }: Props) {
+type TaskStatus = 'not-executed' | 'pending' | 'error' | 'success';
+
+export function useRunWorkflow({ templateRef, onComplete, onError }: Props) {
   const scaffolderApi = useApi(scaffolderApiRef);
   const [taskId, setTaskId] = useState<string>();
   const { secrets } = useTemplateSecrets();
+  const taskStream = useTaskEventStream(taskId);
+  const [taskStatus, setTaskStatus] = useState<TaskStatus>('not-executed');
+
 
   const [state, { execute }] = useAsync(async function runScaffolderWorkflow(
     values: Record<string, JsonValue>,
   ) {
+    setTaskStatus('pending');
+    
     const { taskId: id } = await scaffolderApi.scaffold({
       templateRef,
       values,
@@ -28,5 +38,21 @@ export function useRunWorkflow({ templateRef }: Props) {
     setTaskId(id);
   });
 
-  return { state, execute, taskId };
+  useEffect(() => {
+    if (taskStream.error) {
+      // eslint-disable-next-line no-console
+      console.error(taskStream.error);
+
+      setTaskStatus('error');
+      onError?.(taskStream.error);
+      return;
+    }
+
+    if (taskStream.completed) {
+      setTaskStatus('success');
+      onComplete?.();
+    }
+  }, [onComplete, onError, taskStream.completed, taskStream.error]);
+
+  return { state, execute, taskId, taskStream, taskStatus };
 }

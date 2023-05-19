@@ -10,8 +10,9 @@ import { ReactNode, useCallback } from 'react';
 import { FormWrapper } from './FormWrapper';
 import { JsonValue } from '@backstage/types';
 import { useRunWorkflow } from '../../hooks/useRunWorkflow';
-import { TaskProgress } from './Progress';
 import { Progress } from '@backstage/core-components';
+import { ModalTaskProgress } from '../TaskProgress/ModalTaskProgress';
+import { TaskProgress } from '../TaskProgress/TaskProgress';
 
 type Props = Pick<
   WorkflowProps,
@@ -34,9 +35,9 @@ export function Workflow({
     name: templateName,
   });
 
-  const { loading, manifest, error } = useTemplateParameterSchema(templateRef);
+  const { loading, manifest } = useTemplateParameterSchema(templateRef);
 
-  const { state, execute, taskId } = useRunWorkflow({ templateRef });
+  const { execute, taskStream } = useRunWorkflow({ templateRef, onError, onComplete });
 
   const handleNext = useCallback(
     async (formData: Record<string, JsonValue>) => {
@@ -48,16 +49,7 @@ export function Workflow({
   return (
     <>
       {loading && <Progress />}
-      {error && onError?.(error)}
-      {state.error && onError?.(state.error)}
-      {taskId && !state.error && (
-        <TaskProgress
-          taskId={taskId}
-          onComplete={onComplete}
-          onError={onError}
-        />
-      )}
-      {manifest && !taskId && (
+      {manifest && (
         <FormWrapper
           extensions={customFieldExtensions}
           handleNext={handleNext}
@@ -67,6 +59,7 @@ export function Workflow({
           {children}
         </FormWrapper>
       )}
+      {taskStream.loading === false && <TaskProgress taskStream={taskStream} />}
     </>
   );
 }

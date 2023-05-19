@@ -59,8 +59,7 @@ import { EmptyState } from '@backstage/core-components';
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
 import { EntityOnboardingWorkflow } from '../EntityOnboardingWorkflow/EntityOnboardingWorkflow';
-import { UpdateSystem } from '../UpdateSystem/UpdateSystem';
-import { DeprecateComponent } from '../DeprecateComponent/DeprecateComponent';
+import { WorkflowButtonsPanel } from './WorkflowButtonsPanel';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -209,10 +208,7 @@ const websiteEntityPage = (
       />
     </EntityLayout.Route>
     <EntityLayout.Route path="/system" title="System">
-      <div>
-        <UpdateSystem />
-        <DeprecateComponent />
-      </div>
+      <WorkflowButtonsPanel />
     </EntityLayout.Route>
   </EntityLayout>
 );

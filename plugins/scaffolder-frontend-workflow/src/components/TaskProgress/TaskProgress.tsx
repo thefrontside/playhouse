@@ -1,7 +1,5 @@
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { assert } from 'assert-ts';
-import { useTaskEventStream } from '@backstage/plugin-scaffolder-react';
+import { TaskStream } from '@backstage/plugin-scaffolder-react';
 import { TaskSteps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Box, makeStyles, Paper } from '@material-ui/core';
 import { DefaultTemplateOutputs as Outputs } from '@backstage/plugin-scaffolder-react/alpha';
@@ -37,13 +35,13 @@ const useStyles = makeStyles(
 
 export type TaskProgressClassKey = 'root' | 'errorBox' | 'taskStepsBox' | 'logStreamPaper';
 
-export function TaskProgress(): JSX.Element {
+export interface TaskProgressProps {
+  taskStream: TaskStream;
+}
+
+export function TaskProgress({ taskStream }: TaskProgressProps): JSX.Element {
   const classes = useStyles();
-  const { taskId } = useParams();
 
-  assert(!!taskId, `no taskId in path`);
-
-  const taskStream = useTaskEventStream(taskId);
   const steps = useMemo(
     () =>
       taskStream.task?.spec.steps.map(step => ({

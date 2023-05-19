@@ -1,3 +1,4 @@
+// TODO: fix this in backstage upstream
 import { useImmerReducer } from 'use-immer';
 import { useEffect } from 'react';
 
@@ -44,7 +45,7 @@ type ReducerLogEntry = {
   };
 };
 
-type ReducerAction =
+export type ReducerAction =
   | { type: 'INIT'; data: ScaffolderTask }
   | { type: 'CANCELLED' }
   | { type: 'LOGS'; data: ReducerLogEntry[] }
@@ -134,7 +135,7 @@ function reducer(draft: TaskStream, action: ReducerAction) {
  *
  * @public
  */
-export const useTaskEventStream = (taskId: string): TaskStream => {
+export const useTaskEventStream = (taskId?: string): TaskStream => {
   const scaffolderApi = useApi(scaffolderApiRef);
   const [state, dispatch] = useImmerReducer(reducer, {
     cancelled: false,
@@ -145,6 +146,10 @@ export const useTaskEventStream = (taskId: string): TaskStream => {
   });
 
   useEffect(() => {
+    if(!taskId) {
+      return () => {};
+    }
+    
     let didCancel = false;
     let subscription: Subscription | undefined;
     let logPusher: NodeJS.Timeout | undefined;
