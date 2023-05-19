@@ -3,7 +3,7 @@ import { Button, makeStyles } from '@material-ui/core';
 import { WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import cs from 'classnames';
 import { stringifyEntityRef } from '@backstage/catalog-model';
-import { useRunWorkflow } from '../../hooks';
+import { type TaskStatus, useRunWorkflow } from '../../hooks';
 import { JsonValue } from '@backstage/types';
 import { ModalTaskProgress } from '../TaskProgress/ModalTaskProgress';
 
@@ -14,21 +14,16 @@ type WorkflowButtonProps = Pick<
   Partial<Pick<WorkflowProps, 'onCreate'>> & {
     onComplete?: () => void;
     onError?: (e: Error) => void;
-    buttonTexts: {
-      default: ReactNode;
-      loading: ReactNode;
-      error: ReactNode;
-      success: ReactNode;
-    };
+    buttonTexts: Record<TaskStatus, ReactNode>;
   };
 
 const useStyles = makeStyles(theme => ({
   button: {},
-  default: {
+  idle: {
     backgroundColor: theme.palette.primary.main,
     color: '#ffffff',
   },
-  loading: {
+  pending: {
     backgroundColor: theme.palette.warning.main,
     color: '#ffffff',
   },
@@ -78,8 +73,8 @@ export function WorkflowButton({
         variant="contained"
         color="primary"
         className={cs({
-          [styles.default]: taskStatus === 'not-executed',
-          [styles.loading]: taskStatus === 'pending',
+          [styles.idle]: taskStatus === 'idle',
+          [styles.pending]: taskStatus === 'pending',
           [styles.error]: taskStatus === 'error',
           [styles.success]: taskStatus === 'success',
         })}
@@ -89,7 +84,7 @@ export function WorkflowButton({
         disableFocusRipple
         size="medium"
       >
-        {buttonTexts.default}
+        {buttonTexts[taskStatus]}
       </Button>
       {taskStream.loading === false && (
         <ModalTaskProgress taskStream={taskStream} />

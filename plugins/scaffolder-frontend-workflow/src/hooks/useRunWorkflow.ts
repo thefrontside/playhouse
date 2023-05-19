@@ -14,21 +14,20 @@ type Props = {
   onError?: (e: Error) => void;
 };
 
-type TaskStatus = 'not-executed' | 'pending' | 'error' | 'success';
+export type TaskStatus = 'idle' | 'pending' | 'error' | 'success';
 
 export function useRunWorkflow({ templateRef, onComplete, onError }: Props) {
   const scaffolderApi = useApi(scaffolderApiRef);
   const [taskId, setTaskId] = useState<string>();
   const { secrets } = useTemplateSecrets();
   const taskStream = useTaskEventStream(taskId);
-  const [taskStatus, setTaskStatus] = useState<TaskStatus>('not-executed');
-
+  const [taskStatus, setTaskStatus] = useState<TaskStatus>('idle');
 
   const [state, { execute }] = useAsync(async function runScaffolderWorkflow(
     values: Record<string, JsonValue>,
   ) {
     setTaskStatus('pending');
-    
+
     const { taskId: id } = await scaffolderApi.scaffold({
       templateRef,
       values,

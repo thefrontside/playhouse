@@ -4,7 +4,13 @@ import { useEffect } from 'react';
 
 import { useApi } from '@backstage/core-plugin-api';
 import { Subscription } from '@backstage/types';
-import { LogEvent, ScaffolderTask, ScaffolderTaskOutput, ScaffolderTaskStatus, scaffolderApiRef } from '@backstage/plugin-scaffolder-react';
+import {
+  LogEvent,
+  ScaffolderTask,
+  ScaffolderTaskOutput,
+  ScaffolderTaskStatus,
+  scaffolderApiRef,
+} from '@backstage/plugin-scaffolder-react';
 
 /**
  * The status of the step being processed
@@ -146,10 +152,10 @@ export const useTaskEventStream = (taskId?: string): TaskStream => {
   });
 
   useEffect(() => {
-    if(!taskId) {
+    if (!taskId) {
       return () => {};
     }
-    
+
     let didCancel = false;
     let subscription: Subscription | undefined;
     let logPusher: NodeJS.Timeout | undefined;

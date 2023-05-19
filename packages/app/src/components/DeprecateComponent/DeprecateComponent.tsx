@@ -27,8 +27,8 @@ export function DeprecateComponent(): JSX.Element {
       templateName="update-system"
       initialState={{ url, entityRef }}
       buttonTexts={{
-        default: 'Promote',
-        loading: 'Promoting',
+        idle: 'Promote',
+        pending: 'Promoting',
         error: 'Failed',
         success: 'Promoted',
       }}
