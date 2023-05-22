@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { useCustomFieldExtensions } from '@backstage/plugin-scaffolder-react';
 import {
@@ -20,6 +20,7 @@ type Props = Pick<
   onComplete?: () => void;
   children: ReactNode;
   onError?: (e: Error) => void;
+  onTaskCreated(loading: boolean): void;
 };
 
 export function Workflow({
@@ -28,6 +29,7 @@ export function Workflow({
   onError,
   children,
   onComplete,
+  onTaskCreated,
   ...props
 }: Props): JSX.Element {
   const customFieldExtensions =
@@ -53,15 +55,14 @@ export function Workflow({
     [execute],
   );
 
-  const { width, height } = taskStream.loading
-    ? { width: 'auto', height: 'auto' }
-    : {
-        width: Math.max(window.innerWidth / 2, 500),
-        height: Math.max(window.innerHeight / 2, 650),
-      };
+  useEffect(() => {
+    if (taskStream.loading === false) {
+      onTaskCreated(true);
+    }
+  }, [onTaskCreated, taskStream.loading]);
 
   return (
-    <div style={{ width, height }}>
+    <>
       {loading && <Progress />}
       {manifest && taskStream.loading === true && (
         <FormWrapper
@@ -74,6 +75,6 @@ export function Workflow({
         </FormWrapper>
       )}
       {taskStream.loading === false && <TaskProgress taskStream={taskStream} />}
-    </div>
+    </>
   );
 }
