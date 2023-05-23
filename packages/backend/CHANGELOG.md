@@ -1,5 +1,17 @@
 # backend
 
+## 0.0.18
+
+### Patch Changes
+
+- Updated dependencies [d8cbd21]
+  - @frontside/backstage-plugin-batch-loader@0.3.4
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.8
+  - @frontside/backstage-plugin-graphql@0.7.3
+  - @internal/plugin-healthcheck@0.1.7
+  - @frontside/backstage-plugin-humanitec-backend@0.3.8
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.6
+
 ## 0.0.17
 
 ### Patch Changes

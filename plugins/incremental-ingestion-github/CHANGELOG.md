@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-incremental-ingestion-github
 
+## 0.2.7
+
+### Patch Changes
+
+- d8cbd21: bump backstage
+- Updated dependencies [d8cbd21]
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.6
+
 ## 0.2.6
 
 ### Patch Changes
