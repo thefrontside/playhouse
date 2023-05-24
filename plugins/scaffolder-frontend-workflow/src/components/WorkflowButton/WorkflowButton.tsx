@@ -68,7 +68,7 @@ export function WorkflowButton({
   );
 
   return (
-    <div>
+    <>
       <Button
         variant="contained"
         color="primary"
@@ -89,6 +89,6 @@ export function WorkflowButton({
       {taskStream.loading === false && (
         <ModalTaskProgress taskStream={taskStream} />
       )}
-    </div>
+    </>
   );
 }

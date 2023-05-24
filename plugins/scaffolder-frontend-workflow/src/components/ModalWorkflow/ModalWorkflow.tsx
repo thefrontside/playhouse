@@ -9,7 +9,6 @@ type ModalWorkflowProps = Pick<
 > & {
   children: ReactNode;
   title: string;
-  tootip: ReactNode;
   tooltipIcon: ReactNode;
   tooltipTitle?: string;
   onComplete?: () => void;
@@ -19,7 +18,6 @@ type ModalWorkflowProps = Pick<
 
 export function ModalWorkflow({
   title,
-  tootip,
   tooltipIcon,
   tooltipTitle = '',
   onComplete,
@@ -38,6 +36,7 @@ export function ModalWorkflow({
     <Modal
       title={title}
       icon={tooltipIcon}
+      tooltipTitle={tooltipTitle}
       fullyExpanded={modalExpanded}
       onClose={() => setModalExpanded(false)}
     >

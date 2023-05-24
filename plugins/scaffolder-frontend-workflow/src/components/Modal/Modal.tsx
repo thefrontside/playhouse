@@ -47,8 +47,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 interface ModalProps {
-  title: string;
   icon: ReactNode;
+  title: string;
+  tooltipTitle?: string;
   fullyExpanded?: boolean;
   onClose?: () => void;
   children: ReactNode;
@@ -62,6 +63,7 @@ export function Modal({
   children,
   fullyExpanded = false,
   onClose,
+  tooltipTitle
 }: ModalProps): JSX.Element {
   const [modalState, setModalState] = useState<ModalState>('initial');
   const styles = useStyles();
@@ -76,7 +78,7 @@ export function Modal({
       <Box>
         <div>
           <span>{title}</span>
-          <Tooltip title={title}>
+          <Tooltip title={tooltipTitle ?? title}>
             <IconButton
               style={{ color: 'lightblue', cursor: 'pointer' }}
               className={styles.icon}

@@ -32,11 +32,10 @@ export function UpdateSystem(): JSX.Element {
   return (
     <ModalWorkflow
       title="System"
-      tootip="Unassigned"
       onCreate={onCreate}
       namespace="default"
       templateName="update-system"
-      initialState={{ url, entityRef }}
+      initialState={{ url, entityRef, system: entity?.spec?.system }}
       tooltipIcon={
         <SystemUpdateIcon
           fontSize="small"
