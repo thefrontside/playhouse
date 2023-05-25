@@ -1,6 +1,6 @@
 {
   "name": "@frontside/backstage-ingestion-tests",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "scripts": {
     "start": "backstage-cli package start",
     "build": "backstage-cli package build",
@@ -29,7 +29,6 @@
     "@effection/process": "^2.0.4",
     "@effection/vitest": "^2.1.0",
     "@frontside/graphgen": "^1.6.0",
-    "@simulacrum/github-api-simulator": "^0.2.2",
     "assert-ts": "^0.3.4",
     "effection": "^2.0.6",
     "expect": "^29.3.0",

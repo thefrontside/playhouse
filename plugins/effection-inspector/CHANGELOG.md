@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-effection-inspector
 
+## 0.1.8
+
+### Patch Changes
+
+- d8cbd21: bump backstage
+
 ## 0.1.7
 
 ### Patch Changes

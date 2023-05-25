@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.8
+
+### Patch Changes
+
+- d8cbd21: bump backstage
+- Updated dependencies [d8cbd21]
+  - @frontside/backstage-plugin-humanitec-common@0.3.7
+
 ## 0.3.7
 
 ### Patch Changes
