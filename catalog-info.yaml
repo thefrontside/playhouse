@@ -13,7 +13,7 @@ metadata:
 spec:
   type: website
   owner: engineering@frontside.com
-  lifecycle: production
+  lifecycle: deprecated
   providesApis:
     - backstage-graphql-api
 ---
