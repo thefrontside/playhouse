@@ -16,6 +16,7 @@ spec:
   lifecycle: production
   providesApis:
     - backstage-graphql-api
+  system: system:default/services
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
