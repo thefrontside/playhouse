@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.5.1
+
+### Patch Changes
+
+- 4850b45: In a previous PR, we removed the built-in Github API simulator opting for the start that up in userland. This removes the dependency itself which was missed.
+
 ## 0.5.0
 
 ### Minor Changes
