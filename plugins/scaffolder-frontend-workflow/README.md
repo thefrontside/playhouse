@@ -49,7 +49,7 @@ const { currentStep } = useStepper({ manifest });
 ## Components
 [ModalWorkflow](./src/components/ModalWorkflow/ModalWorkflow.tsx) - Kick off a scaffolder workflow by clicking a link and running the workflow form in a modal:
 
-[demo](./docs/modal.mp4)
+[demo](../../docs/modal.mp4)
 
 ```ts
 <>
@@ -89,7 +89,7 @@ const { currentStep } = useStepper({ manifest });
 
 [WorkflowButton](./src/components/WorkflowButton/WorkflowButton.tsx) - If there are no form elements or no user input is required, then a scaffolder workflow can be executed via a simple button click and the button has props to display state change messaging:
 
-[demo](./demo/button.mp4)
+[demo](../../docs/button.mp4)
 
 ```ts
 <WorkflowButton
