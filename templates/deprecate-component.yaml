@@ -1,0 +1,49 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: deprecate-component
+  title: Deprecate component
+  description: Workflow for deprecating a component
+spec:
+  type: embed
+  parameters:
+    - required:
+        - url
+      properties:
+        url:
+          title: Metadata file URL
+          type: string
+          description: URL of metadata file to update
+          ui:readonly: true
+          ui:widget: hidden
+        entityRef:
+          title: EntityRef
+          type: string
+          description: The entity ref of the file that will be updated.
+          ui:widget: hidden
+
+  steps:
+    - id: update
+      name: Update YAML
+      action: backend:yaml-update
+      input:
+        url: ${{ parameters.url }}
+        entityRef: ${{ parameters.entityRef }}
+        path: spec.lifecycle
+        value: deprecated
+
+    - id: publish
+      name: Publish
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ steps['update'].output.repoUrl }}
+        title: Deprecate component
+        description: Merge this pull request to mark this component deprecated.
+        targetPath: '.'
+        sourcePath: ${{ steps['update'].output.path }}
+        branchName: deprecate-component
+
+  output:
+    links:
+      - title: View Pull Request
+        url: ${{ steps['publish'].output.remoteUrl }}

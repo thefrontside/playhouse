@@ -1,0 +1,73 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: update-system
+  title: Update System
+  description: Workflow for updating system of a component
+spec:
+  type: embed
+  parameters:
+    - title: Select System
+      required:
+        - url
+        - system
+      properties:
+        system:
+          title: Select System
+          type: string
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: [ 'System' ]
+            defaultKind: System
+        url:
+          title: Metadata file URL
+          type: string
+          description: URL of metadata file to update
+          ui:readonly: true
+          ui:widget: hidden
+        entityRef:
+          title: EntityRef
+          type: string
+          description: The entity ref of the file that will be updated.
+          ui:widget: hidden
+
+  steps:
+    - id: update
+      name: Update YAML
+      action: backend:yaml-update
+      input:
+        url: ${{ parameters.url }}
+        entityRef: ${{ parameters.entityRef }}
+        path: spec.system
+        value: ${{ parameters.system }}
+
+    - id: publish
+      name: Publish
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ steps['update'].output.repoUrl }}
+        title: Update System 
+        description: Merge this pull request to set system to ${{ parameters.system }}.
+        targetPath: '.'
+        sourcePath: ${{ steps['update'].output.path }}
+        branchName: update-system-metadata
+
+  output:
+    links:
+      - title: View Pull Request
+        url: ${{ steps['publish'].output.remoteUrl }}
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: website
+spec:
+  owner: default
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: services
+spec:
+  owner: default

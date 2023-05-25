@@ -7,8 +7,9 @@ const smee = new SmeeClient({
   logger: console
 })
 
+// eslint-disable-next-line func-names
 main(function* () {
-  let events = smee.start();
+  const events = smee.start();
   try {
     yield;
   } finally {

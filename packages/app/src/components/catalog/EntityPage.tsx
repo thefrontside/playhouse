@@ -54,11 +54,12 @@ import {
 } from '@backstage/plugin-org';
 import { EntityTechdocsContent } from '@backstage/plugin-techdocs';
 import { EmptyState } from '@backstage/core-components';
-import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
+// import { HumanitecCardComponent } from '@frontside/backstage-plugin-humanitec';
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
 import { EntityOnboardingWorkflow } from '../EntityOnboardingWorkflow/EntityOnboardingWorkflow';
+import { WorkflowButtonsPanel } from './WorkflowButtonsPanel';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -122,7 +123,7 @@ const overviewContent = (
       <EntityAboutCard variant="gridItem" />
     </Grid>
     <Grid item md={6}>
-      <HumanitecCardComponent />
+      {/* <HumanitecCardComponent /> */}
     </Grid>
     <Grid item md={4} xs={12}>
       <EntityLinksCard />
@@ -198,13 +199,16 @@ const websiteEntityPage = (
         description="Showing documentation in this tab requires an annotation to be added to the metadata. 
           This form will onboard your project to use documentation as code by creating a pull request in
           your component's repository. Once you merge that pull request, your docs will show up here.
-        "  
-        templateName="documentation-onboarding" 
+        "
+        templateName="documentation-onboarding"
         namespace="default"
         onError={(error: Error | undefined) => (
           <h2>{error?.message ?? 'Houston we have a problem.'}</h2>
         )}
       />
+    </EntityLayout.Route>
+    <EntityLayout.Route path="/system" title="System">
+      <WorkflowButtonsPanel />
     </EntityLayout.Route>
   </EntityLayout>
 );

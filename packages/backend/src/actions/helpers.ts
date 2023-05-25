@@ -7,3 +7,4 @@ export const generateGitRepoUrl = ({
   owner: string;
   host: string;
 }) => (repoName && owner ? `${host}?repo=${repoName}&owner=${owner}` : host);
+

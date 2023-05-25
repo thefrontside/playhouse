@@ -1,4 +1,4 @@
-import { createTemplateAction } from '@backstage/plugin-scaffolder-backend';
+import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
 import fs from 'fs-extra';
 import * as yaml from 'yaml';
 import { type ScmIntegrations } from '@backstage/integration';

@@ -97,6 +97,14 @@ catalog:
       rules:
         - allow: [Template]
     - type: file
+      target: ../../templates/update-system.yaml
+      rules:
+        - allow: [Template, System]
+    - type: file
+      target: ../../templates/deprecate-component.yaml
+      rules:
+        - allow: [Template]
+    - type: file
       target: ../../templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]

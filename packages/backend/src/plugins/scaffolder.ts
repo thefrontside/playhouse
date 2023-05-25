@@ -6,6 +6,7 @@ import { Router } from 'express';
 import { createGetEnvironmentAction } from '../actions/get-environment';
 import { createAddAnnotation } from '../actions/documentation-onboarding/add-annotation';
 import type { PluginEnvironment } from '../types';
+import { createYamlUpdateAction } from '../actions/yaml-update';
 
 export default async function createPlugin({
   logger,
@@ -26,6 +27,11 @@ export default async function createPlugin({
   const actions = [
     ...builtInActions,
     createAddAnnotation({ integrations, logger }),
+    createYamlUpdateAction({
+      logger, 
+      integrations,
+      reader,
+    }),
     createGetEnvironmentAction({
       orgId: config.getString('humanitec.orgId'),
       registryUrl: config.getString('humanitec.registryUrl'),
