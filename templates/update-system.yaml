@@ -8,7 +8,9 @@ spec:
   type: embed
   parameters:
     - title: Select System
-      required: ['url']
+      required:
+        - url
+        - system
       properties:
         system:
           title: Select System
@@ -16,8 +18,8 @@ spec:
           ui:field: EntityPicker
           ui:options:
             catalogFilter:
-              kind: system
-            defaultKind: system
+              - kind: [ 'System' ]
+            defaultKind: System
         url:
           title: Metadata file URL
           type: string
@@ -31,12 +33,6 @@ spec:
           ui:widget: hidden
 
   steps:
-    - id: fetch
-      name: Fetch the file
-      action: fetch:plain
-      input:
-        url: ${{ parameters.url }}
-
     - id: update
       name: Update YAML
       action: backend:yaml-update
@@ -52,9 +48,10 @@ spec:
       input:
         repoUrl: ${{ steps['update'].output.repoUrl }}
         title: Update System 
-        description: Merge this pull request to setup documentation.
+        description: Merge this pull request to set system to ${{ parameters.system }}.
         targetPath: '.'
         sourcePath: ${{ steps['update'].output.path }}
+        branchName: update-system-metadata
 
   output:
     links:
@@ -64,6 +61,13 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: System
 metadata:
-  name: frontside-website
+  name: website
+spec:
+  owner: default
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: services
 spec:
   owner: default

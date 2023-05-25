@@ -1,6 +1,7 @@
-import { resolveSafeChildPath } from '@backstage/backend-common';
+import { UrlReader, resolveSafeChildPath } from '@backstage/backend-common';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
+
 import { assert } from 'assert-ts';
 import fs from 'fs-extra';
 import _path from 'path';
@@ -8,9 +9,13 @@ import parseGitUrl from 'git-url-parse';
 import { Logger } from 'winston';
 import { parseAllDocuments, isMap, YAMLMap, ParsedNode } from 'yaml';
 import { z } from 'zod';
+import { ScmIntegrations } from '@backstage/integration';
+import { createFetchPlainAction } from '@backstage/plugin-scaffolder-backend';
 
 interface CreateYamlUpdateActionOptions {
   logger: Logger;
+  integrations: ScmIntegrations;
+  reader: UrlReader; 
 }
 
 const InputSchema = z.object({
@@ -22,9 +27,17 @@ const InputSchema = z.object({
 
 type InputType = z.infer<typeof InputSchema>
 
-export function createYamlUpdateAction(_options: CreateYamlUpdateActionOptions) {
+const id = 'backend:yaml-update';
+
+export function createYamlUpdateAction({ logger, integrations, reader }: CreateYamlUpdateActionOptions) {
+
+  const fetchAction = createFetchPlainAction({
+    reader,
+    integrations,
+  });
+
   return createTemplateAction<InputType>({
-    id: 'backend:yaml-update',
+    id,
     description: 'Update properties of a YAML file',
     schema: {
       input: InputSchema,
@@ -36,11 +49,24 @@ export function createYamlUpdateAction(_options: CreateYamlUpdateActionOptions) 
     async handler(ctx) {
       const { url, entityRef, path, value } = ctx.input;
 
-      const { filepath, source, owner, name } = parseGitUrl(url);
+      const { filepath, source, owner, name } = parseGitUrl(url);      
 
       const sourceFilepath = resolveSafeChildPath(ctx.workspacePath, filepath);
 
-      const content = await fs.readFile(sourceFilepath);
+      await fetchAction.handler({
+        ...ctx,
+        input: {
+          url: _path.dirname(ctx.input.url),
+        }
+      });
+
+      let content;
+      try {
+        content = await fs.readFile(sourceFilepath);
+      } catch (e) {
+        logger.error(`Could not read ${sourceFilepath}`, { action: id })
+        throw e;
+      }
       
       const updated = update({ 
         content: content.toString(), 
@@ -112,3 +138,4 @@ function update({ content, path, value, entityRef }: { content: string; path: st
 
   return documents.map(document => document.toString()).join('')
 }
+

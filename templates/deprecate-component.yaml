@@ -7,7 +7,8 @@ metadata:
 spec:
   type: embed
   parameters:
-    - required: ['url']
+    - required:
+        - url
       properties:
         url:
           title: Metadata file URL
@@ -22,12 +23,6 @@ spec:
           ui:widget: hidden
 
   steps:
-    - id: fetch
-      name: Fetch the file
-      action: fetch:plain
-      input:
-        url: ${{ parameters.url }}
-
     - id: update
       name: Update YAML
       action: backend:yaml-update
@@ -46,6 +41,7 @@ spec:
         description: Merge this pull request to mark this component deprecated.
         targetPath: '.'
         sourcePath: ${{ steps['update'].output.path }}
+        branchName: deprecate-component
 
   output:
     links:

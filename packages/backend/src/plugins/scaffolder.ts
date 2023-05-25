@@ -27,7 +27,11 @@ export default async function createPlugin({
   const actions = [
     ...builtInActions,
     createAddAnnotation({ integrations, logger }),
-    createYamlUpdateAction({ logger }),
+    createYamlUpdateAction({
+      logger, 
+      integrations,
+      reader,
+    }),
     createGetEnvironmentAction({
       orgId: config.getString('humanitec.orgId'),
       registryUrl: config.getString('humanitec.registryUrl'),
