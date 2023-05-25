@@ -1,28 +1,25 @@
 import React, { ReactNode, useCallback, useState } from 'react';
 import { type WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
-import { Modal } from '../Modal/Modal';
+import { Modal, ModalProps } from '../Modal/Modal';
 import { Workflow } from '../Form/Workflow';
 
 type ModalWorkflowProps = Pick<
   WorkflowProps,
   'namespace' | 'templateName' | 'onCreate' | 'initialState'
-> & {
+> & Pick<ModalProps, 'onClick' | 'onClose' | 'open'> & {
   children: ReactNode;
-  title: string;
-  tooltipIcon: ReactNode;
-  tooltipTitle?: string;
   onComplete?: () => void;
   onError?: (e: Error) => void;
   className?: string;
 };
 
 export function ModalWorkflow({
-  title,
-  tooltipIcon,
-  tooltipTitle = '',
   onComplete,
   onError,
   className,
+  open,
+  onClick,
+  onClose,
   ...props
 }: ModalWorkflowProps): JSX.Element {
   const [modalExpanded, setModalExpanded] = useState(false);
@@ -32,13 +29,20 @@ export function ModalWorkflow({
     onComplete?.();
   }, [onComplete]);
 
+  const onCloseHandler = useCallback((e) => {
+    setModalExpanded(false);
+
+    if (onClose) {
+      onClose(e, "backdropClick");
+    }
+  }, [onClose]);
+
   return (
     <Modal
-      title={title}
-      icon={tooltipIcon}
-      tooltipTitle={tooltipTitle}
+      open={open}
+      onClick={onClick}
+      onClose={onCloseHandler}
       fullyExpanded={modalExpanded}
-      onClose={() => setModalExpanded(false)}
     >
       <Workflow
         {...props}

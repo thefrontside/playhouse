@@ -4,7 +4,7 @@ import {
   Fade,
   IconButton,
   Modal as MuiModal,
-  Tooltip,
+  type ModalProps as MuiModalProps,
   makeStyles,
 } from '@material-ui/core';
 import cs from 'classnames';
@@ -26,15 +26,9 @@ const useStyles = makeStyles(theme => ({
     left: '10%',
     overflowY: 'auto',
   },
-  icon: {
-    paddingTop: '5px',
-  },
   header: {
     display: 'flex',
     justifyContent: 'flex-end',
-  },
-  content: {
-    padding: theme.spacing(2, 4, 3),
   },
   fullyExpanded: {
     position: 'absolute',
@@ -46,71 +40,46 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-interface ModalProps {
-  icon: ReactNode;
-  title: string;
-  tooltipTitle?: string;
+export interface ModalProps {
+  open: boolean;
+  onClick: MuiModalProps['onClick'];
+  onClose: MuiModalProps['onClose'];
   fullyExpanded?: boolean;
-  onClose?: () => void;
   children: ReactNode;
 }
 
-type ModalState = 'initial' | 'open' | 'closed';
 
 export function Modal({
-  title,
-  icon,
   children,
   fullyExpanded = false,
-  onClose,
-  tooltipTitle
+  open,
+  onClick,
+  onClose
 }: ModalProps): JSX.Element {
-  const [modalState, setModalState] = useState<ModalState>('initial');
   const styles = useStyles();
 
-  const closeHandler = useCallback(() => {
-    setModalState('closed');
-    onClose?.();
-  }, [onClose]);
-
   return (
-    <>
-      <Box>
-        <div>
-          <span>{title}</span>
-          <Tooltip title={tooltipTitle ?? title}>
-            <IconButton
-              style={{ color: 'lightblue', cursor: 'pointer' }}
-              className={styles.icon}
-              onClick={() => setModalState('open')}
-            >
-              {icon}
+    <MuiModal
+      open={open}
+      onClick={onClick}
+      onClose={onClose}
+      style={{ overflow: 'scroll' }}
+      keepMounted={false}
+    >
+      <Fade in={open}>
+        <div
+          className={cs(styles.modal, styles.paper, {
+            [styles.fullyExpanded]: fullyExpanded,
+          })}
+        >
+          <Box className={styles.header}>
+            <IconButton onClick={(e) => onClose && onClose(e, "backdropClick")}>
+              <CloseIcon />
             </IconButton>
-          </Tooltip>
+          </Box>
+          {children}
         </div>
-      </Box>
-      <MuiModal
-        open={modalState === 'open'}
-        onClick={e => e.stopPropagation()}
-        onClose={closeHandler}
-        style={{ overflow: 'scroll' }}
-        keepMounted={false}
-      >
-        <Fade in={modalState === 'open'}>
-          <div
-            className={cs(styles.modal, styles.paper, {
-              [styles.fullyExpanded]: fullyExpanded,
-            })}
-          >
-            <Box className={styles.header}>
-              <IconButton onClick={closeHandler}>
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            {children}
-          </div>
-        </Fade>
-      </MuiModal>
-    </>
+      </Fade>
+    </MuiModal>
   );
 }

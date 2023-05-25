@@ -16,9 +16,13 @@ const useStyles = makeStyles(theme => ({
 export function WorkflowButtonsPanel(): JSX.Element {
   const styles = useStyles();
   return (
-    <div className={styles.container}>
-      <UpdateSystem />
-      <DeprecateComponent />
-    </div>
+    <>
+      <div className={styles.container}>
+        <DeprecateComponent />
+      </div>
+      <div>
+        <UpdateSystem />
+      </div>
+    </>
   );
 }
