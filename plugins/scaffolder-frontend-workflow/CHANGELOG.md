@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.4.0
+
+### Minor Changes
+
+- 7bbd121: Add inline and modal embedded scaffolders
+
 ## 0.3.7
 
 ### Patch Changes
