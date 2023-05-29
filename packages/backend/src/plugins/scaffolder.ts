@@ -6,7 +6,7 @@ import { Router } from 'express';
 import { createGetEnvironmentAction } from '../actions/get-environment';
 import { createAddAnnotation } from '../actions/documentation-onboarding/add-annotation';
 import type { PluginEnvironment } from '../types';
-import { createYamlUpdateAction } from '../actions/yaml-update';
+import { createYamlSetAction } from '@frontside/scaffolder-yaml-actions';
 
 export default async function createPlugin({
   logger,
@@ -27,7 +27,7 @@ export default async function createPlugin({
   const actions = [
     ...builtInActions,
     createAddAnnotation({ integrations, logger }),
-    createYamlUpdateAction({
+    createYamlSetAction({
       logger, 
       integrations,
       reader,
