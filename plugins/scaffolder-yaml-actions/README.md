@@ -1,6 +1,50 @@
-# backstage-plugin-scaffolder-backend-module-yaml-actions
+# @frontside/scaffolder-yaml-actions
 
 This package provides a collection of actions 
+
+## Installation
+
+1. Add `@frontside/scaffolder-yaml-actions` to `packages/backend/package.json`
+2. Add the following code to `packages/backend/src/plugins/scaffolder.ts`
+
+```ts
+import { createYamlSetAction } from '@frontside/scaffolder-yaml-actions';
+
+export default async function createPlugin({
+  logger,
+  config,
+  database,
+  reader,
+  discovery,
+  identity
+}: PluginEnvironment): Promise<Router> {
+  const catalogClient = new CatalogClient({ discoveryApi: discovery });
+  const integrations = ScmIntegrations.fromConfig(config);
+  const builtInActions = createBuiltinActions({
+    integrations,
+    catalogClient,
+    config: config,
+    reader: reader,
+  });
+  const actions = [
+    ...builtInActions,
+    createYamlSetAction({
+      logger, 
+      integrations,
+      reader,
+    }),
+   ];
+  return await createRouter({
+    logger,
+    config,
+    database,
+    catalogClient,
+    identity,
+    reader,
+    actions,
+  });
+}
+```
 
 ## API
 
