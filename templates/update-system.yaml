@@ -35,7 +35,7 @@ spec:
   steps:
     - id: update
       name: Update YAML
-      action: backend:yaml-update
+      action: yaml:set
       input:
         url: ${{ parameters.url }}
         entityRef: ${{ parameters.entityRef }}
