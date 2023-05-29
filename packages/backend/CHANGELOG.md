@@ -1,5 +1,11 @@
 # backend
 
+## 0.0.19
+
+### Patch Changes
+
+- 844496f: Added yaml:set action
+
 ## 0.0.18
 
 ### Patch Changes
