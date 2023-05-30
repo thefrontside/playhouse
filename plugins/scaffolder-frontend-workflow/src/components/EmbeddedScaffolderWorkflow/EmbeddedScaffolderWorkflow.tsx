@@ -6,10 +6,9 @@ import {
   useCustomLayouts,
   useTemplateSecrets,
   ScaffolderTaskOutput,
-  ScaffolderUseTemplateSecrets,
 } from '@backstage/plugin-scaffolder-react';
 import {
-  EmbeddableWorkflow,
+  Workflow,
   type NextFieldExtensionOptions,
   type WorkflowProps,
 } from '@backstage/plugin-scaffolder-react/alpha';
@@ -33,7 +32,6 @@ export type EmbeddedScaffolderWorkflowProps = Omit<
   finishPage?: ReactNode;
   onError(error: Error | undefined): JSX.Element | null;
   onCreate?: (values: Record<string, JsonValue>) => Promise<void>;
-  useSecrets?: () => ScaffolderUseTemplateSecrets;
   children?: ReactNode;
 };
 
@@ -60,10 +58,9 @@ export function EmbeddedScaffolderWorkflow({
   frontPage,
   onCreate = async (_values: OnCompleteArgs) => void 0,
   children = <></>,
-  useSecrets = useTemplateSecrets,
   ...props
 }: EmbeddedScaffolderWorkflowProps): JSX.Element {
-  const { secrets } = useSecrets();
+  const { secrets } = useTemplateSecrets();
   const scaffolderApi = useApi(scaffolderApiRef);
   const navigate = useNavigate();
   const customFieldExtensions =
@@ -109,7 +106,7 @@ export function EmbeddedScaffolderWorkflow({
           path={frontPage ? 'form' : undefined}
           index={!frontPage}
           element={
-            <EmbeddableWorkflow
+            <Workflow
               onCreate={onWorkFlowCreate}
               extensions={customFieldExtensions}
               layouts={customLayouts}
