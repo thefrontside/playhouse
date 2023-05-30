@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.5.0
+
+### Minor Changes
+
+- 6ab2913: Rely on App provided Scaffolder Secret Context
+
 ## 0.4.0
 
 ### Minor Changes
