@@ -1,5 +1,12 @@
 # app
 
+## 0.0.11
+
+### Patch Changes
+
+- Updated dependencies [6ab2913]
+  - @frontside/backstage-plugin-scaffolder-workflow@0.5.0
+
 ## 0.0.10
 
 ### Patch Changes
