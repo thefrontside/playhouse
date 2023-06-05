@@ -54,7 +54,7 @@ export function createYamlSetAction({
     async handler(ctx) {
       const { url, entityRef, path, value } = ctx.input;
 
-      const { filepath, source, owner, name } = parseGitUrl(url);
+      const { filepath, resource, owner, name } = parseGitUrl(url);
 
       const sourceFilepath = resolveSafeChildPath(ctx.workspacePath, filepath);
 
@@ -84,7 +84,7 @@ export function createYamlSetAction({
 
       await fs.writeFile(sourceFilepath, updated);
 
-      ctx.output('repoUrl', `${source}?repo=${name}&owner=${owner}`);
+      ctx.output('repoUrl', `${resource}?repo=${name}&owner=${owner}`);
       ctx.output('filePath', filepath);
       ctx.output('path', _path.dirname(sourceFilepath));
     },
