@@ -4,6 +4,7 @@ import { type IChangeEvent } from '@rjsf/core-v5';
 import React, { useCallback, useMemo, type ReactNode } from 'react';
 import validator from '@rjsf/validator-ajv8';
 import { RJSFForm } from './RJSFForm';
+import { FormProps as FormProps$1 } from '@rjsf/core-v5';
 import {
   type FormProps,
   type NextFieldExtensionOptions,
@@ -26,12 +27,11 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-interface Props {
+type Props = {
   extensions: NextFieldExtensionOptions<any, any>[];
   templateName?: string;
   FormProps?: FormProps;
   initialState?: Record<string, JsonValue>;
-  onCreate: (values: Record<string, JsonValue>) => Promise<void>;
   step: ParsedTemplateSchema;
   handleNext: ({
     formData,
@@ -39,7 +39,7 @@ interface Props {
     formData?: Record<string, JsonValue> | undefined;
   }) => Promise<void>;
   children: ReactNode;
-}
+} & Pick<FormProps$1, 'extraErrors'>
 
 export const Form = (props: Props) => {
   const [formState, setFormState] = useFormDataFromQuery(props.initialState);
@@ -79,6 +79,7 @@ export const Form = (props: Props) => {
         onSubmit={handleNext}
         fields={{ ...extensions }}
         showErrorList={false}
+        extraErrors={props.extraErrors}
         onChange={handleChange}
         {...(props.FormProps ?? {})}
         noHtml5Validate

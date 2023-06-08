@@ -8380,6 +8380,17 @@
     lodash-es "^4.17.15"
     react-is "^18.2.0"
 
+"@rjsf/utils@^5.8.1":
+  version "5.8.1"
+  resolved "https://registry.yarnpkg.com/@rjsf/utils/-/utils-5.8.1.tgz#65a8ce45740fd62c0e17188685ee963396c8bea0"
+  integrity sha512-kzWVNAW417ADG0nSEPxpqYzLrtzi9tKCCn5rOuwt6FIvSrtkatISBekyKNeycGPUfQR9VkROGrcG8cz10xUs6g==
+  dependencies:
+    json-schema-merge-allof "^0.8.1"
+    jsonpointer "^5.0.1"
+    lodash "^4.17.21"
+    lodash-es "^4.17.21"
+    react-is "^18.2.0"
+
 "@rjsf/validator-ajv8@5.6.0":
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/@rjsf/validator-ajv8/-/validator-ajv8-5.6.0.tgz#6e34c47f9ab0e2fa054bc525b3e22ef3f09bd503"

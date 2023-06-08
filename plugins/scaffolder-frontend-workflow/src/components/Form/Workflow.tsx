@@ -1,28 +1,24 @@
+import React, { useEffect } from 'react';
 import { stringifyEntityRef } from '@backstage/catalog-model';
-import { Progress } from '@backstage/core-components';
-import {
-  useCustomFieldExtensions,
-  useCustomLayouts,
-} from '@backstage/plugin-scaffolder-react';
+import { useCustomFieldExtensions } from '@backstage/plugin-scaffolder-react';
 import {
   NextFieldExtensionOptions,
-  WorkflowProps as OriginalWorkflowProps,
+  WorkflowProps,
   useTemplateParameterSchema,
 } from '@backstage/plugin-scaffolder-react/alpha';
+import { ReactNode, useCallback } from 'react';
 import { JsonValue } from '@backstage/types';
-import React, { ReactNode, useCallback, useEffect } from 'react';
-
 import { useRunWorkflow } from '../../hooks/useRunWorkflow';
+import { Progress } from '@backstage/core-components';
 import { TaskProgress } from '../TaskProgress/TaskProgress';
 import { Form } from './Form';
-import { Stepper } from './Stepper';
 
-export type WorkflowProps = Pick<
-  OriginalWorkflowProps,
+type Props = Pick<
+  WorkflowProps,
   'namespace' | 'templateName' | 'onCreate' | 'initialState'
 > & {
   onComplete?: () => void;
-  children: JSX.Element;
+  children: ReactNode;
   onError?: (e: Error) => void;
   onTaskCreated(loading: boolean): void;
 };
@@ -35,17 +31,15 @@ export function Workflow({
   onComplete,
   onTaskCreated,
   ...props
-}: WorkflowProps): JSX.Element {
+}: Props): JSX.Element {
+  const customFieldExtensions =
+    useCustomFieldExtensions<NextFieldExtensionOptions<any, any>>(children);
+
   const templateRef = stringifyEntityRef({
     kind: 'Template',
     namespace: namespace,
     name: templateName,
   });
-
-  const customFieldExtensions =
-    useCustomFieldExtensions<NextFieldExtensionOptions<any, any>>(children);
-
-  const layouts = useCustomLayouts(children);
 
   const { loading, manifest } = useTemplateParameterSchema(templateRef);
 
@@ -55,7 +49,7 @@ export function Workflow({
     onComplete,
   });
 
-  const onCreate = useCallback(
+  const handleNext = useCallback(
     async (formData: Record<string, JsonValue>) => {
       await execute(formData);
     },
@@ -71,21 +65,14 @@ export function Workflow({
   return (
     <>
       {loading && <Progress />}
-      {taskStream.loading === true && loading === false && (
-        <Stepper
-          manifest={manifest}
-          layouts={layouts}
+      {manifest && taskStream.loading === true && (
+        <Form
           extensions={customFieldExtensions}
-          form={
-            <Form
-              extensions={customFieldExtensions}
-              handleNext={onCreate}
-              {...props}
-            />
-          }
+          handleNext={handleNext}
+          {...props}
         >
           {children}
-        </Stepper>
+        </Form>
       )}
       {taskStream.loading === false && <TaskProgress taskStream={taskStream} />}
     </>
