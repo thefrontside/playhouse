@@ -69,24 +69,22 @@ export const Form = (props: Props) => {
   };
 
   return (
-    <>
-      <div className={styles.formWrapper}>
-        <RJSFForm
-          validator={validator}
-          formData={formState}
-          formContext={{ formData: formState }}
-          schema={props.step.schema}
-          uiSchema={props.step.uiSchema}
-          onSubmit={handleNext}
-          fields={{ ...extensions }}
-          showErrorList={false}
-          onChange={handleChange}
-          {...(props.FormProps ?? {})}
-          noHtml5Validate
-        >
-          <div className={styles.footer}>{props.children}</div>
-        </RJSFForm>
-      </div>
-    </>
+    <div className={styles.formWrapper}>
+      <RJSFForm
+        validator={validator}
+        formData={formState}
+        formContext={{ formData: formState }}
+        schema={props.step.schema}
+        uiSchema={props.step.uiSchema}
+        onSubmit={handleNext}
+        fields={{ ...extensions }}
+        showErrorList={false}
+        onChange={handleChange}
+        {...(props.FormProps ?? {})}
+        noHtml5Validate
+      >
+        <div className={styles.footer}>{props.children}</div>
+      </RJSFForm>
+    </div>
   );
 };
