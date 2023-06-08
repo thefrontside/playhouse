@@ -9,6 +9,7 @@ metadata:
     github.com/project-slug: thefrontside/playhouse
     "humanitec.com/orgId": "the-frontside-software-inc"
     "humanitec.com/appId": "backstage"
+    backstage.io/techdocs-ref: file:./docs
     # backstage.io/techdocs-ref: dir:.
 spec:
   type: website
