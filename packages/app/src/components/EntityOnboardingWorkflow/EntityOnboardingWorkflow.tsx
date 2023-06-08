@@ -6,12 +6,16 @@ import {
 import { useEntity } from '@backstage/plugin-catalog-react';
 import {
   EmbeddedScaffolderWorkflowProps,
+  Stepper,
   useRunWorkflow,
   useStepper,
 } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { assert } from 'assert-ts';
-import { useWorkflowManifest } from '@frontside/backstage-plugin-scaffolder-workflow';
-import { OnboardingWorkflow } from './OnboardingWorkflow';
+import {
+  useWorkflowManifest,
+  type RunWorkflow,
+} from '@frontside/backstage-plugin-scaffolder-workflow';
+import { ReusableWorkflow } from './ReusableWorkflow';
 
 type EntityOnboardingWorkflowProps = EmbeddedScaffolderWorkflowProps;
 
@@ -73,8 +77,41 @@ export function EntityOnboardingWorkflow(
   }
 
   return manifest ? (
-    <OnboardingWorkflow manifest={manifest} {...workflow} initialState={{ entityRef, catalogInfoUrl }}>
+    <ReusableWorkflow
+      manifest={manifest}
+      workflow={workflow}
+      initialState={{ entityRef, catalogInfoUrl }}
+      reviewComponent={<EntityOnboardingReview workflow={workflow} />}
+    >
       {props.children}
-    </OnboardingWorkflow>
+    </ReusableWorkflow>
   ) : null;
+}
+
+function EntityOnboardingReview({
+  stepper,
+  workflow,
+}: {
+  stepper?: Stepper;
+  workflow: RunWorkflow;
+}) {
+
+  if (stepper) {
+    return (
+      <>
+        <ul>
+          {Object.entries(stepper.formState).map(([key, value]) => (
+            <li key={key}>
+              <strong>{key}</strong>: {value}
+            </li>
+          ))}
+        </ul>
+        <button onClick={() => stepper.handleBack()}>Back</button>
+        <button onClick={() => workflow.execute(stepper.formState)}>Run</button>
+      </>
+    );
+
+  }
+
+  return null;
 }

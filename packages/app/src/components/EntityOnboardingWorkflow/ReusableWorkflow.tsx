@@ -11,16 +11,19 @@ import {
   useStepper,
   useTransformSchemaToProps,
 } from '@frontside/backstage-plugin-scaffolder-workflow';
+import { RunWorkflow } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { ErrorSchema } from '@rjsf/utils';
-import React, { ReactNode, useCallback } from 'react';
+import React, { ReactNode, useCallback, cloneElement } from 'react';
 
 type OnboardingWorkflowProps = {
   children: ReactNode;
   manifest: TemplateParameterSchema;
+  workflow: RunWorkflow
   initialState?: Record<string, JsonValue>;
-} & ReturnType<typeof useRunWorkflow>;
+  reviewComponent?: JSX.Element;
+};
 
-export const OnboardingWorkflow = (props: OnboardingWorkflowProps) => {
+export const ReusableWorkflow = (props: OnboardingWorkflowProps) => {
   const customFieldExtensions = useCustomFieldExtensions<
     NextFieldExtensionOptions<any, any>
   >(props.children);
@@ -39,12 +42,18 @@ export const OnboardingWorkflow = (props: OnboardingWorkflowProps) => {
   );
 
   const handleNext = useCallback(
-    async data => {
-      console.log('handle next', data);
-      stepper.handleForward(data);
+    async formData => {
+      console.log('handle next', formData);
+      stepper.handleForward({ formData });
     },
     [stepper],
   );
+
+  if (stepper.activeStep >= stepper.steps.length) {
+    return cloneElement(props.reviewComponent ?? <></>, {
+      stepper,
+    });
+  }
 
   return (
     <>

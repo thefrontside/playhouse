@@ -13,6 +13,8 @@ interface Props {
   extensions: NextFieldExtensionOptions<any, any>[];
 }
 
+export type Stepper = ReturnType<typeof useStepper>;
+
 export function useStepper({ manifest, initialState, extensions }: Props) {
   const analytics = useAnalytics();
   const { steps } = useTemplateSchema(manifest);
