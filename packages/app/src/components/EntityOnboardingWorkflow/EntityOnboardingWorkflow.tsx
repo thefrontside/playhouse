@@ -17,6 +17,15 @@ import {
 } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { ReusableWorkflow } from './ReusableWorkflow';
 
+import { ScaffolderFieldExtensions } from '@backstage/plugin-scaffolder-react';
+import { characterTextField } from './FieldExtension';
+import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
+import { createNextScaffolderFieldExtension } from '@backstage/plugin-scaffolder-react/alpha';
+
+export const configuredFieldExtensions = [characterTextField].map(extension =>
+  scaffolderPlugin.provide(createNextScaffolderFieldExtension(extension)),
+);
+
 type EntityOnboardingWorkflowProps = EmbeddedScaffolderWorkflowProps;
 
 function OnboardingActions(props: ReturnType<typeof useStepper>) {
@@ -83,6 +92,11 @@ export function EntityOnboardingWorkflow(
       initialState={{ entityRef, catalogInfoUrl }}
       reviewComponent={<EntityOnboardingReview workflow={workflow} />}
     >
+      <ScaffolderFieldExtensions>
+        {configuredFieldExtensions.map((FieldExtension, index) => (
+          <FieldExtension key={`fieldExtension${index}`} />
+        ))}
+      </ScaffolderFieldExtensions>
       {props.children}
     </ReusableWorkflow>
   ) : null;
@@ -95,7 +109,6 @@ function EntityOnboardingReview({
   stepper?: Stepper;
   workflow: RunWorkflow;
 }) {
-
   if (stepper) {
     return (
       <>
@@ -110,7 +123,6 @@ function EntityOnboardingReview({
         <button onClick={() => workflow.execute(stepper.formState)}>Run</button>
       </>
     );
-
   }
 
   return null;
