@@ -1,6 +1,9 @@
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { Progress } from '@backstage/core-components';
-import { useCustomFieldExtensions } from '@backstage/plugin-scaffolder-react';
+import {
+  useCustomFieldExtensions,
+  useCustomLayouts,
+} from '@backstage/plugin-scaffolder-react';
 import {
   NextFieldExtensionOptions,
   WorkflowProps as OriginalWorkflowProps,
@@ -10,16 +13,16 @@ import { JsonValue } from '@backstage/types';
 import React, { ReactNode, useCallback, useEffect } from 'react';
 
 import { useRunWorkflow } from '../../hooks/useRunWorkflow';
-import { useStepper } from '../../hooks/useStepper';
 import { TaskProgress } from '../TaskProgress/TaskProgress';
 import { Form } from './Form';
+import { Stepper } from './Stepper';
 
 export type WorkflowProps = Pick<
   OriginalWorkflowProps,
   'namespace' | 'templateName' | 'onCreate' | 'initialState'
 > & {
   onComplete?: () => void;
-  children: ReactNode;
+  children: JSX.Element;
   onError?: (e: Error) => void;
   onTaskCreated(loading: boolean): void;
 };
@@ -33,13 +36,16 @@ export function Workflow({
   onTaskCreated,
   ...props
 }: WorkflowProps): JSX.Element {
-  const customFieldExtensions =
-    useCustomFieldExtensions<NextFieldExtensionOptions<any, any>>(children);
   const templateRef = stringifyEntityRef({
     kind: 'Template',
     namespace: namespace,
     name: templateName,
   });
+
+  const customFieldExtensions =
+    useCustomFieldExtensions<NextFieldExtensionOptions<any, any>>(children);
+
+  const layouts = useCustomLayouts(children);
 
   const { loading, manifest } = useTemplateParameterSchema(templateRef);
 
@@ -47,12 +53,6 @@ export function Workflow({
     templateRef,
     onError,
     onComplete,
-  });
-
-  const stepper = useStepper({ 
-    manifest,
-    extensions: customFieldExtensions,
-    initialState: props.initialState,
   });
 
   const onCreate = useCallback(
@@ -71,15 +71,21 @@ export function Workflow({
   return (
     <>
       {loading && <Progress />}
-      {taskStream.loading === true && (
-        <Form
+      {taskStream.loading === true && loading === false && (
+        <Stepper
+          manifest={manifest}
+          layouts={layouts}
           extensions={customFieldExtensions}
-          handleNext={onCreate}
-          step={stepper.currentStep}
-          {...props}
+          form={
+            <Form
+              extensions={customFieldExtensions}
+              handleNext={onCreate}
+              {...props}
+            />
+          }
         >
           {children}
-        </Form>
+        </Stepper>
       )}
       {taskStream.loading === false && <TaskProgress taskStream={taskStream} />}
     </>
