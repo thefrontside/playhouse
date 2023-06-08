@@ -14,13 +14,17 @@ import { assert } from 'assert-ts';
 import {
   useWorkflowManifest,
   type RunWorkflow,
+  TaskProgress,
 } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { ReusableWorkflow } from './ReusableWorkflow';
 
 import { ScaffolderFieldExtensions } from '@backstage/plugin-scaffolder-react';
 import { characterTextField } from './FieldExtension';
 import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
-import { createNextScaffolderFieldExtension } from '@backstage/plugin-scaffolder-react/alpha';
+import {
+  createNextScaffolderFieldExtension,
+  ParsedTemplateSchema,
+} from '@backstage/plugin-scaffolder-react/alpha';
 
 export const configuredFieldExtensions = [characterTextField].map(extension =>
   scaffolderPlugin.provide(createNextScaffolderFieldExtension(extension)),
@@ -67,11 +71,11 @@ export function EntityOnboardingWorkflow(
     name: props.templateName,
   });
 
-  const workflowErrorHandler = (...args) => {
+  const workflowErrorHandler = (...args: any[]) => {
     console.log('workflow error', args);
   };
 
-  const workflowCompleteHandler = (...args) => {
+  const workflowCompleteHandler = (...args: any[]) => {
     console.log('workflow complete', args);
   };
 
@@ -86,19 +90,24 @@ export function EntityOnboardingWorkflow(
   }
 
   return manifest ? (
-    <ReusableWorkflow
-      manifest={manifest}
-      workflow={workflow}
-      initialState={{ entityRef, catalogInfoUrl }}
-      reviewComponent={<EntityOnboardingReview workflow={workflow} />}
-    >
-      <ScaffolderFieldExtensions>
-        {configuredFieldExtensions.map((FieldExtension, index) => (
-          <FieldExtension key={`fieldExtension${index}`} />
-        ))}
-      </ScaffolderFieldExtensions>
-      {props.children}
-    </ReusableWorkflow>
+    <>
+      <ReusableWorkflow
+        manifest={manifest}
+        workflow={workflow}
+        initialState={{ entityRef, catalogInfoUrl }}
+        stepperProgress={<StepperProgress />}
+        reviewComponent={<EntityOnboardingReview workflow={workflow} />}
+      >
+        <ScaffolderFieldExtensions>
+          {configuredFieldExtensions.map((FieldExtension, index) => (
+            <FieldExtension key={`fieldExtension${index}`} />
+          ))}
+        </ScaffolderFieldExtensions>
+      </ReusableWorkflow>
+      {workflow.taskStream.loading === false && (
+        <TaskProgress taskStream={workflow.taskStream} />
+      )}
+    </>
   ) : null;
 }
 
@@ -126,4 +135,31 @@ function EntityOnboardingReview({
   }
 
   return null;
+}
+
+import {
+  Stepper as MuiStepper,
+  Step as MuiStep,
+  StepLabel as MuiStepLabel,
+} from '@material-ui/core';
+
+function StepperProgress({
+  activeStep,
+  steps = [],
+}: {
+  activeStep?: number;
+  steps?: ParsedTemplateSchema[];
+}) {
+  return (
+    <MuiStepper activeStep={activeStep} alternativeLabel variant="elevation">
+      {steps.map((step, index) => (
+        <MuiStep key={index}>
+          <MuiStepLabel>{step.title}</MuiStepLabel>
+        </MuiStep>
+      ))}
+      <MuiStep>
+        <MuiStepLabel>Review</MuiStepLabel>
+      </MuiStep>
+    </MuiStepper>
+  );
 }

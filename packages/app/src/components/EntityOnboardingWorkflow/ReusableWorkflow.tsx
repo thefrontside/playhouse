@@ -7,19 +7,20 @@ import { NextFieldExtensionOptions } from '@backstage/plugin-scaffolder-react/al
 import { JsonValue } from '@backstage/types';
 import {
   Form,
-  useRunWorkflow,
+  Stepper,
   useStepper,
   useTransformSchemaToProps,
 } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { RunWorkflow } from '@frontside/backstage-plugin-scaffolder-workflow';
 import { ErrorSchema } from '@rjsf/utils';
-import React, { ReactNode, useCallback, cloneElement } from 'react';
+import React, { ReactNode, useCallback, cloneElement, useEffect } from 'react';
 
 type OnboardingWorkflowProps = {
   children: ReactNode;
   manifest: TemplateParameterSchema;
-  workflow: RunWorkflow
+  workflow: RunWorkflow;
   initialState?: Record<string, JsonValue>;
+  stepperProgress?: JSX.Element;
   reviewComponent?: JSX.Element;
 };
 
@@ -50,13 +51,23 @@ export const ReusableWorkflow = (props: OnboardingWorkflowProps) => {
   );
 
   if (stepper.activeStep >= stepper.steps.length) {
-    return cloneElement(props.reviewComponent ?? <></>, {
-      stepper,
-    });
+    return cloneElement(
+      props.reviewComponent ?? (
+        <DefaultReviewComponent workflow={props.workflow} />
+      ),
+      {
+        stepper,
+      },
+    );
   }
 
   return (
     <>
+      {props.stepperProgress
+        ? cloneElement(props.stepperProgress, {
+            ...stepper,
+          })
+        : null}
       <Form
         extensions={customFieldExtensions}
         handleNext={handleNext}
@@ -70,3 +81,18 @@ export const ReusableWorkflow = (props: OnboardingWorkflowProps) => {
     </>
   );
 };
+
+function DefaultReviewComponent({
+  workflow,
+  stepper,
+}: {
+  stepper?: Stepper;
+  workflow: RunWorkflow;
+}) {
+  useEffect(() => {
+    if (stepper && workflow.taskStatus === 'idle')
+      workflow.execute(stepper.formState);
+  }, [workflow, stepper]);
+
+  return null;
+}

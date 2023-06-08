@@ -9,21 +9,28 @@ import {
 const CharacterField = (
   props: NextFieldExtensionComponentProps<string, any>,
 ) => {
-  return <Input aria-label="character-text" type="text" onChange={e => props.onChange(e.target?.value)}/>;
+  return (
+    <Input
+      aria-label="character-text"
+      type="text"
+      onChange={e => props.onChange(e.target?.value)}
+    />
+  );
 };
 
 export const validateAsync = async (
   character: string,
   validation: FieldValidation,
 ) => {
-  console.dir({ character, validation });
   try {
     const response = await fetch('https://swapi.dev/api/people');
     const { results } = (await response.json()) as unknown as {
       results: { name: string }[];
     };
 
-    const characterMatch = results.find(r => r.name.includes(character));
+    const characterMatch = results.find(r =>
+      r.name.toLowerCase().includes(character.toLowerCase()),
+    );
     if (!characterMatch) validation.addError('Did not find this character.');
   } catch (e: any) {
     validation.addError(e.message);
