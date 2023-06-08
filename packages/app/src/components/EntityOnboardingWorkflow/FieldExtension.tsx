@@ -9,7 +9,7 @@ import {
 const CharacterField = (
   props: NextFieldExtensionComponentProps<string, any>,
 ) => {
-  return <Input aria-label="character-text" type="text" />;
+  return <Input aria-label="character-text" type="text" onChange={e => props.onChange(e.target?.value)}/>;
 };
 
 export const validateAsync = async (

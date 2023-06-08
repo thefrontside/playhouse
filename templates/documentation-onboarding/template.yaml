@@ -9,7 +9,7 @@ spec:
   type: service
   parameters:
     - title: Select file and branch
-      required: ['catalogInfoUrl', 'branch']
+      required: ['catalogInfoUrl', 'branch', 'character']
       properties:
         catalogInfoUrl:
           title: The catalog-info.yaml url
