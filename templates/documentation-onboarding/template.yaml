@@ -9,7 +9,7 @@ spec:
   type: service
   parameters:
     - title: Select file and branch
-      required: ['catalogInfoUrl', 'branch', 'character']
+      required: ['catalogInfoUrl', 'branch']
       properties:
         catalogInfoUrl:
           title: The catalog-info.yaml url
@@ -26,6 +26,9 @@ spec:
           type: string
           description: the branch name for the pull request
           default: add-annotation-to-catalog-info
+    - title: Select A Character
+      required: ['character']
+      properties:
         character:
           title: Character
           type: string

@@ -26,6 +26,13 @@ import {
   ParsedTemplateSchema,
 } from '@backstage/plugin-scaffolder-react/alpha';
 
+import {
+  Stepper as MuiStepper,
+  Step as MuiStep,
+  StepLabel as MuiStepLabel,
+  Button,
+} from '@material-ui/core';
+
 export const configuredFieldExtensions = [characterTextField].map(extension =>
   scaffolderPlugin.provide(createNextScaffolderFieldExtension(extension)),
 );
@@ -36,10 +43,20 @@ function OnboardingActions(props: ReturnType<typeof useStepper>) {
   console.log(props);
   return (
     <>
-      <button onClick={props.handleBack}>Back</button>
-      <button onClick={() => props.handleForward(props.formState)}>
-        Forward
-      </button>
+      <Button
+        onClick={props.handleBack}
+        disabled={props.activeStep < 1 || props.isValidating}
+      >
+        Back
+      </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        type="submit"
+        disabled={props.isValidating}
+      >
+        {props.activeStep === props.steps.length - 1 ? 'Review' : 'Next'}
+      </Button>
     </>
   );
 }
@@ -95,6 +112,7 @@ export function EntityOnboardingWorkflow(
         manifest={manifest}
         workflow={workflow}
         initialState={{ entityRef, catalogInfoUrl }}
+        formFooter={<OnboardingActions />}
         stepperProgress={<StepperProgress />}
         reviewComponent={<EntityOnboardingReview workflow={workflow} />}
       >
@@ -136,12 +154,6 @@ function EntityOnboardingReview({
 
   return null;
 }
-
-import {
-  Stepper as MuiStepper,
-  Step as MuiStep,
-  StepLabel as MuiStepLabel,
-} from '@material-ui/core';
 
 function StepperProgress({
   activeStep,

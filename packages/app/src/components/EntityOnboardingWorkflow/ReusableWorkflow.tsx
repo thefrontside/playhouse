@@ -20,6 +20,7 @@ type OnboardingWorkflowProps = {
   manifest: TemplateParameterSchema;
   workflow: RunWorkflow;
   initialState?: Record<string, JsonValue>;
+  formFooter: JSX.Element;
   stepperProgress?: JSX.Element;
   reviewComponent?: JSX.Element;
 };
@@ -42,7 +43,7 @@ export const ReusableWorkflow = (props: OnboardingWorkflowProps) => {
     { layouts },
   );
 
-  const handleNext = useCallback(
+  const handleForward = useCallback(
     async formData => {
       console.log('handle next', formData);
       stepper.handleForward({ formData });
@@ -70,13 +71,15 @@ export const ReusableWorkflow = (props: OnboardingWorkflowProps) => {
         : null}
       <Form
         extensions={customFieldExtensions}
-        handleNext={handleNext}
+        handleNext={handleForward}
         step={currentStep}
         extraErrors={stepper.errors as unknown as ErrorSchema}
         {...props}
       >
         {props.children}
-        <button type="submit">Submit</button>
+        {cloneElement(props.formFooter, {
+          ...stepper,
+        })}
       </Form>
     </>
   );
