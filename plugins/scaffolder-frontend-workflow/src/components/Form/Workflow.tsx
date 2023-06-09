@@ -14,6 +14,7 @@ import {
 import { NextFieldExtensionOptions } from '@backstage/plugin-scaffolder-react/alpha';
 import { JsonValue } from '@backstage/types';
 import { ErrorSchema } from '@rjsf/utils';
+import { makeStyles } from '@material-ui/core';
 
 type OnboardingWorkflowProps = {
   children: ReactNode;
@@ -24,6 +25,12 @@ type OnboardingWorkflowProps = {
   stepperProgress?: JSX.Element;
   reviewComponent?: JSX.Element;
 };
+
+const useStyles = makeStyles(theme => ({
+  formWrapper: {
+    padding: theme.spacing(2),
+  },
+}));
 
 export const Workflow = (props: OnboardingWorkflowProps) => {
   const customFieldExtensions = useCustomFieldExtensions<
@@ -50,14 +57,19 @@ export const Workflow = (props: OnboardingWorkflowProps) => {
     [stepper],
   );
 
+  const styles = useStyles();
   if (stepper.activeStep >= stepper.steps.length) {
-    return cloneElement(
-      props.reviewComponent ?? (
-        <DefaultReviewComponent workflow={props.workflow} />
-      ),
-      {
-        stepper,
-      },
+    return (
+      <div className={styles.formWrapper}>
+        {cloneElement(
+          props.reviewComponent ?? (
+            <DefaultReviewComponent workflow={props.workflow} />
+          ),
+          {
+            stepper,
+          },
+        )}
+      </div>
     );
   }
 

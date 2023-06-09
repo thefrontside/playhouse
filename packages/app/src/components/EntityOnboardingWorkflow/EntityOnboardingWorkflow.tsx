@@ -21,6 +21,7 @@ import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
 import {
   createNextScaffolderFieldExtension,
   ParsedTemplateSchema,
+  ReviewState,
 } from '@backstage/plugin-scaffolder-react/alpha';
 
 import {
@@ -28,7 +29,10 @@ import {
   Step as MuiStep,
   StepLabel as MuiStepLabel,
   Button,
+  makeStyles,
 } from '@material-ui/core';
+import { InfoCard, MarkdownContent } from '@backstage/core-components';
+import { BackstageTheme } from '@backstage/theme';
 
 export const configuredFieldExtensions = [characterTextField].map(extension =>
   scaffolderPlugin.provide(createNextScaffolderFieldExtension(extension)),
@@ -57,16 +61,29 @@ function OnboardingActions({
           type="submit"
           disabled={stepper.isValidating}
         >
-          {stepper.activeStep === stepper.steps.length - 1 ? 'Review' : 'Next'}
+          {stepper.activeStep > stepper.steps.length - 1 ? 'Review' : 'Next'}
         </Button>
       </>
     );
   return null;
 }
 
+const useMainStyles = makeStyles<BackstageTheme>(() => ({
+  markdown: {
+    /** to make the styles for React Markdown not leak into the description */
+    '& :first-child': {
+      marginTop: 0,
+    },
+    '& :last-child': {
+      marginBottom: 0,
+    },
+  },
+}));
+
 export function EntityOnboardingWorkflow(
   props: EntityOnboardingWorkflowProps,
 ): JSX.Element | null {
+  const styles = useMainStyles();
   const { entity } = useEntity();
 
   const entityRef = stringifyEntityRef(entity);
@@ -112,7 +129,17 @@ export function EntityOnboardingWorkflow(
   }
 
   return manifest ? (
-    <>
+    <InfoCard
+      title={manifest.title}
+      subheader={
+        <MarkdownContent
+          className={styles.markdown}
+          content={manifest.description ?? 'No description'}
+        />
+      }
+      noPadding
+      titleTypographyProps={{ component: 'h2' }}
+    >
       <Workflow
         manifest={manifest}
         workflow={workflow}
@@ -130,9 +157,18 @@ export function EntityOnboardingWorkflow(
       {workflow.taskStream.loading === false && (
         <TaskProgress taskStream={workflow.taskStream} />
       )}
-    </>
+    </InfoCard>
   ) : null;
 }
+
+const useReviewStyles = makeStyles(theme => ({
+  footer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'right',
+    marginTop: theme.spacing(2),
+  },
+}));
 
 function EntityOnboardingReview({
   stepper,
@@ -141,18 +177,14 @@ function EntityOnboardingReview({
   stepper?: Stepper;
   workflow: RunWorkflow;
 }) {
+  const styles = useReviewStyles();
   if (stepper) {
     return (
       <>
-        <ul>
-          {Object.entries(stepper.formState).map(([key, value]) => (
-            <li key={key}>
-              <strong>{key}</strong>: {value}
-            </li>
-          ))}
-        </ul>
-        <button onClick={() => stepper.handleBack()}>Back</button>
-        <button onClick={() => workflow.execute(stepper.formState)}>Run</button>
+        <ReviewState schemas={stepper.steps} formState={stepper.formState} />
+        <div className={styles.footer}>
+          <OnboardingActions workflow={workflow} stepper={stepper} />
+        </div>
       </>
     );
   }
