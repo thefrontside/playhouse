@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import {
   ANNOTATION_ORIGIN_LOCATION,
   stringifyEntityRef,
@@ -8,15 +8,12 @@ import {
   EmbeddedScaffolderWorkflowProps,
   Stepper,
   useRunWorkflow,
-  useStepper,
-} from '@frontside/backstage-plugin-scaffolder-workflow';
-import { assert } from 'assert-ts';
-import {
   useWorkflowManifest,
   type RunWorkflow,
   TaskProgress,
+  Workflow,
 } from '@frontside/backstage-plugin-scaffolder-workflow';
-import { ReusableWorkflow } from './ReusableWorkflow';
+import { assert } from 'assert-ts';
 
 import { ScaffolderFieldExtensions } from '@backstage/plugin-scaffolder-react';
 import { characterTextField } from './FieldExtension';
@@ -39,26 +36,32 @@ export const configuredFieldExtensions = [characterTextField].map(extension =>
 
 type EntityOnboardingWorkflowProps = EmbeddedScaffolderWorkflowProps;
 
-function OnboardingActions(props: ReturnType<typeof useStepper>) {
-  console.log(props);
-  return (
-    <>
-      <Button
-        onClick={props.handleBack}
-        disabled={props.activeStep < 1 || props.isValidating}
-      >
-        Back
-      </Button>
-      <Button
-        variant="contained"
-        color="primary"
-        type="submit"
-        disabled={props.isValidating}
-      >
-        {props.activeStep === props.steps.length - 1 ? 'Review' : 'Next'}
-      </Button>
-    </>
-  );
+function OnboardingActions({
+  stepper,
+}: {
+  stepper?: Stepper;
+  workflow: RunWorkflow;
+}) {
+  if (stepper)
+    return (
+      <>
+        <Button
+          onClick={stepper.handleBack}
+          disabled={stepper.activeStep < 1 || stepper.isValidating}
+        >
+          Back
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          type="submit"
+          disabled={stepper.isValidating}
+        >
+          {stepper.activeStep === stepper.steps.length - 1 ? 'Review' : 'Next'}
+        </Button>
+      </>
+    );
+  return null;
 }
 
 export function EntityOnboardingWorkflow(
@@ -88,12 +91,14 @@ export function EntityOnboardingWorkflow(
     name: props.templateName,
   });
 
-  const workflowErrorHandler = (...args: any[]) => {
-    console.log('workflow error', args);
+  const workflowErrorHandler = () => {
+    // when ...args: any[]
+    // console.log('workflow error', args);
   };
 
-  const workflowCompleteHandler = (...args: any[]) => {
-    console.log('workflow complete', args);
+  const workflowCompleteHandler = () => {
+    // when ...args: any[]
+    // console.log('workflow complete', args);
   };
 
   const workflow = useRunWorkflow({
@@ -108,11 +113,11 @@ export function EntityOnboardingWorkflow(
 
   return manifest ? (
     <>
-      <ReusableWorkflow
+      <Workflow
         manifest={manifest}
         workflow={workflow}
         initialState={{ entityRef, catalogInfoUrl }}
-        formFooter={<OnboardingActions />}
+        formFooter={<OnboardingActions workflow={workflow} />}
         stepperProgress={<StepperProgress />}
         reviewComponent={<EntityOnboardingReview workflow={workflow} />}
       >
@@ -121,7 +126,7 @@ export function EntityOnboardingWorkflow(
             <FieldExtension key={`fieldExtension${index}`} />
           ))}
         </ScaffolderFieldExtensions>
-      </ReusableWorkflow>
+      </Workflow>
       {workflow.taskStream.loading === false && (
         <TaskProgress taskStream={workflow.taskStream} />
       )}

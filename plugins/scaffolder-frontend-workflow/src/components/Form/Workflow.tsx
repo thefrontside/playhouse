@@ -1,80 +1,102 @@
-import React, { useEffect } from 'react';
-import { stringifyEntityRef } from '@backstage/catalog-model';
-import { useCustomFieldExtensions } from '@backstage/plugin-scaffolder-react';
+import React, { ReactNode, useCallback, cloneElement, useEffect } from 'react';
 import {
-  NextFieldExtensionOptions,
-  WorkflowProps,
-  useTemplateParameterSchema,
-} from '@backstage/plugin-scaffolder-react/alpha';
-import { ReactNode, useCallback } from 'react';
+  TemplateParameterSchema,
+  useCustomFieldExtensions,
+  useCustomLayouts,
+} from '@backstage/plugin-scaffolder-react';
+import {
+  Form,
+  Stepper,
+  useStepper,
+  useTransformSchemaToProps,
+  RunWorkflow,
+} from '@frontside/backstage-plugin-scaffolder-workflow';
+import { NextFieldExtensionOptions } from '@backstage/plugin-scaffolder-react/alpha';
 import { JsonValue } from '@backstage/types';
-import { useRunWorkflow } from '../../hooks/useRunWorkflow';
-import { Progress } from '@backstage/core-components';
-import { TaskProgress } from '../TaskProgress/TaskProgress';
-import { Form } from './Form';
+import { ErrorSchema } from '@rjsf/utils';
 
-type Props = Pick<
-  WorkflowProps,
-  'namespace' | 'templateName' | 'onCreate' | 'initialState'
-> & {
-  onComplete?: () => void;
+type OnboardingWorkflowProps = {
   children: ReactNode;
-  onError?: (e: Error) => void;
-  onTaskCreated(loading: boolean): void;
+  manifest: TemplateParameterSchema;
+  workflow: RunWorkflow;
+  initialState?: Record<string, JsonValue>;
+  formFooter?: JSX.Element;
+  stepperProgress?: JSX.Element;
+  reviewComponent?: JSX.Element;
 };
 
-export function Workflow({
-  namespace,
-  templateName,
-  onError,
-  children,
-  onComplete,
-  onTaskCreated,
-  ...props
-}: Props): JSX.Element {
-  const customFieldExtensions =
-    useCustomFieldExtensions<NextFieldExtensionOptions<any, any>>(children);
+export const Workflow = (props: OnboardingWorkflowProps) => {
+  const customFieldExtensions = useCustomFieldExtensions<
+    NextFieldExtensionOptions<any, any>
+  >(props.children);
 
-  const templateRef = stringifyEntityRef({
-    kind: 'Template',
-    namespace: namespace,
-    name: templateName,
+  const layouts = useCustomLayouts(props.children);
+
+  const stepper = useStepper({
+    manifest: props.manifest,
+    extensions: customFieldExtensions,
+    initialState: props.initialState,
   });
 
-  const { loading, manifest } = useTemplateParameterSchema(templateRef);
-
-  const { execute, taskStream } = useRunWorkflow({
-    templateRef,
-    onError,
-    onComplete,
-  });
-
-  const handleNext = useCallback(
-    async (formData: Record<string, JsonValue>) => {
-      await execute(formData);
-    },
-    [execute],
+  const currentStep = useTransformSchemaToProps(
+    stepper.steps[stepper.activeStep],
+    { layouts },
   );
 
-  useEffect(() => {
-    if (taskStream.loading === false) {
-      onTaskCreated(true);
-    }
-  }, [onTaskCreated, taskStream.loading]);
+  const handleForward = useCallback(
+    async formData => {
+      stepper.handleForward({ formData });
+    },
+    [stepper],
+  );
+
+  if (stepper.activeStep >= stepper.steps.length) {
+    return cloneElement(
+      props.reviewComponent ?? (
+        <DefaultReviewComponent workflow={props.workflow} />
+      ),
+      {
+        stepper,
+      },
+    );
+  }
 
   return (
     <>
-      {loading && <Progress />}
-      {manifest && taskStream.loading === true && (
-        <Form
-          extensions={customFieldExtensions}
-          handleNext={handleNext}
-          {...props}
-        >
-          {children}
-        </Form>
-      )}
-      {taskStream.loading === false && <TaskProgress taskStream={taskStream} />}
+      {props.stepperProgress
+        ? cloneElement(props.stepperProgress, {
+            ...stepper,
+          })
+        : null}
+      <Form
+        extensions={customFieldExtensions}
+        handleNext={handleForward}
+        step={currentStep}
+        extraErrors={stepper.errors as unknown as ErrorSchema}
+        {...props}
+      >
+        {props.children}
+        {props.formFooter
+          ? cloneElement(props.formFooter, {
+              stepper,
+            })
+          : null}
+      </Form>
     </>
   );
+};
+
+function DefaultReviewComponent({
+  workflow,
+  stepper,
+}: {
+  stepper?: Stepper;
+  workflow: RunWorkflow;
+}) {
+  useEffect(() => {
+    if (stepper && workflow.taskStatus === 'idle')
+      workflow.execute(stepper.formState);
+  }, [workflow, stepper]);
+
+  return null;
 }
