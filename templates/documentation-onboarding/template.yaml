@@ -26,14 +26,6 @@ spec:
           type: string
           description: the branch name for the pull request
           default: add-annotation-to-catalog-info
-    - title: Select A Character
-      required: ['character']
-      properties:
-        character:
-          title: Character
-          type: string
-          description: choose a star wars character
-          'ui:field': CharacterText
 
   steps:
     - id: fetchPlain

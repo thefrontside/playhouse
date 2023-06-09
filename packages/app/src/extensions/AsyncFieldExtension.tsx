@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControl, FormLabel, Input, makeStyles } from '@material-ui/core';
+import { FormControl, InputLabel, Input, makeStyles } from '@material-ui/core';
 import { FieldValidation } from '@rjsf/utils';
 import {
   NextFieldExtensionOptions,
@@ -40,7 +40,7 @@ const CharacterField = (
       required={required}
       disabled={disabled}
     >
-      {schema?.title ? <FormLabel>{schema.title}</FormLabel> : null}
+      {schema?.title ? <InputLabel shrink>{schema.title}</InputLabel> : null}
       <Input
         aria-label="character-text"
         type="text"

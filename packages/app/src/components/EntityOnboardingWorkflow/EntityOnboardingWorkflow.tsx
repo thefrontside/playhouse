@@ -16,10 +16,8 @@ import {
 import { assert } from 'assert-ts';
 
 import { ScaffolderFieldExtensions } from '@backstage/plugin-scaffolder-react';
-import { characterTextField } from './FieldExtension';
-import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
+import { configuredFieldExtensions } from '../../extensions';
 import {
-  createNextScaffolderFieldExtension,
   ParsedTemplateSchema,
   ReviewState,
 } from '@backstage/plugin-scaffolder-react/alpha';
@@ -33,10 +31,6 @@ import {
 } from '@material-ui/core';
 import { InfoCard, MarkdownContent } from '@backstage/core-components';
 import { BackstageTheme } from '@backstage/theme';
-
-export const configuredFieldExtensions = [characterTextField].map(extension =>
-  scaffolderPlugin.provide(createNextScaffolderFieldExtension(extension)),
-);
 
 type EntityOnboardingWorkflowProps = EmbeddedScaffolderWorkflowProps;
 

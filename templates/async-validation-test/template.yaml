@@ -1,0 +1,34 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: async-validation-test
+  title: Async Validation Test
+  description: For testing
+spec:
+  owner: john@example.com
+  type: service
+  parameters:
+    - title: Select file and branch
+      required: ['catalogInfoUrl']
+      properties:
+        catalogInfoUrl:
+          title: The catalog-info.yaml url
+          type: string
+          description: The catalog-info.yaml file to add the annotation to
+          ui:readonly: true
+          default: https://github.com/thefrontside/playhouse/blob/main/catalog-info.yaml
+    - title: Select A Character
+      required: ['character']
+      properties:
+        character:
+          title: Character
+          type: string
+          description: choose a star wars character
+          'ui:field': CharacterText
+
+  steps:
+    - id: fetchPlain
+      name: Fetch the file
+      action: fetch:plain
+      input:
+        url: ${{ parameters.catalogInfoUrl }}
