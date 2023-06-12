@@ -109,7 +109,7 @@ function splitPath(string: string) {
   return result;
 }
 
-function set({
+export function set({
   content,
   path,
   value,
@@ -127,9 +127,14 @@ function set({
   for (const document of documents) {
     assert(isMap(document.contents));
 
-    const documentEntityRef = stringifyEntityRef(document.contents.toJSON());
+    const maybeEntity = document.contents.toJSON();
 
-    if (entityRef && documentEntityRef !== entityRef) {
+    if (
+      typeof maybeEntity.kind === 'string' &&
+      typeof maybeEntity.name === 'string' &&
+      entityRef &&
+      stringifyEntityRef(maybeEntity) !== entityRef
+    ) {
       continue;
     }
 
@@ -139,7 +144,6 @@ function set({
       const key = keys[i] as unknown as ParsedNode;
 
       if (isLast) {
-        assert(!!value);
         next.set(key, document.createNode(value) as ParsedNode);
         continue;
       }
