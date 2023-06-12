@@ -16,6 +16,8 @@ type Props = {
 
 export type TaskStatus = 'idle' | 'pending' | 'error' | 'success';
 
+export type RunWorkflow = ReturnType<typeof useRunWorkflow>;
+
 export function useRunWorkflow({ templateRef, onComplete, onError }: Props) {
   const scaffolderApi = useApi(scaffolderApiRef);
   const [taskId, setTaskId] = useState<string>();

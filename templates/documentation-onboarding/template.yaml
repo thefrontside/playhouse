@@ -33,7 +33,7 @@ spec:
       action: fetch:plain
       input:
         url: ${{ parameters.catalogInfoUrl }}
-        
+
     - id: add-annotation
       name: AddAnnotation
       action: backend:add-annotation
@@ -49,7 +49,7 @@ spec:
         repoUrl: ${{ steps['add-annotation'].output.repoUrl }}
         title: Onboarding to TechDocs
         description: Merge this pull request to setup documentation.
-        targetPath: "."
+        targetPath: '.'
         sourcePath: ${{ steps['add-annotation'].output.path }}
         branchName: ${{ parameters.branch }}
 

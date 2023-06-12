@@ -1,9 +1,9 @@
 import { JsonValue } from '@backstage/types';
-import { makeStyles } from '@material-ui/core';
 import { type IChangeEvent } from '@rjsf/core-v5';
 import React, { useCallback, useMemo, type ReactNode } from 'react';
 import validator from '@rjsf/validator-ajv8';
 import { RJSFForm } from './RJSFForm';
+import { FormProps as FormProps$1 } from '@rjsf/core-v5';
 import {
   type FormProps,
   type NextFieldExtensionOptions,
@@ -11,27 +11,11 @@ import {
   ParsedTemplateSchema,
 } from '@backstage/plugin-scaffolder-react/alpha';
 
-const useStyles = makeStyles(theme => ({
-  backButton: {
-    marginRight: theme.spacing(1),
-  },
-  footer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'right',
-    marginTop: theme.spacing(2),
-  },
-  formWrapper: {
-    padding: theme.spacing(2),
-  },
-}));
-
-interface Props {
+type Props = {
   extensions: NextFieldExtensionOptions<any, any>[];
   templateName?: string;
   FormProps?: FormProps;
   initialState?: Record<string, JsonValue>;
-  onCreate: (values: Record<string, JsonValue>) => Promise<void>;
   step: ParsedTemplateSchema;
   handleNext: ({
     formData,
@@ -39,12 +23,10 @@ interface Props {
     formData?: Record<string, JsonValue> | undefined;
   }) => Promise<void>;
   children: ReactNode;
-}
+} & Pick<FormProps$1, 'extraErrors'>;
 
 export const Form = (props: Props) => {
   const [formState, setFormState] = useFormDataFromQuery(props.initialState);
-
-  const styles = useStyles();
 
   const extensions = useMemo(() => {
     return Object.fromEntries(
@@ -69,24 +51,21 @@ export const Form = (props: Props) => {
   };
 
   return (
-    <>
-      <div className={styles.formWrapper}>
-        <RJSFForm
-          validator={validator}
-          formData={formState}
-          formContext={{ formData: formState }}
-          schema={props.step.schema}
-          uiSchema={props.step.uiSchema}
-          onSubmit={handleNext}
-          fields={{ ...extensions }}
-          showErrorList={false}
-          onChange={handleChange}
-          {...(props.FormProps ?? {})}
-          noHtml5Validate
-        >
-          <div className={styles.footer}>{props.children}</div>
-        </RJSFForm>
-      </div>
-    </>
+    <RJSFForm
+      validator={validator}
+      formData={formState}
+      formContext={{ formData: formState }}
+      schema={props.step.schema}
+      uiSchema={props.step.uiSchema}
+      onSubmit={handleNext}
+      fields={{ ...extensions }}
+      showErrorList={false}
+      extraErrors={props.extraErrors}
+      onChange={handleChange}
+      {...(props.FormProps ?? {})}
+      noHtml5Validate
+    >
+      {props.children}
+    </RJSFForm>
   );
 };

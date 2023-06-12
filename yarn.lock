@@ -8380,6 +8380,17 @@
     lodash-es "^4.17.15"
     react-is "^18.2.0"
 
+"@rjsf/utils@^5.8.1":
+  version "5.8.1"
+  resolved "https://registry.yarnpkg.com/@rjsf/utils/-/utils-5.8.1.tgz#65a8ce45740fd62c0e17188685ee963396c8bea0"
+  integrity sha512-kzWVNAW417ADG0nSEPxpqYzLrtzi9tKCCn5rOuwt6FIvSrtkatISBekyKNeycGPUfQR9VkROGrcG8cz10xUs6g==
+  dependencies:
+    json-schema-merge-allof "^0.8.1"
+    jsonpointer "^5.0.1"
+    lodash "^4.17.21"
+    lodash-es "^4.17.21"
+    react-is "^18.2.0"
+
 "@rjsf/validator-ajv8@5.6.0":
   version "5.6.0"
   resolved "https://registry.yarnpkg.com/@rjsf/validator-ajv8/-/validator-ajv8-5.6.0.tgz#6e34c47f9ab0e2fa054bc525b3e22ef3f09bd503"
@@ -17984,6 +17995,17 @@ json-schema-library@^7.3.9:
   version "7.4.4"
   resolved "https://registry.yarnpkg.com/json-schema-library/-/json-schema-library-7.4.4.tgz#8c09aa0a4e20cb5cc46c0b148ad9384ca1f861c0"
   integrity sha512-pn1uP4UChkqFvJ9KAZnPgZZbn8QDMmROwhR0EnjS4yW97aCy7jiu4bwEPsAZbqLE+ioSosaayHgC8HzsX2OZkQ==
+  dependencies:
+    "@sagold/json-pointer" "^5.0.0"
+    "@sagold/json-query" "^6.0.0"
+    deepmerge "^4.2.2"
+    fast-deep-equal "^3.1.3"
+    valid-url "^1.0.9"
+
+json-schema-library@^7.4.8:
+  version "7.4.8"
+  resolved "https://registry.yarnpkg.com/json-schema-library/-/json-schema-library-7.4.8.tgz#97e911f53c0ec9a1e0187faffa3ab03b50b58824"
+  integrity sha512-az9m/AuE9AZLC4OocYvswfLYDGbMN8hlxwH/+6ElPG8Dc5kWPhDNmjMTOCYoa+SKEsibx4ts/xnsvp7uiWrXEQ==
   dependencies:
     "@sagold/json-pointer" "^5.0.0"
     "@sagold/json-query" "^6.0.0"
