@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.6.0
+
+### Minor Changes
+
+- ed36b96: Updated the Workflow component and related hooks to enable fully creating the Scaffolder form customizable in userland. This includes breaking changes to Workflow, new hooks to handle validation, and an update to useStepper to support that validation.
+
 ## 0.5.0
 
 ### Minor Changes
