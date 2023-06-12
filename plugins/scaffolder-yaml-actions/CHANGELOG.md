@@ -1,5 +1,11 @@
 # @frontside/scaffolder-yaml-actions
 
+## 0.1.3
+
+### Patch Changes
+
+- 287bc1c: Added tests for string, number and null value
+
 ## 0.1.2
 
 ### Patch Changes
