@@ -25,6 +25,36 @@ type OnboardingWorkflowProps = {
   reviewComponent?: JSX.Element;
 };
 
+/**
+ * With the hooks from this package, one can recreate the Scaffolder
+ * form and review component implementing fully customized design and UI.
+ * 
+ * @param children - Used to pass any field extensions expected by the RJSF form
+ * @param manifest - The template as returned from the `useWorkflowManifest` hook
+ * @param workflow - The workflow as returned by the `useRunWorkflow` hook
+ * @param initialState - The form's initial state
+ * @param formFooter - Component which handles the form forward, back and review buttons
+ * @param stepperProgress - Component which represents the user's current progress in the form
+ * @param reviewComponent - Component which shows the review state after the form is complete and ready for submission
+ *  
+ * @example using the component
+ * ```javascript
+    <Workflow
+      manifest={manifest}
+      workflow={workflow}
+      initialState={{ entityRef, catalogInfoUrl }}
+      formFooter={<OnboardingActions workflow={workflow} />}
+      stepperProgress={<StepperProgress />}
+      reviewComponent={<EntityOnboardingReview workflow={workflow} />}
+    >
+      <ScaffolderFieldExtensions>
+        {configuredFieldExtensions.map((FieldExtension, index) => (
+          <FieldExtension key={`fieldExtension${index}`} />
+        ))}
+      </ScaffolderFieldExtensions>
+    </Workflow>
+ * ```
+ */
 export const Workflow = (props: OnboardingWorkflowProps) => {
   const customFieldExtensions = useCustomFieldExtensions<
     NextFieldExtensionOptions<any, any>
