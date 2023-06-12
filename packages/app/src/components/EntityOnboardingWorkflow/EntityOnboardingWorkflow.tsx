@@ -34,15 +34,37 @@ import { BackstageTheme } from '@backstage/theme';
 
 type EntityOnboardingWorkflowProps = EmbeddedScaffolderWorkflowProps;
 
+const useStyles = makeStyles<BackstageTheme>(theme => ({
+  formWrapper: {
+    padding: theme.spacing(2),
+  },
+  formFooter: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'right',
+    marginTop: theme.spacing(2),
+  },
+  markdown: {
+    /** to make the styles for React Markdown not leak into the description */
+    '& :first-child': {
+      marginTop: 0,
+    },
+    '& :last-child': {
+      marginBottom: 0,
+    },
+  },
+}));
+
 function OnboardingActions({
   stepper,
 }: {
   stepper?: Stepper;
   workflow: RunWorkflow;
 }) {
+  const styles = useStyles();
   if (stepper)
     return (
-      <>
+      <div className={styles.formFooter}>
         <Button
           onClick={stepper.handleBack}
           disabled={stepper.activeStep < 1 || stepper.isValidating}
@@ -57,27 +79,15 @@ function OnboardingActions({
         >
           {stepper.activeStep > stepper.steps.length - 1 ? 'Review' : 'Next'}
         </Button>
-      </>
+      </div>
     );
   return null;
 }
 
-const useMainStyles = makeStyles<BackstageTheme>(() => ({
-  markdown: {
-    /** to make the styles for React Markdown not leak into the description */
-    '& :first-child': {
-      marginTop: 0,
-    },
-    '& :last-child': {
-      marginBottom: 0,
-    },
-  },
-}));
-
 export function EntityOnboardingWorkflow(
   props: EntityOnboardingWorkflowProps,
 ): JSX.Element | null {
-  const styles = useMainStyles();
+  const styles = useStyles();
   const { entity } = useEntity();
 
   const entityRef = stringifyEntityRef(entity);
@@ -134,35 +144,28 @@ export function EntityOnboardingWorkflow(
       noPadding
       titleTypographyProps={{ component: 'h2' }}
     >
-      <Workflow
-        manifest={manifest}
-        workflow={workflow}
-        initialState={{ entityRef, catalogInfoUrl }}
-        formFooter={<OnboardingActions workflow={workflow} />}
-        stepperProgress={<StepperProgress />}
-        reviewComponent={<EntityOnboardingReview workflow={workflow} />}
-      >
-        <ScaffolderFieldExtensions>
-          {configuredFieldExtensions.map((FieldExtension, index) => (
-            <FieldExtension key={`fieldExtension${index}`} />
-          ))}
-        </ScaffolderFieldExtensions>
-      </Workflow>
+      <div className={styles.formWrapper}>
+        <Workflow
+          manifest={manifest}
+          workflow={workflow}
+          initialState={{ entityRef, catalogInfoUrl }}
+          formFooter={<OnboardingActions workflow={workflow} />}
+          stepperProgress={<StepperProgress />}
+          reviewComponent={<EntityOnboardingReview workflow={workflow} />}
+        >
+          <ScaffolderFieldExtensions>
+            {configuredFieldExtensions.map((FieldExtension, index) => (
+              <FieldExtension key={`fieldExtension${index}`} />
+            ))}
+          </ScaffolderFieldExtensions>
+        </Workflow>
+      </div>
       {workflow.taskStream.loading === false && (
         <TaskProgress taskStream={workflow.taskStream} />
       )}
     </InfoCard>
   ) : null;
 }
-
-const useReviewStyles = makeStyles(theme => ({
-  footer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'right',
-    marginTop: theme.spacing(2),
-  },
-}));
 
 function EntityOnboardingReview({
   stepper,
@@ -171,15 +174,13 @@ function EntityOnboardingReview({
   stepper?: Stepper;
   workflow: RunWorkflow;
 }) {
-  const styles = useReviewStyles();
+  const styles = useStyles();
   if (stepper) {
     return (
-      <>
+      <div className={styles.formWrapper}>
         <ReviewState schemas={stepper.steps} formState={stepper.formState} />
-        <div className={styles.footer}>
-          <OnboardingActions workflow={workflow} stepper={stepper} />
-        </div>
-      </>
+        <OnboardingActions workflow={workflow} stepper={stepper} />
+      </div>
     );
   }
 
