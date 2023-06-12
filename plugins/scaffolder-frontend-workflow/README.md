@@ -1,4 +1,4 @@
-# @backstage/plugin-scaffolder-react
+# @frontside/backstage-plugin-scaffolder-workflow
 ## Why?
 Scaffolder workflows are one of the focal points of [backstage](https://backstage.io/) that alleviates the pain of writing boilerplate code for almost any situation.
 
