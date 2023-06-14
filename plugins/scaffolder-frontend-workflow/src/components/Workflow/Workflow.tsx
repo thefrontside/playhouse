@@ -116,7 +116,7 @@ export const Workflow = ({
         handleNext={handleForward}
         step={currentStep}
         extraErrors={stepper.errors as unknown as ErrorSchema}
-        initialState={initialState}
+        initialState={stepper.formState}
         {...FormProps}
       >
         {children}
