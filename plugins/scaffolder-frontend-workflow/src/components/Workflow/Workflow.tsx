@@ -1,21 +1,21 @@
-import React, { ReactNode, useCallback, cloneElement, useEffect } from 'react';
 import {
   TemplateParameterSchema,
   useCustomFieldExtensions,
   useCustomLayouts,
 } from '@backstage/plugin-scaffolder-react';
-import {
-  Form,
-  Stepper,
-  useStepper,
-  useTransformSchemaToProps,
-  RunWorkflow,
-} from '@frontside/backstage-plugin-scaffolder-workflow';
 import { NextFieldExtensionOptions } from '@backstage/plugin-scaffolder-react/alpha';
 import { JsonValue } from '@backstage/types';
 import { ErrorSchema } from '@rjsf/utils';
+import React, { ReactNode, cloneElement, useCallback, useEffect } from 'react';
+import {
+  RunWorkflow,
+  useStepper,
+  useTransformSchemaToProps,
+  type Stepper,
+} from '../../hooks';
+import { Form, type RJSFFormProps, type FormProps } from '../Form';
 
-type OnboardingWorkflowProps = {
+type WorkflowProps = {
   children: ReactNode;
   manifest: TemplateParameterSchema;
   workflow: RunWorkflow;
@@ -23,6 +23,8 @@ type OnboardingWorkflowProps = {
   formFooter?: JSX.Element;
   stepperProgress?: JSX.Element;
   reviewComponent?: JSX.Element;
+  FormComponent?: FormProps['Component'];
+  FormProps?: RJSFFormProps;
 };
 
 /**
@@ -36,7 +38,8 @@ type OnboardingWorkflowProps = {
  * @param formFooter - Component which handles the form forward, back and review buttons
  * @param stepperProgress - Component which represents the user's current progress in the form
  * @param reviewComponent - Component which shows the review state after the form is complete and ready for submission
- *  
+ * @param FormComponent - RJSF Component constructor 
+ * 
  * @example using the component
  * ```javascript
     <Workflow
@@ -55,17 +58,26 @@ type OnboardingWorkflowProps = {
     </Workflow>
  * ```
  */
-export const Workflow = (props: OnboardingWorkflowProps) => {
-  const customFieldExtensions = useCustomFieldExtensions<
-    NextFieldExtensionOptions<any, any>
-  >(props.children);
+export const Workflow = ({
+  FormComponent,
+  children,
+  formFooter,
+  manifest,
+  initialState,
+  stepperProgress,
+  workflow,
+  reviewComponent,
+  FormProps = {}
+}: WorkflowProps) => {
+  const customFieldExtensions =
+    useCustomFieldExtensions<NextFieldExtensionOptions<any, any>>(children);
 
-  const layouts = useCustomLayouts(props.children);
+  const layouts = useCustomLayouts(children);
 
   const stepper = useStepper({
-    manifest: props.manifest,
+    manifest,
     extensions: customFieldExtensions,
-    initialState: props.initialState,
+    initialState,
   });
 
   const currentStep = useTransformSchemaToProps(
@@ -82,8 +94,8 @@ export const Workflow = (props: OnboardingWorkflowProps) => {
 
   if (stepper.activeStep >= stepper.steps.length) {
     return cloneElement(
-      props.reviewComponent ?? (
-        <DefaultReviewComponent workflow={props.workflow} />
+      reviewComponent ?? (
+        <DefaultReviewComponent workflow={workflow} />
       ),
       {
         stepper,
@@ -93,21 +105,23 @@ export const Workflow = (props: OnboardingWorkflowProps) => {
 
   return (
     <>
-      {props.stepperProgress
-        ? cloneElement(props.stepperProgress, {
+      {stepperProgress
+        ? cloneElement(stepperProgress, {
             ...stepper,
           })
         : null}
       <Form
+        Component={FormComponent}
         extensions={customFieldExtensions}
         handleNext={handleForward}
         step={currentStep}
         extraErrors={stepper.errors as unknown as ErrorSchema}
-        {...props}
+        initialState={initialState}
+        {...FormProps}
       >
-        {props.children}
-        {props.formFooter
-          ? cloneElement(props.formFooter, {
+        {children}
+        {formFooter
+          ? cloneElement(formFooter, {
               stepper,
             })
           : null}
