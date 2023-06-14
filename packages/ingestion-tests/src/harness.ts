@@ -33,6 +33,7 @@ export interface BackstageHarness {
 
 export function createBackstageHarness(
   npmScript: string,
+  logPrefix: string,
   ...configs: JsonObject[]
 ): BackstageHarness {
   assert(!!npmScript, 'you must supply an npm script e.g. yarn workspace backend start')
@@ -49,22 +50,22 @@ export function createBackstageHarness(
       const logs: ProcessLog[] = [
         yield createProcessLog({
           name: 'HttpRequestLogger',
-          path: `logs/http`,
+          path: `logs/${logPrefix}http`,
           pluginId: 'backstage',
         }),
         yield createProcessLog({
           name: 'CatalogLogger',
-          path: `logs/catalog`,
+          path: `logs/${logPrefix}catalog`,
           pluginId: 'catalog',
         }),
         yield createProcessLog({
           name: 'SearchLogger',
-          path: `logs/search`,
+          path: `logs/${logPrefix}search`,
           pluginId: 'search',
         }),
         yield createProcessLog({
           name: 'BackstageFirehoseLogger',
-          path: 'logs/firehose',
+          path: `logs/${logPrefix}firehose`,
         }),
       ];
 
