@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.6.0
+
+### Minor Changes
+
+- 226363d: The ingestion test logs were dropped into a logs folder and every test would overwrite the file. This adds an option to pass an additional prefix which allows per file, per suite and/or per test log files irrespective of the test runner.
+
 ## 0.5.1
 
 ### Patch Changes
