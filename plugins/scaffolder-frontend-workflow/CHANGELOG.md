@@ -1,5 +1,15 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.7.0
+
+### Minor Changes
+
+- f84fa9a: Expose the FormComponent to improve ability to customize the DOM layout and styling.
+
+### Patch Changes
+
+- 636a98f: Provide a method in the `useRunWorkflow` hook to `reset()` the state.
+
 ## 0.6.0
 
 ### Minor Changes
