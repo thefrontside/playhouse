@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { type WorkflowProps } from '@backstage/plugin-scaffolder-react/alpha';
 import { Modal, ModalProps } from '../Modal/Modal';
-import { Workflow } from '../Form/Workflow';
+import { Workflow } from '../Workflow';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { useRunWorkflow, useWorkflowManifest } from '../../hooks';
 

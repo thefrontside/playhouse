@@ -2,70 +2,74 @@ import { JsonValue } from '@backstage/types';
 import { type IChangeEvent } from '@rjsf/core-v5';
 import React, { useCallback, useMemo, type ReactNode } from 'react';
 import validator from '@rjsf/validator-ajv8';
-import { RJSFForm } from './RJSFForm';
-import { FormProps as FormProps$1 } from '@rjsf/core-v5';
+import { RJSFForm, type RJSFFormProps } from './RJSFForm';
+
 import {
-  type FormProps,
   type NextFieldExtensionOptions,
   useFormDataFromQuery,
   ParsedTemplateSchema,
 } from '@backstage/plugin-scaffolder-react/alpha';
 
-type Props = {
+export type FormProps = {
   extensions: NextFieldExtensionOptions<any, any>[];
-  templateName?: string;
-  FormProps?: FormProps;
-  initialState?: Record<string, JsonValue>;
   step: ParsedTemplateSchema;
+  Component?: typeof RJSFForm;
+  initialState?: Record<string, JsonValue>;
   handleNext: ({
     formData,
   }: {
     formData?: Record<string, JsonValue> | undefined;
   }) => Promise<void>;
   children: ReactNode;
-} & Pick<FormProps$1, 'extraErrors'>;
+} & RJSFFormProps;
 
-export const Form = (props: Props) => {
-  const [formState, setFormState] = useFormDataFromQuery(props.initialState);
+export const Form = ({
+  Component = RJSFForm,
+  step,
+  extensions,
+  initialState,
+  handleNext,
+  ...props
+}: FormProps) => {
+  const [formData, setFormData] = useFormDataFromQuery(initialState);
 
-  const extensions = useMemo(() => {
+  const fields = useMemo(() => {
     return Object.fromEntries(
-      props.extensions.map(({ name, component }) => [name, component]),
+      extensions.map(({ name, component }) => [name, component]),
     );
-  }, [props.extensions]);
+  }, [extensions]);
 
   const handleChange = useCallback(
     (e: IChangeEvent) =>
-      setFormState(current => ({ ...current, ...e.formData })),
-    [setFormState],
+      setFormData(current => ({ ...current, ...e.formData })),
+    [setFormData],
   );
 
-  const handleNext = async ({
-    formData = {},
-  }: {
+  const onSubmit = async (params: {
     formData?: Record<string, JsonValue>;
   }) => {
-    props.handleNext(formData);
+    const { formData: _formData = {} } = params;
 
-    setFormState(current => ({ ...current, ...formData }));
+    handleNext(_formData);
+
+    setFormData(current => ({ ...current, ..._formData }));
   };
 
   return (
-    <RJSFForm
+    <Component
       validator={validator}
-      formData={formState}
-      formContext={{ formData: formState }}
-      schema={props.step.schema}
-      uiSchema={props.step.uiSchema}
-      onSubmit={handleNext}
-      fields={{ ...extensions }}
-      showErrorList={false}
-      extraErrors={props.extraErrors}
+      schema={step.schema}
+      uiSchema={step.uiSchema}
+      fields={fields}
+      formData={formData}
+      formContext={{ formData }}
+      onSubmit={onSubmit}
       onChange={handleChange}
-      {...(props.FormProps ?? {})}
+      {...props}
+      showErrorList={false}
       noHtml5Validate
     >
       {props.children}
-    </RJSFForm>
+    </Component>
   );
 };
