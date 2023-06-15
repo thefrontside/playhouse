@@ -55,5 +55,10 @@ export function useRunWorkflow({ templateRef, onComplete, onError }: Props) {
     }
   }, [onComplete, onError, taskStream.completed, taskStream.error]);
 
-  return { state, execute, taskId, taskStream, taskStatus };
+  const reset = () => {
+    setTaskStatus('idle');
+    setTaskId(undefined);
+  };
+
+  return { state, execute, taskId, taskStream, taskStatus, reset };
 }
