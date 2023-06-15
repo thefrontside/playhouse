@@ -6,7 +6,7 @@ export const scaffolderApiMock: jest.Mocked<ScaffolderApi> = {
     .mockImplementationOnce(() => Promise.resolve({ taskId: 'boop' })),
   getTemplateParameterSchema: jest.fn(),
   getIntegrationsList: jest.fn(),
-  getTask: jest.fn().mockImplementationOnce(() =>
+  getTask: jest.fn().mockImplementation(() =>
     Promise.resolve({
       id: 'blam',
       spec: { steps: [] },
@@ -15,7 +15,7 @@ export const scaffolderApiMock: jest.Mocked<ScaffolderApi> = {
       createdAt: '',
     }),
   ),
-  streamLogs: jest.fn().mockImplementationOnce(() => ({
+  streamLogs: jest.fn().mockImplementation(() => ({
     subscribe: () => {},
     next: () => ({
       type: 'log',

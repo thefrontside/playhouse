@@ -7,6 +7,8 @@ import {
   useRunWorkflow,
   TaskProgress,
   Workflow,
+  RJSFFormProps,
+  FormProps,
 } from '@frontside/backstage-plugin-scaffolder-workflow';
 import {
   ParsedTemplateSchema,
@@ -48,6 +50,8 @@ const useStyles = makeStyles<BackstageTheme>(theme => ({
 export function ScaffolderWorkflow(props: {
   templateName: string;
   namespace?: string;
+  FormProps?: RJSFFormProps;
+  FormComponent?: FormProps['Component'];
 }): JSX.Element | null {
   const styles = useStyles();
 
@@ -91,6 +95,8 @@ export function ScaffolderWorkflow(props: {
           stepperProgress={<StepperProgress />}
           reviewComponent={<EntityReview workflow={workflow} />}
           children={<></>}
+          FormProps={props?.FormProps}
+          FormComponent={props?.FormComponent}
         />
       </div>
       {workflow.taskStream.loading === false && (
