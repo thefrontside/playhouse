@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.7.1
+
+### Patch Changes
+
+- 2a01546: Removed unnecessary dependency on@backstage/plugin-scaffolder
+
 ## 0.7.0
 
 ### Minor Changes
