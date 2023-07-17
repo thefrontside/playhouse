@@ -57,6 +57,7 @@ const useStyles = makeStyles<BackstageTheme>(theme => ({
 
 function OnboardingActions({
   stepper,
+  workflow,
 }: {
   stepper?: Stepper;
   workflow: RunWorkflow;
@@ -71,14 +72,26 @@ function OnboardingActions({
         >
           Back
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          type="submit"
-          disabled={stepper.isValidating}
-        >
-          {stepper.activeStep > stepper.steps.length - 1 ? 'Review' : 'Next'}
-        </Button>
+        {stepper.activeStep > stepper.steps.length - 1 ? (
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={stepper.isValidating}
+            type="button"
+            onClick={() => workflow?.execute(stepper.formState)}
+          >
+            Create
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            disabled={stepper.isValidating}
+          >
+            Next
+          </Button>
+        )}
       </div>
     );
   return null;
