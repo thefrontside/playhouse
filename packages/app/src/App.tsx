@@ -33,7 +33,7 @@ import { Root } from './components/Root';
 
 import { AlertDisplay, OAuthRequestDialog } from '@backstage/core-components';
 import { createApp } from '@backstage/app-defaults';
-import { FlatRoutes } from '@backstage/core-app-api';
+import { AppRouter, FlatRoutes } from '@backstage/core-app-api';
 import { orgPlugin } from '@backstage/plugin-org';
 import { InspectorPage } from '@frontside/backstage-plugin-effection-inspector';
 import { GraphiQLPage } from '@backstage/plugin-graphiql';
@@ -76,9 +76,6 @@ const app = createApp({
     });
   },
 });
-
-const AppProvider = app.getProvider();
-const AppRouter = app.getRouter();
 
 const routes = (
   <FlatRoutes>
@@ -139,16 +136,12 @@ const routes = (
   </FlatRoutes>
 );
 
-const App = () => (
-  <AppProvider>
-    <SecretsContextProvider>
-      <AlertDisplay />
-      <OAuthRequestDialog />
-      <AppRouter>
-        <Root>{routes}</Root>
-      </AppRouter>
-    </SecretsContextProvider>
-  </AppProvider>
+export default app.createRoot(
+  <SecretsContextProvider>
+    <AlertDisplay />
+    <OAuthRequestDialog />
+    <AppRouter>
+      <Root>{routes}</Root>
+    </AppRouter>
+  </SecretsContextProvider>
 );
-
-export default App;
