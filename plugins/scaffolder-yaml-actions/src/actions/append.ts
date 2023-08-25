@@ -8,9 +8,9 @@ import parseGitUrl from 'git-url-parse';
 import _path from 'path';
 import { Logger } from 'winston';
 import { z } from 'zod';
-import { set } from '../operations/set';
+import { append } from '../operations/append';
 
-interface CreateYamlSetActionOptions {
+interface CreateYamAppendActionOptions {
   logger: Logger;
   integrations: ScmIntegrations;
   reader: UrlReader;
@@ -18,22 +18,22 @@ interface CreateYamlSetActionOptions {
 }
 
 const InputSchema = z.object({
-  url: z.string().describe('URL of the YAML file to set'),
-  path: z.string().describe('The path of the property to set'),
+  url: z.string().describe('URL of the YAML file to update'),
+  path: z.string().describe('The path of the collection to append to'),
   value: z
-    .union([z.string(), z.number(), z.null()])
-    .describe('The value to set'),
-  entityRef: z.string().optional().describe('entity ref of the entity to set'),
+    .union([z.string(), z.number(), z.null(), z.record(z.any())])
+    .describe('The value to append'),
+  entityRef: z.string().optional().describe('entity ref of the entity to update'),
 });
 
 type InputType = z.infer<typeof InputSchema>;
 
-export function createYamlSetAction({
+export function createYamlAppendAction({
   logger,
   integrations,
   reader,
-  id = 'yaml:set',
-}: CreateYamlSetActionOptions) {
+  id = 'yaml:append',
+}: CreateYamAppendActionOptions) {
   const fetchAction = createFetchPlainAction({
     reader,
     integrations,
@@ -41,7 +41,7 @@ export function createYamlSetAction({
 
   return createTemplateAction<InputType>({
     id,
-    description: 'Set property value of a YAML file',
+    description: 'Append to a collection in a YAML document',
     schema: {
       input: InputSchema,
       output: z.object({
@@ -73,7 +73,7 @@ export function createYamlSetAction({
         throw e;
       }
 
-      const updated = set({
+      const updated = append({
         content: content.toString(),
         path,
         value,
