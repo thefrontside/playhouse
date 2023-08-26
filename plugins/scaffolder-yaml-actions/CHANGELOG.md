@@ -1,5 +1,11 @@
 # @frontside/scaffolder-yaml-actions
 
+## 0.2.0
+
+### Minor Changes
+
+- db94da7: Added yaml:append action
+
 ## 0.1.3
 
 ### Patch Changes
