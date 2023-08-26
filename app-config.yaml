@@ -108,6 +108,11 @@ catalog:
       target: ../../templates/standard-microservice/template.yaml
       rules:
         - allow: [Template]
+    - type: file
+      target: ../../templates/add-tag.yaml
+      rules:
+        - allow: [Template]
+
 
 humanitec:
   orgId: the-frontside-software-inc
