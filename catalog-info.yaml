@@ -10,6 +10,8 @@ metadata:
     "humanitec.com/orgId": "the-frontside-software-inc"
     "humanitec.com/appId": "backstage"
     # backstage.io/techdocs-ref: dir:.
+  tags:
+    - production
 spec:
   type: website
   owner: engineering@frontside.com
@@ -22,6 +24,8 @@ kind: API
 metadata:
   name: backstage-graphql-api
   description: GraphQL API provided by GraphQL Plugin
+  tags:
+    - production
 spec:
   type: graphql
   owner: engineering@frontside.com
