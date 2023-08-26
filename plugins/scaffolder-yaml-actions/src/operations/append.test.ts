@@ -12,4 +12,17 @@ describe('append', () => {
   - b
 `)
   });
+  it("creates collection when it doesn't exist", () => {
+    expect(append({
+      content: `metadata:
+        foo: 
+        `,
+      path: 'metadata.tags',
+      value: 'production'
+    })).toEqual(`metadata:
+  foo:
+  tags:
+    - production
+`)
+  });
 });

@@ -1,0 +1,52 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: add-tag
+  title: Add Tag
+  description: Workflow for adding a tag to a component
+spec:
+  type: yaml
+  parameters:
+    - title: Add Tag
+      required:
+        - url
+        - tag
+      properties:
+        tag:
+          title: Tag
+          type: string
+          description: tag to add to metadata
+        url:
+          title: Metadata file URL
+          type: string
+          description: URL of metadata file to update
+        entityRef:
+          title: EntityRef
+          type: string
+          description: The entity ref of the file that will be updated.
+
+  steps:
+    - id: append
+      name: Add tag
+      action: yaml:append
+      input:
+        url: ${{ parameters.url }}
+        entityRef: ${{ parameters.entityRef }}
+        path: metadata.tags
+        value: ${{ parameters.tag }}
+
+    - id: publish
+      name: Publish
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ steps['append'].output.repoUrl }}
+        title: Update Medatata File
+        description: Merge this pull request to set add tag to metadata.
+        targetPath: '.'
+        sourcePath: ${{ steps['append'].output.path }}
+        branchName: add-tag-metadata
+
+  output:
+    links:
+      - title: View Pull Request
+        url: ${{ steps['publish'].output.remoteUrl }}

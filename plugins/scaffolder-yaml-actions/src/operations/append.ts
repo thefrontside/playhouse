@@ -25,10 +25,20 @@ export function append({
       continue;
     }
 
-    const node = document.contents.getIn(splitPath(path));
+    const keys = splitPath(path);
+    const node = document.contents.getIn(keys);
 
-    if (isSeq(node)) {
+    if (node === undefined) {
+      const parentPath = [...keys];
+      const key = parentPath.pop();
+      const parent = document.contents.getIn(parentPath);
+      if (isMap(parent)) {
+        parent.add({ key, value: document.createNode([value])})
+      }
+    } else if (isSeq(node)) {
       node.add(document.createNode(value))
+    } else {
+      throw new Error(`Could not append to ${path} because array doesn't exist`)
     }
   }
 
