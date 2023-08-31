@@ -2,7 +2,7 @@ import {
   CatalogBuilder
 } from '@backstage/plugin-catalog-backend';
 import { ScaffolderEntitiesProcessor } from '@backstage/plugin-scaffolder-backend';
-import { IncrementalCatalogBuilder } from '@frontside/backstage-plugin-incremental-ingestion-backend';
+import { IncrementalCatalogBuilder } from '@backstage/plugin-catalog-backend-module-incremental-ingestion';
 import { GithubRepositoryEntityProvider } from '@frontside/backstage-plugin-incremental-ingestion-github';
 import { Router } from 'express';
 import { Duration } from 'luxon';

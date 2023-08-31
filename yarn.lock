@@ -3197,6 +3197,31 @@
     uuid "^8.0.0"
     winston "^3.2.1"
 
+"@backstage/plugin-catalog-backend-module-incremental-ingestion@^0.4.5":
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/@backstage/plugin-catalog-backend-module-incremental-ingestion/-/plugin-catalog-backend-module-incremental-ingestion-0.4.5.tgz#2fb16533977d41124b8ec96c8c0dc5947d471c6e"
+  integrity sha512-8HXDbORkMPv5Xq9c18MaFgHui0Ehv9u9lZRLeBRrudoyXJXK8kCCgkW/IuJLIydjl/StDXeY5+in0Spuix0h4w==
+  dependencies:
+    "@backstage/backend-common" "^0.19.4"
+    "@backstage/backend-plugin-api" "^0.6.2"
+    "@backstage/backend-tasks" "^0.5.7"
+    "@backstage/catalog-model" "^1.4.1"
+    "@backstage/config" "^1.0.8"
+    "@backstage/errors" "^1.2.1"
+    "@backstage/plugin-catalog-backend" "^1.12.4"
+    "@backstage/plugin-catalog-node" "^1.4.3"
+    "@backstage/plugin-events-node" "^0.2.11"
+    "@backstage/plugin-permission-common" "^0.7.7"
+    "@types/express" "^4.17.6"
+    "@types/luxon" "^3.0.0"
+    express "^4.17.1"
+    express-promise-router "^4.1.0"
+    knex "^2.0.0"
+    lodash "^4.17.21"
+    luxon "^3.0.0"
+    uuid "^8.3.2"
+    winston "^3.2.1"
+
 "@backstage/plugin-catalog-backend@^1.12.4":
   version "1.12.4"
   resolved "https://registry.yarnpkg.com/@backstage/plugin-catalog-backend/-/plugin-catalog-backend-1.12.4.tgz#d1d932777777eda83ffd81dcd60a5b878eb2da4f"
