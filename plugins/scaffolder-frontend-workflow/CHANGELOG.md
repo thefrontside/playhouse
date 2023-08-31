@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.7.2
+
+### Patch Changes
+
+- 181c413: Upgraded to Backstage 1.17
+
 ## 0.7.1
 
 ### Patch Changes

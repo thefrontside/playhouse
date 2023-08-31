@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.9
+
+### Patch Changes
+
+- 181c413: Upgraded to Backstage 1.17
+- Updated dependencies [181c413]
+  - @frontside/backstage-plugin-humanitec-common@0.3.8
+
 ## 0.3.8
 
 ### Patch Changes

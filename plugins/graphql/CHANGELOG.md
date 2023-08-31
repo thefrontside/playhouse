@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql
 
+## 0.7.4
+
+### Patch Changes
+
+- 181c413: Upgraded to Backstage 1.17
+
 ## 0.7.3
 
 ### Patch Changes

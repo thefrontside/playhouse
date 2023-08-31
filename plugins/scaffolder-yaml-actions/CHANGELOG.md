@@ -1,5 +1,11 @@
 # @frontside/scaffolder-yaml-actions
 
+## 0.2.2
+
+### Patch Changes
+
+- 181c413: Upgraded to Backstage 1.17
+
 ## 0.2.1
 
 ### Patch Changes
