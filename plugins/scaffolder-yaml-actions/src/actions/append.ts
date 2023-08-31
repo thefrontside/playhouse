@@ -52,18 +52,28 @@ export function createYamlAppendAction({
     async handler(ctx) {
       const { url, entityRef, path, value } = ctx.input;
 
-      const { filepath, resource, owner, name } = parseGitUrl(url);
+      let sourceFilepath;
+      if (isUrl(url)) {
+        const { filepath, resource, owner, name } = parseGitUrl(url);
+        
+        // This should be removed in favour of using fetch:plain:file
+        // FIX: blocked by https://github.com/backstage/backstage/issues/17072
+        await fetchAction.handler({
+          ...ctx,
+          input: {
+            url: _path.dirname(ctx.input.url),
+          },
+        });
+        
+        sourceFilepath = resolveSafeChildPath(ctx.workspacePath, filepath);
 
-      const sourceFilepath = resolveSafeChildPath(ctx.workspacePath, filepath);
-
-      // This should be removed in favour of using fetch:plain:file
-      // FIX: blocked by https://github.com/backstage/backstage/issues/17072
-      await fetchAction.handler({
-        ...ctx,
-        input: {
-          url: _path.dirname(ctx.input.url),
-        },
-      });
+        ctx.output('repoUrl', `${resource}?repo=${name}&owner=${owner}`);
+        ctx.output('filePath', filepath);
+      } else if (_path.isAbsolute(url)) {
+        sourceFilepath = url;
+      } else {
+        sourceFilepath = resolveSafeChildPath(ctx.workspacePath, url);
+      }
 
       let content;
       try {
@@ -82,9 +92,8 @@ export function createYamlAppendAction({
 
       await fs.writeFile(sourceFilepath, updated);
 
-      ctx.output('repoUrl', `${resource}?repo=${name}&owner=${owner}`);
-      ctx.output('filePath', filepath);
       ctx.output('path', _path.dirname(sourceFilepath));
+      ctx.output('sourceFilepath', sourceFilepath);
     },
   });
 }

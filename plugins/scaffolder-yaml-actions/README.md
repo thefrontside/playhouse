@@ -64,7 +64,7 @@ Set the contents of a YAML document.
 
 **Input:**
 
-* `url` [*string*] - URL of the YAML document [example: https://github.com/backstage/backstage/tree/master/catalog-info.yaml]
+* `url` [*string*] - URL of the YAML file or file system path [example: https://github.com/backstage/backstage/tree/master/catalog-info.yaml]
 * `path` [*string*] - the path of the property to set [example: metadata.name]
 * `value` [*string* | *number* | *null] - value to set
 * entityRef [string, optional] - entity ref of entity to update in case YAML file contains multiple documents
@@ -81,7 +81,7 @@ Append a value to a collection in a YAML document.
 
 **Input:**
 
-* `url` [*string*] - URL of the YAML document [example: https://github.com/backstage/backstage/tree/master/catalog-info.yaml]
+* `url` [*string*] - URL of the YAML file or file system path (relative or absolute) [example: https://github.com/backstage/backstage/tree/master/catalog-info.yaml]
 * `path` [*string*] - the path of the property to update [example: metadata.tags]
 * `value` [*string* | *number* | *null* | *Record<string, any>*] - value to append
 * entityRef [string, optional] - entity ref of entity to update in case YAML file contains multiple documents
