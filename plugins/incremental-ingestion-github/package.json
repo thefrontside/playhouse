@@ -23,9 +23,9 @@
     "generate": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.18.5",
-    "@backstage/config": "^1.0.7",
-    "@backstage/integration": "^1.4.5",
+    "@backstage/backend-common": "^0.19.4",
+    "@backstage/config": "^1.0.8",
+    "@backstage/integration": "^1.6.2",
     "@frontside/backstage-plugin-incremental-ingestion-backend": "*",
     "@graphql-codegen/near-operation-file-preset": "^2.4.1",
     "@graphql-codegen/typescript-operations": "^2.5.3",
@@ -41,7 +41,7 @@
     "yn": "^4.0.0"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.7",
+    "@backstage/cli": "^0.22.12",
     "@graphql-codegen/cli": "2.11.5",
     "@graphql-codegen/typescript": "2.7.3",
     "@graphql-codegen/typescript-document-nodes": "2.3.3",
