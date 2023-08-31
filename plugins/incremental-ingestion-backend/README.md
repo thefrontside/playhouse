@@ -1,5 +1,7 @@
 # backend-incremental-ingestion
 
+> :warning: This package is deprecated in favour of [**@backstage/plugin-catalog-backend-module-incremental-ingestion**](https://www.npmjs.com/package/@backstage/plugin-catalog-backend-module-incremental-ingestion)
+
 The Incremental Ingestion Backend plugin provides an Incremental Entity Provider that can be used to ingest data from sources using delta mutations, while retaining the orphan prevention mechanism provided by full mutations.
 
 ## Why did we create it?
