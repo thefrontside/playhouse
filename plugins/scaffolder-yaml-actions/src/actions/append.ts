@@ -9,6 +9,7 @@ import _path from 'path';
 import { Logger } from 'winston';
 import { z } from 'zod';
 import { append } from '../operations/append';
+import { isUrl } from './_helpers';
 
 interface CreateYamAppendActionOptions {
   logger: Logger;
@@ -18,7 +19,7 @@ interface CreateYamAppendActionOptions {
 }
 
 const InputSchema = z.object({
-  url: z.string().describe('URL of the YAML file to update'),
+  url: z.string().describe('URL of the YAML file to set or file system path (relative or absolute)'),
   path: z.string().describe('The path of the collection to append to'),
   value: z
     .union([z.string(), z.number(), z.null(), z.record(z.any())])

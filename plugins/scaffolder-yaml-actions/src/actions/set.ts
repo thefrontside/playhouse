@@ -9,6 +9,7 @@ import _path from 'path';
 import { Logger } from 'winston';
 import { z } from 'zod';
 import { set } from '../operations/set';
+import { isUrl } from './_helpers';
 
 interface CreateYamlSetActionOptions {
   logger: Logger;
@@ -18,7 +19,7 @@ interface CreateYamlSetActionOptions {
 }
 
 const InputSchema = z.object({
-  url: z.string().describe('URL of the YAML file to set'),
+  url: z.string().describe('URL of the YAML file to set or file system path (relative or absolute)'),
   path: z.string().describe('The path of the property to set'),
   value: z
     .union([z.string(), z.number(), z.null()])
