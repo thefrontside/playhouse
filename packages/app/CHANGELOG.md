@@ -1,5 +1,15 @@
 # app
 
+## 0.1.2
+
+### Patch Changes
+
+- 181c413: Upgraded to Backstage 1.17
+- Updated dependencies [181c413]
+  - @frontside/backstage-plugin-effection-inspector@0.1.9
+  - @frontside/backstage-plugin-humanitec@0.3.10
+  - @frontside/backstage-plugin-scaffolder-workflow@0.7.2
+
 ## 0.1.1
 
 ### Patch Changes

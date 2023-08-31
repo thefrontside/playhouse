@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-effection-inspector
 
+## 0.1.9
+
+### Patch Changes
+
+- 181c413: Upgraded to Backstage 1.17
+
 ## 0.1.8
 
 ### Patch Changes

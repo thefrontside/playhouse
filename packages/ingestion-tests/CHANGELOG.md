@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.6.1
+
+### Patch Changes
+
+- 181c413: Upgraded to Backstage 1.17
+
 ## 0.6.0
 
 ### Minor Changes

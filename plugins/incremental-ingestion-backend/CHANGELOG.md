@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.4.7
+
+### Patch Changes
+
+- 181c413: Upgraded to Backstage 1.17
+
 ## 0.4.6
 
 ### Patch Changes
