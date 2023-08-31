@@ -1,5 +1,13 @@
 # backend
 
+## 0.0.21
+
+### Patch Changes
+
+- 036788e: Allowed passing a path instead of url in YAML actions
+- Updated dependencies [036788e]
+  - @frontside/scaffolder-yaml-actions@0.2.1
+
 ## 0.0.20
 
 ### Patch Changes

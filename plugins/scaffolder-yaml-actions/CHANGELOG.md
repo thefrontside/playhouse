@@ -1,5 +1,11 @@
 # @frontside/scaffolder-yaml-actions
 
+## 0.2.1
+
+### Patch Changes
+
+- 036788e: Allowed passing a path instead of url in YAML actions
+
 ## 0.2.0
 
 ### Minor Changes
