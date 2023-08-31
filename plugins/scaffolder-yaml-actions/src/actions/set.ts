@@ -9,6 +9,7 @@ import _path from 'path';
 import { Logger } from 'winston';
 import { z } from 'zod';
 import { set } from '../operations/set';
+import { isUrl } from './_helpers';
 
 interface CreateYamlSetActionOptions {
   logger: Logger;
@@ -18,7 +19,7 @@ interface CreateYamlSetActionOptions {
 }
 
 const InputSchema = z.object({
-  url: z.string().describe('URL of the YAML file to set'),
+  url: z.string().describe('URL of the YAML file to set or file system path (relative or absolute)'),
   path: z.string().describe('The path of the property to set'),
   value: z
     .union([z.string(), z.number(), z.null()])
@@ -52,18 +53,28 @@ export function createYamlSetAction({
     async handler(ctx) {
       const { url, entityRef, path, value } = ctx.input;
 
-      const { filepath, resource, owner, name } = parseGitUrl(url);
+      let sourceFilepath;
+      if (isUrl(url)) {
+        const { filepath, resource, owner, name } = parseGitUrl(url);
 
-      const sourceFilepath = resolveSafeChildPath(ctx.workspacePath, filepath);
+        // This should be removed in favour of using fetch:plain:file
+        // FIX: blocked by https://github.com/backstage/backstage/issues/17072
+        await fetchAction.handler({
+          ...ctx,
+          input: {
+            url: _path.dirname(ctx.input.url),
+          },
+        });
 
-      // This should be removed in favour of using fetch:plain:file
-      // FIX: blocked by https://github.com/backstage/backstage/issues/17072
-      await fetchAction.handler({
-        ...ctx,
-        input: {
-          url: _path.dirname(ctx.input.url),
-        },
-      });
+        sourceFilepath = resolveSafeChildPath(ctx.workspacePath, filepath);
+
+        ctx.output('repoUrl', `${resource}?repo=${name}&owner=${owner}`);
+        ctx.output('filePath', filepath);
+      } else if (_path.isAbsolute(url)) {
+        sourceFilepath = url;
+      } else {
+        sourceFilepath = resolveSafeChildPath(ctx.workspacePath, url);
+      }
 
       let content;
       try {
@@ -82,9 +93,8 @@ export function createYamlSetAction({
 
       await fs.writeFile(sourceFilepath, updated);
 
-      ctx.output('repoUrl', `${resource}?repo=${name}&owner=${owner}`);
-      ctx.output('filePath', filepath);
       ctx.output('path', _path.dirname(sourceFilepath));
+      ctx.output('sourceFilepath', sourceFilepath);
     },
   });
 }

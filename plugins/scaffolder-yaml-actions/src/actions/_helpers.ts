@@ -1,0 +1,1 @@
+export const isUrl = (maybeUrl: string) => /^(?:[a-z+]+:)?\/\//.test(maybeUrl)
