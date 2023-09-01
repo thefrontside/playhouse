@@ -1,111 +1,67 @@
-import { ANNOTATION_LOCATION, ANNOTATION_ORIGIN_LOCATION, DEFAULT_NAMESPACE, stringifyEntityRef } from "@backstage/catalog-model";
-import { Config } from "@backstage/config";
-import { DefaultGithubCredentialsProvider, GitHubIntegration, ScmIntegrations } from '@backstage/integration';
-import type { EntityIteratorResult, IncrementalEntityProvider } from "@frontside/backstage-plugin-incremental-ingestion-backend";
+import {
+  ANNOTATION_LOCATION,
+  ANNOTATION_ORIGIN_LOCATION,
+  DEFAULT_NAMESPACE,
+  Entity,
+  stringifyEntityRef,
+} from '@backstage/catalog-model';
+import {
+  DefaultGithubCredentialsProvider,
+  GithubIntegration,
+  ScmIntegrations,
+} from '@backstage/integration';
+import type {
+  EntityIteratorResult,
+  IncrementalEntityProvider,
+} from '@backstage/plugin-catalog-backend-module-incremental-ingestion';
 import { graphql } from '@octokit/graphql';
 import assert from 'assert-ts';
 import slugify from 'slugify';
-import type { RepositorySearchQuery } from "./repository-entity-provider.__generated__";
+import type { OrganizationRepositoriesQuery } from './query.__generated__';
+import {
+  type GithubRepositoryEntityProviderConstructorOptions,
+  type Context,
+  type Cursor,
+  type GithubRepositoryEntityProviderOptions,
+  type RepositoryMapper,
+  type OrganizationMapper,
+} from '../types';
+import { ORGANIZATION_REPOSITORIES_QUERY } from './query';
+import { defaultOrganizationMapper, defaultRepositoryMapper } from './mappers';
+import { DeferredEntity } from '@backstage/plugin-catalog-node';
 
-const REPOSITORY_SEARCH_QUERY = /* GraphQL */`
-  query RepositorySearch($searchQuery: String!, $cursor: String) {
-    search(
-      query: $searchQuery
-      type: REPOSITORY
-      first: 100
-      after: $cursor
-    ) {
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      nodes {
-        ... on Repository {
-          __typename
-          id
-          isArchived
-          name
-          nameWithOwner
-          url
-          description
-          visibility
-          languages(first: 10) {
-            nodes {
-              name
-            }
-          }
-          repositoryTopics(first: 10) {
-            nodes {
-              topic {
-                name
-              }
-            }
-          }
-          owner {
-            ... on Organization {
-              __typename
-              login
-            }
-            ... on User {
-              __typename
-              login
-            }
-          }
-        }
-      }
-    }
-    rateLimit {
-      cost
-      remaining
-      used
-      limit
-    }
-  }
-`;
+export class GithubRepositoryEntityProvider
+  implements IncrementalEntityProvider<Cursor, Context>
+{
+  private readonly host: string;
+  private readonly credentialsProvider: DefaultGithubCredentialsProvider;
+  private readonly integration: GithubIntegration;
+  private readonly repositoryMapper: RepositoryMapper;
+  private readonly organizationMapper: OrganizationMapper;
 
-interface GithubRepositoryEntityProviderOptions {
-  host: string;
-  config: Config;
-  searchQuery: string;
-}
-
-interface Context {
-  client: typeof graphql;
-  url: string;
-}
-
-interface Cursor {
-  cursor: string | null;
-}
-
-interface GithubRepositoryEntityProviderConstructorOptions { 
-  credentialsProvider: DefaultGithubCredentialsProvider; 
-  host: string; 
-  integration: GitHubIntegration; 
-  searchQuery: string; 
-}
-
-export class GithubRepositoryEntityProvider implements IncrementalEntityProvider<Cursor, Context> {
-  private host: string;
-  private credentialsProvider: DefaultGithubCredentialsProvider;
-  private integration: GitHubIntegration;
-  private searchQuery: string;
-
-  static create({ host, config, searchQuery = "created:>1970-01-01" }: GithubRepositoryEntityProviderOptions) {
+  static create({ host, config }: GithubRepositoryEntityProviderOptions) {
     const integrations = ScmIntegrations.fromConfig(config);
-    const credentialsProvider = DefaultGithubCredentialsProvider.fromIntegrations(integrations);
+    const credentialsProvider =
+      DefaultGithubCredentialsProvider.fromIntegrations(integrations);
     const integration = integrations.github.byHost(host);
 
     assert(integration !== undefined, `Missing Github integration for ${host}`);
 
-    return new GithubRepositoryEntityProvider({ credentialsProvider, host, integration, searchQuery })
+    return new GithubRepositoryEntityProvider({
+      credentialsProvider,
+      host,
+      integration,
+    });
   }
 
-  private constructor(options: GithubRepositoryEntityProviderConstructorOptions) {
-    this.credentialsProvider = options.credentialsProvider;
+  private constructor(
+    options: GithubRepositoryEntityProviderConstructorOptions,
+  ) {
     this.host = options.host;
+    this.credentialsProvider = options.credentialsProvider;
     this.integration = options.integration;
-    this.searchQuery = options.searchQuery;
+    this.organizationMapper = options.organizationMapper ?? defaultOrganizationMapper;
+    this.repositoryMapper = options.repositoryMapper ?? defaultRepositoryMapper;
   }
 
   getProviderName() {
@@ -113,7 +69,6 @@ export class GithubRepositoryEntityProvider implements IncrementalEntityProvider
   }
 
   async around(burst: (context: Context) => Promise<void>) {
-
     const url = `https://${this.host}`;
 
     const { headers } = await this.credentialsProvider.getCredentials({
@@ -125,58 +80,60 @@ export class GithubRepositoryEntityProvider implements IncrementalEntityProvider
       headers,
     });
 
-    await burst({ client, url })
+    await burst({ client, url });
   }
 
-  async next({ client, url }: Context, { cursor }: Cursor = { cursor: null }): Promise<EntityIteratorResult<Cursor>> {
+  async next(
+    { client }: Context,
+    cursor: Cursor,
+  ): Promise<EntityIteratorResult<Cursor>> {
+    let orgCursor = cursor?.orgCursor || null;
+    let repoCursor = cursor?.repoCursor || null;
 
-    const data = await client<RepositorySearchQuery>(REPOSITORY_SEARCH_QUERY,
+    const data = await client<OrganizationRepositoriesQuery>(
+      ORGANIZATION_REPOSITORIES_QUERY,
       {
-        cursor,
-        searchQuery: this.searchQuery,
-      }
+        orgCursor,
+        repoCursor,
+      },
     );
 
-    const location = `url:${url}`;
+    const deferred: DeferredEntity[] = [];
 
-    const entities = data.search.nodes?.flatMap(node => node?.__typename === 'Repository' ? [node] : [])
-      .map(node => ({
-        entity: {
-          apiVersion: 'backstage.io/v1beta1',
-          kind: 'GithubRepository',
-          metadata: {
-            namespace: DEFAULT_NAMESPACE,
-            name: normalizeEntityName(node.nameWithOwner),
-            description: node.description ?? '',
-            annotations: {
-              [ANNOTATION_LOCATION]: location,
-              [ANNOTATION_ORIGIN_LOCATION]: location,
-            },
-          },
-          spec: {
-            url: node.url,
-            owner: stringifyEntityRef({
-              kind: `Github${node.owner.__typename}`,
-              namespace: DEFAULT_NAMESPACE,
-              name: node.owner.login
-            }),
-            nameWithOwner: node.nameWithOwner,
-            languages: node.languages?.nodes?.flatMap(_node => _node?.__typename === 'Language' ? [_node] : []).map(_node => _node.name) ?? [],
-            topics: node.repositoryTopics?.nodes?.flatMap(_node => _node?.__typename === 'RepositoryTopic' ? [_node] : []).map(_node => _node.topic.name) ?? [],
-            visibility: node.visibility,
-          },
-        },
-        locationKey: this.getProviderName(),
-      }));
+    const [ organization ] = data.viewer.organizations.nodes ?? [];
+
+    // only call org mapper for first page of repositories
+    if (repoCursor === null && organization) {
+      deferred.push(...this.organizationMapper(organization));
+    }
+
+    for (const repository of organization?.repositories.nodes || []) {
+      if (repository) {
+        deferred.push(...this.repositoryMapper(repository));
+      }
+    }
+
+    let done = false;
+    if (!organization?.repositories.pageInfo.hasNextPage && !data.viewer.organizations.pageInfo.hasNextPage) {
+      // last page of repositories and no more organizations
+      done = true;
+    } else if (organization?.repositories.pageInfo.hasNextPage) {
+      // current organization still has repositories
+      repoCursor = organization?.repositories.pageInfo.endCursor ?? null;
+    } else if (data.viewer.organizations.pageInfo.hasNextPage) {
+      // start next org on the next cycle
+      repoCursor = null;
+      orgCursor = data.viewer.organizations.pageInfo.endCursor ?? null;
+    }
 
     return {
-      done: !data.search.pageInfo.hasNextPage,
-      cursor: { cursor: data.search.pageInfo.endCursor ?? null },
-      entities: entities ?? []
+      done,
+      cursor: { repoCursor, orgCursor },
+      entities: deferred,
     };
   }
 }
 
 function normalizeEntityName(name: string = '') {
-  return slugify(name.replace('/', '__').replace('.', '__dot__'))
+  return slugify(name.replace('/', '__').replace('.', '__dot__'));
 }
