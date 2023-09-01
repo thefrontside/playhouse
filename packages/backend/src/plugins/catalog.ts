@@ -19,16 +19,15 @@ export default async function createPlugin(
   
   const githubRepositoryProvider = GithubRepositoryEntityProvider.create({ 
     host: 'github.com', 
-    searchQuery: "created:>1970-01-01 user:thefrontside", 
     config: env.config 
   })
 
   incrementalBuilder.addIncrementalEntityProvider(
     githubRepositoryProvider,
     {
-      burstInterval: Duration.fromObject({ seconds: 3 }),
-      burstLength: Duration.fromObject({ seconds: 3 }),
-      restLength: Duration.fromObject({ day: 1 })
+      burstInterval: { seconds: 3 },
+      burstLength: { seconds: 3 },
+      restLength: { days: 1 }
     }
   )
 
