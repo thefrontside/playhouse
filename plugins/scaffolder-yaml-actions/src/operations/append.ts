@@ -19,7 +19,7 @@ export function append({
     const maybeEntity = document.contents.toJSON();
 
     if (typeof maybeEntity.kind === 'string' &&
-      typeof maybeEntity.name === 'string' &&
+    (typeof maybeEntity.name === 'string' || typeof maybeEntity.metadata?.name === 'string') &&
       entityRef &&
       stringifyEntityRef(maybeEntity) !== entityRef) {
       continue;
