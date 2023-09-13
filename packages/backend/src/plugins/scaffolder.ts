@@ -28,7 +28,7 @@ export default async function createPlugin({
     ...builtInActions,
     createAddAnnotation({ integrations, logger }),
     createYamlSetAction({
-      logger, 
+      logger,
       integrations,
       reader,
     }),

@@ -1,0 +1,168 @@
+directive @relation(
+  name: String
+  nodeType: String
+  kind: String
+) on FIELD_DEFINITION
+
+scalar JSON
+scalar JSONObject
+
+type KeyValuePair {
+  key: String!
+  value: String!
+}
+
+union Ownable = API | Component | Domain | Resource | System | Template
+union Dependency = Component | Resource
+union Owner = User | Group
+
+interface Entity
+  @implements(interface: "Node")
+  @discriminates(with: "kind", opaqueType: "OpaqueEntity") {
+  name: String! @field(at: "metadata.name")
+  kind: String! @field(at: "kind")
+  namespace: String! @field(at: "metadata.namespace", default: "default")
+  apiVersion: String! @field(at: "apiVersion")
+  title: String @field(at: "metadata.title")
+  description: String @field(at: "metadata.description")
+  labels: [KeyValuePair!] @field(at: "metadata.labels")
+  annotations: [KeyValuePair!] @field(at: "metadata.annotations")
+  tags: [String!] @field(at: "metadata.tags")
+  links: [EntityLink!] @field(at: "metadata.links")
+}
+
+type EntityLink {
+  url: String!
+  title: String
+  icon: String
+  type: String
+}
+
+interface Location
+  @implements(interface: "Entity")
+  @discriminates(with: "spec.type", opaqueType: "OpaqueLocation")
+  @discriminationAlias(value: "url", type: "URLLocation")
+  @discriminationAlias(value: "file", type: "FileLocation") {
+  type: String @field(at: "spec.type")
+  target: String @field(at: "spec.target")
+  targets: [String!] @field(at: "spec.targets")
+  presence: String @field(at: "spec.presence")
+}
+
+interface API
+  @implements(interface: "Entity")
+  @discriminates(with: "spec.type", opaqueType: "OpaqueAPI")
+  @discriminationAlias(value: "openapi", type: "OpenAPI")
+  @discriminationAlias(value: "asyncapi", type: "AsyncAPI")
+  @discriminationAlias(value: "graphql", type: "GraphQL")
+  @discriminationAlias(value: "grpc", type: "GRPC") {
+  type: String! @field(at: "spec.type")
+  lifecycle: String! @field(at: "spec.lifecycle")
+  owner: Owner! @relation(name: "ownedBy")
+  definition: String! @field(at: "spec.definition")
+  system: System @relation(name: "partOf")
+  apiConsumedBy: Connection
+    @relation(name: "apiConsumedBy", nodeType: "Component")
+  apiProvidedBy: Connection
+    @relation(name: "apiProvidedBy", nodeType: "Component")
+}
+
+interface Component
+  @implements(interface: "Entity")
+  @discriminates(with: "spec.type", opaqueType: "OpaqueComponent")
+  @discriminationAlias(value: "service", type: "Service")
+  @discriminationAlias(value: "website", type: "Website")
+  @discriminationAlias(value: "library", type: "Library") {
+  type: String! @field(at: "spec.type")
+  lifecycle: String! @field(at: "spec.lifecycle")
+  owner: Owner! @relation(name: "ownedBy")
+  system: System @relation(name: "partOf", kind: "system")
+  subComponentOf: Component @relation(name: "partOf", kind: "component")
+  providesApis: Connection @relation(name: "providesApi", nodeType: "API")
+  consumesApis: Connection @relation(name: "consumesApi", nodeType: "API")
+  dependsOn: Connection @relation(name: "dependsOn", nodeType: "Dependency")
+  dependencyOf: Connection
+    @relation(name: "dependencyOf", nodeType: "Dependency")
+  components: Connection @relation(name: "hasPart", nodeType: "Component")
+}
+
+type Domain @implements(interface: "Entity") {
+  owner: Owner! @relation(name: "ownedBy")
+  systems: Connection @relation(name: "hasPart", nodeType: "System")
+}
+
+interface Resource
+  @implements(interface: "Entity")
+  @discriminates(with: "spec.type", opaqueType: "OpaqueResource")
+  @discriminationAlias(value: "database", type: "Database") {
+  type: String! @field(at: "spec.type")
+  owner: Owner! @relation(name: "ownedBy")
+  dependsOn: Connection @relation(name: "dependsOn", nodeType: "Dependency")
+  dependencyOf: Connection
+    @relation(name: "dependencyOf", nodeType: "Dependency")
+  system: System @relation(name: "partOf")
+}
+
+type System @implements(interface: "Entity") {
+  owner: Owner! @relation(name: "ownedBy")
+  domain: Domain @relation(name: "partOf")
+  apis: Connection @relation(name: "hasPart", nodeType: "API", kind: "api")
+  components: Connection
+    @relation(name: "hasPart", nodeType: "Component", kind: "component")
+  resources: Connection
+    @relation(name: "hasPart", nodeType: "Resource", kind: "resource")
+}
+
+type Step {
+  id: String
+  name: String
+  action: String!
+  input: JSONObject
+  if: JSON
+}
+
+interface Template
+  @implements(interface: "Entity")
+  @discriminates(with: "spec.type", opaqueType: "OpaqueTemplate") {
+  type: String! @field(at: "spec.type")
+  parameters: JSONObject @field(at: "spec.parameters")
+  steps: [Step!]! @field(at: "spec.steps")
+  owner: Owner @relation(name: "ownedBy")
+}
+
+type GroupProfile {
+  displayName: String
+  email: String
+  picture: String
+}
+
+interface Group
+  @implements(interface: "Entity")
+  @discriminates(with: "spec.type", opaqueType: "OpaqueGroup")
+  @discriminationAlias(value: "team", type: "Team")
+  @discriminationAlias(value: "sub-department", type: "SubDepartment")
+  @discriminationAlias(value: "department", type: "Department")
+  @discriminationAlias(value: "organization", type: "Organization") {
+  type: String! @field(at: "spec.type")
+  profile: GroupProfile @field(at: "spec.profile")
+  parent: Group @relation(name: "childOf")
+  children: Connection @relation(name: "parentOf", nodeType: "Group")
+  members: Connection @relation(name: "hasMember", nodeType: "User")
+  ownerOf: Connection @relation(name: "ownerOf", nodeType: "Ownable")
+}
+
+type UserProfile {
+  displayName: String
+  email: String
+  picture: String
+}
+
+type User @implements(interface: "Entity") {
+  profile: UserProfile @field(at: "spec.profile")
+  memberOf: Connection @relation(nodeType: "Group")
+  ownerOf: Connection @relation(nodeType: "Ownable")
+}
+
+extend type Query {
+  entity(kind: String!, name: String!, namespace: String): Entity
+}
