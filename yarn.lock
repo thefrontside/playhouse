@@ -4584,10 +4584,10 @@
     graphql "16.5.0"
     hash.js "1.1.7"
 
-"@frontside/hydraphql@^0.0.0":
-  version "0.0.0"
-  resolved "https://registry.yarnpkg.com/@frontside/hydraphql/-/hydraphql-0.0.0.tgz#ac43f2bf289b5f164db9e19ff8da768796ba3d5c"
-  integrity sha512-m3pCkDq+qCToAEJttHKZLFA8IXl3QH5HtbwKTal8CoezKgkUC1e2wrxqaolj+BQx0+Yco+KRARarx/tiJrScRQ==
+"@frontside/hydraphql@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@frontside/hydraphql/-/hydraphql-0.0.1.tgz#90cc11fbc8c8d19bff5e4f24fc29d8fc1040d608"
+  integrity sha512-VE/2yog1rVnkWBGcZHMtVaJGbKDLh71nDImc0SC0Z9TIqlw3yJds7ngfz8psX1qPz+IBqwxfRDaVM9aTWtLUeg==
   dependencies:
     "@graphql-tools/code-file-loader" "^8.0.0"
     "@graphql-tools/graphql-file-loader" "^8.0.0"
@@ -4596,9 +4596,6 @@
     "@graphql-tools/merge" "^9.0.0"
     "@graphql-tools/schema" "^10.0.0"
     "@graphql-tools/utils" "^10.0.0"
-    dataloader "^2.1.0"
-    graphql "^16.6.0"
-    graphql-modules "^2.2.0"
     lodash "^4.17.21"
     pascal-case "^3.1.2"
     reflect-metadata "^0.1.13"
@@ -15603,7 +15600,7 @@ graphql-language-service@^5.0.6:
     nullthrows "^1.0.0"
     vscode-languageserver-types "^3.17.1"
 
-graphql-modules@^2.1.0, graphql-modules@^2.2.0:
+graphql-modules@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/graphql-modules/-/graphql-modules-2.2.0.tgz#c857798240a1c7cea7c57ac85e07a765151ee369"
   integrity sha512-iWFyqP+jZqlwPkM4zVI0A/GDgQErxCTZeiz/jVv0MNzKut+ZEV6Dx8TlLhHd6VLqrqHZmib4NybG5Me8E03jDg==
