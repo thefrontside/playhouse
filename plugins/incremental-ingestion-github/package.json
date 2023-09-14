@@ -42,9 +42,9 @@
   },
   "devDependencies": {
     "@backstage/cli": "^0.22.12",
-    "@graphql-codegen/cli": "2.11.5",
-    "@graphql-codegen/typescript": "2.7.3",
-    "@graphql-codegen/typescript-document-nodes": "2.3.3",
+    "@graphql-codegen/cli": "^4.0.0",
+    "@graphql-codegen/typescript": "^4.0.0",
+    "@graphql-codegen/typescript-document-nodes": "^4.0.0",
     "@octokit/graphql-schema": "^11.1.0",
     "@types/supertest": "^2.0.8",
     "msw": "^0.42.0",

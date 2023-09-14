@@ -122,7 +122,7 @@ export const graphqlPlugin = createBackendPlugin({
           schemas: [...schemas],
           modules: [...modules.values()],
           plugins,
-          loaders,
+          loaders: Object.fromEntries(loaders.entries()),
           dataloaderOptions,
           context,
         }));
