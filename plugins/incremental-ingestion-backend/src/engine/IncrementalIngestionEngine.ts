@@ -5,7 +5,6 @@ import {
   IterationEngineOptions,
 } from '../types';
 import { IncrementalIngestionDatabaseManager } from '../database/IncrementalIngestionDatabaseManager';
-import type { AbortSignal } from 'node-abort-controller';
 
 import { performance } from 'perf_hooks';
 import { Duration, DurationObjectUnits } from 'luxon';

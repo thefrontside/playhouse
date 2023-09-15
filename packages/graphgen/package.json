@@ -17,11 +17,11 @@
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@frontside/tsconfig": "^3.0.0",
-    "@graphql-codegen/add": "^3.1.1",
-    "@graphql-codegen/cli": "^2.6.2",
-    "@graphql-codegen/graphql-modules-preset": "^2.3.8",
-    "@graphql-codegen/typescript": "^2.4.8",
-    "@graphql-codegen/typescript-resolvers": "^2.6.1",
+    "@graphql-codegen/add": "^5.0.0",
+    "@graphql-codegen/cli": "^4.0.0",
+    "@graphql-codegen/graphql-modules-preset": "^4.0.0",
+    "@graphql-codegen/typescript": "^4.0.0",
+    "@graphql-codegen/typescript-resolvers": "^4.0.0",
     "@types/flat-cache": "^2.0.0",
     "@types/graphql": "^14.5.0",
     "shx": "^0.3.4"
