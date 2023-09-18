@@ -15,7 +15,7 @@ describe('append', () => {
   it("creates collection when it doesn't exist", () => {
     expect(append({
       content: `metadata:
-        foo: 
+        foo:
         `,
       path: 'metadata.tags',
       value: 'production'
@@ -23,6 +23,30 @@ describe('append', () => {
   foo:
   tags:
     - production
+`)
+  });
+  it('adds to the resource entity', () => {
+    expect(append({
+      content: `metadata:
+        name: entity-a
+kind: component
+---
+metadata:
+        name: entity-b
+kind: resource
+        `,
+      path: 'metadata.tags',
+      value: 'production',
+      entityRef: 'resource:default/entity-b'
+    })).toEqual(`metadata:
+  name: entity-a
+kind: component
+---
+metadata:
+  name: entity-b
+  tags:
+    - production
+kind: resource
 `)
   });
 });

@@ -22,5 +22,28 @@ describe('set', () => {
       value: 'world!!!'
     })).toBe("hello: world!!!\n")
   });
+  it('allows to set value to resource entity', () => {
+    expect(set({
+      content: `metadata:
+  name: entity-a
+kind: component
+---
+metadata:
+      name: entity-b
+kind: resource
+`,
+      path: 'hello',
+      value: 'world!!!',
+      entityRef: 'resource:default/entity-b'
+    })).toBe(`metadata:
+  name: entity-a
+kind: component
+---
+metadata:
+  name: entity-b
+kind: resource
+hello: world!!!
+`)
+  });
 });
 
