@@ -1,5 +1,11 @@
 # @frontside/graphgen-backstage
 
+## 0.3.2
+
+### Patch Changes
+
+- edf4591: Backport graphql plugins from Backstage PRFC [#15519](https://github.com/backstage/backstage/pull/15519)
+
 ## 0.3.1
 
 ### Patch Changes
