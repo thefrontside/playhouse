@@ -1,5 +1,11 @@
 # @frontside/scaffolder-yaml-actions
 
+## 0.2.3
+
+### Patch Changes
+
+- c929ea9: Support entity updates by metadata name
+
 ## 0.2.2
 
 ### Patch Changes

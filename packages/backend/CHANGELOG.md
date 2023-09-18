@@ -1,5 +1,18 @@
 # backend
 
+## 0.0.23
+
+### Patch Changes
+
+- edf4591: Backport graphql plugins from Backstage PRFC [#15519](https://github.com/backstage/backstage/pull/15519)
+- Updated dependencies [edf4591]
+- Updated dependencies [c929ea9]
+  - @frontside/backstage-plugin-graphql-backend-module-catalog@0.1.0
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.8
+  - @frontside/backstage-plugin-humanitec-backend@0.3.10
+  - @frontside/backstage-plugin-graphql-backend@0.1.0
+  - @frontside/scaffolder-yaml-actions@0.2.3
+
 ## 0.0.22
 
 ### Patch Changes

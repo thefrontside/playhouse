@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.10
+
+### Patch Changes
+
+- edf4591: Backport graphql plugins from Backstage PRFC [#15519](https://github.com/backstage/backstage/pull/15519)
+
 ## 0.3.9
 
 ### Patch Changes

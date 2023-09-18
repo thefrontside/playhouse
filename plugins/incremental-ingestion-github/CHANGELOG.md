@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-incremental-ingestion-github
 
+## 0.2.9
+
+### Patch Changes
+
+- edf4591: Backport graphql plugins from Backstage PRFC [#15519](https://github.com/backstage/backstage/pull/15519)
+- Updated dependencies [edf4591]
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.8
+
 ## 0.2.8
 
 ### Patch Changes
