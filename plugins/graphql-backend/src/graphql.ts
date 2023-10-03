@@ -2,6 +2,7 @@ import { Module } from 'graphql-modules';
 import {
   GraphQLContext,
   BatchLoadFn,
+  GraphQLModule
 } from '@frontside/hydraphql';
 import { Plugin } from 'graphql-yoga';
 import { Options as DataLoaderOptions } from 'dataloader';
@@ -38,19 +39,20 @@ export const graphqlPlugin = createBackendPlugin({
       },
     });
 
-    const modules = new Map<string, Module>();
+    const modules = new Map<string, Module | GraphQLModule>();
     env.registerExtensionPoint(graphqlModulesExtensionPoint, {
       async addModules(newModules) {
         for (const module of newModules) {
           const resolvedModule = await (typeof module === 'function'
             ? module()
             : module);
-          if (modules.has(resolvedModule.id)) {
+          const moduleId = 'id' in resolvedModule ? resolvedModule.id : resolvedModule.module.id
+          if (modules.has(moduleId)) {
             throw new Error(
-              `A module with id "${resolvedModule.id}" has already been registered`,
+              `A module with id "${moduleId}" has already been registered`,
             );
           }
-          modules.set(resolvedModule.id, resolvedModule);
+          modules.set(moduleId, resolvedModule);
         }
       },
     });

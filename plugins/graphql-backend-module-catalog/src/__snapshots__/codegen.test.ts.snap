@@ -5,13 +5,13 @@ exports[`graphql-catalog codegen should generate the correct code: graphql 1`] =
 
 directive @discriminationAlias(type: String!, value: String!) repeatable on INTERFACE
 
-directive @field(at: _DirectiveArgument_!, default: _DirectiveArgument_) on FIELD_DEFINITION
+directive @field(at: _DirectiveArgument_, default: _DirectiveArgument_) on FIELD_DEFINITION
 
 directive @implements(interface: String!) on INTERFACE | OBJECT
 
 directive @relation(kind: String, name: String, nodeType: String) on FIELD_DEFINITION
 
-directive @resolve(at: _DirectiveArgument_, from: String) on FIELD_DEFINITION
+directive @resolve(at: _DirectiveArgument_, from: String, nodeType: String) on FIELD_DEFINITION
 
 interface API implements Entity & Node & Ownable {
   annotations: [KeyValuePair!]
@@ -2436,7 +2436,7 @@ export type DiscriminationAliasDirectiveArgs = {
 export type DiscriminationAliasDirectiveResolver<Result, Parent, ContextType = any, Args = DiscriminationAliasDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type FieldDirectiveArgs = {
-  at: Scalars['_DirectiveArgument_']['input'];
+  at?: Maybe<Scalars['_DirectiveArgument_']['input']>;
   default?: Maybe<Scalars['_DirectiveArgument_']['input']>;
 };
 
@@ -2459,6 +2459,7 @@ export type RelationDirectiveResolver<Result, Parent, ContextType = any, Args = 
 export type ResolveDirectiveArgs = {
   at?: Maybe<Scalars['_DirectiveArgument_']['input']>;
   from?: Maybe<Scalars['String']['input']>;
+  nodeType?: Maybe<Scalars['String']['input']>;
 };
 
 export type ResolveDirectiveResolver<Result, Parent, ContextType = any, Args = ResolveDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;

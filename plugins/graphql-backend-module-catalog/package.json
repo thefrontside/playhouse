@@ -46,7 +46,7 @@
     "@backstage/catalog-model": "^1.4.1",
     "@backstage/plugin-catalog-node": "^1.4.3",
     "@frontside/backstage-plugin-graphql-backend": "^0.1.0",
-    "@frontside/hydraphql": "^0.0.1",
+    "@frontside/hydraphql": "^0.1.1",
     "@graphql-tools/load-files": "^7.0.0",
     "@graphql-tools/utils": "^10.0.0",
     "dataloader": "^2.1.0",

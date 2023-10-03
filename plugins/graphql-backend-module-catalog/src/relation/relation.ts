@@ -1,7 +1,7 @@
-import { TypeDefs, createModule } from 'graphql-modules';
+import { createModule } from 'graphql-modules';
 import { relationDirectiveMapper } from '../relationDirectiveMapper';
-import { createDirectiveMapperProvider } from '@frontside/hydraphql';
-import { loadFiles, loadFilesSync } from '@graphql-tools/load-files';
+import { GraphQLModule } from '@frontside/hydraphql';
+import { loadFilesSync } from '@graphql-tools/load-files';
 import { resolvePackagePath } from '@backstage/backend-common';
 
 const relationSchemaPath = resolvePackagePath(
@@ -10,17 +10,10 @@ const relationSchemaPath = resolvePackagePath(
 );
 
 /** @public */
-export const RelationSync = (
-  typeDefs: TypeDefs = loadFilesSync(relationSchemaPath),
-) =>
-  createModule({
+export const Relation = (): GraphQLModule => ({
+  mappers: { relation: relationDirectiveMapper },
+  module: createModule({
     id: 'relation',
-    typeDefs,
-    providers: [
-      createDirectiveMapperProvider('relation', relationDirectiveMapper),
-    ],
-  });
-
-/** @public */
-export const Relation = async () =>
-  RelationSync(await loadFiles(relationSchemaPath));
+    typeDefs: loadFilesSync(relationSchemaPath),
+  })
+});

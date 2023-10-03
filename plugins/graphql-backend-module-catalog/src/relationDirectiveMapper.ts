@@ -2,34 +2,22 @@ import { connectionFromArray } from 'graphql-relay';
 import { Entity, parseEntityRef } from '@backstage/catalog-model';
 import {
   GraphQLFieldConfig,
-  GraphQLID,
   GraphQLInt,
   GraphQLInterfaceType,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLObjectType,
   GraphQLString,
-  isInputType,
-  isInterfaceType,
   isListType,
   isNonNullType,
-  isObjectType,
-  isUnionType,
 } from 'graphql';
 import {
   DirectiveMapperAPI,
   ResolverContext,
   unboxNamedType,
   encodeId,
+  isConnectionType,
+  createConnectionType,
+  getNodeTypeForConnection
 } from '@frontside/hydraphql';
 import { CATALOG_SOURCE } from './constants';
-
-function isConnectionType(type: unknown): type is GraphQLInterfaceType {
-  return (
-    (isInterfaceType(type) && type.name === 'Connection') ||
-    (isNonNullType(type) && isConnectionType(type.ofType))
-  );
-}
 
 function filterEntityRefs(
   entity: Entity | undefined,
@@ -47,42 +35,6 @@ function filterEntityRefs(
           : [];
       }) ?? []
   );
-}
-
-function createConnectionType(
-  nodeType: GraphQLInterfaceType | GraphQLObjectType,
-  fieldType: GraphQLInterfaceType,
-): GraphQLObjectType {
-  const wrappedEdgeType = fieldType.getFields().edges.type as GraphQLNonNull<
-    GraphQLList<GraphQLNonNull<GraphQLInterfaceType>>
-  >;
-  const edgeType = wrappedEdgeType.ofType.ofType.ofType as GraphQLInterfaceType;
-
-  return new GraphQLObjectType({
-    name: `${nodeType.name}Connection`,
-    fields: {
-      ...fieldType.toConfig().fields,
-      edges: {
-        type: new GraphQLNonNull(
-          new GraphQLList(
-            new GraphQLNonNull(
-              new GraphQLObjectType({
-                name: `${nodeType.name}Edge`,
-                fields: {
-                  ...edgeType.toConfig().fields,
-                  node: {
-                    type: new GraphQLNonNull(nodeType),
-                  },
-                },
-                interfaces: [edgeType],
-              }),
-            ),
-          ),
-        ),
-      },
-    },
-    interfaces: [fieldType],
-  });
 }
 
 export function relationDirectiveMapper(
@@ -108,51 +60,13 @@ export function relationDirectiveMapper(
 
   if (isConnectionType(fieldType)) {
     if (directive.nodeType) {
-      const nodeType = api.typeMap[directive.nodeType];
+      const nodeType = getNodeTypeForConnection(
+        directive.nodeType,
+        (name) => api.typeMap[name],
+        (name, type) => (api.typeMap[name] = type),
+      );
 
-      if (!nodeType) {
-        throw new Error(
-          `The interface "${directive.nodeType}" is not defined in the schema`,
-        );
-      }
-      if (isInputType(nodeType)) {
-        throw new Error(
-          `The interface "${directive.nodeType}" is an input type and can't be used in a Connection`,
-        );
-      }
-      if (isUnionType(nodeType)) {
-        const resolveType = nodeType.resolveType;
-        if (resolveType)
-          throw new Error(
-            `The "resolveType" function has already been implemented for "${nodeType.name}" union which may lead to undefined behavior`,
-          );
-        const iface = (api.typeMap[directive.nodeType] =
-          new GraphQLInterfaceType({
-            name: directive.nodeType,
-            interfaces: [api.typeMap.Node as GraphQLInterfaceType],
-            fields: { id: { type: new GraphQLNonNull(GraphQLID) } },
-            resolveType: (...args) =>
-              (api.typeMap.Node as GraphQLInterfaceType).resolveType?.(...args),
-          }));
-        const types = nodeType.getTypes().map(type => type.name);
-        types.forEach(typeName => {
-          const type = api.typeMap[typeName];
-          if (isInterfaceType(type)) {
-            api.typeMap[typeName] = new GraphQLInterfaceType({
-              ...type.toConfig(),
-              interfaces: [...type.getInterfaces(), iface],
-            });
-          }
-          if (isObjectType(type)) {
-            api.typeMap[typeName] = new GraphQLObjectType({
-              ...type.toConfig(),
-              interfaces: [...type.getInterfaces(), iface],
-            });
-          }
-        });
-
-        field.type = createConnectionType(iface, fieldType);
-      } else {
+      if (nodeType) {
         field.type = createConnectionType(nodeType, fieldType);
       }
     } else {
