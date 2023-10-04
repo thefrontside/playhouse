@@ -16,45 +16,50 @@ Some key features are currently missing. These features may change the schema in
 1. `viewer` query for retrieving data for the current user.
 
 - [GraphQL modules](#graphql-modules)
-  - [Catalog module](#catalog-module)
-  - [Relation module](#relation-module)
+  - [Backstage Plugins](#backstage-plugins)
+  - [Experimental Backend System](#experimental-backend-system)
 - [Directives API](#directives-api)
   - [`@relation` directive](#relation-directive)
 - [Catalog Data loader](#catalog-data-loader-advanced)
 
 ## GraphQL modules
 
-### Catalog module
+This package provides two GraphQL modules:
+- `Catalog` module – provides basic Catalog GraphQL types and `@relation` directive
+- `Relation` module – provides only `@relation` directive
 
-The `Catalog` module is installed just as any other Backstage Module:
-[`@frontside/backstage-plugin-graphql-backend`](../graphql-backend/README.md)
+### Backstage Plugins
 
+For the [Backstage plugin system](https://backstage.io/docs/plugins/backend-plugin),
+you can learn how to add GraphQL modules by checking out [GraphQL Modules](../graphql-backend/README.md#graphql-modules)
+section in `@frontside/backstage-plugin-graphql-backend` package.
+
+This package exports `Catalog` and `Relation` modules
+
+### Experimental Backend System
+
+For the [experimental backend system](https://backstage.io/docs/plugins/experimental-backend),
+you can add them as a plugin modules:
+
+- To use `Catalog` GraphQL module
 ```ts
 // packages/backend/src/index.ts
 import { graphqlModuleCatalog } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
 
 const backend = createBackend();
-
-// GraphQL
-backend.use(graphqlPlugin());
 backend.use(graphqlModuleCatalog());
 ```
 
-### Relation module
-
-If you don't want to use basic Catalog types for some reason, but
-still want to use `@relation` directive, you can install `Relation` module
-
+- To use `Relation` GraphQL module
 ```ts
-// packages/backend/src/index.ts
 import { graphqlModuleRelationResolver } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
 
 const backend = createBackend();
-
-// GraphQL
-backend.use(graphqlPlugin());
 backend.use(graphqlModuleRelationResolver());
 ```
+
+If you don't want to use basic Catalog types for some reason, but
+still want to use `@relation` directive, you can install `Relation` module
 
 ## Directives API
 
