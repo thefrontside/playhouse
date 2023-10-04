@@ -41,14 +41,14 @@ describe('useAsyncValidation', () => {
     {
       name: 'TextExtensionError',
       component: () => null,
-      validation: (value: string, validation: FieldValidation) => {
+      validation: (_value: string, validation: FieldValidation) => {
         validation.addError('boop');
       },
     },
     {
       name: 'TextExtensionValidates',
       component: () => null,
-      validation: (value: string, validation: FieldValidation) => {},
+      validation: (_value: string, _validation: FieldValidation) => {},
     },
   ];
   const validators = extensions.reduce((v, c) => {
