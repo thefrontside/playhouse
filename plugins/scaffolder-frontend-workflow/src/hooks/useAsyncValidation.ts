@@ -10,7 +10,7 @@ import { Draft07 as JSONSchema, isJSONError } from 'json-schema-library';
 
 import { useApiHolder, ApiHolder } from '@backstage/core-plugin-api';
 import { JsonObject, JsonValue } from '@backstage/types';
-import { ErrorSchemaBuilder, isObject } from '@rjsf/utils';
+import { ErrorSchemaBuilder, isObject as isRJSFObject } from '@rjsf/utils';
 import { Validators } from './useValidators';
 
 export interface AsyncValidationProps {
@@ -155,4 +155,13 @@ function createAsyncValidators(
     const validated = await validate(formData);
     return validated.ErrorSchema;
   };
+}
+
+function isObject(value: unknown): value is JsonObject {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    isRJSFObject(value)
+  );
 }
