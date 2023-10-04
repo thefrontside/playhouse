@@ -1,10 +1,14 @@
 import { useAnalytics } from '@backstage/core-plugin-api';
 import { TemplateParameterSchema } from '@backstage/plugin-scaffolder-react';
-import { NextFieldExtensionOptions, useFormDataFromQuery, useTemplateSchema } from '@backstage/plugin-scaffolder-react/alpha';
-import { JsonValue } from '@backstage/types';
-import { FieldValidation } from '@rjsf/utils';
+import {
+  NextFieldExtensionOptions,
+  useFormDataFromQuery,
+  useTemplateSchema,
+} from '@backstage/plugin-scaffolder-react/alpha';
+import { JsonObject, JsonValue } from '@backstage/types';
+import { ErrorSchema, toErrorList } from '@rjsf/utils';
 import { useState } from 'react';
-import { FormValidation, useAsyncValidation } from './useAsyncValidation';
+import { useAsyncValidation } from './useAsyncValidation';
 import { useValidators } from './useValidators';
 
 interface Props {
@@ -21,15 +25,17 @@ export function useStepper({ manifest, initialState, extensions }: Props) {
   const [formState, setFormState] = useFormDataFromQuery(initialState);
   const [activeStep, setActiveStep] = useState(0);
   const [isValidating, setIsValidating] = useState(false);
-  const [errors, setErrors] = useState<undefined | FormValidation>();
+  const [errors, setErrors] = useState<undefined | ErrorSchema<JsonObject>>();
 
   const validators = useValidators({ extensions });
 
   const validation = useAsyncValidation({
     extensions,
+    // this includes both the schema and the uiSchema
+    //  which is required to look up and run async validation
     schema: steps[activeStep]?.mergedSchema,
     validators,
-  })
+  });
 
   const handleBack = () => {
     setActiveStep(prevActiveStep => prevActiveStep - 1);
@@ -70,32 +76,11 @@ export function useStepper({ manifest, initialState, extensions }: Props) {
     currentStep: steps[activeStep],
     errors,
     formState,
-    isValidating
+    isValidating,
   };
 }
 
-function hasErrors(errors?: FormValidation): boolean {
-  if (!errors) {
-    return false;
-  }
-
-  for (const error of Object.values(errors)) {
-    if (isFieldValidation(error)) {
-      if ((error.__errors ?? []).length > 0) {
-        return true;
-      }
-
-      continue;
-    }
-
-    if (hasErrors(error)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function isFieldValidation(error: any): error is FieldValidation {
-  return !!error && '__errors' in error;
+function hasErrors(errors?: ErrorSchema<JsonObject>): boolean {
+  const errorList = toErrorList(errors);
+  return errorList.length > 0;
 }
