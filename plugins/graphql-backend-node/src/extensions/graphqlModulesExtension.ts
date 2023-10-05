@@ -1,10 +1,11 @@
 import { createExtensionPoint } from '@backstage/backend-plugin-api';
+import { GraphQLModule } from '@frontside/hydraphql';
 import { Module } from 'graphql-modules';
 
 /** @public */
-export interface GraphQLModulesExtensionPoint {
+export interface GraphQLModulesExtensionPoint<T = Module | GraphQLModule> {
   addModules(
-    modules: ((() => Module | Promise<Module>) | Module | Promise<Module>)[],
+    modules: ((() => T | Promise<T>) | T | Promise<T>)[],
   ): void;
 }
 

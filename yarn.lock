@@ -4584,10 +4584,10 @@
     graphql "16.5.0"
     hash.js "1.1.7"
 
-"@frontside/hydraphql@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@frontside/hydraphql/-/hydraphql-0.0.1.tgz#90cc11fbc8c8d19bff5e4f24fc29d8fc1040d608"
-  integrity sha512-VE/2yog1rVnkWBGcZHMtVaJGbKDLh71nDImc0SC0Z9TIqlw3yJds7ngfz8psX1qPz+IBqwxfRDaVM9aTWtLUeg==
+"@frontside/hydraphql@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@frontside/hydraphql/-/hydraphql-0.1.1.tgz#d903c426efe6c33d5d3682ff32eab4ebd801d5d1"
+  integrity sha512-giXQHJGor097xqAA9r3yqgu+T/DhCZ7SZSBSY+W670lHZxF5zPCL/+0SE3fK+qTiZV9MUU3nWHfbDs+MxT5pVw==
   dependencies:
     "@graphql-tools/code-file-loader" "^8.0.0"
     "@graphql-tools/graphql-file-loader" "^8.0.0"
@@ -4596,9 +4596,9 @@
     "@graphql-tools/merge" "^9.0.0"
     "@graphql-tools/schema" "^10.0.0"
     "@graphql-tools/utils" "^10.0.0"
+    graphql-relay "^0.10.0"
     lodash "^4.17.21"
     pascal-case "^3.1.2"
-    reflect-metadata "^0.1.13"
     tslib "^2.6.2"
 
 "@frontside/tsconfig@^1.2.0":
@@ -22614,11 +22614,6 @@ redux@^4.0.0, redux@^4.0.4, redux@^4.1.2:
   integrity sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==
   dependencies:
     "@babel/runtime" "^7.9.2"
-
-reflect-metadata@^0.1.13:
-  version "0.1.13"
-  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.1.13.tgz#67ae3ca57c972a2aa1642b10fe363fe32d49dc08"
-  integrity sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==
 
 reflect.getprototypeof@^1.0.3:
   version "1.0.4"

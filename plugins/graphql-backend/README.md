@@ -8,20 +8,29 @@ It uses [GraphQL Modules][graphql-modules] and [Envelop][] plugins so you can
 compose pieces of schema and middleware from many different places
 (including other plugins) into a single, complete GraphQL server.
 
-At a minimum, you should install the [graphql-catalog][] which adds basic
+At a minimum, you should install the [graphql-backend-module-catalog][] which adds basic
 schema elements to access the [Backstage Catalog][backstage-catalog] via GraphQL
 
-- [Getting started](#getting-started)
-- [GraphQL Modules](#graphql-modules)
-- [Extending Schema](../graphql-common/README.md#extending-your-schema-with-a-custom-module)
-- [Envelop Plugins](#envelop-plugins)
-- [GraphQL Context](#graphql-context)
-- [Custom Data loaders](#custom-data-loaders-advanced)
+- [Backstage Plugins](./docs/backend-plugins.md#getting-started)
+- [Experimental Backend System](#experimental-backend-system)
+  - [Getting started](#getting-started)
+  - [GraphQL Modules](#graphql-modules)
+    - [Custom GraphQL Module](#custom-graphql-module)
+  - [Envelop Plugins](#envelop-plugins)
+  - [GraphQL Context](#graphql-context)
+  - [Custom Data loaders](#custom-data-loaders-advanced)
+- [Extending Schema](https://github.com/thefrontside/HydraphQL/blob/main/README.md#extending-your-schema-with-a-custom-module)
 - [Integrations](#integrations)
   - [Backstage GraphiQL Plugin](#backstage-graphiql-plugin)
   - [Backstage API Docs](#backstage-api-docs)
+- [Questions](#questions)
 
-## Getting Started
+## Experimental Backend System
+
+This approach is suitable for the new [Backstage backend system](https://backstage.io/docs/backend-system/).
+For the current [Backstage plugins system](https://backstage.io/docs/plugins/backend-plugin) see [Backstage Plugins](./docs/backend-plugins.md#getting-started)
+
+### Getting Started
 
 To install the GraphQL Backend onto your server:
 
@@ -45,13 +54,13 @@ yarn workspace example-backend start
 This will launch the full example backend. However, without any modules
 installed, you won't be able to do much with it.
 
-## GraphQL Modules
+### GraphQL Modules
 
 The way to add new types and new resolvers to your GraphQL backend is
 with [GraphQL Modules][graphql-modules]. These are portable little
 bundles of schema that you can drop into place and have them extend
 your GraphQL server. The most important of these that is maintained by
-the Backstage team is the [graphql-catalog][] module that makes your
+the Backstage team is the [graphql-backend-module-catalog][] module that makes your
 Catalog accessible via GraphQL. Add this module to your backend:
 
 ```ts
@@ -65,9 +74,85 @@ backend.use(graphqlPlugin());
 backend.use(graphqlModuleCatalog());
 ```
 
-To learn more about adding your own modules, see the [graphql-common][] package.
+#### Custom GraphQL Module
 
-## Envelop Plugins
+To learn more about adding your own modules, see the [HydraphQL][] package.
+
+To extend your schema, you will define it using the GraphQL Schema Definition
+Language, and then (optionally) write resolvers to handle the various types
+which you defined.
+
+1. Create modules directory where you'll store all your GraphQL modules, for example in `packages/backend/src/modules`
+1. Create a module directory `my-module` there
+1. Create a GraphQL schema file `my-module.graphql` in the module directory
+
+```graphql
+extend type Query {
+  hello: String!
+}
+```
+
+This code adds a `hello` field to the global `Query` type. Next, we are going to
+write a module containing this schema and its resolvers.
+
+4. Create a GraphQL module file `my-module.ts` in the module directory
+
+```ts
+import { resolvePackagePath } from "@backstage/backend-common";
+import { loadFilesSync } from "@graphql-tools/load-files";
+import { createModule } from "graphql-modules";
+
+export const myModule = createModule({
+  id: "my-module",
+  dirname: resolvePackagePath("backend", "src/modules/my-module"),
+  typeDefs: loadFilesSync(
+    resolvePackagePath("backend", "src/modules/my-module/my-module.graphql"),
+  ),
+  resolvers: {
+    Query: {
+      hello: () => "world",
+    },
+  },
+});
+```
+
+5. Now we can pass your GraphQL module to GraphQL Application backend
+   module
+
+```ts
+// packages/backend/src/modules/graphqlMyModule.ts
+import { createBackendModule } from "@backstage/backend-plugin-api";
+import { graphqlModulesExtensionPoint } from "@backstage/plugin-graphql-backend-node";
+import { MyModule } from "../modules/my-module/my-module";
+
+export const graphqlModuleMyModule = createBackendModule({
+  pluginId: "graphql",
+  moduleId: "myModule",
+  register(env) {
+    env.registerInit({
+      deps: { modules: graphqlModulesExtensionPoint },
+      async init({ modules }) {
+        await modules.addModules([MyModule]);
+      },
+    });
+  },
+});
+```
+
+6. And then add it to your backend
+
+```ts
+// packages/backend/src/index.ts
+import { graphqlModuleMyModule } from "./modules/graphqlMyModule";
+
+const backend = createBackend();
+
+// GraphQL
+backend.use(graphqlPlugin());
+backend.use(graphqlModuleMyModule());
+```
+
+### Envelop Plugins
 
 Whereas [Graphql Modules][graphql-modules] are used to extend the
 schema and resolvers of your GraphQL server, [Envelop][] plugins are
@@ -112,7 +197,7 @@ backend.use(graphqlPlugin());
 backend.use(graphqlModulePlugins());
 ```
 
-## GraphQL Context
+### GraphQL Context
 
 The GraphQL context is an object that is passed to every resolver
 function. It is a convenient place to store data that is needed by
@@ -139,7 +224,7 @@ export const graphqlModuleContext = createBackendModule({
 });
 ```
 
-## Custom Data Loaders (Advanced)
+### Custom Data Loaders (Advanced)
 
 By default, your graphql context will contain a `Dataloader` for retrieving
 records from the Catalog by their GraphQL ID. Most of the time this is all you
@@ -162,6 +247,7 @@ source name
 // packages/backend/src/modules/graphqlLoaders.ts
 import { createBackendModule } from '@backstage/backend-plugin-api';
 import { graphqlLoadersExtensionPoint } from '@frontside/backstage-plugin-graphql-backend-node';
+import { NodeQuery } from '@frontside/hydraphql';
 
 export const graphqlModuleLoaders = createBackendModule({
   pluginId: 'graphql',
@@ -172,12 +258,12 @@ export const graphqlModuleLoaders = createBackendModule({
       async init({ loaders }) {
         loaders.addLoaders({
           ProjectAPI: async (
-            keys: readonly string[],
+            queries: readonly NodeQuery[],
             context: GraphQLContext,
           ) => {
             /* Fetch */
           },
-          TaskAPI: async (keys: readonly string[], context: GraphQLContext) => {
+          TaskAPI: async (queries: readonly NodeQuery[], context: GraphQLContext) => {
             /* Fetch */
           },
         });
@@ -193,14 +279,14 @@ Then you can use `@resolve` directive in your GraphQL schemas
 interface Node
   @discriminates(with: "__source")
   @discriminationAlias(value: "Project", type: "ProjectAPI")
-  @discriminationAlias(value: "Tasks", type: "TaskAPI")
+  @discriminationAlias(value: "Task", type: "TaskAPI")
 
 type Project @implements(interface "Node") {
-  tasks: Tasks @resolve(at: "spec.projectId", from: "TaskAPI")
+  tasks: [Task] @resolve(at: "spec.projectId", from: "TaskAPI")
 }
 
-type Tasks @implements(interface "Node") {
-  list: [Task!] @field(at: "tasks")
+type Task @implements(interface "Node") {
+  # ...
 }
 ```
 
@@ -265,10 +351,64 @@ backend:
       - host: localhost:7007
 ```
 
+## Questions
+
+### Why was my `union` type transformed to an interface in output schema?
+
+You might notice that if you have a `union` type which is used in
+`@relation` directive with `Connection` type, like this:
+
+```graphql
+union Owner = User | Group
+
+type Resource @implements(interface: "Entity") {
+  owners: Connection! @relation(name: "ownedBy", nodeType: "Owner")
+}
+```
+
+In output schema you'll get:
+
+```graphql
+interface Owner implements Node {
+  id: ID!
+}
+
+type OwnerConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [OwnerEdge!]!
+  count: Int
+}
+
+type OwnerEdge implements Edge {
+  cursor: String!
+  node: Owner!
+}
+
+type User implements Entity & Node & Owner {
+  # ...
+}
+
+type Group implements Entity & Node & Owner {
+  # ...
+}
+```
+
+The reason why we do that, is because `Edge` interface has a `node`
+field with `Node` type. So it forces that any object types that
+implement `Edge` interface must have the `node` field with the type
+that implements `Node` interface. And unions can't implement
+interfaces yet
+([graphql/graphql-spec#518](https://github.com/graphql/graphql-spec/issues/518))
+So you just simply can't use unions in such case. As a workaround we
+change a union to an interface that implements `Node` and each type
+that was used in the union, now implements the new interface. To an
+end user there is no difference between a union and interface
+approach, both variants work similar.
+
 [graphql]: https://graphql.org
 [envelop]: https://the-guild.dev/graphql/envelop
 [graphql-modules]: https://the-guild.dev/graphql/modules
-[graphql-catalog]: ../graphql-catalog/README.md
-[graphql-common]: ../graphql-common/README.md
+[graphql-backend-module-catalog]: ../graphql-backend-module-catalog/README.md
+[HydraphQL]: https://github.com/thefrontside/HydraphQL/blob/main/README.md
 [backstage-catalog]: https://backstage.io/docs/features/software-catalog/software-catalog-overview
 [usemaskederrors]: https://the-guild.dev/graphql/envelop/plugins/use-masked-errors

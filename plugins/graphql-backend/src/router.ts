@@ -15,14 +15,14 @@ import {
   createGraphQLApp,
   GraphQLContext,
   BatchLoadFn,
-  Core,
+  GraphQLModule,
 } from '@frontside/hydraphql';
 import { LoggerService } from '@backstage/backend-plugin-api';
 
 export interface RouterOptions {
   appOptions?: GraphQLAppOptions;
   schemas?: string[];
-  modules?: Module[];
+  modules?: (Module| GraphQLModule)[];
   plugins?: Plugin[];
   loaders?: Record<string, BatchLoadFn<GraphQLContext>>;
   dataloaderOptions?: Options<string, any>;
@@ -49,7 +49,7 @@ export async function createRouter({
 
   let yoga: YogaServerInstance<any, any> | null = null;
   const application = await createGraphQLApp({
-    modules: [await Core(), ...modules],
+    modules,
     schema: [...schemas],
     ...appOptions,
   });

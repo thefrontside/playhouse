@@ -1,12 +1,12 @@
-import { createModule, TypeDefs } from 'graphql-modules';
+import { createModule } from 'graphql-modules';
 import GraphQLJSON, { GraphQLJSONObject } from 'graphql-type-json';
 import { relationDirectiveMapper } from '../relationDirectiveMapper';
 import {
-  createDirectiveMapperProvider,
+  GraphQLModule,
   encodeId,
 } from '@frontside/hydraphql';
 import { stringifyEntityRef } from '@backstage/catalog-model';
-import { loadFiles, loadFilesSync } from '@graphql-tools/load-files';
+import { loadFilesSync } from '@graphql-tools/load-files';
 import { resolvePackagePath } from '@backstage/backend-common';
 import { CATALOG_SOURCE } from '../constants';
 
@@ -16,12 +16,11 @@ const catalogSchemaPath = resolvePackagePath(
 );
 
 /** @public */
-export const CatalogSync = (
-  typeDefs: TypeDefs = loadFilesSync(catalogSchemaPath),
-) =>
-  createModule({
+export const Catalog = (): GraphQLModule => ({
+  mappers: { relation: relationDirectiveMapper },
+  module: createModule({
     id: 'catalog',
-    typeDefs,
+    typeDefs: loadFilesSync(catalogSchemaPath),
     resolvers: {
       JSON: GraphQLJSON,
       JSONObject: GraphQLJSONObject,
@@ -55,11 +54,5 @@ export const CatalogSync = (
         }),
       },
     },
-    providers: [
-      createDirectiveMapperProvider('relation', relationDirectiveMapper),
-    ],
-  });
-
-/** @public */
-export const Catalog = async () =>
-  CatalogSync(await loadFiles(catalogSchemaPath));
+  })
+});
