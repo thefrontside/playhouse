@@ -1,5 +1,4 @@
 import {
-  CoreSync,
   transformSchema,
   encodeId,
   decodeId,
@@ -8,13 +7,12 @@ import DataLoader from 'dataloader';
 import { DocumentNode, GraphQLNamedType, printType } from 'graphql';
 import { createModule, gql } from 'graphql-modules';
 import { createGraphQLAPI } from './__testUtils__';
-import { RelationSync } from './relation/relation';
+import { Relation } from './relation/relation';
 
 describe('mapRelationDirective', () => {
   const transform = (source: DocumentNode) =>
     transformSchema([
-      CoreSync(),
-      RelationSync(),
+      Relation(),
       createModule({
         id: 'mapRelationDirective',
         typeDefs: source,

@@ -1,7 +1,7 @@
-import { CoreSync, transformSchema } from '@frontside/hydraphql';
+import { transformSchema } from '@frontside/hydraphql';
 import { printSchemaWithDirectives } from '@graphql-tools/utils';
-import { CatalogSync } from './catalog';
+import { Catalog } from './catalog';
 
 export const schema = printSchemaWithDirectives(
-  transformSchema([CoreSync(), CatalogSync()]),
+  transformSchema([Catalog()]),
 );

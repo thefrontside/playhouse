@@ -3,7 +3,6 @@ import type { JsonObject } from '@backstage/types';
 import {
   createGraphQLApp,
   GraphQLContext,
-  CoreSync,
 } from '@frontside/hydraphql';
 
 import * as graphql from 'graphql';
@@ -12,7 +11,7 @@ import { Module } from 'graphql-modules';
 import { envelop, useEngine } from '@envelop/core';
 import { useDataLoader } from '@envelop/dataloader';
 import { useGraphQLModules } from '@envelop/graphql-modules';
-import { RelationSync } from '../relation';
+import { Relation } from '../relation';
 
 export async function createGraphQLAPI(
   TestModule: Module,
@@ -20,7 +19,7 @@ export async function createGraphQLAPI(
   generateOpaqueTypes?: boolean,
 ) {
   const application = await createGraphQLApp({
-    modules: [CoreSync(), RelationSync(), TestModule],
+    modules: [Relation(), TestModule],
     generateOpaqueTypes,
   });
 
