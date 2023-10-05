@@ -10,7 +10,7 @@ import { Draft07 as JSONSchema, isJSONError } from 'json-schema-library';
 
 import { useApiHolder, ApiHolder } from '@backstage/core-plugin-api';
 import { JsonObject, JsonValue } from '@backstage/types';
-import { ErrorSchemaBuilder, isObject as isRJSFObject } from '@rjsf/utils';
+import { ErrorSchemaBuilder } from '@rjsf/utils';
 import { Validators } from './useValidators';
 
 export interface AsyncValidationProps {
@@ -95,7 +95,7 @@ function createAsyncValidators(
         //  before it reaches production, the user would not be able to address
         //  the error anyways.
         throw new Error(
-          `Form key ${key} threw an error. Please raise this error with the team.\n${`${definitionInSchema.name}: ${definitionInSchema.message}`}`,
+          `Form key ${key} threw an error. Please raise this error with the team.`,
         );
       }
       const { schema, uiSchema } = extractSchemaFromStep(definitionInSchema);
@@ -124,8 +124,22 @@ function createAsyncValidators(
         }
       };
 
-      if (isObject(value)) {
-        await validate(value, path, definitionInSchema, errorBuilder);
+      if (isObject(value) || definitionInSchema.type === 'object') {
+        if (!isObject(value))
+          // ideally this will only be a dev time error, but if it isn't addressed
+          //  before it reaches production, the user would not be able to address
+          //  the error anyways.
+          throw new Error(
+            `${path.join(
+              '.',
+            )} specified as object type, but is ${typeof value}`,
+          );
+        await validate(
+          (value ?? {}) as JsonObject,
+          path,
+          definitionInSchema,
+          errorBuilder,
+        );
         if ('ui:field' in definitionInSchema) {
           await validateForm(
             definitionInSchema['ui:field'] as string,
@@ -158,10 +172,11 @@ function createAsyncValidators(
 }
 
 function isObject(value: unknown): value is JsonObject {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    isRJSFObject(value)
-  );
+  if (typeof File !== 'undefined' && value instanceof File) {
+    return false;
+  }
+  if (typeof Date !== 'undefined' && value instanceof Date) {
+    return false;
+  }
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

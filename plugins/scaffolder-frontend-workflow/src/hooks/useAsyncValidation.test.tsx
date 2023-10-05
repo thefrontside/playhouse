@@ -65,18 +65,81 @@ describe('useAsyncValidation', () => {
     expect(returnedValidation).toEqual({});
   });
 
-  // should this throw on an error?
-  it.skip('throws errors on invalid schema', async () => {
+  it("doesn't throw on circular schema", async () => {
     const schema = {
       title: 'boop',
       type: 'object',
-      properties: [
+      oneOf: [
         {
-          blam: { type: 'bargle' },
+          properties: {
+            lorem: {
+              type: 'string',
+            },
+          },
+          required: ['lorem'],
+        },
+        {
+          properties: {
+            ipsum: {
+              type: 'string',
+            },
+          },
+          required: ['ipsum'],
         },
       ],
     };
     const formData = { bloop: 'boop' };
+    const validation = createValidation({ schema, validators, extensions });
+    const returnedValidation = await validation(formData);
+
+    expect(returnedValidation).toEqual({});
+  });
+
+  // these should be handled by ajv and the RJSF form
+  it("doesn't throw on schema validation error", async () => {
+    const schema = {
+      title: 'boop',
+      type: 'object',
+      properties: {
+        boop1: { type: 'string', pattern: '\\d+' },
+        boop2: { type: 'string' },
+        boop3: { type: 'object' },
+      },
+      required: ['no existing'],
+    };
+    const formData = { blorp: 'boop', boop3: { happy: 'zoop' } };
+    const validation = createValidation({ schema, validators, extensions });
+    const returnedValidation = await validation(formData);
+
+    expect(returnedValidation).toEqual({});
+  });
+
+  // these should be handled by ajv and the RJSF form
+  //   unless it is an object which has additional expectations
+  //   and will throw if it isn't a defined object
+  it("doesn't throw on invalid schema due to formData", async () => {
+    const schema = {
+      title: 'boop',
+      type: 'object',
+      properties: {
+        boop1: { type: 'string', bloop: 'bllopr' },
+        boop2: { type: 'string' },
+        complexField: {
+          title: 'boop object',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+            },
+            label: {
+              type: 'string',
+            },
+            required: ['id', 'label'],
+          },
+        },
+      },
+    };
+    const formData = { blorp: 'boop', complexField: {} };
     const validation = createValidation({ schema, validators, extensions });
     const returnedValidation = await validation(formData);
 
@@ -156,7 +219,7 @@ describe('useAsyncValidation', () => {
     });
   });
 
-  it('validates open ended object component', async () => {
+  it('throws on open ended object component', async () => {
     const schema = {
       title: 'boop',
       type: 'object',
@@ -170,14 +233,12 @@ describe('useAsyncValidation', () => {
       required: ['stringField'],
     };
     const validation = createValidation({ schema, validators, extensions });
-    const returnedValidation = await validation({});
-
-    expect(returnedValidation).not.toEqual({});
-
-    expect(returnedValidation?.stringField?.__errors).toEqual(['boop']);
+    await expect(validation({})).rejects.toThrow(
+      'stringField specified as object type, but is undefined',
+    );
   });
 
-  it('validates defined object component', async () => {
+  it('validates defined, required object component with root validation', async () => {
     const schema = {
       title: 'boop',
       type: 'object',
@@ -212,6 +273,125 @@ describe('useAsyncValidation', () => {
         label: { __errors: ['boop'] },
       },
     });
+
+    await expect(validation({})).rejects.toThrow(
+      'complexField specified as object type, but is undefined',
+    );
+  });
+
+  it('validates defined, required object component without root validation', async () => {
+    const schema = {
+      title: 'boop',
+      type: 'object',
+      properties: {
+        complexField: {
+          title: 'boop object',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              'ui:field': 'TextExtensionError',
+            },
+            label: {
+              type: 'string',
+              'ui:field': 'TextExtensionError',
+            },
+            required: ['id', 'label'],
+          },
+        },
+      },
+      required: ['complexField'],
+    };
+    const validation = createValidation({ schema, validators, extensions });
+    // the formData matters here as the nested object expects the object passed down
+    const returnedValidation = await validation({ complexField: {} });
+
+    expect(returnedValidation).toEqual({
+      complexField: {
+        id: { __errors: ['boop'] },
+        label: { __errors: ['boop'] },
+      },
+    });
+
+    await expect(validation({})).rejects.toThrow(
+      'complexField specified as object type, but is undefined',
+    );
+  });
+
+  it('validates defined, root optional object component without root validation', async () => {
+    const schema = {
+      title: 'boop',
+      type: 'object',
+      properties: {
+        complexField: {
+          title: 'boop object',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              'ui:field': 'TextExtensionError',
+            },
+            label: {
+              type: 'string',
+              'ui:field': 'TextExtensionError',
+            },
+            required: ['id', 'label'],
+          },
+        },
+      },
+    };
+    const validation = createValidation({ schema, validators, extensions });
+    // the formData matters here as the nested object expects the object passed down
+    await expect(validation({})).rejects.toThrow(
+      'complexField specified as object type, but is undefined',
+    );
+
+    const returnedValidation = await validation({ complexField: {} });
+
+    expect(returnedValidation).toEqual({
+      complexField: {
+        id: { __errors: ['boop'] },
+        label: { __errors: ['boop'] },
+      },
+    });
+  });
+
+  it('validates defined, all optional object component without root validation', async () => {
+    const schema = {
+      title: 'boop',
+      type: 'object',
+      properties: {
+        complexField: {
+          title: 'boop object',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              'ui:field': 'TextExtensionError',
+            },
+            label: {
+              type: 'string',
+              'ui:field': 'TextExtensionError',
+            },
+          },
+        },
+      },
+    };
+    const validation = createValidation({ schema, validators, extensions });
+
+    await expect(validation({})).rejects.toThrow(
+      'complexField specified as object type, but is undefined',
+    );
+
+    // the formData matters here as the nested object expects the object passed down
+    const returnedValidation = await validation({ complexField: {} });
+
+    expect(returnedValidation).toEqual({
+      complexField: {
+        id: { __errors: ['boop'] },
+        label: { __errors: ['boop'] },
+      },
+    });
   });
 
   it('validates object with references', async () => {
@@ -237,12 +417,19 @@ describe('useAsyncValidation', () => {
       required: ['billing_address', 'shipping_address'],
     };
     const validation = createValidation({ schema, validators, extensions });
-    const returnedValidation = await validation({});
+    const returnedValidation = await validation({
+      billing_address: {},
+      shipping_address: {},
+    });
 
     expect(returnedValidation).toEqual({
       billing_address: { __errors: ['boop'] },
       shipping_address: { __errors: ['boop'] },
     });
+
+    await expect(validation({})).rejects.toThrow(
+      'billing_address specified as object type, but is undefined',
+    );
   });
 
   it('validates object with unidirectional dependencies', async () => {
@@ -262,7 +449,6 @@ describe('useAsyncValidation', () => {
     const validation = createValidation({ schema, validators, extensions });
     const returnedValidation = await validation({});
 
-    // TODO does that dependency validate?
     expect(returnedValidation).toEqual({
       name: { __errors: ['boop'] },
       credit_card: { __errors: ['boop'] },
@@ -324,7 +510,8 @@ describe('useAsyncValidation', () => {
       credit_card: { __errors: ['boop'] },
     });
 
-    // TODO this should pass when the formData includes the credit_card
+    // this should pass when the formData includes the credit_card
+    //   but the billing_address is never rendered
     // const returnedValidationAfterDep = await validation({ credit_card: 12345 });
     // expect(returnedValidationAfterDep).toEqual({
     //   name: { __errors: ['boop'] },
@@ -390,7 +577,8 @@ describe('useAsyncValidation', () => {
     const validation = createValidation({ schema, validators, extensions });
     const returnedValidation = await validation({});
 
-    // TODO does the form data matter? should it?
+    // this is only handling the first rendered field and
+    //   not the dependent rendered fields and values
     expect(returnedValidation).toEqual({
       'Any pets?': { __errors: ['boop'] },
       // credit_card: { __errors: ['boop'] },
@@ -398,6 +586,8 @@ describe('useAsyncValidation', () => {
     });
   });
 
+  // these custom widgets are supported in RJSF, but Backstage with their steps
+  //  do not seem to render and handle these correctly
   describe.skip('does not support custom widgets for oneOf, anyOf, and allOf', () => {
     it('validates oneOf', async () => {
       const schema = {
@@ -427,7 +617,6 @@ describe('useAsyncValidation', () => {
       const validation = createValidation({ schema, validators, extensions });
       const returnedValidation = await validation({});
 
-      // TODO does the form data matter? should it?
       expect(returnedValidation).toEqual({
         // credit_card: { __errors: ['boop'] },
         // billing_address: { __errors: ['boop'] },
