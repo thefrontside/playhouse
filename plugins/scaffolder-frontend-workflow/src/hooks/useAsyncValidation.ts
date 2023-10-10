@@ -6,33 +6,31 @@ import {
   createFieldValidation,
   extractSchemaFromStep,
 } from '@backstage/plugin-scaffolder-react/alpha';
-import { Draft07 as JSONSchema } from 'json-schema-library';
+import { Draft07 as JSONSchema, isJSONError } from 'json-schema-library';
 
 import { useApiHolder, ApiHolder } from '@backstage/core-plugin-api';
 import { JsonObject, JsonValue } from '@backstage/types';
-import { FieldValidation } from '@rjsf/utils';
+import { ErrorSchemaBuilder } from '@rjsf/utils';
 import { Validators } from './useValidators';
 
-interface Props {
+export interface AsyncValidationProps {
   extensions: NextFieldExtensionOptions<any, any>[];
+  // this is required as it also includes the uiSchema
   // mergedSchema from useTemplateSchema().steps[activeStep].mergedSchema
   schema: JsonObject;
   validators: Validators;
 }
 
-export function useAsyncValidation(props: Props) {
+export function useAsyncValidation(props: AsyncValidationProps) {
   const apiHolder = useApiHolder();
+  const { schema, validators } = props;
 
   return useMemo(() => {
-    return createAsyncValidators(props.schema, props.validators, {
+    return createAsyncValidators(schema, validators, {
       apiHolder,
     });
-  }, [props.schema, props.validators, apiHolder]);
+  }, [schema, validators, apiHolder]);
 }
-
-export type FormValidation = {
-  [name: string]: FieldValidation | FormValidation;
-};
 
 function createAsyncValidators(
   rootSchema: JsonObject,
@@ -46,15 +44,16 @@ function createAsyncValidators(
 ) {
   async function validate(
     formData: JsonObject,
-    pathPrefix: string = '#',
-    current: JsonObject = formData,
-  ): Promise<FormValidation> {
-    const parsedSchema = new JSONSchema(rootSchema);
-    const formValidation: FormValidation = {};
-
+    pathPrefix: string[] = [],
+    currentSchema = rootSchema,
+    errorBuilder: ErrorSchemaBuilder = new ErrorSchemaBuilder<
+      typeof currentSchema
+    >(),
+  ): Promise<ErrorSchemaBuilder<typeof currentSchema>> {
+    const parsedSchema = new JSONSchema(currentSchema);
     const validateForm = async (
       validatorName: string,
-      key: string,
+      path: string[],
       value: JsonValue | undefined,
       schema: JsonObject,
       uiSchema: NextFieldExtensionUiSchema<unknown, unknown>,
@@ -71,15 +70,34 @@ function createAsyncValidators(
           });
         } catch (ex) {
           // @ts-expect-error 'ex' is of type 'unknown'.ts(18046)
-          fieldValidation.addError(ex.message);
+          errorBuilder.addErrors(ex.message, path);
         }
-        formValidation[key] = fieldValidation;
+        if (fieldValidation.__errors)
+          errorBuilder.addErrors(fieldValidation?.__errors, path);
       }
     };
 
-    for (const [key, value] of Object.entries(current)) {
-      const path = `${pathPrefix}/${key}`;
-      const definitionInSchema = parsedSchema.getSchema(path, formData);
+    for (const key of Object.keys(currentSchema?.properties ?? {})) {
+      const value = formData[key];
+      const path = pathPrefix.concat([key]);
+      // this takes the schema and resolves any references
+      const definitionInSchema = parsedSchema.step(
+        key,
+        currentSchema,
+        formData,
+      );
+      if (isJSONError(definitionInSchema)) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `${definitionInSchema.name}: ${definitionInSchema.message}`,
+        );
+        // ideally this will only be a dev time error, but if it isn't addressed
+        //  before it reaches production, the user would not be able to address
+        //  the error anyways.
+        throw new Error(
+          `Form key ${key} threw an error. Please raise this error with the team.`,
+        );
+      }
       const { schema, uiSchema } = extractSchemaFromStep(definitionInSchema);
 
       const hasItems = definitionInSchema && definitionInSchema.items;
@@ -91,7 +109,7 @@ function createAsyncValidators(
       ) => {
         await validateForm(
           propValue['ui:field'] as string,
-          key,
+          path,
           value,
           itemSchema,
           itemUiSchema,
@@ -106,7 +124,32 @@ function createAsyncValidators(
         }
       };
 
-      if (definitionInSchema && 'ui:field' in definitionInSchema) {
+      if (isObject(value) || definitionInSchema.type === 'object') {
+        if (!isObject(value))
+          // ideally this will only be a dev time error, but if it isn't addressed
+          //  before it reaches production, the user would not be able to address
+          //  the error anyways.
+          throw new Error(
+            `${path.join(
+              '.',
+            )} specified as object type, but is ${typeof value}`,
+          );
+        await validate(
+          (value ?? {}) as JsonObject,
+          path,
+          definitionInSchema,
+          errorBuilder,
+        );
+        if ('ui:field' in definitionInSchema) {
+          await validateForm(
+            definitionInSchema['ui:field'] as string,
+            path,
+            value,
+            schema,
+            uiSchema,
+          );
+        }
+      } else if (definitionInSchema && 'ui:field' in definitionInSchema) {
         await doValidateItem(definitionInSchema, schema, uiSchema);
       } else if (hasItems && 'ui:field' in definitionInSchema.items) {
         await doValidate(definitionInSchema.items);
@@ -116,19 +159,24 @@ function createAsyncValidators(
         for (const [, propValue] of Object.entries(properties)) {
           await doValidate(propValue);
         }
-      } else if (isObject(value)) {
-        formValidation[key] = await validate(formData, path, value);
       }
     }
 
-    return formValidation;
+    return errorBuilder;
   }
 
   return async (formData: JsonObject) => {
-    return await validate(formData);
+    const validated = await validate(formData);
+    return validated.ErrorSchema;
   };
-};
+}
 
 function isObject(value: unknown): value is JsonObject {
+  if (typeof File !== 'undefined' && value instanceof File) {
+    return false;
+  }
+  if (typeof Date !== 'undefined' && value instanceof Date) {
+    return false;
+  }
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
