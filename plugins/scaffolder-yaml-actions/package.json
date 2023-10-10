@@ -23,11 +23,11 @@
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.19.4",
-    "@backstage/catalog-model": "^1.4.1",
-    "@backstage/integration": "^1.6.2",
-    "@backstage/plugin-scaffolder-backend": "^1.16.5",
-    "@backstage/plugin-scaffolder-node": "^0.2.2",
+    "@backstage/backend-common": "^0.19.7",
+    "@backstage/catalog-model": "^1.4.2",
+    "@backstage/integration": "^1.7.0",
+    "@backstage/plugin-scaffolder-backend": "^1.17.3",
+    "@backstage/plugin-scaffolder-node": "^0.2.5",
     "assert-ts": "^0.3.4",
     "fs-extra": "^11.1.1",
     "git-url-parse": "^13.1.0",
@@ -36,7 +36,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.12"
+    "@backstage/cli": "^0.22.13"
   },
   "files": [
     "dist"
