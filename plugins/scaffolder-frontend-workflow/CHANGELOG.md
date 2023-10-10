@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.8.0
+
+### Minor Changes
+
+- 16099d1: Async validation is now scoped to only run for the current step. Allow Scaffolder to run validation at the root of an object.
+
 ## 0.7.2
 
 ### Patch Changes
