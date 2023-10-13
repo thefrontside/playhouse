@@ -63,7 +63,7 @@ add it to the `modules` array in your backend config and create a catalog `DataL
 
 ```ts
 import { createRouter } from '@frontside/backstage-plugin-graphql-backend';
-import { Catalog } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
+import { Catalog, createCatalogLoader } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
 
 // packages/backend/src/plugins/graphql.ts
 export default async function createPlugin(
