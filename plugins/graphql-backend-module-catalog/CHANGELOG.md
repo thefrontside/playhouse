@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.1.2
+
+### Patch Changes
+
+- d267d2d: Export `createCatalogLoader` function
+- Updated dependencies [d267d2d]
+  - @frontside/backstage-plugin-graphql-backend@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
