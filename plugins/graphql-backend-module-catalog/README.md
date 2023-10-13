@@ -31,10 +31,24 @@ This package provides two GraphQL modules:
 ### Backstage Plugins
 
 For the [Backstage plugin system](https://backstage.io/docs/plugins/backend-plugin),
-you can learn how to add GraphQL modules by checking out [GraphQL Modules](../graphql-backend/README.md#graphql-modules)
-section in `@frontside/backstage-plugin-graphql-backend` package.
+you have to pass `Catalog` or `Relation` GraphQL module to the `modules` option and
+create catalog `DataLoader`:
 
-This package exports `Catalog` and `Relation` modules
+```ts
+import { createRouter } from '@frontside/backstage-plugin-graphql-backend';
+import { Catalog } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
+
+// packages/backend/src/plugins/graphql.ts
+export default async function createPlugin(
+  env: PluginEnvironment,
+): Promise<Router> {
+  return await createRouter({
+    logger: env.logger,
+    modules: [Catalog],
+    loaders: { ...createCatalogLoader(env.catalogClient) },
+  });
+}
+```
 
 ### Experimental Backend System
 
@@ -108,19 +122,9 @@ type System {
 }
 ```
 
-## Catalog Data Loader (Advanced)
-
-In most use cases, you will not need to create a Catalog `dataloader` by
-hand. However, when writing [custom data loaders for accessing 3rd
-party sources][custom-loader] or [rolling your own GraphQL Server
-implementation][roll-your-own] you will need to provide the Catalog
-loader yourself. This plugin provides the `createLoader` helper to do
-just that.
-
 [graphql-backend]: ../graphql-backend/README.md
 [graphql-modules]: https://the-guild.dev/graphql/modules
 [relay]: https://relay.dev/docs/guides/graphql-server-specification
 [custom-loader]: ../graphql-backend/README.md#custom-data-loaders-advanced
-[roll-your-own]: ../graphql-common/README.md#getting-started
 [catalog]: https://backstage.io/docs/features/software-catalog/software-catalog-overview
-[directives-api]: ../graphql-common/README.md#directives-api
+[directives-api]: https://github.com/thefrontside/HydraphQL/blob/main/README.md#directives-api
