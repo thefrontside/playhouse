@@ -4,8 +4,7 @@ import {
   graphqlLoadersExtensionPoint,
   graphqlModulesExtensionPoint,
 } from '@frontside/backstage-plugin-graphql-backend';
-import { createEntitiesLoadFn } from './entitiesLoadFn';
-import { CATALOG_SOURCE } from './constants';
+import { createCatalogLoader } from './entitiesLoadFn';
 import { Relation } from './relation/relation';
 
 /** @public */
@@ -21,7 +20,7 @@ export const graphqlModuleRelationResolver = createBackendModule({
       },
       async init({ catalog, modules, loaders }) {
         modules.addModules([Relation]);
-        loaders.addLoaders({ [CATALOG_SOURCE]: createEntitiesLoadFn(catalog) });
+        loaders.addLoaders(createCatalogLoader(catalog));
       },
     });
   },

@@ -2,10 +2,10 @@ import type { CatalogApi } from '@backstage/catalog-client';
 import { Entity } from '@backstage/catalog-model';
 import { NodeQuery } from '@frontside/hydraphql';
 import { GraphQLError } from 'graphql';
+import { CATALOG_SOURCE } from './constants';
 
-export const createEntitiesLoadFn =
-  (catalog: CatalogApi) =>
-  async (
+export const createCatalogLoader = (catalog: CatalogApi) => ({
+  [CATALOG_SOURCE]: async (
     queries: readonly (NodeQuery | undefined)[],
   ): Promise<Array<Entity | GraphQLError>> => {
     // TODO: Support fields
@@ -27,4 +27,5 @@ export const createEntitiesLoadFn =
           new GraphQLError(`no such entity with ref: '${queries[index]}'`)),
     );
     return entities;
-  };
+  },
+});

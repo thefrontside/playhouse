@@ -56,14 +56,14 @@ installed, you won't be able to do much with it.
 The way to add new types and new resolvers to your GraphQL backend is
 with [GraphQL Modules][graphql-modules]. These are portable little
 bundles of schema that you can drop into place and have them extend
-your GraphQL server. The most important of these that is maintained by
-the Backstage team is the [graphql-backend-module-catalog][] module that makes your
-Catalog accessible via GraphQL. To add this module to your GraphQL server,
-add it to the `modules` array in your backend config:
+your GraphQL server. The most important of these that is the
+[graphql-backend-module-catalog][] module that makes your
+Catalog accessible via GraphQL. To add this module and catalog loader to your GraphQL server,
+add it to the `modules` array in your backend config and create a catalog `DataLoader`:
 
 ```ts
 import { createRouter } from '@frontside/backstage-plugin-graphql-backend';
-import { Catalog } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
+import { Catalog, createCatalogLoader } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
 
 // packages/backend/src/plugins/graphql.ts
 export default async function createPlugin(
@@ -72,6 +72,7 @@ export default async function createPlugin(
   return await createRouter({
     logger: env.logger,
     modules: [Catalog],
+    loaders: { ...createCatalogLoader(env.catalogClient) },
   });
 }
 ```
