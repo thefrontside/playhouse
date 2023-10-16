@@ -1,6 +1,6 @@
-import { Logger } from 'winston';
-import { Config } from '@backstage/config';
-import {
+import type { Logger } from 'winston';
+import type { Config } from '@backstage/config';
+import type {
   DatabaseManager,
   PluginCacheManager,
   PluginDatabaseManager,
@@ -8,10 +8,10 @@ import {
   TokenManager,
   UrlReader,
 } from '@backstage/backend-common';
-import { PluginTaskScheduler } from '@backstage/backend-tasks';
-import { IdentityApi } from '@backstage/plugin-auth-node';
-import { PermissionEvaluator } from '@backstage/plugin-permission-common';
-import { CatalogClient } from '@backstage/catalog-client';
+import type { PluginTaskScheduler } from '@backstage/backend-tasks';
+import type { IdentityApi } from '@backstage/plugin-auth-node';
+import type { PermissionEvaluator } from '@backstage/plugin-permission-common';
+import type { CatalogClient } from '@backstage/catalog-client';
 
 export type PluginEnvironment = {
   logger: Logger;
@@ -25,5 +25,5 @@ export type PluginEnvironment = {
   scheduler: PluginTaskScheduler;
   permissions: PermissionEvaluator;
   identity: IdentityApi;
-  catalog: CatalogClient
+  catalog: CatalogClient;
 };
