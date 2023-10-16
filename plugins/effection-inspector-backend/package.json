@@ -22,8 +22,8 @@
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.19.4",
-    "@backstage/config": "^1.0.8",
+    "@backstage/backend-common": "^0.19.7",
+    "@backstage/config": "^1.1.0",
     "@effection/inspect-utils": "^2.1.6",
     "@types/express": "*",
     "effection": "^2.0.6",
@@ -34,7 +34,7 @@
     "yn": "^4.0.0"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.22.12",
+    "@backstage/cli": "^0.22.13",
     "@types/supertest": "^2.0.8",
     "msw": "^0.35.0",
     "supertest": "^4.0.2"
