@@ -1,4 +1,4 @@
-import { Catalog } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
+import { Catalog, createCatalogLoader } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
 import { createRouter } from '@frontside/backstage-plugin-graphql-backend';
 import { Router } from 'express';
 import { PluginEnvironment } from '../types';
@@ -9,6 +9,7 @@ export default async function createPlugin(
 ): Promise<Router> {
   return await createRouter({
     logger: env.logger,
-    modules: [myModule, await Catalog()],
+    modules: [myModule, Catalog()],
+    loaders: { ...createCatalogLoader(env.catalog) },
   });
 }
