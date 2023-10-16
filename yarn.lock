@@ -1966,9 +1966,9 @@
     regenerator-runtime "^0.14.0"
 
 "@babel/runtime@^7.20.6":
-  version "7.23.1"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.1.tgz#72741dc4d413338a91dcb044a86f3c0bc402646d"
-  integrity sha512-hC2v6p8ZSI/W0HUzh3V8C5g+NwSKzKPtJwSpTjwl0o297GP9+ZLQSkdvHz46CM3LqyoXxq+5G9komY+eSqSO0g==
+  version "7.23.2"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.2.tgz#062b0ac103261d68a966c4c7baf2ae3e62ec3885"
+  integrity sha512-mM8eg4yl5D6i3lu2QKPuPH4FArvJ8KhTofbE7jwMUv9KX5mBvwPAqnV3MlyBNqdp9RyRKP6Yck8TrfYrPvX3bg==
   dependencies:
     regenerator-runtime "^0.14.0"
 
@@ -2764,6 +2764,17 @@
     "@backstage/plugin-catalog-node" "^1.4.6"
     "@backstage/plugin-scaffolder-common" "^1.4.1"
 
+"@backstage/plugin-catalog-backend-module-unprocessed@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@backstage/plugin-catalog-backend-module-unprocessed/-/plugin-catalog-backend-module-unprocessed-0.3.2.tgz#67bc2b7fc21d0864c1cf9b5c07189e61a9544254"
+  integrity sha512-C5GUxA4jHalDKK8htgxpqhsa+qARYMLWni0y6tJ0Zz5H7nxbpP04hjkHaqjlFN4SoqucP1s3+nIVWaVThrSQvg==
+  dependencies:
+    "@backstage/backend-plugin-api" "^0.6.5"
+    "@backstage/catalog-model" "^1.4.2"
+    "@backstage/plugin-auth-node" "^0.3.2"
+    express-promise-router "^4.1.1"
+    knex "^2.4.2"
+
 "@backstage/plugin-catalog-backend@^1.13.3":
   version "1.13.3"
   resolved "https://registry.yarnpkg.com/@backstage/plugin-catalog-backend/-/plugin-catalog-backend-1.13.3.tgz#80ad09dd6d5a0feb4bcfd4e61edc3b0f6b83aa5d"
@@ -2911,6 +2922,22 @@
     react-use "^17.2.4"
     yaml "^2.0.0"
     zen-observable "^0.10.0"
+
+"@backstage/plugin-catalog-unprocessed-entities@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@backstage/plugin-catalog-unprocessed-entities/-/plugin-catalog-unprocessed-entities-0.1.3.tgz#a84e4f257c2bbabe4e7a3f0d6610eb6298e225ee"
+  integrity sha512-a612yty5DCJcjOj5mXl5r0zEDMkJT3v2YLsDLdIga9LEqSJ/VU7B3UnZjUnO7dm3ZJpQerUVW0vvKv3jFbKujw==
+  dependencies:
+    "@backstage/catalog-model" "^1.4.2"
+    "@backstage/core-components" "^0.13.5"
+    "@backstage/core-plugin-api" "^1.6.0"
+    "@backstage/errors" "^1.2.2"
+    "@backstage/theme" "^0.4.2"
+    "@material-ui/core" "^4.9.13"
+    "@material-ui/icons" "^4.9.1"
+    "@material-ui/lab" "^4.0.0-alpha.60"
+    "@types/react" "^16.13.1 || ^17.0.0"
+    react-use "^17.2.4"
 
 "@backstage/plugin-catalog@^1.13.0":
   version "1.13.0"
@@ -6638,7 +6665,7 @@
     prop-types "^15.7.2"
     react-is "^16.8.0 || ^17.0.0"
 
-"@material-ui/lab@4.0.0-alpha.61", "@material-ui/lab@^4.0.0-alpha.57":
+"@material-ui/lab@4.0.0-alpha.61", "@material-ui/lab@^4.0.0-alpha.57", "@material-ui/lab@^4.0.0-alpha.60":
   version "4.0.0-alpha.61"
   resolved "https://registry.yarnpkg.com/@material-ui/lab/-/lab-4.0.0-alpha.61.tgz#9bf8eb389c0c26c15e40933cc114d4ad85e3d978"
   integrity sha512-rSzm+XKiNUjKegj8bzt5+pygZeckNLOr+IjykH8sYdVk7dE9y2ZuUSofiMV2bJk3qU+JHwexmw+q0RyNZB9ugg==
@@ -14556,7 +14583,7 @@ express-openapi-validator@^5.0.4:
     ono "^7.1.3"
     path-to-regexp "^6.2.0"
 
-express-promise-router@^4.1.0:
+express-promise-router@^4.1.0, express-promise-router@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/express-promise-router/-/express-promise-router-4.1.1.tgz#8fac102060b9bcc868f84d34fbb12fd8fa494291"
   integrity sha512-Lkvcy/ZGrBhzkl3y7uYBHLMtLI4D6XQ2kiFg9dq7fbktBch5gjqJ0+KovX0cvCAvTJw92raWunRLM/OM+5l4fA==
@@ -18173,7 +18200,7 @@ knex@^1.0.3:
     tarn "^3.0.2"
     tildify "2.0.0"
 
-knex@^2.0.0, knex@^2.3.0:
+knex@^2.0.0, knex@^2.3.0, knex@^2.4.2:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/knex/-/knex-2.5.1.tgz#a6c6b449866cf4229f070c17411f23871ba52ef9"
   integrity sha512-z78DgGKUr4SE/6cm7ku+jHvFT0X97aERh/f0MUKAKgFnwCYBEW4TFBqtHWFYiJFid7fMrtpZ/gxJthvz5mEByA==
