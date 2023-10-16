@@ -43,6 +43,7 @@ import { auth0AuthApiRef } from './internal';
 import Star from '@material-ui/icons/Star';
 import { githubAuthApiRef } from '@backstage/core-plugin-api';
 import { SecretsContextProvider } from '@backstage/plugin-scaffolder-react';
+import { CatalogUnprocessedEntitiesPage } from '@backstage/plugin-catalog-unprocessed-entities';
 
 const app = createApp({
   apis,
@@ -87,6 +88,10 @@ const routes = (
     >
       {entityPage}
     </Route>
+    <Route
+      path="/catalog-unprocessed-entities"
+      element={<CatalogUnprocessedEntitiesPage />}
+    />
     <Route path="/docs" element={<TechDocsIndexPage />}>
       <DefaultTechDocsHome />
     </Route>
