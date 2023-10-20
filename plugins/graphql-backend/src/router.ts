@@ -3,9 +3,9 @@ import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
 import { Module } from 'graphql-modules';
-import helmet from 'helmet';
 import { Options } from 'dataloader';
 import { createYoga, Plugin, YogaServerInstance } from 'graphql-yoga';
+import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useDataLoader } from '@envelop/dataloader';
 import { printSchema } from 'graphql';
@@ -63,20 +63,10 @@ export async function createRouter({
     response.send(printSchema(application.schema));
   });
 
-  if (process.env.NODE_ENV === 'development')
-    router.use(
-      helmet.contentSecurityPolicy({
-        directives: {
-          defaultSrc: ["'self'", "'unsafe-inline'", 'http://*'],
-          scriptSrc: ["'self'", "'unsafe-inline'", 'https://*'],
-          imgSrc: ["'self'", 'https: data:'],
-        },
-      }),
-    );
-
   router.use((req, res, next) => {
     if (!yoga) {
       yoga = createYoga({
+        renderGraphiQL,
         plugins: [
           useGraphQLModules(application),
           useDataLoader(
