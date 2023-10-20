@@ -36,7 +36,7 @@ create catalog `DataLoader`:
 
 ```ts
 import { createRouter } from '@frontside/backstage-plugin-graphql-backend';
-import { Catalog } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
+import { Catalog, createCatalogLoader } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
 
 // packages/backend/src/plugins/graphql.ts
 export default async function createPlugin(

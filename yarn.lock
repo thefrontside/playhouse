@@ -5475,6 +5475,11 @@
   dependencies:
     tslib "^2.5.2"
 
+"@graphql-yoga/render-graphiql@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@graphql-yoga/render-graphiql/-/render-graphiql-5.0.0.tgz#ac4004b2f021eac379163e8746611d6ad32f5106"
+  integrity sha512-m6pyKG4MGb4LBcKO3XIQmHS6zV9omxOY2cD9yszUesmIv0lEcXezHWiH2+uehCE2MmeO5vGNoSZIgEq291bXUg==
+
 "@graphql-yoga/subscription@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@graphql-yoga/subscription/-/subscription-4.0.0.tgz#2bf5844ce8aeff46332650ad642218250201dcc5"
