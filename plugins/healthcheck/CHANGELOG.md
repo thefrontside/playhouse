@@ -1,5 +1,11 @@
 # @internal/plugin-healthcheck
 
+## 0.1.9
+
+### Patch Changes
+
+- c503329: Bump Backstage to 1.18.4 and related dependencies.
+
 ## 0.1.8
 
 ### Patch Changes

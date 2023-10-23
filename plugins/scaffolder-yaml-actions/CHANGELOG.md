@@ -1,5 +1,11 @@
 # @frontside/scaffolder-yaml-actions
 
+## 0.2.4
+
+### Patch Changes
+
+- c503329: Bump Backstage to 1.18.4 and related dependencies.
+
 ## 0.2.3
 
 ### Patch Changes

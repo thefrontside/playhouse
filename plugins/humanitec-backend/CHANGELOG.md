@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.11
+
+### Patch Changes
+
+- c503329: Bump Backstage to 1.18.4 and related dependencies.
+- Updated dependencies [c503329]
+  - @frontside/backstage-plugin-humanitec-common@0.3.9
+
 ## 0.3.10
 
 ### Patch Changes

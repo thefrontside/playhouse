@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.6.2
+
+### Patch Changes
+
+- c503329: Bump Backstage to 1.18.4 and related dependencies.
+
 ## 0.6.1
 
 ### Patch Changes

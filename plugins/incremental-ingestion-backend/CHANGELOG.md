@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.4.9
+
+### Patch Changes
+
+- c503329: Bump Backstage to 1.18.4 and related dependencies.
+
 ## 0.4.8
 
 ### Patch Changes

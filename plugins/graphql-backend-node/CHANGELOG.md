@@ -1,5 +1,12 @@
 # @frontside/backstage-plugin-graphql-backend-node
 
+## 0.1.2
+
+### Patch Changes
+
+- c503329: Bump Backstage to 1.18.4 and related dependencies.
+- 06d6040: Updated url of repositories
+
 ## 0.1.1
 
 ### Patch Changes
