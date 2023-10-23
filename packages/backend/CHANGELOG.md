@@ -1,5 +1,22 @@
 # backend
 
+## 0.0.24
+
+### Patch Changes
+
+- c503329: Bump Backstage to 1.18.4 and related dependencies.
+- Updated dependencies [c503329]
+- Updated dependencies [06d6040]
+  - @frontside/backstage-plugin-graphql-backend-module-catalog@0.1.3
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.4.9
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.10
+  - @frontside/scaffolder-yaml-actions@0.2.4
+  - @frontside/backstage-plugin-humanitec-backend@0.3.11
+  - @frontside/backstage-plugin-graphql-backend@0.1.3
+  - @frontside/backstage-plugin-batch-loader@0.3.6
+  - @internal/plugin-healthcheck@0.1.9
+  - app@0.1.4
+
 ## 0.0.23
 
 ### Patch Changes

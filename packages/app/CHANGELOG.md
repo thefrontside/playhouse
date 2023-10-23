@@ -1,5 +1,15 @@
 # app
 
+## 0.1.4
+
+### Patch Changes
+
+- c503329: Bump Backstage to 1.18.4 and related dependencies.
+- Updated dependencies [c503329]
+  - @frontside/backstage-plugin-scaffolder-workflow@0.8.1
+  - @frontside/backstage-plugin-effection-inspector@0.1.10
+  - @frontside/backstage-plugin-humanitec@0.3.11
+
 ## 0.1.3
 
 ### Patch Changes
