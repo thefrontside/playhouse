@@ -13,10 +13,10 @@
   "backstage": {
     "role": "backend-plugin"
   },
-  "homepage": "https://backstage.io",
+  "homepage": "https://frontside.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/backstage/backstage",
+    "url": "https://github.com/thefrontside/playhouse",
     "directory": "plugins/graphql-backend"
   },
   "keywords": [
