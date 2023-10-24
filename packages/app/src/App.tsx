@@ -41,25 +41,53 @@ import { GraphiQLPage } from '@backstage/plugin-graphiql';
 import { SignInPage } from '@backstage/core-components';
 import { auth0AuthApiRef } from './internal';
 import Star from '@material-ui/icons/Star';
-import { githubAuthApiRef } from '@backstage/core-plugin-api';
+import {
+  IdentityApi,
+  githubAuthApiRef,
+  storageApiRef,
+  useApi,
+} from '@backstage/core-plugin-api';
 import { SecretsContextProvider } from '@backstage/plugin-scaffolder-react';
 import { CatalogUnprocessedEntitiesPage } from '@backstage/plugin-catalog-unprocessed-entities';
 
 const app = createApp({
   apis,
   components: {
-    SignInPage: props => (
-      <SignInPage
-        {...props}
-        auto
-        provider={{
-          id: 'auth0-auth-provider',
-          title: 'Auth0',
-          message: 'Sign in using Auth0',
-          apiRef: auth0AuthApiRef,
-        }}
-      />
-    ),
+    SignInPage: props => {
+      const storage = useApi(storageApiRef);
+      return (
+        <SignInPage
+          onSignInSuccess={async (identityApi: IdentityApi) => {
+            props.onSignInSuccess({
+              getProfileInfo() {
+                return identityApi.getProfileInfo();
+              },
+              getBackstageIdentity() {
+                return identityApi.getBackstageIdentity();
+              },
+              getCredentials() {
+                return identityApi.getCredentials();
+              },
+              async signOut() {
+                await identityApi.signOut();
+                // happens after signout
+                storage.remove('authenticated/user');
+              },
+            });
+            // happens after successful authentication
+            const identity = await identityApi.getBackstageIdentity();
+            storage.set('authenticated/user', identity.userEntityRef);
+          }}
+          auto
+          provider={{
+            id: 'auth0-auth-provider',
+            title: 'Auth0',
+            message: 'Sign in using Auth0',
+            apiRef: auth0AuthApiRef,
+          }}
+        />
+      );
+    },
   },
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
@@ -103,7 +131,10 @@ const routes = (
         <ReportIssue />
       </TechDocsAddons>
     </Route>
-    <Route path="/create" element={<NextScaffolderPage FormProps={{ noHtml5Validate: true }} />} />
+    <Route
+      path="/create"
+      element={<NextScaffolderPage FormProps={{ noHtml5Validate: true }} />}
+    />
     <Route path="/api-docs" element={<ApiExplorerPage />} />
     <Route
       path="/tech-radar"
@@ -148,5 +179,5 @@ export default app.createRoot(
     <AppRouter>
       <Root>{routes}</Root>
     </AppRouter>
-  </SecretsContextProvider>
+  </SecretsContextProvider>,
 );
