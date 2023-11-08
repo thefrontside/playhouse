@@ -12,7 +12,7 @@ At a minimum, you should install the [graphql-backend-module-catalog][] which ad
 schema elements to access the [Backstage Catalog][backstage-catalog] via GraphQL
 
 - [Backstage Plugins](./docs/backend-plugins.md#getting-started)
-- [Experimental Backend System](#experimental-backend-system)
+- [Backend System](#backend-system)
   - [Getting started](#getting-started)
   - [GraphQL Modules](#graphql-modules)
     - [Custom GraphQL Module](#custom-graphql-module)
@@ -25,7 +25,7 @@ schema elements to access the [Backstage Catalog][backstage-catalog] via GraphQL
   - [Backstage API Docs](#backstage-api-docs)
 - [Questions](#questions)
 
-## Experimental Backend System
+## Backend System
 
 This approach is suitable for the new [Backstage backend system](https://backstage.io/docs/backend-system/).
 For the current [Backstage plugins system](https://backstage.io/docs/plugins/backend-plugin) see [Backstage Plugins](./docs/backend-plugins.md#getting-started)

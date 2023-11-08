@@ -17,10 +17,10 @@ Some key features are currently missing. These features may change the schema in
 
 - [GraphQL modules](#graphql-modules)
   - [Backstage Plugins](#backstage-plugins)
-  - [Experimental Backend System](#experimental-backend-system)
+  - [Backend System](#backend-system)
 - [Directives API](#directives-api)
   - [`@relation` directive](#relation-directive)
-- [Catalog Data loader](#catalog-data-loader-advanced)
+- [Custom GraphQL Resolvers](#custom-graphql-resolvers)
 
 ## GraphQL modules
 
@@ -46,13 +46,16 @@ export default async function createPlugin(
     logger: env.logger,
     modules: [Catalog],
     loaders: { ...createCatalogLoader(env.catalogClient) },
+    // You might want to pass catalog client to the context
+    // and use it in resolvers, but it's not required
+    context: ctx => ({ ...ctx, catalog: env.catalogClient }),
   });
 }
 ```
 
-### Experimental Backend System
+### Backend System
 
-For the [experimental backend system](https://backstage.io/docs/plugins/experimental-backend),
+For the [backend system](https://backstage.io/docs/backend-system/),
 you can add them as a plugin modules:
 
 - To use `Catalog` GraphQL module
@@ -120,6 +123,46 @@ type System {
   resources: Connection
     @relation(name: "hasPart", nodeType: "Resource", kind: "resource")
 }
+```
+
+## Custom GraphQL Resolvers
+
+If you need to implement complicated logic for some fields and can't be
+achieved with available [directives][directives-api], you can write
+your own resolvers. To do this, you need to define a resolver function
+in your [GraphQL module](../graphql-backend/README.md#custom-graphql-module):
+
+```ts
+import { createModule } from "graphql-modules";
+import type { CatalogClient, QueryEntitiesRequest } from '@backstage/catalog-client';
+import { encodeEntityId } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
+
+export const myModule = createModule({
+  /* ... */
+  resolvers: {
+    Task: {
+      // This resolver utilize 3rd party api to get entity ref and then encodes it to NodeId
+      // Which will be resolved to an entity
+      entity: async (_, args, { taskAPI }) => {
+        const response = await taskAPI.getTask(args.taskId);
+        return { id: encodeEntityId(response.entityRef) };
+      },
+    },
+    Query: {
+      // Here you can use catalog client to query entities
+      entities: async (
+        _: any,
+        args: QueryEntitiesRequest,
+        // If you aren't using Backstage Backend System https://backstage.io/docs/backend-system/
+        // This requires you to pass catalog client to the context
+        { catalog }: { catalog: CatalogClient }
+      ): Promise<{ id: string }[]> => {
+        const { items: entities } = await catalog.queryEntities(args);
+        return entities.map(entity => ({ id: encodeEntityId(entity) }));
+      },
+    },
+  },
+});
 ```
 
 [graphql-backend]: ../graphql-backend/README.md
