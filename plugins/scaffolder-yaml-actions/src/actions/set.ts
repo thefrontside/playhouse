@@ -63,6 +63,7 @@ export function createYamlSetAction({
           ...ctx,
           input: {
             url: _path.dirname(ctx.input.url),
+            targetPath: _path.dirname(filepath)
           },
         });
 
