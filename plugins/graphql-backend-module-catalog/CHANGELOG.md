@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.1.4
+
+### Patch Changes
+
+- 3d72e30: Add `encodeEntityId/decodeEntityId` helpers
+
 ## 0.1.3
 
 ### Patch Changes
