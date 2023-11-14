@@ -1,5 +1,11 @@
 # @frontside/scaffolder-yaml-actions
 
+## 0.2.5
+
+### Patch Changes
+
+- 5c4071f: Allow target files to be in directories
+
 ## 0.2.4
 
 ### Patch Changes
