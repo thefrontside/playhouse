@@ -2,9 +2,9 @@ import React from 'react';
 import { FormControl, InputLabel, Input, makeStyles } from '@material-ui/core';
 import { FieldValidation } from '@rjsf/utils';
 import {
-  NextFieldExtensionOptions,
-  NextFieldExtensionComponentProps,
-} from '@backstage/plugin-scaffolder-react/alpha';
+  FieldExtensionOptions,
+  FieldExtensionComponentProps,
+} from '@backstage/plugin-scaffolder-react';
 import { MarkdownContent } from '@backstage/core-components';
 
 const useStyles = makeStyles(theme => ({
@@ -19,9 +19,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const CharacterField = (
-  props: NextFieldExtensionComponentProps<string, any>,
-) => {
+const CharacterField = (props: FieldExtensionComponentProps<string, any>) => {
   const {
     displayLabel = true,
     rawErrors = [],
@@ -78,7 +76,7 @@ export const validateAsync = async (
   }
 };
 
-export const characterTextField: NextFieldExtensionOptions<string, any> = {
+export const characterTextField: FieldExtensionOptions<string, any> = {
   name: 'CharacterText',
   component: CharacterField,
   validation: validateAsync,

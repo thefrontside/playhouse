@@ -1,7 +1,7 @@
 import { characterTextField } from './AsyncFieldExtension';
 import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
-import { createNextScaffolderFieldExtension } from '@backstage/plugin-scaffolder-react/alpha';
+import { createScaffolderFieldExtension } from '@backstage/plugin-scaffolder-react';
 
 export const configuredFieldExtensions = [characterTextField].map(extension =>
-  scaffolderPlugin.provide(createNextScaffolderFieldExtension(extension)),
+  scaffolderPlugin.provide(createScaffolderFieldExtension(extension)),
 );

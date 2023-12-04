@@ -6,10 +6,10 @@ import {
   useCustomLayouts,
   useTemplateSecrets,
   ScaffolderTaskOutput,
+  type FieldExtensionOptions,
 } from '@backstage/plugin-scaffolder-react';
 import {
   Workflow,
-  type NextFieldExtensionOptions,
   type WorkflowProps,
 } from '@backstage/plugin-scaffolder-react/alpha';
 import { JsonValue } from '@backstage/types';
@@ -42,13 +42,18 @@ interface FrontPageWrapperProps {
   children: ReactNode;
 }
 
-function FrontPageWrapper({ frontPageButtonText = "START", children }: FrontPageWrapperProps): JSX.Element {
-  return (<Box display="flex" alignItems="center" flexDirection="column">
-    {children}
-    <Button component={Link} variant="contained" to="form">
-      {frontPageButtonText}
-    </Button>
-  </Box>)
+function FrontPageWrapper({
+  frontPageButtonText = 'START',
+  children,
+}: FrontPageWrapperProps): JSX.Element {
+  return (
+    <Box display="flex" alignItems="center" flexDirection="column">
+      {children}
+      <Button component={Link} variant="contained" to="form">
+        {frontPageButtonText}
+      </Button>
+    </Box>
+  );
 }
 
 /**
@@ -64,7 +69,7 @@ export function EmbeddedScaffolderWorkflow({
   const scaffolderApi = useApi(scaffolderApiRef);
   const navigate = useNavigate();
   const customFieldExtensions =
-    useCustomFieldExtensions<NextFieldExtensionOptions>(children);
+    useCustomFieldExtensions<FieldExtensionOptions>(children);
 
   const customLayouts = useCustomLayouts(children);
 
@@ -97,9 +102,7 @@ export function EmbeddedScaffolderWorkflow({
         {frontPage && (
           <Route
             index
-            element={
-              <FrontPageWrapper>{frontPage}</FrontPageWrapper>
-            }
+            element={<FrontPageWrapper>{frontPage}</FrontPageWrapper>}
           />
         )}
         <Route
@@ -114,13 +117,7 @@ export function EmbeddedScaffolderWorkflow({
             />
           }
         />
-        <Route
-          path="tasks/:taskId"
-          element={
-            <TaskProgressRoute />
-          }
-        />
-          
+        <Route path="tasks/:taskId" element={<TaskProgressRoute />} />
       </Routes>
     </>
   );

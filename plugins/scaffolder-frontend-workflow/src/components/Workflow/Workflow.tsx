@@ -3,7 +3,7 @@ import {
   useCustomFieldExtensions,
   useCustomLayouts,
 } from '@backstage/plugin-scaffolder-react';
-import { NextFieldExtensionOptions } from '@backstage/plugin-scaffolder-react/alpha';
+import type { FieldExtensionOptions } from '@backstage/plugin-scaffolder-react';
 import { JsonValue } from '@backstage/types';
 import { ErrorSchema } from '@rjsf/utils';
 import React, { ReactNode, cloneElement, useCallback, useEffect } from 'react';
@@ -67,10 +67,10 @@ export const Workflow = ({
   stepperProgress,
   workflow,
   reviewComponent,
-  FormProps = {}
+  FormProps = {},
 }: WorkflowProps) => {
   const customFieldExtensions =
-    useCustomFieldExtensions<NextFieldExtensionOptions<any, any>>(children);
+    useCustomFieldExtensions<FieldExtensionOptions<any, any>>(children);
 
   const layouts = useCustomLayouts(children);
 
@@ -94,9 +94,7 @@ export const Workflow = ({
 
   if (stepper.activeStep >= stepper.steps.length) {
     return cloneElement(
-      reviewComponent ?? (
-        <DefaultReviewComponent workflow={workflow} />
-      ),
+      reviewComponent ?? <DefaultReviewComponent workflow={workflow} />,
       {
         stepper,
       },

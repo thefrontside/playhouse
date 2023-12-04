@@ -1,17 +1,18 @@
 import { JsonValue } from '@backstage/types';
-import { type IChangeEvent } from '@rjsf/core-v5';
+import { type IChangeEvent } from '@rjsf/core';
 import React, { useCallback, useMemo, type ReactNode } from 'react';
 import validator from '@rjsf/validator-ajv8';
 import { RJSFForm, type RJSFFormProps } from './RJSFForm';
 
 import {
-  type NextFieldExtensionOptions,
   useFormDataFromQuery,
   ParsedTemplateSchema,
 } from '@backstage/plugin-scaffolder-react/alpha';
 
+import type { FieldExtensionOptions } from '@backstage/plugin-scaffolder-react';
+
 export type FormProps = {
-  extensions: NextFieldExtensionOptions<any, any>[];
+  extensions: FieldExtensionOptions<any, any>[];
   step: ParsedTemplateSchema;
   Component?: typeof RJSFForm;
   initialState?: Record<string, JsonValue>;
@@ -45,9 +46,7 @@ export const Form = ({
     [setFormData],
   );
 
-  const onSubmit = async (params: {
-    formData?: Record<string, JsonValue>;
-  }) => {
+  const onSubmit = async (params: { formData?: Record<string, JsonValue> }) => {
     const { formData: _formData = {} } = params;
 
     handleNext(_formData);
@@ -60,6 +59,8 @@ export const Form = ({
       validator={validator}
       schema={step.schema}
       uiSchema={step.uiSchema}
+      // TODO fix TS
+      // @ts-expect-error
       fields={fields}
       formData={formData}
       formContext={{ formData }}
