@@ -4,5 +4,5 @@ export const RJSFForm = withTheme(require('@rjsf/material-ui').Theme);
 
 export type RJSFFormProps = Pick<
   FormProps,
-  'transformErrors' | 'extraErrors' | 'className' | 'ref'
+  'transformErrors' | 'extraErrors' | 'formContext' | 'className' | 'ref'
 >;

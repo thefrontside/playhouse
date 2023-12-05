@@ -62,7 +62,7 @@ export const Form = ({
       uiSchema={step.uiSchema}
       fields={fields}
       formData={formData}
-      formContext={{ formData }}
+      formContext={{ ...props.formContext, formData }}
       onSubmit={onSubmit}
       onChange={handleChange}
       {...props}
