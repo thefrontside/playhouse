@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import {
-  NextCustomFieldValidator,
-  NextFieldExtensionOptions,
-  NextFieldExtensionUiSchema,
+  CustomFieldValidator,
+  FieldExtensionOptions,
+  FieldExtensionUiSchema,
+} from '@backstage/plugin-scaffolder-react';
+import {
   createFieldValidation,
   extractSchemaFromStep,
 } from '@backstage/plugin-scaffolder-react/alpha';
@@ -14,7 +16,7 @@ import { ErrorSchemaBuilder } from '@rjsf/utils';
 import { Validators } from './useValidators';
 
 export interface AsyncValidationProps {
-  extensions: NextFieldExtensionOptions<any, any>[];
+  extensions: FieldExtensionOptions<any, any>[];
   // this is required as it also includes the uiSchema
   // mergedSchema from useTemplateSchema().steps[activeStep].mergedSchema
   schema: JsonObject;
@@ -36,7 +38,7 @@ function createAsyncValidators(
   rootSchema: JsonObject,
   validators: Record<
     string,
-    undefined | NextCustomFieldValidator<unknown, unknown>
+    undefined | CustomFieldValidator<unknown, unknown>
   >,
   context: {
     apiHolder: ApiHolder;
@@ -56,7 +58,7 @@ function createAsyncValidators(
       path: string[],
       value: JsonValue | undefined,
       schema: JsonObject,
-      uiSchema: NextFieldExtensionUiSchema<unknown, unknown>,
+      uiSchema: FieldExtensionUiSchema<unknown, unknown>,
     ) => {
       const validator = validators[validatorName];
       if (validator) {
@@ -105,7 +107,7 @@ function createAsyncValidators(
       const doValidateItem = async (
         propValue: JsonObject,
         itemSchema: JsonObject,
-        itemUiSchema: NextFieldExtensionUiSchema<unknown, unknown>,
+        itemUiSchema: FieldExtensionUiSchema<unknown, unknown>,
       ) => {
         await validateForm(
           propValue['ui:field'] as string,

@@ -58,12 +58,18 @@ const useStyles = makeStyles<BackstageTheme>(theme => ({
 function OnboardingActions({
   stepper,
   workflow,
+  formRef,
+  whichComponent,
 }: {
+  formRef?: any;
   stepper?: Stepper;
   workflow: RunWorkflow;
+  whichComponent: string;
 }) {
+  const errors = formRef?.current?.state?.errors ?? [];
   const styles = useStyles();
-  if (stepper)
+  if (stepper) {
+    console.log(whichComponent, errors);
     return (
       <div className={styles.formFooter}>
         <Button
@@ -94,6 +100,7 @@ function OnboardingActions({
         )}
       </div>
     );
+  }
   return null;
 }
 
@@ -162,7 +169,9 @@ export function EntityOnboardingWorkflow(
           manifest={manifest}
           workflow={workflow}
           initialState={{ entityRef, catalogInfoUrl }}
-          formFooter={<OnboardingActions workflow={workflow} />}
+          formFooter={
+            <OnboardingActions workflow={workflow} whichComponent="footer" />
+          }
           stepperProgress={<StepperProgress />}
           reviewComponent={<EntityOnboardingReview workflow={workflow} />}
         >
@@ -192,7 +201,11 @@ function EntityOnboardingReview({
     return (
       <div className={styles.formWrapper}>
         <ReviewState schemas={stepper.steps} formState={stepper.formState} />
-        <OnboardingActions workflow={workflow} stepper={stepper} />
+        <OnboardingActions
+          workflow={workflow}
+          stepper={stepper}
+          whichComponent="review"
+        />
       </div>
     );
   }

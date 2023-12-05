@@ -1,12 +1,16 @@
 import { useMemo } from 'react';
-import { NextFieldExtensionOptions } from '@backstage/plugin-scaffolder-react/alpha';
+import type { FieldExtensionOptions } from '@backstage/plugin-scaffolder-react';
 
-export type Validators = ReturnType<typeof useValidators>; 
+export type Validators = ReturnType<typeof useValidators>;
 
-export function useValidators({ extensions }: { extensions: NextFieldExtensionOptions<any, any>[]; }) {
+export function useValidators({
+  extensions,
+}: {
+  extensions: FieldExtensionOptions<any, any>[];
+}) {
   return useMemo(() => {
     return Object.fromEntries(
-      extensions.map(({ name, validation }) => [name, validation])
+      extensions.map(({ name, validation }) => [name, validation]),
     );
   }, [extensions]);
 }

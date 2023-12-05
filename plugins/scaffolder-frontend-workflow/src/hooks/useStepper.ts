@@ -1,7 +1,9 @@
 import { useAnalytics } from '@backstage/core-plugin-api';
-import { TemplateParameterSchema } from '@backstage/plugin-scaffolder-react';
+import type {
+  FieldExtensionOptions,
+  TemplateParameterSchema,
+} from '@backstage/plugin-scaffolder-react';
 import {
-  NextFieldExtensionOptions,
   useFormDataFromQuery,
   useTemplateSchema,
 } from '@backstage/plugin-scaffolder-react/alpha';
@@ -14,7 +16,7 @@ import { useValidators } from './useValidators';
 interface Props {
   manifest: TemplateParameterSchema;
   initialState?: Record<string, JsonValue>;
-  extensions: NextFieldExtensionOptions<any, any>[];
+  extensions: FieldExtensionOptions<any, any>[];
 }
 
 export type Stepper = ReturnType<typeof useStepper>;

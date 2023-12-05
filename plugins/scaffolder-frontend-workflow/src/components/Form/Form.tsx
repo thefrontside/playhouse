@@ -1,17 +1,19 @@
-import { JsonValue } from '@backstage/types';
-import { type IChangeEvent } from '@rjsf/core-v5';
+import type { JsonValue } from '@backstage/types';
+import type { IChangeEvent } from '@rjsf/core';
 import React, { useCallback, useMemo, type ReactNode } from 'react';
 import validator from '@rjsf/validator-ajv8';
 import { RJSFForm, type RJSFFormProps } from './RJSFForm';
 
 import {
-  type NextFieldExtensionOptions,
   useFormDataFromQuery,
   ParsedTemplateSchema,
 } from '@backstage/plugin-scaffolder-react/alpha';
 
+import type { FieldExtensionOptions } from '@backstage/plugin-scaffolder-react';
+import type { RJSFSchema, RegistryFieldsType } from '@rjsf/utils';
+
 export type FormProps = {
-  extensions: NextFieldExtensionOptions<any, any>[];
+  extensions: FieldExtensionOptions<any, any>[];
   step: ParsedTemplateSchema;
   Component?: typeof RJSFForm;
   initialState?: Record<string, JsonValue>;
@@ -36,7 +38,7 @@ export const Form = ({
   const fields = useMemo(() => {
     return Object.fromEntries(
       extensions.map(({ name, component }) => [name, component]),
-    );
+    ) as RegistryFieldsType<any, RJSFSchema, any>;
   }, [extensions]);
 
   const handleChange = useCallback(
@@ -45,9 +47,7 @@ export const Form = ({
     [setFormData],
   );
 
-  const onSubmit = async (params: {
-    formData?: Record<string, JsonValue>;
-  }) => {
+  const onSubmit = async (params: { formData?: Record<string, JsonValue> }) => {
     const { formData: _formData = {} } = params;
 
     handleNext(_formData);
