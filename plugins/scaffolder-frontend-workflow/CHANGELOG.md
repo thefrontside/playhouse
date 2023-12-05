@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.10.0
+
+### Minor Changes
+
+- d578189: Allow passing formContext through the FormProps to scaffolder form.
+
 ## 0.9.0
 
 ### Minor Changes

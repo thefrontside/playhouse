@@ -1,6 +1,6 @@
 {
   "name": "app",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "backstage": {
     "role": "frontend"
@@ -36,7 +36,7 @@
     "@backstage/types": "^1.1.1",
     "@frontside/backstage-plugin-effection-inspector": "^0.1.11",
     "@frontside/backstage-plugin-humanitec": "^0.3.12",
-    "@frontside/backstage-plugin-scaffolder-workflow": "^0.9.0",
+    "@frontside/backstage-plugin-scaffolder-workflow": "^0.10.0",
     "@material-ui/core": "^4.12.2",
     "@material-ui/icons": "^4.9.1",
     "@rjsf/utils": "5.13.6",
