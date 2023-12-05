@@ -1,5 +1,24 @@
 # backend
 
+## 0.1.0
+
+### Minor Changes
+
+- b6f76c1: Bump Backstage to `1.20.x` along with related dependencies. This includes a bump of Knex to v3. Additionally, this version of Backstage begins to shift scaffolder alpha features into the mainline which affects the types in related packages.
+
+### Patch Changes
+
+- Updated dependencies [b6f76c1]
+  - @frontside/backstage-plugin-graphql-backend-module-catalog@0.2.0
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.5.0
+  - @frontside/scaffolder-yaml-actions@0.3.0
+  - @frontside/backstage-plugin-batch-loader@0.4.0
+  - app@0.2.0
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.11
+  - @frontside/backstage-plugin-humanitec-backend@0.3.12
+  - @frontside/backstage-plugin-graphql-backend@0.1.4
+  - @internal/plugin-healthcheck@0.1.10
+
 ## 0.0.24
 
 ### Patch Changes

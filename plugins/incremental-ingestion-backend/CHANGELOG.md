@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.5.0
+
+### Minor Changes
+
+- b6f76c1: Bump Backstage to `1.20.x` along with related dependencies. This includes a bump of Knex to v3. Additionally, this version of Backstage begins to shift scaffolder alpha features into the mainline which affects the types in related packages.
+
 ## 0.4.9
 
 ### Patch Changes
