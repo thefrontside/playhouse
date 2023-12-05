@@ -1,5 +1,5 @@
-import { JsonValue } from '@backstage/types';
-import { type IChangeEvent } from '@rjsf/core';
+import type { JsonValue } from '@backstage/types';
+import type { IChangeEvent } from '@rjsf/core';
 import React, { useCallback, useMemo, type ReactNode } from 'react';
 import validator from '@rjsf/validator-ajv8';
 import { RJSFForm, type RJSFFormProps } from './RJSFForm';
@@ -10,6 +10,7 @@ import {
 } from '@backstage/plugin-scaffolder-react/alpha';
 
 import type { FieldExtensionOptions } from '@backstage/plugin-scaffolder-react';
+import type { RJSFSchema, RegistryFieldsType } from '@rjsf/utils';
 
 export type FormProps = {
   extensions: FieldExtensionOptions<any, any>[];
@@ -37,7 +38,7 @@ export const Form = ({
   const fields = useMemo(() => {
     return Object.fromEntries(
       extensions.map(({ name, component }) => [name, component]),
-    );
+    ) as RegistryFieldsType<any, RJSFSchema, any>;
   }, [extensions]);
 
   const handleChange = useCallback(
@@ -59,8 +60,6 @@ export const Form = ({
       validator={validator}
       schema={step.schema}
       uiSchema={step.uiSchema}
-      // TODO fix TS
-      // @ts-expect-error
       fields={fields}
       formData={formData}
       formContext={{ formData }}
