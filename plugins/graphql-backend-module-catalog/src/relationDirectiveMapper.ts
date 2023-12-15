@@ -15,7 +15,7 @@ import {
   encodeId,
   isConnectionType,
   createConnectionType,
-  getNodeTypeForConnection
+  getNodeTypeForConnection,
 } from '@frontside/hydraphql';
 import { CATALOG_SOURCE } from './constants';
 
@@ -62,7 +62,7 @@ export function relationDirectiveMapper(
     if (directive.nodeType) {
       const nodeType = getNodeTypeForConnection(
         directive.nodeType,
-        (name) => api.typeMap[name],
+        name => api.typeMap[name],
         (name, type) => (api.typeMap[name] = type),
       );
 
@@ -102,7 +102,7 @@ export function relationDirectiveMapper(
 
     field.resolve = async ({ id }, args, { loader }) => {
       const ids = filterEntityRefs(
-        await loader.load(id) as Entity,
+        (await loader.load(id)) as Entity,
         directive.name,
         directive.kind,
       ).map(ref => ({
@@ -112,15 +112,21 @@ export function relationDirectiveMapper(
           query: { ref },
         }),
       }));
+      const connection = connectionFromArray<{ id: string } | null>(ids, args);
+      (
+        await loader.loadMany(connection.edges.map(({ node }) => node!.id))
+      ).forEach(
+        (entity, index) => !entity && (connection.edges[index].node = null),
+      );
       return {
-        ...connectionFromArray(ids, args),
+        ...connection,
         count: ids.length,
       };
     };
   } else {
     field.resolve = async ({ id }, _, { loader }) => {
-      const ids = filterEntityRefs(
-        await loader.load(id) as Entity,
+      const ids: ({ id: string } | null)[] = filterEntityRefs(
+        (await loader.load(id)) as Entity,
         directive.name,
         directive.kind,
       ).map(ref => ({
@@ -130,6 +136,10 @@ export function relationDirectiveMapper(
           query: { ref },
         }),
       }));
+      if (!isList) ids.splice(1);
+      (await loader.loadMany(ids.map(node => node!.id))).forEach(
+        (entity, index) => !entity && (ids[index] = null),
+      );
       return isList ? ids : ids[0] ?? null;
     };
   }

@@ -563,4 +563,68 @@ describe('mapRelationDirective', () => {
       },
     });
   });
+
+  it('should return null for not existing entities', async () => {
+    const TestModule = createModule({
+      id: 'test',
+      typeDefs: gql`
+        extend interface Node @discriminates(with: "kind")
+
+        type Entity @implements(interface: "Node") {
+          ownedBy: User @relation
+          owner: User @relation(name: "ownedBy")
+          group: Group @relation(name: "ownedBy", kind: "Group")
+        }
+        type User @implements(interface: "Node") {
+          name: String! @field(at: "name")
+        }
+        type Group @implements(interface: "Node") {
+          name: String! @field(at: "name")
+        }
+      `,
+    });
+    const entity = {
+      kind: 'Entity',
+      relations: [
+        { type: 'ownedBy', targetRef: 'user:default/john' },
+        { type: 'ownedBy', targetRef: 'group:default/team-a' },
+      ],
+    };
+    const user = {
+      kind: 'User',
+      name: 'John',
+    };
+    const loader = () =>
+      new DataLoader(async ids =>
+        ids.map(id => {
+          const { query: { ref } = {} } = decodeId(id as string);
+          if (ref === 'user:default/john') return user;
+          if (ref === 'group:default/team-a') return null;
+          return entity;
+        }),
+      );
+    const query = await createGraphQLAPI(TestModule, loader);
+    const result = await query(/* GraphQL */ `
+      node(id: ${JSON.stringify(
+        encodeId({
+          source: 'Mock',
+          typename: 'Entity',
+          query: { ref: 'entity' },
+        }),
+      )}) {
+        ...on Entity {
+          ownedBy { name }
+          owner { name }
+          group { name }
+        }
+      }
+    `);
+    expect(result).toEqual({
+      node: {
+        ownedBy: { name: 'John' },
+        owner: { name: 'John' },
+        group: null,
+      },
+    });
+  });
 });
