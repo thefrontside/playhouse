@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.2.1
+
+### Patch Changes
+
+- d329856: Resolve node to null if entity doesn't exist
+
 ## 0.2.0
 
 ### Minor Changes
