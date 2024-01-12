@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec
 
+## 0.3.13
+
+### Patch Changes
+
+- c161cc4: Fixed connection when using authenticated API requests
+
 ## 0.3.12
 
 ### Patch Changes
