@@ -4,7 +4,7 @@ export const Deployment = object({
   comment: string(),
   created_at: string(),
   created_by: string(),
-  delta_id: string(),
+  delta_id: string().optional(),
   env_id: string(),
   export_file: string(),
   export_status: string(),
