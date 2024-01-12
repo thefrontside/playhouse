@@ -58,13 +58,14 @@ export async function createRouter(
 
     const client = createHumanitecClient({ token, orgId });
 
+    let id = 0;
     let timeout: NodeJS.Timeout;
 
     function scheduleUpdate(interval: number) {
       async function update() {
         const result = await fetchAppInfo({ client }, appId);
         const data = JSON.stringify(result);
-        response.write(`event: update-success\ndata: ${data}\n\n`);
+        response.write(`event: update-success\ndata: ${data}\nid: ${id++}\n\n`);
         flush(response);
       }
 
@@ -73,10 +74,9 @@ export async function createRouter(
           timeout = setTimeout(() => scheduleUpdate(interval), interval);
         })
         .catch((e) => {
-          response.write(`event: update-failure\ndata: ${e.message}\n\n`);
+          response.write(`event: update-failure\ndata: ${e.message}\nid: ${id++}\n\n`);
           flush(response);
-          logger.error(`Error encountered trying to update environment`);
-          logger.debug(e);
+          logger.error(`Error encountered trying to update environment`, e);
           response.end();
         })
     }
