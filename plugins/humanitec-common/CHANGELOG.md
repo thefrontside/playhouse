@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec-common
 
+## 0.3.12
+
+### Patch Changes
+
+- bfed947: Deduplicate updates for the same orgId/appId
+
 ## 0.3.11
 
 ### Patch Changes
