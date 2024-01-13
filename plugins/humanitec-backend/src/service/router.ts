@@ -19,7 +19,7 @@ import { errorHandler } from '@backstage/backend-common';
 import express from 'express';
 import Router from 'express-promise-router';
 import { Logger } from 'winston';
-import { createHumanitecClient, fetchAppInfo } from '@frontside/backstage-plugin-humanitec-common';
+import { AppInfoService } from './app-info-service';
 
 export interface RouterOptions {
   logger: Logger;
@@ -40,6 +40,8 @@ export async function createRouter(
     response.send({ status: 'ok' });
   });
 
+  const appInfoService = new AppInfoService(token);
+
   router.get('/environments', async (request, response) => {
 
     // Mandatory headers and http status to keep connection open
@@ -56,35 +58,22 @@ export async function createRouter(
       orgId = config.getString('humanitec.orgId');
     }
 
-    const client = createHumanitecClient({ token, orgId });
-
-    let id = 0;
-    let timeout: NodeJS.Timeout;
-
-    function scheduleUpdate(interval: number) {
-      async function update() {
-        const result = await fetchAppInfo({ client }, appId);
-        const data = JSON.stringify(result);
-        response.write(`event: update-success\ndata: ${data}\nid: ${id++}\n\n`);
+    const unsubscribe = appInfoService.addSubscriber(orgId, appId, (data) => {
+      if (data.error) {
+        response.write(`event: update-failure\ndata: ${data.error.message}\nid: ${data.id}\n\n`);
         flush(response);
+        logger.error(`Error encountered trying to update environment`, data.error);
+        response.end();
+        unsubscribe();
+
+        return
       }
 
-      update()
-        .then(() => {
-          timeout = setTimeout(() => scheduleUpdate(interval), interval);
-        })
-        .catch((e) => {
-          response.write(`event: update-failure\ndata: ${e.message}\nid: ${id++}\n\n`);
-          flush(response);
-          logger.error(`Error encountered trying to update environment`, e);
-          response.end();
-        })
-    }
+      response.write(`event: update-success\ndata: ${JSON.stringify(data.data)}\nid: ${data.id}\n\n`);
+      flush(response);
+    });
 
-    request.on('close', () => clearTimeout(timeout));
-
-    scheduleUpdate(10000);
-
+    request.on('close', () => unsubscribe());
   });
 
   router.use(errorHandler());

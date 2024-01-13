@@ -17,17 +17,21 @@ export function useAppInfo({ appId, orgId }: { appId: string; orgId: string }) {
       createEventSource().then((s) => {
         source = s;
 
-        source.addEventListener('update-success', (message) => {
+        source.addEventListener('update-success', (message: any) => {
           try {
-            setData(JSON.parse(message.data));
+            if (message.data) {
+              setData(JSON.parse(message.data));
+            }
           } catch (e) {
             // eslint-disable-next-line no-console
             console.error(e);
           }
         });
 
-        source.addEventListener('update-failure', (message) => {
-          setData(new Error(message.data))
+        source.addEventListener('update-failure', (message: any) => {
+          if (message.data) {
+            setData(new Error(message.data));
+          }
           source.close();
         });
       }, (e) => {
