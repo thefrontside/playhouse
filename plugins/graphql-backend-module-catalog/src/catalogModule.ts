@@ -1,4 +1,4 @@
-import { createBackendModule } from '@backstage/backend-plugin-api';
+import { createBackendModule, coreServices } from '@backstage/backend-plugin-api';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 import {
   graphqlContextExtensionPoint,
@@ -19,10 +19,11 @@ export const graphqlModuleCatalog = createBackendModule({
         modules: graphqlModulesExtensionPoint,
         loaders: graphqlLoadersExtensionPoint,
         context: graphqlContextExtensionPoint,
+        tokenManager: coreServices.tokenManager,
       },
-      async init({ catalog, modules, loaders, context }) {
+      async init({ catalog, modules, loaders, context, tokenManager }) {
         modules.addModules([Catalog]);
-        loaders.addLoaders(createCatalogLoader(catalog));
+        loaders.addLoaders(createCatalogLoader(catalog, tokenManager));
         context.setContext(ctx => ({ ...ctx, catalog }));
       },
     });

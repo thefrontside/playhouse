@@ -10,6 +10,6 @@ export default async function createPlugin(
   return await createRouter({
     logger: env.logger,
     modules: [myModule, Catalog()],
-    loaders: { ...createCatalogLoader(env.catalog) },
+    loaders: { ...createCatalogLoader(env.catalog, env.tokenManager) },
   });
 }
