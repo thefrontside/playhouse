@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.2.2
+
+### Patch Changes
+
+- 2124df0: Pass Backstage auth token to Catalog client requests
+
 ## 0.2.1
 
 ### Patch Changes
