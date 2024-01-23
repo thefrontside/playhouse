@@ -3,7 +3,7 @@ import { Entity } from '@backstage/catalog-model';
 import { getBearerTokenFromAuthorizationHeader } from '@backstage/plugin-auth-node';
 import { GraphQLContext, NodeQuery } from '@frontside/hydraphql';
 import { GraphQLError } from 'graphql';
-import type { Request } from 'express';
+import type { Request } from 'node-fetch';
 import { CATALOG_SOURCE } from './constants';
 
 export const createCatalogLoader = (catalog: CatalogApi) => ({
@@ -13,7 +13,7 @@ export const createCatalogLoader = (catalog: CatalogApi) => ({
   ): Promise<Array<Entity | GraphQLError>> => {
     // TODO: Support fields
     const request = context.request;
-    const token = request ? getBearerTokenFromAuthorizationHeader(request.headers.authorization) : undefined;
+    const token = getBearerTokenFromAuthorizationHeader(request?.headers.get('authorization'));
     const entityRefs = queries.reduce(
       (refs, { ref } = {}, index) => (ref ? refs.set(index, ref) : refs),
       new Map<number, string>(),
