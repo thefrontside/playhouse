@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 
 import { createHumanitecClient, fetchAppInfo } from '@frontside/backstage-plugin-humanitec-common';
 
-const fetchInterval = 10000;
+const defaultFetchInterval = 10000;
 
 export interface AppInfoUpdate {
     id: number;
@@ -16,14 +16,16 @@ export interface AppInfoUpdate {
 //
 export class AppInfoService {
     private emitter: EventEmitter = new EventEmitter();
-    private pending: Record<string, Promise<any>> = {};
-    private timeouts: Record<string, NodeJS.Timeout> = {};
-    private lastData: Record<string, AppInfoUpdate> = {};
+    private pending: Map<string, Promise<any>> = new Map();
+    private timeouts: Map<string, NodeJS.Timeout> = new Map();
+    private lastData: Map<string, AppInfoUpdate> = new Map();
 
     private token: string;
+    private fetchInterval: number;
 
-    constructor(token: string) {
+    constructor(token: string, fetchInterval = defaultFetchInterval) {
         this.token = token;
+        this.fetchInterval = fetchInterval;
     }
 
     addSubscriber(orgId: string, appId: string, subscriber: (data: AppInfoUpdate) => void): () => void {
@@ -32,38 +34,37 @@ export class AppInfoService {
         this.emitter.on(key, subscriber);
 
         // Only fetch app info if a fetch is not pending.
-        if (!this.pending[key]) {
+        if (!this.pending.has(key)) {
             this.fetchAppInfo(orgId, appId);
         } else {
-            if (this.lastData[key]) {
-                subscriber(this.lastData[key]);
+            if (this.lastData.has(key)) {
+                subscriber(this.lastData.get(key)!);
             }
         }
 
         // Return a function that removes this subscriber when it's no longer interested.
         return () => {
             this.emitter.off(key, subscriber);
-            if (this.emitter.listenerCount(key) === 0 && this.timeouts[key]) {
-                clearTimeout(this.timeouts[key]);
-                delete this.pending[key];
-                delete this.timeouts[key];
-                delete this.lastData[key];
+            if (this.emitter.listenerCount(key) === 0 && this.timeouts.has(key)) {
+                clearTimeout(this.timeouts.get(key)!);
+                this.timeouts.delete(key);
+                this.pending.delete(key);
+                this.lastData.delete(key);
             }
         };
     }
 
-    private fetchAppInfo(orgId: string, appId: string): Promise<any> {
+    private fetchAppInfo(orgId: string, appId: string): void {
         const key = `${orgId}:${appId}`;
         const client = createHumanitecClient({ token: this.token, orgId });
-        let id = 0;
 
-        this.pending[key] = (async () => {
-            const update: AppInfoUpdate = { id: id++ };
+        const id = this.lastData.has(key) ? this.lastData.get(key)!.id + 1 : 0;
+
+        this.pending.set(key, (async () => {
+            const update: AppInfoUpdate = { id: id };
             try {
                 const data = await fetchAppInfo({ client }, appId);
                 update.data = data;
-
-                this.timeouts[key] = setTimeout(()=> this.fetchAppInfo(orgId, appId), fetchInterval);
             } catch (error) {
                 if (error instanceof Error) {
                     update.error = error;
@@ -71,10 +72,10 @@ export class AppInfoService {
                     update.error = new Error(`${error}`);
                 }
             } finally {
+                this.timeouts.set(key, setTimeout(() => this.fetchAppInfo(orgId, appId), this.fetchInterval));
+                this.lastData.set(key, update);
                 this.emitter.emit(key, update);
-                this.lastData[key] = update;
             }
-        })();
-        return this.pending[key];
+        })());
     }
 }
