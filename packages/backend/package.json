@@ -60,7 +60,7 @@
     "express-promise-router": "^4.1.0",
     "fs-extra": "^11.1.0",
     "git-url-parse": "^13.1.0",
-    "graphql-modules": "^2.1.0",
+    "graphql-modules": "^2.3.0",
     "js-yaml": "^4.1.0",
     "luxon": "^2.3.1",
     "octokit": "^2.0.9",

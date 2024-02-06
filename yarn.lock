@@ -16219,10 +16219,10 @@ graphql-language-service@5.2.0, graphql-language-service@^5.2.0:
     nullthrows "^1.0.0"
     vscode-languageserver-types "^3.17.1"
 
-graphql-modules@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/graphql-modules/-/graphql-modules-2.2.0.tgz#c857798240a1c7cea7c57ac85e07a765151ee369"
-  integrity sha512-iWFyqP+jZqlwPkM4zVI0A/GDgQErxCTZeiz/jVv0MNzKut+ZEV6Dx8TlLhHd6VLqrqHZmib4NybG5Me8E03jDg==
+graphql-modules@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/graphql-modules/-/graphql-modules-2.3.0.tgz#6b0c4ea97838a64c1900e61e28ec571cb0922d12"
+  integrity sha512-CcrjUjMYHy3zelnffldhR3h6t4ndCVJEzdqBAv/mp4ZGEA/izirOKZB2lnRwpXNqOtVwIz2O/E1Cg/UH8dFNaQ==
   dependencies:
     "@graphql-tools/schema" "^10.0.0"
     "@graphql-tools/wrap" "^10.0.0"
