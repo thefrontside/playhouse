@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.2.4
+
+### Patch Changes
+
+- 84f2970: Upgraded to graphql-modules 2.3.0
+- Updated dependencies [84f2970]
+  - @frontside/backstage-plugin-graphql-backend@0.1.5
+
 ## 0.2.3
 
 ### Patch Changes
