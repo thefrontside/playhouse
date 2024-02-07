@@ -122,7 +122,7 @@ export const myModule = createModule({
 ```ts
 // packages/backend/src/modules/graphqlMyModule.ts
 import { createBackendModule } from "@backstage/backend-plugin-api";
-import { graphqlModulesExtensionPoint } from "@backstage/plugin-graphql-backend-node";
+import { graphqlModulesExtensionPoint } from "@frontside/backstage-plugin-graphql-backend-node";
 import { MyModule } from "../modules/my-module/my-module";
 
 export const graphqlModuleMyModule = createBackendModule({

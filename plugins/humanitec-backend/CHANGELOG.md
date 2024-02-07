@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.15
+
+### Patch Changes
+
+- b9e57e3: Continue polling when an error is returned.
+
 ## 0.3.14
 
 ### Patch Changes
