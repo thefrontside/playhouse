@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/index.cjs.js",
   "types": "src/index.ts",
   "private": true,
@@ -42,8 +42,8 @@
     "@backstage/plugin-techdocs-backend": "^1.9.0",
     "@frontside/backstage-plugin-batch-loader": "0.4.0",
     "@frontside/backstage-plugin-effection-inspector-backend": "0.1.11",
-    "@frontside/backstage-plugin-graphql-backend": "^0.1.4",
-    "@frontside/backstage-plugin-graphql-backend-module-catalog": "^0.2.0",
+    "@frontside/backstage-plugin-graphql-backend": "^0.1.5",
+    "@frontside/backstage-plugin-graphql-backend-module-catalog": "^0.2.4",
     "@frontside/backstage-plugin-humanitec-backend": "^0.3.12",
     "@frontside/backstage-plugin-incremental-ingestion-backend": "*",
     "@frontside/scaffolder-yaml-actions": "^0.3.0",
