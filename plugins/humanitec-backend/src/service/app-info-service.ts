@@ -16,7 +16,6 @@ export interface AppInfoUpdate {
 //
 export class AppInfoService {
     private emitter: EventEmitter = new EventEmitter();
-    private pending: Map<string, Promise<any>> = new Map();
     private timeouts: Map<string, NodeJS.Timeout> = new Map();
     private lastData: Map<string, AppInfoUpdate> = new Map();
 
@@ -34,8 +33,8 @@ export class AppInfoService {
         this.emitter.on(key, subscriber);
 
         // Only fetch app info if a fetch is not pending.
-        if (!this.pending.has(key)) {
-            this.fetchAppInfo(orgId, appId);
+        if (!this.timeouts.has(key)) {
+            this.timeouts.set(key, setTimeout(() => this.fetchAppInfo(orgId, appId), 1));
         } else {
             if (this.lastData.has(key)) {
                 subscriber(this.lastData.get(key)!);
@@ -48,34 +47,33 @@ export class AppInfoService {
             if (this.emitter.listenerCount(key) === 0 && this.timeouts.has(key)) {
                 clearTimeout(this.timeouts.get(key)!);
                 this.timeouts.delete(key);
-                this.pending.delete(key);
                 this.lastData.delete(key);
             }
         };
     }
 
-    private fetchAppInfo(orgId: string, appId: string): void {
+    private async fetchAppInfo(orgId: string, appId: string): Promise<void> {
         const key = `${orgId}:${appId}`;
         const client = createHumanitecClient({ token: this.token, orgId });
 
         const id = this.lastData.has(key) ? this.lastData.get(key)!.id + 1 : 0;
 
-        this.pending.set(key, (async () => {
-            const update: AppInfoUpdate = { id: id };
-            try {
-                const data = await fetchAppInfo({ client }, appId);
-                update.data = data;
-            } catch (error) {
-                if (error instanceof Error) {
-                    update.error = error;
-                } else {
-                    update.error = new Error(`${error}`);
-                }
-            } finally {
+        const update: AppInfoUpdate = { id: id };
+        try {
+            const data = await fetchAppInfo({ client }, appId);
+            update.data = data;
+        } catch (error) {
+            if (error instanceof Error) {
+                update.error = error;
+            } else {
+                update.error = new Error(`${error}`);
+            }
+        } finally {
+            if (this.emitter.listenerCount(key) > 0) {
                 this.timeouts.set(key, setTimeout(() => this.fetchAppInfo(orgId, appId), this.fetchInterval));
                 this.lastData.set(key, update);
                 this.emitter.emit(key, update);
             }
-        })());
+        }
     }
 }
