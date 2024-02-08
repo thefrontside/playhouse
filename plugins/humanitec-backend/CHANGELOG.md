@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec-backend
 
+## 0.3.16
+
+### Patch Changes
+
+- fc748dd: Handle disconnects while fetching app info
+
 ## 0.3.15
 
 ### Patch Changes
