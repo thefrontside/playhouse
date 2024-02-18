@@ -1,5 +1,32 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.2.5
+
+### Patch Changes
+
+- fb0e84d: Make module default exports to allow using import syntax
+
+  This change allows to use import syntax to load modules
+
+  ```diff
+  import { createBackend } from '@backstage/backend-defaults';
+  -import { graphqlPlugin } from '@frontside/backstage-plugin-graphql-backend';
+  -import { graphqlModuleCatalog } from '@frontside/backstage-plugin-graphql-backend-module-catalog';
+
+  const backend = createBackend();
+
+
+  -backend.add(graphqlPlugin());
+  +backend.add(import('@frontside/backstage-plugin-graphql-backend'));
+  -backend.add(graphqlModuleCatalog());
+  +backend.add(import('@frontside/backstage-plugin-graphql-backend-module-catalog'));
+
+  backend.start();
+  ```
+
+- Updated dependencies [fb0e84d]
+  - @frontside/backstage-plugin-graphql-backend@0.1.6
+
 ## 0.2.4
 
 ### Patch Changes
