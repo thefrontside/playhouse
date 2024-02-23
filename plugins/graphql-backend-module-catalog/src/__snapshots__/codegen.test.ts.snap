@@ -196,11 +196,254 @@ interface Entity implements Node {
   title: String
 }
 
+type EntityConnection implements Connection {
+  count: Int
+  edges: [EntityEdge!]!
+  pageInfo: PageInfo!
+}
+
+type EntityEdge implements Edge {
+  cursor: String!
+  node: Entity!
+}
+
+"""
+{
+  order: [
+    { fieldA: ASC }
+    { fieldB: DESC }
+    { fieldC: [{ fieldD: ASC }] }
+    { fieldE: { order: ASC } }
+    {
+      fieldE: {
+        fields: [{ fieldF: DESC }, { fieldG: ASC }]
+      }
+    }
+  ]
+  search: {
+    term: "substring"
+    fields: {
+      fieldA: true
+      fieldB: true
+      fieldC: { fieldD: true }
+      fieldE: {
+        include: true
+        fields: { fieldF: true, fieldG: true }
+      }
+    }
+  }
+  match: [
+    { fieldA: ["value1", "value2"], fieldB: ["value3"] }
+    { fieldC: { fieldD: ["value4"] } }
+    {
+      fieldE: {
+        values: ["value5", "value6"],
+        fields: { fieldF: ["value7"], fieldG: ["value8"] }
+      }
+    }
+  ]
+}
+"""
+input EntityFilter {
+  match: [EntityFilterExpression!]
+  order: [EntityOrderField!]
+  search: EntityTextFilter
+}
+
+input EntityFilterExpression {
+  annotations: EntityFilterExpression_Annotations
+  apiVersion: [JSON!]
+  definition: [JSON!]
+  description: [JSON!]
+  kind: [JSON!]
+  labels: EntityFilterExpression_Labels
+  lifecycle: [JSON!]
+  links: EntityFilterExpression_Links
+  name: [JSON!]
+  namespace: [JSON!]
+  parameters: [JSON!]
+  presence: [JSON!]
+  profile: EntityFilterExpression_Profile
+  steps: EntityFilterExpression_Steps
+  tags: [JSON!]
+  target: [JSON!]
+  targets: [JSON!]
+  title: [JSON!]
+  type: [JSON!]
+}
+
+input EntityFilterExpression_Annotations {
+  key: [JSON!]
+  value: [JSON!]
+}
+
+input EntityFilterExpression_Labels {
+  key: [JSON!]
+  value: [JSON!]
+}
+
+input EntityFilterExpression_Links {
+  icon: [JSON!]
+  title: [JSON!]
+  type: [JSON!]
+  url: [JSON!]
+}
+
+input EntityFilterExpression_Profile {
+  displayName: [JSON!]
+  email: [JSON!]
+  picture: [JSON!]
+}
+
+input EntityFilterExpression_Steps {
+  action: [JSON!]
+  id: [JSON!]
+  if: [JSON!]
+  input: [JSON!]
+  name: [JSON!]
+}
+
 type EntityLink {
   icon: String
   title: String
   type: String
   url: String!
+}
+
+input EntityOrderField {
+  annotations: [EntityOrderField_Annotations!]
+  apiVersion: OrderDirection
+  definition: OrderDirection
+  description: OrderDirection
+  kind: OrderDirection
+  labels: [EntityOrderField_Labels!]
+  lifecycle: OrderDirection
+  links: [EntityOrderField_Links!]
+  name: OrderDirection
+  namespace: OrderDirection
+  parameters: OrderDirection
+  presence: OrderDirection
+  profile: [EntityOrderField_Profile!]
+  steps: [EntityOrderField_Steps!]
+  tags: OrderDirection
+  target: OrderDirection
+  targets: OrderDirection
+  title: OrderDirection
+  type: OrderDirection
+}
+
+input EntityOrderField_Annotations {
+  key: OrderDirection
+  value: OrderDirection
+}
+
+input EntityOrderField_Labels {
+  key: OrderDirection
+  value: OrderDirection
+}
+
+input EntityOrderField_Links {
+  icon: OrderDirection
+  title: OrderDirection
+  type: OrderDirection
+  url: OrderDirection
+}
+
+input EntityOrderField_Profile {
+  displayName: OrderDirection
+  email: OrderDirection
+  picture: OrderDirection
+}
+
+input EntityOrderField_Steps {
+  action: OrderDirection
+  id: OrderDirection
+  if: OrderDirection
+  input: OrderDirection
+  name: OrderDirection
+}
+
+input EntityRawFilter {
+  filter: [EntityRawFilterExpression!]
+  fullTextFilter: EntityRawTextFilter
+  orderFields: [EntityRawOrderField!]
+}
+
+input EntityRawFilterExpression {
+  fields: [EntityRawFilterField!]!
+}
+
+input EntityRawFilterField {
+  key: String!
+  values: [JSON!]!
+}
+
+input EntityRawOrderField {
+  field: String!
+  order: OrderDirection!
+}
+
+input EntityRawTextFilter {
+  fields: [String!]
+  term: String!
+}
+
+input EntityTextFilter {
+  fields: EntityTextFilterFields
+  term: String!
+}
+
+input EntityTextFilterFields {
+  annotations: EntityTextFilterFields_Annotations
+  apiVersion: Boolean
+  definition: Boolean
+  description: Boolean
+  kind: Boolean
+  labels: EntityTextFilterFields_Labels
+  lifecycle: Boolean
+  links: EntityTextFilterFields_Links
+  name: Boolean
+  namespace: Boolean
+  parameters: Boolean
+  presence: Boolean
+  profile: EntityTextFilterFields_Profile
+  steps: EntityTextFilterFields_Steps
+  tags: Boolean
+  target: Boolean
+  targets: Boolean
+  title: Boolean
+  type: Boolean
+}
+
+input EntityTextFilterFields_Annotations {
+  key: Boolean
+  value: Boolean
+}
+
+input EntityTextFilterFields_Labels {
+  key: Boolean
+  value: Boolean
+}
+
+input EntityTextFilterFields_Links {
+  icon: Boolean
+  title: Boolean
+  type: Boolean
+  url: Boolean
+}
+
+input EntityTextFilterFields_Profile {
+  displayName: Boolean
+  email: Boolean
+  picture: Boolean
+}
+
+input EntityTextFilterFields_Steps {
+  action: Boolean
+  id: Boolean
+  if: Boolean
+  input: Boolean
+  name: Boolean
 }
 
 type FileLocation implements Entity & Location & Node {
@@ -516,6 +759,11 @@ type OpenAPI implements API & Entity & Node & Ownable {
   type: String!
 }
 
+enum OrderDirection {
+  ASC
+  DESC
+}
+
 type Organization implements Entity & Group & Node {
   annotations: [KeyValuePair!]
   apiVersion: String!
@@ -561,6 +809,7 @@ type PageInfo {
 }
 
 type Query {
+  entities(after: String, before: String, filter: EntityFilter, first: Int, last: Int, rawFilter: EntityRawFilter): EntityConnection
   entity(kind: String!, name: String!, namespace: String): Entity
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
@@ -615,6 +864,24 @@ type Service implements Component & Dependency & Entity & Node & Ownable {
   providesApis(after: String, before: String, first: Int, last: Int): APIConnection
   subComponentOf: Component
   system: System
+  tags: [String!]
+  title: String
+  type: String!
+}
+
+type ServiceTemplate implements Entity & Node & Ownable & Template {
+  annotations: [KeyValuePair!]
+  apiVersion: String!
+  description: String
+  id: ID!
+  kind: String!
+  labels: [KeyValuePair!]
+  links: [EntityLink!]
+  name: String!
+  namespace: String!
+  owner: Owner
+  parameters: JSONObject
+  steps: [Step!]!
   tags: [String!]
   title: String
   type: String!
@@ -1135,12 +1402,257 @@ export type Entity = {
   title?: Maybe<Scalars['String']['output']>;
 };
 
+export type EntityConnection = Connection & {
+  __typename?: 'EntityConnection';
+  count?: Maybe<Scalars['Int']['output']>;
+  edges: Array<EntityEdge>;
+  pageInfo: PageInfo;
+};
+
+export type EntityEdge = Edge & {
+  __typename?: 'EntityEdge';
+  cursor: Scalars['String']['output'];
+  node: Entity;
+};
+
+/**
+ * {
+ *   order: [
+ *     { fieldA: ASC }
+ *     { fieldB: DESC }
+ *     { fieldC: [{ fieldD: ASC }] }
+ *     { fieldE: { order: ASC } }
+ *     {
+ *       fieldE: {
+ *         fields: [{ fieldF: DESC }, { fieldG: ASC }]
+ *       }
+ *     }
+ *   ]
+ *   search: {
+ *     term: "substring"
+ *     fields: {
+ *       fieldA: true
+ *       fieldB: true
+ *       fieldC: { fieldD: true }
+ *       fieldE: {
+ *         include: true
+ *         fields: { fieldF: true, fieldG: true }
+ *       }
+ *     }
+ *   }
+ *   match: [
+ *     { fieldA: ["value1", "value2"], fieldB: ["value3"] }
+ *     { fieldC: { fieldD: ["value4"] } }
+ *     {
+ *       fieldE: {
+ *         values: ["value5", "value6"],
+ *         fields: { fieldF: ["value7"], fieldG: ["value8"] }
+ *       }
+ *     }
+ *   ]
+ * }
+ */
+export type EntityFilter = {
+  match?: InputMaybe<Array<EntityFilterExpression>>;
+  order?: InputMaybe<Array<EntityOrderField>>;
+  search?: InputMaybe<EntityTextFilter>;
+};
+
+export type EntityFilterExpression = {
+  annotations?: InputMaybe<EntityFilterExpression_Annotations>;
+  apiVersion?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  definition?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  description?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  kind?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  labels?: InputMaybe<EntityFilterExpression_Labels>;
+  lifecycle?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  links?: InputMaybe<EntityFilterExpression_Links>;
+  name?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  namespace?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  parameters?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  presence?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  profile?: InputMaybe<EntityFilterExpression_Profile>;
+  steps?: InputMaybe<EntityFilterExpression_Steps>;
+  tags?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  target?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  targets?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  title?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  type?: InputMaybe<Array<Scalars['JSON']['input']>>;
+};
+
+export type EntityFilterExpression_Annotations = {
+  key?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  value?: InputMaybe<Array<Scalars['JSON']['input']>>;
+};
+
+export type EntityFilterExpression_Labels = {
+  key?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  value?: InputMaybe<Array<Scalars['JSON']['input']>>;
+};
+
+export type EntityFilterExpression_Links = {
+  icon?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  title?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  type?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  url?: InputMaybe<Array<Scalars['JSON']['input']>>;
+};
+
+export type EntityFilterExpression_Profile = {
+  displayName?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  email?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  picture?: InputMaybe<Array<Scalars['JSON']['input']>>;
+};
+
+export type EntityFilterExpression_Steps = {
+  action?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  id?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  if?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  input?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  name?: InputMaybe<Array<Scalars['JSON']['input']>>;
+};
+
 export type EntityLink = {
   __typename?: 'EntityLink';
   icon?: Maybe<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
   type?: Maybe<Scalars['String']['output']>;
   url: Scalars['String']['output'];
+};
+
+export type EntityOrderField = {
+  annotations?: InputMaybe<Array<EntityOrderField_Annotations>>;
+  apiVersion?: InputMaybe<OrderDirection>;
+  definition?: InputMaybe<OrderDirection>;
+  description?: InputMaybe<OrderDirection>;
+  kind?: InputMaybe<OrderDirection>;
+  labels?: InputMaybe<Array<EntityOrderField_Labels>>;
+  lifecycle?: InputMaybe<OrderDirection>;
+  links?: InputMaybe<Array<EntityOrderField_Links>>;
+  name?: InputMaybe<OrderDirection>;
+  namespace?: InputMaybe<OrderDirection>;
+  parameters?: InputMaybe<OrderDirection>;
+  presence?: InputMaybe<OrderDirection>;
+  profile?: InputMaybe<Array<EntityOrderField_Profile>>;
+  steps?: InputMaybe<Array<EntityOrderField_Steps>>;
+  tags?: InputMaybe<OrderDirection>;
+  target?: InputMaybe<OrderDirection>;
+  targets?: InputMaybe<OrderDirection>;
+  title?: InputMaybe<OrderDirection>;
+  type?: InputMaybe<OrderDirection>;
+};
+
+export type EntityOrderField_Annotations = {
+  key?: InputMaybe<OrderDirection>;
+  value?: InputMaybe<OrderDirection>;
+};
+
+export type EntityOrderField_Labels = {
+  key?: InputMaybe<OrderDirection>;
+  value?: InputMaybe<OrderDirection>;
+};
+
+export type EntityOrderField_Links = {
+  icon?: InputMaybe<OrderDirection>;
+  title?: InputMaybe<OrderDirection>;
+  type?: InputMaybe<OrderDirection>;
+  url?: InputMaybe<OrderDirection>;
+};
+
+export type EntityOrderField_Profile = {
+  displayName?: InputMaybe<OrderDirection>;
+  email?: InputMaybe<OrderDirection>;
+  picture?: InputMaybe<OrderDirection>;
+};
+
+export type EntityOrderField_Steps = {
+  action?: InputMaybe<OrderDirection>;
+  id?: InputMaybe<OrderDirection>;
+  if?: InputMaybe<OrderDirection>;
+  input?: InputMaybe<OrderDirection>;
+  name?: InputMaybe<OrderDirection>;
+};
+
+export type EntityRawFilter = {
+  filter?: InputMaybe<Array<EntityRawFilterExpression>>;
+  fullTextFilter?: InputMaybe<EntityRawTextFilter>;
+  orderFields?: InputMaybe<Array<EntityRawOrderField>>;
+};
+
+export type EntityRawFilterExpression = {
+  fields: Array<EntityRawFilterField>;
+};
+
+export type EntityRawFilterField = {
+  key: Scalars['String']['input'];
+  values: Array<Scalars['JSON']['input']>;
+};
+
+export type EntityRawOrderField = {
+  field: Scalars['String']['input'];
+  order: OrderDirection;
+};
+
+export type EntityRawTextFilter = {
+  fields?: InputMaybe<Array<Scalars['String']['input']>>;
+  term: Scalars['String']['input'];
+};
+
+export type EntityTextFilter = {
+  fields?: InputMaybe<EntityTextFilterFields>;
+  term: Scalars['String']['input'];
+};
+
+export type EntityTextFilterFields = {
+  annotations?: InputMaybe<EntityTextFilterFields_Annotations>;
+  apiVersion?: InputMaybe<Scalars['Boolean']['input']>;
+  definition?: InputMaybe<Scalars['Boolean']['input']>;
+  description?: InputMaybe<Scalars['Boolean']['input']>;
+  kind?: InputMaybe<Scalars['Boolean']['input']>;
+  labels?: InputMaybe<EntityTextFilterFields_Labels>;
+  lifecycle?: InputMaybe<Scalars['Boolean']['input']>;
+  links?: InputMaybe<EntityTextFilterFields_Links>;
+  name?: InputMaybe<Scalars['Boolean']['input']>;
+  namespace?: InputMaybe<Scalars['Boolean']['input']>;
+  parameters?: InputMaybe<Scalars['Boolean']['input']>;
+  presence?: InputMaybe<Scalars['Boolean']['input']>;
+  profile?: InputMaybe<EntityTextFilterFields_Profile>;
+  steps?: InputMaybe<EntityTextFilterFields_Steps>;
+  tags?: InputMaybe<Scalars['Boolean']['input']>;
+  target?: InputMaybe<Scalars['Boolean']['input']>;
+  targets?: InputMaybe<Scalars['Boolean']['input']>;
+  title?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type EntityTextFilterFields_Annotations = {
+  key?: InputMaybe<Scalars['Boolean']['input']>;
+  value?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type EntityTextFilterFields_Labels = {
+  key?: InputMaybe<Scalars['Boolean']['input']>;
+  value?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type EntityTextFilterFields_Links = {
+  icon?: InputMaybe<Scalars['Boolean']['input']>;
+  title?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<Scalars['Boolean']['input']>;
+  url?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type EntityTextFilterFields_Profile = {
+  displayName?: InputMaybe<Scalars['Boolean']['input']>;
+  email?: InputMaybe<Scalars['Boolean']['input']>;
+  picture?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type EntityTextFilterFields_Steps = {
+  action?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['Boolean']['input']>;
+  if?: InputMaybe<Scalars['Boolean']['input']>;
+  input?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type FileLocation = Entity & Location & Node & {
@@ -1670,6 +2182,10 @@ export type OpenApiApiProvidedByArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type OrderDirection =
+  | 'ASC'
+  | 'DESC';
+
 export type Organization = Entity & Group & Node & {
   __typename?: 'Organization';
   annotations?: Maybe<Array<KeyValuePair>>;
@@ -1744,9 +2260,20 @@ export type PageInfo = {
 
 export type Query = {
   __typename?: 'Query';
+  entities?: Maybe<EntityConnection>;
   entity?: Maybe<Entity>;
   node?: Maybe<Node>;
   nodes: Array<Maybe<Node>>;
+};
+
+
+export type QueryEntitiesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<EntityFilter>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  rawFilter?: InputMaybe<EntityRawFilter>;
 };
 
 
@@ -1877,6 +2404,25 @@ export type ServiceProvidesApisArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ServiceTemplate = Entity & Node & Ownable & Template & {
+  __typename?: 'ServiceTemplate';
+  annotations?: Maybe<Array<KeyValuePair>>;
+  apiVersion: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  kind: Scalars['String']['output'];
+  labels?: Maybe<Array<KeyValuePair>>;
+  links?: Maybe<Array<EntityLink>>;
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  owner?: Maybe<Owner>;
+  parameters?: Maybe<Scalars['JSONObject']['output']>;
+  steps: Array<Step>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  title?: Maybe<Scalars['String']['output']>;
+  type: Scalars['String']['output'];
 };
 
 export type Step = {
@@ -2267,16 +2813,16 @@ export type ResolversUnionTypes<RefType extends Record<string, unknown>> = {
 export type ResolversInterfaceTypes<RefType extends Record<string, unknown>> = {
   API: ( Omit<AsyncApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Grpc, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<GraphQl, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpenApi, 'owner'> & { owner: RefType['Owner'] } );
   Component: ( Omit<Library, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueComponent, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Service, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Website, 'owner'> & { owner: RefType['Owner'] } );
-  Connection: ( ApiConnection ) | ( ComponentConnection ) | ( DependencyConnection ) | ( GroupConnection ) | ( OwnableConnection ) | ( ResourceConnection ) | ( SystemConnection ) | ( UserConnection );
+  Connection: ( ApiConnection ) | ( ComponentConnection ) | ( DependencyConnection ) | ( EntityConnection ) | ( GroupConnection ) | ( OwnableConnection ) | ( ResourceConnection ) | ( SystemConnection ) | ( UserConnection );
   Dependency: ( Omit<Database, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Library, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueComponent, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueResource, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Service, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Website, 'owner'> & { owner: RefType['Owner'] } );
-  Edge: ( ApiEdge ) | ( ComponentEdge ) | ( DependencyEdge ) | ( GroupEdge ) | ( OwnableEdge ) | ( ResourceEdge ) | ( SystemEdge ) | ( UserEdge );
-  Entity: ( Omit<AsyncApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Database, 'owner'> & { owner: RefType['Owner'] } ) | ( Department ) | ( Omit<Domain, 'owner'> & { owner: RefType['Owner'] } ) | ( FileLocation ) | ( Omit<Grpc, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<GraphQl, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Library, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueComponent, 'owner'> & { owner: RefType['Owner'] } ) | ( OpaqueEntity ) | ( OpaqueGroup ) | ( OpaqueLocation ) | ( Omit<OpaqueResource, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( Omit<OpenApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Organization ) | ( Omit<Service, 'owner'> & { owner: RefType['Owner'] } ) | ( SubDepartment ) | ( Omit<System, 'owner'> & { owner: RefType['Owner'] } ) | ( Team ) | ( UrlLocation ) | ( User ) | ( Omit<Website, 'owner'> & { owner: RefType['Owner'] } );
+  Edge: ( ApiEdge ) | ( ComponentEdge ) | ( DependencyEdge ) | ( EntityEdge ) | ( GroupEdge ) | ( OwnableEdge ) | ( ResourceEdge ) | ( SystemEdge ) | ( UserEdge );
+  Entity: ( Omit<AsyncApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Database, 'owner'> & { owner: RefType['Owner'] } ) | ( Department ) | ( Omit<Domain, 'owner'> & { owner: RefType['Owner'] } ) | ( FileLocation ) | ( Omit<Grpc, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<GraphQl, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Library, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueComponent, 'owner'> & { owner: RefType['Owner'] } ) | ( OpaqueEntity ) | ( OpaqueGroup ) | ( OpaqueLocation ) | ( Omit<OpaqueResource, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( Omit<OpenApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Organization ) | ( Omit<Service, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<ServiceTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( SubDepartment ) | ( Omit<System, 'owner'> & { owner: RefType['Owner'] } ) | ( Team ) | ( UrlLocation ) | ( User ) | ( Omit<Website, 'owner'> & { owner: RefType['Owner'] } );
   Group: ( Department ) | ( OpaqueGroup ) | ( Organization ) | ( SubDepartment ) | ( Team );
   Location: ( FileLocation ) | ( OpaqueLocation ) | ( UrlLocation );
-  Node: ( Omit<AsyncApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Database, 'owner'> & { owner: RefType['Owner'] } ) | ( Department ) | ( Omit<Domain, 'owner'> & { owner: RefType['Owner'] } ) | ( FileLocation ) | ( Omit<Grpc, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<GraphQl, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Library, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueComponent, 'owner'> & { owner: RefType['Owner'] } ) | ( OpaqueEntity ) | ( OpaqueGroup ) | ( OpaqueLocation ) | ( Omit<OpaqueResource, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( Omit<OpenApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Organization ) | ( Omit<Service, 'owner'> & { owner: RefType['Owner'] } ) | ( SubDepartment ) | ( Omit<System, 'owner'> & { owner: RefType['Owner'] } ) | ( Team ) | ( UrlLocation ) | ( User ) | ( Omit<Website, 'owner'> & { owner: RefType['Owner'] } );
-  Ownable: ( Omit<AsyncApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Database, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Domain, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Grpc, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<GraphQl, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Library, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueComponent, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueResource, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( Omit<OpenApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Service, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<System, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Website, 'owner'> & { owner: RefType['Owner'] } );
+  Node: ( Omit<AsyncApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Database, 'owner'> & { owner: RefType['Owner'] } ) | ( Department ) | ( Omit<Domain, 'owner'> & { owner: RefType['Owner'] } ) | ( FileLocation ) | ( Omit<Grpc, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<GraphQl, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Library, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueComponent, 'owner'> & { owner: RefType['Owner'] } ) | ( OpaqueEntity ) | ( OpaqueGroup ) | ( OpaqueLocation ) | ( Omit<OpaqueResource, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( Omit<OpenApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Organization ) | ( Omit<Service, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<ServiceTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( SubDepartment ) | ( Omit<System, 'owner'> & { owner: RefType['Owner'] } ) | ( Team ) | ( UrlLocation ) | ( User ) | ( Omit<Website, 'owner'> & { owner: RefType['Owner'] } );
+  Ownable: ( Omit<AsyncApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Database, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Domain, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Grpc, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<GraphQl, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Library, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueComponent, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueResource, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( Omit<OpenApi, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Service, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<ServiceTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( Omit<System, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<Website, 'owner'> & { owner: RefType['Owner'] } );
   Resource: ( Omit<Database, 'owner'> & { owner: RefType['Owner'] } ) | ( Omit<OpaqueResource, 'owner'> & { owner: RefType['Owner'] } );
-  Template: ( Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } );
+  Template: ( Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } ) | ( Omit<ServiceTemplate, 'owner'> & { owner?: Maybe<RefType['Owner']> } );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -2298,7 +2844,34 @@ export type ResolversTypes = {
   Domain: ResolverTypeWrapper<Omit<Domain, 'owner'> & { owner: ResolversTypes['Owner'] }>;
   Edge: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['Edge']>;
   Entity: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['Entity']>;
+  EntityConnection: ResolverTypeWrapper<EntityConnection>;
+  EntityEdge: ResolverTypeWrapper<EntityEdge>;
+  EntityFilter: EntityFilter;
+  EntityFilterExpression: EntityFilterExpression;
+  EntityFilterExpression_Annotations: EntityFilterExpression_Annotations;
+  EntityFilterExpression_Labels: EntityFilterExpression_Labels;
+  EntityFilterExpression_Links: EntityFilterExpression_Links;
+  EntityFilterExpression_Profile: EntityFilterExpression_Profile;
+  EntityFilterExpression_Steps: EntityFilterExpression_Steps;
   EntityLink: ResolverTypeWrapper<EntityLink>;
+  EntityOrderField: EntityOrderField;
+  EntityOrderField_Annotations: EntityOrderField_Annotations;
+  EntityOrderField_Labels: EntityOrderField_Labels;
+  EntityOrderField_Links: EntityOrderField_Links;
+  EntityOrderField_Profile: EntityOrderField_Profile;
+  EntityOrderField_Steps: EntityOrderField_Steps;
+  EntityRawFilter: EntityRawFilter;
+  EntityRawFilterExpression: EntityRawFilterExpression;
+  EntityRawFilterField: EntityRawFilterField;
+  EntityRawOrderField: EntityRawOrderField;
+  EntityRawTextFilter: EntityRawTextFilter;
+  EntityTextFilter: EntityTextFilter;
+  EntityTextFilterFields: EntityTextFilterFields;
+  EntityTextFilterFields_Annotations: EntityTextFilterFields_Annotations;
+  EntityTextFilterFields_Labels: EntityTextFilterFields_Labels;
+  EntityTextFilterFields_Links: EntityTextFilterFields_Links;
+  EntityTextFilterFields_Profile: EntityTextFilterFields_Profile;
+  EntityTextFilterFields_Steps: EntityTextFilterFields_Steps;
   FileLocation: ResolverTypeWrapper<FileLocation>;
   GRPC: ResolverTypeWrapper<Omit<Grpc, 'owner'> & { owner: ResolversTypes['Owner'] }>;
   GraphQL: ResolverTypeWrapper<Omit<GraphQl, 'owner'> & { owner: ResolversTypes['Owner'] }>;
@@ -2322,6 +2895,7 @@ export type ResolversTypes = {
   OpaqueResource: ResolverTypeWrapper<Omit<OpaqueResource, 'owner'> & { owner: ResolversTypes['Owner'] }>;
   OpaqueTemplate: ResolverTypeWrapper<Omit<OpaqueTemplate, 'owner'> & { owner?: Maybe<ResolversTypes['Owner']> }>;
   OpenAPI: ResolverTypeWrapper<Omit<OpenApi, 'owner'> & { owner: ResolversTypes['Owner'] }>;
+  OrderDirection: OrderDirection;
   Organization: ResolverTypeWrapper<Organization>;
   Ownable: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['Ownable']>;
   OwnableConnection: ResolverTypeWrapper<OwnableConnection>;
@@ -2333,6 +2907,7 @@ export type ResolversTypes = {
   ResourceConnection: ResolverTypeWrapper<ResourceConnection>;
   ResourceEdge: ResolverTypeWrapper<ResourceEdge>;
   Service: ResolverTypeWrapper<Omit<Service, 'owner'> & { owner: ResolversTypes['Owner'] }>;
+  ServiceTemplate: ResolverTypeWrapper<Omit<ServiceTemplate, 'owner'> & { owner?: Maybe<ResolversTypes['Owner']> }>;
   Step: ResolverTypeWrapper<Step>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   SubDepartment: ResolverTypeWrapper<SubDepartment>;
@@ -2369,7 +2944,34 @@ export type ResolversParentTypes = {
   Domain: Omit<Domain, 'owner'> & { owner: ResolversParentTypes['Owner'] };
   Edge: ResolversInterfaceTypes<ResolversParentTypes>['Edge'];
   Entity: ResolversInterfaceTypes<ResolversParentTypes>['Entity'];
+  EntityConnection: EntityConnection;
+  EntityEdge: EntityEdge;
+  EntityFilter: EntityFilter;
+  EntityFilterExpression: EntityFilterExpression;
+  EntityFilterExpression_Annotations: EntityFilterExpression_Annotations;
+  EntityFilterExpression_Labels: EntityFilterExpression_Labels;
+  EntityFilterExpression_Links: EntityFilterExpression_Links;
+  EntityFilterExpression_Profile: EntityFilterExpression_Profile;
+  EntityFilterExpression_Steps: EntityFilterExpression_Steps;
   EntityLink: EntityLink;
+  EntityOrderField: EntityOrderField;
+  EntityOrderField_Annotations: EntityOrderField_Annotations;
+  EntityOrderField_Labels: EntityOrderField_Labels;
+  EntityOrderField_Links: EntityOrderField_Links;
+  EntityOrderField_Profile: EntityOrderField_Profile;
+  EntityOrderField_Steps: EntityOrderField_Steps;
+  EntityRawFilter: EntityRawFilter;
+  EntityRawFilterExpression: EntityRawFilterExpression;
+  EntityRawFilterField: EntityRawFilterField;
+  EntityRawOrderField: EntityRawOrderField;
+  EntityRawTextFilter: EntityRawTextFilter;
+  EntityTextFilter: EntityTextFilter;
+  EntityTextFilterFields: EntityTextFilterFields;
+  EntityTextFilterFields_Annotations: EntityTextFilterFields_Annotations;
+  EntityTextFilterFields_Labels: EntityTextFilterFields_Labels;
+  EntityTextFilterFields_Links: EntityTextFilterFields_Links;
+  EntityTextFilterFields_Profile: EntityTextFilterFields_Profile;
+  EntityTextFilterFields_Steps: EntityTextFilterFields_Steps;
   FileLocation: FileLocation;
   GRPC: Omit<Grpc, 'owner'> & { owner: ResolversParentTypes['Owner'] };
   GraphQL: Omit<GraphQl, 'owner'> & { owner: ResolversParentTypes['Owner'] };
@@ -2404,6 +3006,7 @@ export type ResolversParentTypes = {
   ResourceConnection: ResourceConnection;
   ResourceEdge: ResourceEdge;
   Service: Omit<Service, 'owner'> & { owner: ResolversParentTypes['Owner'] };
+  ServiceTemplate: Omit<ServiceTemplate, 'owner'> & { owner?: Maybe<ResolversParentTypes['Owner']> };
   Step: Step;
   String: Scalars['String']['output'];
   SubDepartment: SubDepartment;
@@ -2560,7 +3163,7 @@ export type ComponentEdgeResolvers<ContextType = any, ParentType extends Resolve
 };
 
 export type ConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Connection'] = ResolversParentTypes['Connection']> = {
-  __resolveType: TypeResolveFn<'APIConnection' | 'ComponentConnection' | 'DependencyConnection' | 'GroupConnection' | 'OwnableConnection' | 'ResourceConnection' | 'SystemConnection' | 'UserConnection', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'APIConnection' | 'ComponentConnection' | 'DependencyConnection' | 'EntityConnection' | 'GroupConnection' | 'OwnableConnection' | 'ResourceConnection' | 'SystemConnection' | 'UserConnection', ParentType, ContextType>;
   count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   edges?: Resolver<Array<ResolversTypes['Edge']>, ParentType, ContextType>;
   pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
@@ -2643,13 +3246,13 @@ export type DomainResolvers<ContextType = any, ParentType extends ResolversParen
 };
 
 export type EdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Edge'] = ResolversParentTypes['Edge']> = {
-  __resolveType: TypeResolveFn<'APIEdge' | 'ComponentEdge' | 'DependencyEdge' | 'GroupEdge' | 'OwnableEdge' | 'ResourceEdge' | 'SystemEdge' | 'UserEdge', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'APIEdge' | 'ComponentEdge' | 'DependencyEdge' | 'EntityEdge' | 'GroupEdge' | 'OwnableEdge' | 'ResourceEdge' | 'SystemEdge' | 'UserEdge', ParentType, ContextType>;
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   node?: Resolver<ResolversTypes['Node'], ParentType, ContextType>;
 };
 
 export type EntityResolvers<ContextType = any, ParentType extends ResolversParentTypes['Entity'] = ResolversParentTypes['Entity']> = {
-  __resolveType: TypeResolveFn<'AsyncAPI' | 'Database' | 'Department' | 'Domain' | 'FileLocation' | 'GRPC' | 'GraphQL' | 'Library' | 'OpaqueAPI' | 'OpaqueComponent' | 'OpaqueEntity' | 'OpaqueGroup' | 'OpaqueLocation' | 'OpaqueResource' | 'OpaqueTemplate' | 'OpenAPI' | 'Organization' | 'Service' | 'SubDepartment' | 'System' | 'Team' | 'URLLocation' | 'User' | 'Website', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'AsyncAPI' | 'Database' | 'Department' | 'Domain' | 'FileLocation' | 'GRPC' | 'GraphQL' | 'Library' | 'OpaqueAPI' | 'OpaqueComponent' | 'OpaqueEntity' | 'OpaqueGroup' | 'OpaqueLocation' | 'OpaqueResource' | 'OpaqueTemplate' | 'OpenAPI' | 'Organization' | 'Service' | 'ServiceTemplate' | 'SubDepartment' | 'System' | 'Team' | 'URLLocation' | 'User' | 'Website', ParentType, ContextType>;
   annotations?: Resolver<Maybe<Array<ResolversTypes['KeyValuePair']>>, ParentType, ContextType>;
   apiVersion?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -2661,6 +3264,19 @@ export type EntityResolvers<ContextType = any, ParentType extends ResolversParen
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type EntityConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['EntityConnection'] = ResolversParentTypes['EntityConnection']> = {
+  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edges?: Resolver<Array<ResolversTypes['EntityEdge']>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type EntityEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['EntityEdge'] = ResolversParentTypes['EntityEdge']> = {
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<ResolversTypes['Entity'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type EntityLinkResolvers<ContextType = any, ParentType extends ResolversParentTypes['EntityLink'] = ResolversParentTypes['EntityLink']> = {
@@ -2834,7 +3450,7 @@ export type LocationResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AsyncAPI' | 'Database' | 'Department' | 'Domain' | 'FileLocation' | 'GRPC' | 'GraphQL' | 'Library' | 'OpaqueAPI' | 'OpaqueComponent' | 'OpaqueEntity' | 'OpaqueGroup' | 'OpaqueLocation' | 'OpaqueResource' | 'OpaqueTemplate' | 'OpenAPI' | 'Organization' | 'Service' | 'SubDepartment' | 'System' | 'Team' | 'URLLocation' | 'User' | 'Website', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'AsyncAPI' | 'Database' | 'Department' | 'Domain' | 'FileLocation' | 'GRPC' | 'GraphQL' | 'Library' | 'OpaqueAPI' | 'OpaqueComponent' | 'OpaqueEntity' | 'OpaqueGroup' | 'OpaqueLocation' | 'OpaqueResource' | 'OpaqueTemplate' | 'OpenAPI' | 'Organization' | 'Service' | 'ServiceTemplate' | 'SubDepartment' | 'System' | 'Team' | 'URLLocation' | 'User' | 'Website', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -3023,7 +3639,7 @@ export type OrganizationResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type OwnableResolvers<ContextType = any, ParentType extends ResolversParentTypes['Ownable'] = ResolversParentTypes['Ownable']> = {
-  __resolveType: TypeResolveFn<'AsyncAPI' | 'Database' | 'Domain' | 'GRPC' | 'GraphQL' | 'Library' | 'OpaqueAPI' | 'OpaqueComponent' | 'OpaqueResource' | 'OpaqueTemplate' | 'OpenAPI' | 'Service' | 'System' | 'Website', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'AsyncAPI' | 'Database' | 'Domain' | 'GRPC' | 'GraphQL' | 'Library' | 'OpaqueAPI' | 'OpaqueComponent' | 'OpaqueResource' | 'OpaqueTemplate' | 'OpenAPI' | 'Service' | 'ServiceTemplate' | 'System' | 'Website', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -3053,6 +3669,7 @@ export type PageInfoResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  entities?: Resolver<Maybe<ResolversTypes['EntityConnection']>, ParentType, ContextType, Partial<QueryEntitiesArgs>>;
   entity?: Resolver<Maybe<ResolversTypes['Entity']>, ParentType, ContextType, RequireFields<QueryEntityArgs, 'kind' | 'name'>>;
   node?: Resolver<Maybe<ResolversTypes['Node']>, ParentType, ContextType, RequireFields<QueryNodeArgs, 'id'>>;
   nodes?: Resolver<Array<Maybe<ResolversTypes['Node']>>, ParentType, ContextType, RequireFields<QueryNodesArgs, 'ids'>>;
@@ -3110,6 +3727,25 @@ export type ServiceResolvers<ContextType = any, ParentType extends ResolversPare
   providesApis?: Resolver<Maybe<ResolversTypes['APIConnection']>, ParentType, ContextType, Partial<ServiceProvidesApisArgs>>;
   subComponentOf?: Resolver<Maybe<ResolversTypes['Component']>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
+  tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ServiceTemplateResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceTemplate'] = ResolversParentTypes['ServiceTemplate']> = {
+  annotations?: Resolver<Maybe<Array<ResolversTypes['KeyValuePair']>>, ParentType, ContextType>;
+  apiVersion?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  kind?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  labels?: Resolver<Maybe<Array<ResolversTypes['KeyValuePair']>>, ParentType, ContextType>;
+  links?: Resolver<Maybe<Array<ResolversTypes['EntityLink']>>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  owner?: Resolver<Maybe<ResolversTypes['Owner']>, ParentType, ContextType>;
+  parameters?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  steps?: Resolver<Array<ResolversTypes['Step']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3201,7 +3837,7 @@ export type TeamResolvers<ContextType = any, ParentType extends ResolversParentT
 };
 
 export type TemplateResolvers<ContextType = any, ParentType extends ResolversParentTypes['Template'] = ResolversParentTypes['Template']> = {
-  __resolveType: TypeResolveFn<'OpaqueTemplate', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'OpaqueTemplate' | 'ServiceTemplate', ParentType, ContextType>;
   annotations?: Resolver<Maybe<Array<ResolversTypes['KeyValuePair']>>, ParentType, ContextType>;
   apiVersion?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3322,6 +3958,8 @@ export type Resolvers<ContextType = any> = {
   Domain?: DomainResolvers<ContextType>;
   Edge?: EdgeResolvers<ContextType>;
   Entity?: EntityResolvers<ContextType>;
+  EntityConnection?: EntityConnectionResolvers<ContextType>;
+  EntityEdge?: EntityEdgeResolvers<ContextType>;
   EntityLink?: EntityLinkResolvers<ContextType>;
   FileLocation?: FileLocationResolvers<ContextType>;
   GRPC?: GrpcResolvers<ContextType>;
@@ -3355,6 +3993,7 @@ export type Resolvers<ContextType = any> = {
   ResourceConnection?: ResourceConnectionResolvers<ContextType>;
   ResourceEdge?: ResourceEdgeResolvers<ContextType>;
   Service?: ServiceResolvers<ContextType>;
+  ServiceTemplate?: ServiceTemplateResolvers<ContextType>;
   Step?: StepResolvers<ContextType>;
   SubDepartment?: SubDepartmentResolvers<ContextType>;
   System?: SystemResolvers<ContextType>;
