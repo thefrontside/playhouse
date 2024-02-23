@@ -15,14 +15,10 @@ import {
   isInterfaceType,
   isUnionType,
 } from 'graphql';
-import {
-  EntityRawFilterExpression,
-  EntityRawFilterField,
-  OrderDirection,
-  QueryEntitiesArgs,
-} from './__generated__/graphql';
 
-function parseEntityFilter(filter: EntityRawFilterExpression[]) {
+type OrderDirection = 'ASC' | 'DESC';
+
+function parseEntityFilter(filter: { fields: unknown }[]) {
   return { anyOf: filter.map(({ fields }) => ({ allOf: fields })) };
 }
 
@@ -111,7 +107,10 @@ function mapMatchFilterToQueryFilter(
   match: Record<string, unknown[] | Record<string, unknown[]>>,
   fieldMap: Map<string, { isLeaf: boolean; fields: Set<string> }>,
   parentKey?: string,
-): (EntityRawFilterField | { anyOf: EntityRawFilterField[] })[] {
+): (
+  | { key: string; values: unknown[] }
+  | { anyOf: { key: string; values: unknown[] }[] }
+)[] {
   if (parentKey && fieldMap.get(parentKey)?.isLeaf) {
     const { values, fields } = match;
     const fieldKeys = [...(fieldMap.get(parentKey)?.fields ?? [])];
@@ -155,7 +154,7 @@ function mapMatchFilterToQueryFilter(
       ...filters,
       ...mapMatchFilterToQueryFilter(fieldValues, fieldMap, matchKey),
     ];
-  }, [] as (EntityRawFilterField | { anyOf: EntityRawFilterField[] })[]);
+  }, [] as ({ key: string; values: unknown[] } | { anyOf: { key: string; values: unknown[] }[] })[]);
 }
 
 function mapOrderFieldsToQueryOrder(
@@ -212,11 +211,13 @@ function mapSearchFilterToTextSearch(
   if (parentKey && fieldMap.get(parentKey)?.isLeaf) {
     const { include, fields } = search;
     return [
-      ...(include
-        ? fieldMap.get(parentKey)?.fields ?? []
-        : []),
+      ...(include ? fieldMap.get(parentKey)?.fields ?? [] : []),
       ...(fields
-        ? mapSearchFilterToTextSearch(fields as Record<string, boolean>, fieldMap, parentKey)
+        ? mapSearchFilterToTextSearch(
+            fields as Record<string, boolean>,
+            fieldMap,
+            parentKey,
+          )
         : []),
     ];
   }
@@ -234,7 +235,8 @@ function mapSearchFilterToTextSearch(
 
 // TODO Handle labels and annotations separately
 export const queryResolvers: () => Resolvers = () => {
-  let fieldMap: Map<string, { isLeaf: boolean, fields: Set<string> }> | null = null
+  let fieldMap: Map<string, { isLeaf: boolean; fields: Set<string> }> | null =
+    null;
 
   return {
     entity: (
@@ -253,7 +255,29 @@ export const queryResolvers: () => Resolvers = () => {
     }),
     entities: async (
       _root: any,
-      { first, after, last, before, filter, rawFilter }: QueryEntitiesArgs,
+      {
+        first,
+        after,
+        last,
+        before,
+        filter,
+        rawFilter,
+      }: {
+        first?: number;
+        after?: string;
+        last?: number;
+        before: string;
+        filter: {
+          match?: Record<string, unknown>[];
+          order?: Record<string, unknown>[];
+          search?: { term: string, fields: Record<string, unknown>};
+        };
+        rawFilter: {
+          filter?: { fields: unknown[] }[];
+          orderFields?: { field: string; order: OrderDirection }[];
+          fullTextFilter?: { term: string; fields?: string[] };
+        };
+      },
       { catalog }: { catalog: CatalogApi },
       { schema }: { schema: GraphQLSchema },
     ): Promise<Connection<{ id: string }>> => {
@@ -272,55 +296,59 @@ export const queryResolvers: () => Resolvers = () => {
 
       const orderFields = (() => {
         if (rawFilter?.orderFields) {
-          return rawFilter.orderFields.map(({ field, order }) => ({
-            field,
-            order: order.toLowerCase(),
-          }))
+          return rawFilter.orderFields.map(
+            ({ field, order }: { field: string; order: OrderDirection }) => ({
+              field,
+              order: order.toLowerCase(),
+            }),
+          );
         }
         if (filter?.order) {
           return mapOrderFieldsToQueryOrder(
             filter.order as Record<string, OrderDirection>[],
             fieldMap,
-          )
+          );
         }
-        return [{ field: 'metadata.uid', order: 'asc' }]
-      })()
+        return [{ field: 'metadata.uid', order: 'asc' }];
+      })();
 
       const fullTextSearch = (() => {
         if (rawFilter?.fullTextFilter) {
           return {
             term: rawFilter.fullTextFilter.term,
             fields: rawFilter.fullTextFilter.fields ?? undefined,
-          }
+          };
         }
         if (filter?.search) {
           return {
             term: filter.search.term,
-            fields: filter.search.fields ? mapSearchFilterToTextSearch(
-              filter.search.fields as Record<string, boolean>,
-              fieldMap,
-            ) : undefined,
-          }
+            fields: filter.search.fields
+              ? mapSearchFilterToTextSearch(
+                  filter.search.fields as Record<string, boolean>,
+                  fieldMap,
+                )
+              : undefined,
+          };
         }
-        return { term: '' }
-      })()
+        return { term: '' };
+      })();
 
       const queryFilter = (() => {
         if (rawFilter?.filter) {
-          return parseEntityFilter(rawFilter.filter)
+          return parseEntityFilter(rawFilter.filter);
         }
         if (filter?.match) {
           return {
-            anyOf: filter.match.map(match => ({
+            anyOf: filter.match.map((match: unknown) => ({
               allOf: mapMatchFilterToQueryFilter(
                 match as Record<string, unknown[]>,
                 fieldMap!,
               ),
             })),
-          }
+          };
         }
-        return undefined
-      })()
+        return undefined;
+      })();
 
       const decodedCursor = (c =>
         c ? JSON.parse(Buffer.from(c, 'base64').toString('utf8')) : undefined)(
@@ -366,7 +394,9 @@ export const queryResolvers: () => Resolvers = () => {
             JSON.stringify({
               totalItems,
               firstSortFieldValues: [
-                orderField ? _.get(items[0], orderField) : items[0].metadata.uid,
+                orderField
+                  ? _.get(items[0], orderField)
+                  : items[0].metadata.uid,
                 items[0].metadata.uid,
               ],
               ...cursorParams,
@@ -389,5 +419,5 @@ export const queryResolvers: () => Resolvers = () => {
         count: totalItems,
       } as Connection<{ id: string }>;
     },
-  }
+  };
 };
