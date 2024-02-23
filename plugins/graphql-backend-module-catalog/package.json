@@ -47,14 +47,15 @@
     "@backstage/plugin-auth-node": "^0.4.1",
     "@backstage/plugin-catalog-node": "^1.5.0",
     "@frontside/backstage-plugin-graphql-backend": "^0.1.6",
-    "@frontside/hydraphql": "^0.1.2",
+    "@frontside/hydraphql": "^0.1.3",
     "@graphql-tools/load-files": "^7.0.0",
     "@graphql-tools/utils": "^10.0.0",
     "dataloader": "^2.1.0",
     "graphql": "^16.6.0",
     "graphql-modules": "^2.3.0",
     "graphql-relay": "^0.10.0",
-    "graphql-type-json": "^0.3.2"
+    "graphql-type-json": "^0.3.2",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@backstage/cli": "^0.24.0",

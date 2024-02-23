@@ -1,0 +1,121 @@
+directive @relation(
+  name: String
+  nodeType: String
+  kind: String
+) on FIELD_DEFINITION
+
+scalar JSON
+scalar JSONObject
+
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+type EntityConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [EntityEdge!]!
+  count: Int
+}
+
+type EntityEdge implements Edge {
+  cursor: String!
+  node: Entity!
+}
+
+extend type Query {
+  entity(kind: String!, name: String!, namespace: String): Entity
+  entities(
+    first: Int,
+    after: String,
+    last: Int,
+    before: String,
+    filter: EntityFilter,
+    rawFilter: EntityRawFilter,
+  ): EntityConnection
+}
+
+input EntityOrderField {
+  _dummy: OrderDirection
+}
+
+input EntityTextFilterFields {
+  _dummy: Boolean
+}
+
+input EntityTextFilter {
+  term: String!
+  fields: EntityTextFilterFields
+}
+
+input EntityFilterExpression {
+  _dummy: [JSON!]
+}
+
+"""
+{
+  order: [
+    { fieldA: ASC }
+    { fieldB: DESC }
+    { fieldC: [{ fieldD: ASC }] }
+    { fieldE: { order: ASC } }
+    {
+      fieldE: {
+        fields: [{ fieldF: DESC }, { fieldG: ASC }]
+      }
+    }
+  ]
+  search: {
+    term: "substring"
+    fields: {
+      fieldA: true
+      fieldB: true
+      fieldC: { fieldD: true }
+      fieldE: {
+        include: true
+        fields: { fieldF: true, fieldG: true }
+      }
+    }
+  }
+  match: [
+    { fieldA: ["value1", "value2"], fieldB: ["value3"] }
+    { fieldC: { fieldD: ["value4"] } }
+    {
+      fieldE: {
+        values: ["value5", "value6"],
+        fields: { fieldF: ["value7"], fieldG: ["value8"] }
+      }
+    }
+  ]
+}
+"""
+input EntityFilter {
+  order: [EntityOrderField!]
+  search: EntityTextFilter
+  match: [EntityFilterExpression!]
+}
+
+input EntityRawFilterField {
+  key: String!
+  values: [JSON!]!
+}
+
+input EntityRawFilterExpression {
+  fields: [EntityRawFilterField!]!
+}
+
+input EntityRawOrderField {
+  field: String!
+  order: OrderDirection!
+}
+
+input EntityRawTextFilter {
+  term: String!
+  fields: [String!]
+}
+
+input EntityRawFilter {
+  filter: [EntityRawFilterExpression!]
+  orderFields: [EntityRawOrderField!]
+  fullTextFilter: EntityRawTextFilter
+}

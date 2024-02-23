@@ -11,5 +11,6 @@ export default async function createPlugin(
     logger: env.logger,
     modules: [myModule, Catalog()],
     loaders: { ...createCatalogLoader(env.catalog) },
+    context: (ctx) => ({ ...ctx, catalog: env.catalog }),
   });
 }

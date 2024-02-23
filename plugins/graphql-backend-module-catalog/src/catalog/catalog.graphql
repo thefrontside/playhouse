@@ -1,12 +1,3 @@
-directive @relation(
-  name: String
-  nodeType: String
-  kind: String
-) on FIELD_DEFINITION
-
-scalar JSON
-scalar JSONObject
-
 type KeyValuePair {
   key: String!
   value: String!
@@ -16,8 +7,7 @@ union Ownable = API | Component | Domain | Resource | System | Template
 union Dependency = Component | Resource
 union Owner = User | Group
 
-interface Entity
-  @implements(interface: "Node")
+extend interface Entity
   @discriminates(with: "kind", opaqueType: "OpaqueEntity") {
   name: String! @field(at: "metadata.name")
   kind: String! @field(at: "kind")
@@ -123,7 +113,8 @@ type Step {
 
 interface Template
   @implements(interface: "Entity")
-  @discriminates(with: "spec.type", opaqueType: "OpaqueTemplate") {
+  @discriminates(with: "spec.type", opaqueType: "OpaqueTemplate")
+  @discriminationAlias(value: "service", type: "ServiceTemplate") {
   type: String! @field(at: "spec.type")
   parameters: JSONObject @field(at: "spec.parameters")
   steps: [Step!]! @field(at: "spec.steps")
@@ -161,8 +152,4 @@ type User @implements(interface: "Entity") {
   profile: UserProfile @field(at: "spec.profile")
   memberOf: Connection @relation(nodeType: "Group")
   ownerOf: Connection @relation(nodeType: "Ownable")
-}
-
-extend type Query {
-  entity(kind: String!, name: String!, namespace: String): Entity
 }

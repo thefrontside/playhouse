@@ -11,7 +11,7 @@ export const createCatalogLoader = (catalog: CatalogApi) => ({
     queries: readonly (NodeQuery | undefined)[],
     context: GraphQLContext & { request?: Request }
   ): Promise<Array<Entity | GraphQLError>> => {
-    // TODO: Support fields
+    // TODO: Support fields, to allow use loader in `@resolve` directive
     const request = context.request;
     const token = getBearerTokenFromAuthorizationHeader(request?.headers.get('authorization'));
     const entityRefs = queries.reduce(

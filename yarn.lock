@@ -4719,10 +4719,10 @@
     graphql "16.5.0"
     hash.js "1.1.7"
 
-"@frontside/hydraphql@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@frontside/hydraphql/-/hydraphql-0.1.2.tgz#15b68f1b507d5edecc2f69161d5b2e8ab52f0d84"
-  integrity sha512-DD7+YG1zO0aHQp6K8bFUSKrj5kzlj0f8sOou6oQxSHxzjsggRiFis41ejeUxP/c6QwXns3tgxJfYFW1U3gdRUw==
+"@frontside/hydraphql@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@frontside/hydraphql/-/hydraphql-0.1.3.tgz#11107a050f78d096d2b69327b7753c586d1b7e17"
+  integrity sha512-frXzM8452J3sXwV182XtRNyBdgnCpJe2voUFZk3NQq2thz5D+IDoFK4yXa7MsO9JqmzOND23SPQJmFpIdBvM6w==
   dependencies:
     "@graphql-tools/code-file-loader" "^8.0.0"
     "@graphql-tools/graphql-file-loader" "^8.0.0"

@@ -1,14 +1,8 @@
 import { createModule } from 'graphql-modules';
-import GraphQLJSON, { GraphQLJSONObject } from 'graphql-type-json';
-import { relationDirectiveMapper } from '../relationDirectiveMapper';
-import {
-  GraphQLModule,
-  encodeId,
-} from '@frontside/hydraphql';
-import { stringifyEntityRef } from '@backstage/catalog-model';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { resolvePackagePath } from '@backstage/backend-common';
-import { CATALOG_SOURCE } from '../constants';
+import { Relation } from '../relation';
+import { GraphQLModule } from '@frontside/hydraphql';
 
 const catalogSchemaPath = resolvePackagePath(
   '@frontside/backstage-plugin-graphql-backend-module-catalog',
@@ -17,13 +11,13 @@ const catalogSchemaPath = resolvePackagePath(
 
 /** @public */
 export const Catalog = (): GraphQLModule => ({
-  mappers: { relation: relationDirectiveMapper },
+  mappers: { ...Relation().mappers },
+  postTransform: Relation().postTransform,
   module: createModule({
-    id: 'catalog',
-    typeDefs: loadFilesSync(catalogSchemaPath),
+    id: 'catalog-entities',
+    typeDefs: [...Relation().module.typeDefs, ...loadFilesSync(catalogSchemaPath)],
     resolvers: {
-      JSON: GraphQLJSON,
-      JSONObject: GraphQLJSONObject,
+      ...Relation().module.config.resolvers,
       Entity: {
         labels: (labels: Record<string, string>) =>
           labels
@@ -36,22 +30,6 @@ export const Catalog = (): GraphQLModule => ({
                 value,
               }))
             : null,
-      },
-      Query: {
-        entity: (
-          _: any,
-          {
-            name,
-            kind,
-            namespace = 'default',
-          }: { name: string; kind: string; namespace: string },
-        ): { id: string } => ({
-          id: encodeId({
-            source: CATALOG_SOURCE,
-            typename: 'Entity',
-            query: { ref: stringifyEntityRef({ name, kind, namespace }) },
-          }),
-        }),
       },
     },
   })
