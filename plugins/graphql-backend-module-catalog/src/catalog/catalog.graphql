@@ -15,8 +15,8 @@ extend interface Entity
   apiVersion: String! @field(at: "apiVersion")
   title: String @field(at: "metadata.title")
   description: String @field(at: "metadata.description")
-  labels: [KeyValuePair!] @field(at: "metadata.labels")
-  annotations: [KeyValuePair!] @field(at: "metadata.annotations")
+  labels: [KeyValuePair!] @field(at: "metadata.labels") @excludeFromFilter
+  annotations: [KeyValuePair!] @field(at: "metadata.annotations") @excludeFromFilter
   tags: [String!] @field(at: "metadata.tags")
   links: [EntityLink!] @field(at: "metadata.links")
 }

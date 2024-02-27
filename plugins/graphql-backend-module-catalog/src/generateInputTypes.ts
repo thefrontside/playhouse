@@ -257,7 +257,8 @@ function processTypes(
     }
     Object.entries(type.getFields()).forEach(([fieldName, field]) => {
       const [fieldDirective] = getDirective(schema, field, 'field') ?? [];
-      if (!fieldDirective && !isNested) return;
+      const [excludeFromFilter] = getDirective(schema, field, 'excludeFromFilter') ?? []
+      if (!fieldDirective && !isNested || excludeFromFilter) return;
 
       // const sourceFieldName = fieldDirective.at ?? fieldName
 

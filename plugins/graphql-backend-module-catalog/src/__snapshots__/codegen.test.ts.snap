@@ -5,6 +5,8 @@ exports[`graphql-catalog codegen should generate the correct code: graphql 1`] =
 
 directive @discriminationAlias(type: String!, value: String!) repeatable on INTERFACE
 
+directive @excludeFromFilter on FIELD_DEFINITION
+
 directive @field(at: _DirectiveArgument_, default: _DirectiveArgument_) on FIELD_DEFINITION
 
 directive @implements(interface: String!) on INTERFACE | OBJECT
@@ -251,12 +253,10 @@ input EntityFilter {
 }
 
 input EntityFilterExpression {
-  annotations: EntityFilterExpression_Annotations
   apiVersion: [JSON!]
   definition: [JSON!]
   description: [JSON!]
   kind: [JSON!]
-  labels: EntityFilterExpression_Labels
   lifecycle: [JSON!]
   links: EntityFilterExpression_Links
   name: [JSON!]
@@ -270,16 +270,6 @@ input EntityFilterExpression {
   targets: [JSON!]
   title: [JSON!]
   type: [JSON!]
-}
-
-input EntityFilterExpression_Annotations {
-  key: [JSON!]
-  value: [JSON!]
-}
-
-input EntityFilterExpression_Labels {
-  key: [JSON!]
-  value: [JSON!]
 }
 
 input EntityFilterExpression_Links {
@@ -311,12 +301,10 @@ type EntityLink {
 }
 
 input EntityOrderField {
-  annotations: [EntityOrderField_Annotations!]
   apiVersion: OrderDirection
   definition: OrderDirection
   description: OrderDirection
   kind: OrderDirection
-  labels: [EntityOrderField_Labels!]
   lifecycle: OrderDirection
   links: [EntityOrderField_Links!]
   name: OrderDirection
@@ -330,16 +318,6 @@ input EntityOrderField {
   targets: OrderDirection
   title: OrderDirection
   type: OrderDirection
-}
-
-input EntityOrderField_Annotations {
-  key: OrderDirection
-  value: OrderDirection
-}
-
-input EntityOrderField_Labels {
-  key: OrderDirection
-  value: OrderDirection
 }
 
 input EntityOrderField_Links {
@@ -394,12 +372,10 @@ input EntityTextFilter {
 }
 
 input EntityTextFilterFields {
-  annotations: EntityTextFilterFields_Annotations
   apiVersion: Boolean
   definition: Boolean
   description: Boolean
   kind: Boolean
-  labels: EntityTextFilterFields_Labels
   lifecycle: Boolean
   links: EntityTextFilterFields_Links
   name: Boolean
@@ -413,16 +389,6 @@ input EntityTextFilterFields {
   targets: Boolean
   title: Boolean
   type: Boolean
-}
-
-input EntityTextFilterFields_Annotations {
-  key: Boolean
-  value: Boolean
-}
-
-input EntityTextFilterFields_Labels {
-  key: Boolean
-  value: Boolean
 }
 
 input EntityTextFilterFields_Links {
@@ -1459,12 +1425,10 @@ export type EntityFilter = {
 };
 
 export type EntityFilterExpression = {
-  annotations?: InputMaybe<EntityFilterExpression_Annotations>;
   apiVersion?: InputMaybe<Array<Scalars['JSON']['input']>>;
   definition?: InputMaybe<Array<Scalars['JSON']['input']>>;
   description?: InputMaybe<Array<Scalars['JSON']['input']>>;
   kind?: InputMaybe<Array<Scalars['JSON']['input']>>;
-  labels?: InputMaybe<EntityFilterExpression_Labels>;
   lifecycle?: InputMaybe<Array<Scalars['JSON']['input']>>;
   links?: InputMaybe<EntityFilterExpression_Links>;
   name?: InputMaybe<Array<Scalars['JSON']['input']>>;
@@ -1478,16 +1442,6 @@ export type EntityFilterExpression = {
   targets?: InputMaybe<Array<Scalars['JSON']['input']>>;
   title?: InputMaybe<Array<Scalars['JSON']['input']>>;
   type?: InputMaybe<Array<Scalars['JSON']['input']>>;
-};
-
-export type EntityFilterExpression_Annotations = {
-  key?: InputMaybe<Array<Scalars['JSON']['input']>>;
-  value?: InputMaybe<Array<Scalars['JSON']['input']>>;
-};
-
-export type EntityFilterExpression_Labels = {
-  key?: InputMaybe<Array<Scalars['JSON']['input']>>;
-  value?: InputMaybe<Array<Scalars['JSON']['input']>>;
 };
 
 export type EntityFilterExpression_Links = {
@@ -1520,12 +1474,10 @@ export type EntityLink = {
 };
 
 export type EntityOrderField = {
-  annotations?: InputMaybe<Array<EntityOrderField_Annotations>>;
   apiVersion?: InputMaybe<OrderDirection>;
   definition?: InputMaybe<OrderDirection>;
   description?: InputMaybe<OrderDirection>;
   kind?: InputMaybe<OrderDirection>;
-  labels?: InputMaybe<Array<EntityOrderField_Labels>>;
   lifecycle?: InputMaybe<OrderDirection>;
   links?: InputMaybe<Array<EntityOrderField_Links>>;
   name?: InputMaybe<OrderDirection>;
@@ -1539,16 +1491,6 @@ export type EntityOrderField = {
   targets?: InputMaybe<OrderDirection>;
   title?: InputMaybe<OrderDirection>;
   type?: InputMaybe<OrderDirection>;
-};
-
-export type EntityOrderField_Annotations = {
-  key?: InputMaybe<OrderDirection>;
-  value?: InputMaybe<OrderDirection>;
-};
-
-export type EntityOrderField_Labels = {
-  key?: InputMaybe<OrderDirection>;
-  value?: InputMaybe<OrderDirection>;
 };
 
 export type EntityOrderField_Links = {
@@ -1603,12 +1545,10 @@ export type EntityTextFilter = {
 };
 
 export type EntityTextFilterFields = {
-  annotations?: InputMaybe<EntityTextFilterFields_Annotations>;
   apiVersion?: InputMaybe<Scalars['Boolean']['input']>;
   definition?: InputMaybe<Scalars['Boolean']['input']>;
   description?: InputMaybe<Scalars['Boolean']['input']>;
   kind?: InputMaybe<Scalars['Boolean']['input']>;
-  labels?: InputMaybe<EntityTextFilterFields_Labels>;
   lifecycle?: InputMaybe<Scalars['Boolean']['input']>;
   links?: InputMaybe<EntityTextFilterFields_Links>;
   name?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1622,16 +1562,6 @@ export type EntityTextFilterFields = {
   targets?: InputMaybe<Scalars['Boolean']['input']>;
   title?: InputMaybe<Scalars['Boolean']['input']>;
   type?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-export type EntityTextFilterFields_Annotations = {
-  key?: InputMaybe<Scalars['Boolean']['input']>;
-  value?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-export type EntityTextFilterFields_Labels = {
-  key?: InputMaybe<Scalars['Boolean']['input']>;
-  value?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type EntityTextFilterFields_Links = {
@@ -2848,15 +2778,11 @@ export type ResolversTypes = {
   EntityEdge: ResolverTypeWrapper<EntityEdge>;
   EntityFilter: EntityFilter;
   EntityFilterExpression: EntityFilterExpression;
-  EntityFilterExpression_Annotations: EntityFilterExpression_Annotations;
-  EntityFilterExpression_Labels: EntityFilterExpression_Labels;
   EntityFilterExpression_Links: EntityFilterExpression_Links;
   EntityFilterExpression_Profile: EntityFilterExpression_Profile;
   EntityFilterExpression_Steps: EntityFilterExpression_Steps;
   EntityLink: ResolverTypeWrapper<EntityLink>;
   EntityOrderField: EntityOrderField;
-  EntityOrderField_Annotations: EntityOrderField_Annotations;
-  EntityOrderField_Labels: EntityOrderField_Labels;
   EntityOrderField_Links: EntityOrderField_Links;
   EntityOrderField_Profile: EntityOrderField_Profile;
   EntityOrderField_Steps: EntityOrderField_Steps;
@@ -2867,8 +2793,6 @@ export type ResolversTypes = {
   EntityRawTextFilter: EntityRawTextFilter;
   EntityTextFilter: EntityTextFilter;
   EntityTextFilterFields: EntityTextFilterFields;
-  EntityTextFilterFields_Annotations: EntityTextFilterFields_Annotations;
-  EntityTextFilterFields_Labels: EntityTextFilterFields_Labels;
   EntityTextFilterFields_Links: EntityTextFilterFields_Links;
   EntityTextFilterFields_Profile: EntityTextFilterFields_Profile;
   EntityTextFilterFields_Steps: EntityTextFilterFields_Steps;
@@ -2948,15 +2872,11 @@ export type ResolversParentTypes = {
   EntityEdge: EntityEdge;
   EntityFilter: EntityFilter;
   EntityFilterExpression: EntityFilterExpression;
-  EntityFilterExpression_Annotations: EntityFilterExpression_Annotations;
-  EntityFilterExpression_Labels: EntityFilterExpression_Labels;
   EntityFilterExpression_Links: EntityFilterExpression_Links;
   EntityFilterExpression_Profile: EntityFilterExpression_Profile;
   EntityFilterExpression_Steps: EntityFilterExpression_Steps;
   EntityLink: EntityLink;
   EntityOrderField: EntityOrderField;
-  EntityOrderField_Annotations: EntityOrderField_Annotations;
-  EntityOrderField_Labels: EntityOrderField_Labels;
   EntityOrderField_Links: EntityOrderField_Links;
   EntityOrderField_Profile: EntityOrderField_Profile;
   EntityOrderField_Steps: EntityOrderField_Steps;
@@ -2967,8 +2887,6 @@ export type ResolversParentTypes = {
   EntityRawTextFilter: EntityRawTextFilter;
   EntityTextFilter: EntityTextFilter;
   EntityTextFilterFields: EntityTextFilterFields;
-  EntityTextFilterFields_Annotations: EntityTextFilterFields_Annotations;
-  EntityTextFilterFields_Labels: EntityTextFilterFields_Labels;
   EntityTextFilterFields_Links: EntityTextFilterFields_Links;
   EntityTextFilterFields_Profile: EntityTextFilterFields_Profile;
   EntityTextFilterFields_Steps: EntityTextFilterFields_Steps;
@@ -3037,6 +2955,10 @@ export type DiscriminationAliasDirectiveArgs = {
 };
 
 export type DiscriminationAliasDirectiveResolver<Result, Parent, ContextType = any, Args = DiscriminationAliasDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
+export type ExcludeFromFilterDirectiveArgs = { };
+
+export type ExcludeFromFilterDirectiveResolver<Result, Parent, ContextType = any, Args = ExcludeFromFilterDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type FieldDirectiveArgs = {
   at?: Maybe<Scalars['_DirectiveArgument_']['input']>;
@@ -4013,6 +3935,7 @@ export type Resolvers<ContextType = any> = {
 export type DirectiveResolvers<ContextType = any> = {
   discriminates?: DiscriminatesDirectiveResolver<any, any, ContextType>;
   discriminationAlias?: DiscriminationAliasDirectiveResolver<any, any, ContextType>;
+  excludeFromFilter?: ExcludeFromFilterDirectiveResolver<any, any, ContextType>;
   field?: FieldDirectiveResolver<any, any, ContextType>;
   implements?: ImplementsDirectiveResolver<any, any, ContextType>;
   relation?: RelationDirectiveResolver<any, any, ContextType>;

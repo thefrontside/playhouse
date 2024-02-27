@@ -3,6 +3,7 @@ directive @relation(
   nodeType: String
   kind: String
 ) on FIELD_DEFINITION
+directive @excludeFromFilter on FIELD_DEFINITION
 
 scalar JSON
 scalar JSONObject
