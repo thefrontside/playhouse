@@ -18,6 +18,16 @@ import {
 
 type OrderDirection = 'ASC' | 'DESC';
 
+interface CatalogCursor {
+  firstSortFieldValues?: [string, string];
+  orderFieldValues?: [string, string] | never[];
+  totalItems?: number;
+  isPrevious: boolean;
+  orderFields?: Array<{ field: string; order: 'asc' | 'desc' }>;
+  fullTextSearch?: { term: string; fields?: string[] };
+  filter?: { anyOf: Array<{ allOf: { key: string; values: string[] }[] }> };
+}
+
 function parseEntityFilter(filter: { fields: unknown }[]) {
   return { anyOf: filter.map(({ fields }) => ({ allOf: fields })) };
 }
@@ -270,7 +280,7 @@ export const queryResolvers: () => Resolvers = () => {
         filter: {
           match?: Record<string, unknown>[];
           order?: Record<string, unknown>[];
-          search?: { term: string, fields: Record<string, unknown>};
+          search?: { term: string; fields: Record<string, unknown> };
         };
         rawFilter: {
           filter?: { fields: unknown[] }[];
@@ -294,78 +304,85 @@ export const queryResolvers: () => Resolvers = () => {
         );
       }
 
-      const orderFields = (() => {
-        if (rawFilter?.orderFields) {
-          return rawFilter.orderFields.map(
-            ({ field, order }: { field: string; order: OrderDirection }) => ({
-              field,
-              order: order.toLowerCase(),
-            }),
-          );
-        }
-        if (filter?.order) {
-          return mapOrderFieldsToQueryOrder(
-            filter.order as Record<string, OrderDirection>[],
-            fieldMap,
-          );
-        }
-        return [{ field: 'metadata.uid', order: 'asc' }];
-      })();
-
-      const fullTextSearch = (() => {
-        if (rawFilter?.fullTextFilter) {
-          return {
-            term: rawFilter.fullTextFilter.term,
-            fields: rawFilter.fullTextFilter.fields ?? undefined,
-          };
-        }
-        if (filter?.search) {
-          return {
-            term: filter.search.term,
-            fields: filter.search.fields
-              ? mapSearchFilterToTextSearch(
-                  filter.search.fields as Record<string, boolean>,
-                  fieldMap,
-                )
-              : undefined,
-          };
-        }
-        return { term: '' };
-      })();
-
-      const queryFilter = (() => {
-        if (rawFilter?.filter) {
-          return parseEntityFilter(rawFilter.filter);
-        }
-        if (filter?.match) {
-          return {
-            anyOf: filter.match.map((match: unknown) => ({
-              allOf: mapMatchFilterToQueryFilter(
-                match as Record<string, unknown[]>,
-                fieldMap!,
-              ),
-            })),
-          };
-        }
-        return undefined;
-      })();
-
       const decodedCursor = (c =>
         c ? JSON.parse(Buffer.from(c, 'base64').toString('utf8')) : undefined)(
         after ?? before,
       );
 
-      const cursorParams = {
-        orderFields,
-        fullTextSearch,
-        filter: queryFilter,
+      const cursorObject: Partial<CatalogCursor> = {
+        orderFieldValues: [],
       };
+      if (decodedCursor) {
+        Object.assign(cursorObject, decodedCursor);
+      } else {
+        const orderFields = (() => {
+          if (rawFilter?.orderFields) {
+            return rawFilter.orderFields.map(
+              ({ field, order }: { field: string; order: OrderDirection }) => ({
+                field,
+                order: order.toLowerCase(),
+              }),
+            );
+          }
+          if (filter?.order) {
+            return mapOrderFieldsToQueryOrder(
+              filter.order as Record<string, OrderDirection>[],
+              fieldMap,
+            );
+          }
+          return [{ field: 'metadata.uid', order: 'asc' }];
+        })();
+
+        const fullTextSearch = (() => {
+          if (rawFilter?.fullTextFilter) {
+            return {
+              term: rawFilter.fullTextFilter.term,
+              fields: rawFilter.fullTextFilter.fields ?? undefined,
+            };
+          }
+          if (filter?.search) {
+            return {
+              term: filter.search.term,
+              fields: filter.search.fields
+                ? mapSearchFilterToTextSearch(
+                    filter.search.fields as Record<string, boolean>,
+                    fieldMap,
+                  )
+                : undefined,
+            };
+          }
+          return { term: '' };
+        })();
+
+        const queryFilter = (() => {
+          if (rawFilter?.filter) {
+            return parseEntityFilter(rawFilter.filter);
+          }
+          if (filter?.match) {
+            return {
+              anyOf: filter.match.map((match: unknown) => ({
+                allOf: mapMatchFilterToQueryFilter(
+                  match as Record<string, unknown[]>,
+                  fieldMap!,
+                ),
+              })),
+            };
+          }
+          return undefined;
+        })();
+
+        Object.assign(cursorObject, {
+          orderFields,
+          fullTextSearch,
+          filter: queryFilter,
+        });
+      }
       const cursor = Buffer.from(
         JSON.stringify({
-          orderFieldValues: [],
-          ...cursorParams,
-          ...decodedCursor,
-          isPrevious: (first === undefined && last !== undefined) || (after === undefined && before !== undefined),
+          ...cursorObject,
+          isPrevious:
+            (first === undefined && last !== undefined) ||
+            (after === undefined && before !== undefined),
         }),
         'utf8',
       ).toString('base64');
@@ -374,7 +391,7 @@ export const queryResolvers: () => Resolvers = () => {
       if (after) limit = first;
       if (before) limit = last;
 
-      const orderField = cursorParams.orderFields[0]?.field;
+      const orderField = cursorObject.orderFields?.[0]?.field;
       const { items, pageInfo, totalItems } = await catalog.queryEntities({
         fields: [
           'metadata.uid',
@@ -399,8 +416,7 @@ export const queryResolvers: () => Resolvers = () => {
                   : items[0].metadata.uid,
                 items[0].metadata.uid,
               ],
-              ...cursorParams,
-              ...decodedCursor,
+              ...cursorObject,
               orderFieldValues: [
                 orderField ? _.get(item, orderField) : item.metadata.uid,
                 item.metadata.uid,
