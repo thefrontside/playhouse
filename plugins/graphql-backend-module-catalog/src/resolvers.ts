@@ -365,14 +365,14 @@ export const queryResolvers: () => Resolvers = () => {
           orderFieldValues: [],
           ...cursorParams,
           ...decodedCursor,
-          isPrevious: first === null && last !== null,
+          isPrevious: (first === undefined && last !== undefined) || (after === undefined && before !== undefined),
         }),
         'utf8',
       ).toString('base64');
 
-      let limit: number | undefined = first ?? last ?? undefined;
-      if (after) limit = first ?? undefined;
-      if (before) limit = last ?? undefined;
+      let limit: number | undefined = first ?? last;
+      if (after) limit = first;
+      if (before) limit = last;
 
       const orderField = cursorParams.orderFields[0]?.field;
       const { items, pageInfo, totalItems } = await catalog.queryEntities({
@@ -384,7 +384,7 @@ export const queryResolvers: () => Resolvers = () => {
           ...(orderField ? [orderField] : []),
         ],
         cursor,
-        limit: limit ?? undefined,
+        limit,
       });
 
       // TODO Reuse field's resolvers
@@ -411,8 +411,8 @@ export const queryResolvers: () => Resolvers = () => {
           node: { id: encodeEntityId(item) },
         })),
         pageInfo: {
-          startCursor: pageInfo.prevCursor ?? null,
-          endCursor: pageInfo.nextCursor ?? null,
+          startCursor: pageInfo.prevCursor ?? undefined,
+          endCursor: pageInfo.nextCursor ?? undefined,
           hasPreviousPage: Boolean(pageInfo.prevCursor),
           hasNextPage: Boolean(pageInfo.nextCursor),
         },
