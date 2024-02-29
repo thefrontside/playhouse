@@ -5,8 +5,6 @@ exports[`graphql-catalog codegen should generate the correct code: graphql 1`] =
 
 directive @discriminationAlias(type: String!, value: String!) repeatable on INTERFACE
 
-directive @excludeFromFilter on FIELD_DEFINITION
-
 directive @field(at: _DirectiveArgument_, default: _DirectiveArgument_) on FIELD_DEFINITION
 
 directive @implements(interface: String!) on INTERFACE | OBJECT
@@ -14,6 +12,8 @@ directive @implements(interface: String!) on INTERFACE | OBJECT
 directive @relation(kind: String, name: String, nodeType: String) on FIELD_DEFINITION
 
 directive @resolve(at: _DirectiveArgument_, from: String, nodeType: String) on FIELD_DEFINITION
+
+directive @sourceType(name: String!) on FIELD_DEFINITION
 
 interface API implements Entity & Node & Ownable {
   annotations: [KeyValuePair!]
@@ -30,6 +30,7 @@ interface API implements Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -62,6 +63,7 @@ type AsyncAPI implements API & Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -85,6 +87,7 @@ interface Component implements Dependency & Entity & Node & Ownable {
   namespace: String!
   owner: Owner!
   providesApis(after: String, before: String, first: Int, last: Int): APIConnection
+  relations: [Relation!]
   subComponentOf: Component
   system: System
   tags: [String!]
@@ -122,6 +125,7 @@ type Database implements Dependency & Entity & Node & Ownable & Resource {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -143,6 +147,7 @@ type Department implements Entity & Group & Node {
   ownerOf(after: String, before: String, first: Int, last: Int): OwnableConnection
   parent: Group
   profile: GroupProfile
+  relations: [Relation!]
   tags: [String!]
   title: String
   type: String!
@@ -174,6 +179,7 @@ type Domain implements Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   systems(after: String, before: String, first: Int, last: Int): SystemConnection
   tags: [String!]
   title: String
@@ -194,6 +200,7 @@ interface Entity implements Node {
   links: [EntityLink!]
   name: String!
   namespace: String!
+  relations: [Relation!]
   tags: [String!]
   title: String
 }
@@ -221,6 +228,7 @@ type EntityEdge implements Edge {
         fields: [{ fieldF: DESC }, { fieldG: ASC }]
       }
     }
+    { annotations: [{ field: "backstage.io/source-location", order: ASC }] }
   ]
   search: {
     term: "substring"
@@ -253,17 +261,20 @@ input EntityFilter {
 }
 
 input EntityFilterExpression {
+  annotations: [EntityRawFilterField!]
   apiVersion: [JSON!]
   definition: [JSON!]
   description: [JSON!]
   kind: [JSON!]
+  labels: [EntityRawFilterField!]
   lifecycle: [JSON!]
   links: EntityFilterExpression_Links
   name: [JSON!]
   namespace: [JSON!]
-  parameters: [JSON!]
+  parameters: [EntityRawFilterField!]
   presence: [JSON!]
   profile: EntityFilterExpression_Profile
+  relations: EntityFilterExpression_Relations
   steps: EntityFilterExpression_Steps
   tags: [JSON!]
   target: [JSON!]
@@ -285,11 +296,16 @@ input EntityFilterExpression_Profile {
   picture: [JSON!]
 }
 
+input EntityFilterExpression_Relations {
+  targetRef: [JSON!]
+  type: [JSON!]
+}
+
 input EntityFilterExpression_Steps {
   action: [JSON!]
   id: [JSON!]
   if: [JSON!]
-  input: [JSON!]
+  input: [EntityRawFilterField!]
   name: [JSON!]
 }
 
@@ -301,17 +317,20 @@ type EntityLink {
 }
 
 input EntityOrderField {
+  annotations: [EntityRawOrderField!]
   apiVersion: OrderDirection
   definition: OrderDirection
   description: OrderDirection
   kind: OrderDirection
+  labels: [EntityRawOrderField!]
   lifecycle: OrderDirection
   links: [EntityOrderField_Links!]
   name: OrderDirection
   namespace: OrderDirection
-  parameters: OrderDirection
+  parameters: [EntityRawOrderField!]
   presence: OrderDirection
   profile: [EntityOrderField_Profile!]
+  relations: [EntityOrderField_Relations!]
   steps: [EntityOrderField_Steps!]
   tags: OrderDirection
   target: OrderDirection
@@ -333,11 +352,16 @@ input EntityOrderField_Profile {
   picture: OrderDirection
 }
 
+input EntityOrderField_Relations {
+  targetRef: OrderDirection
+  type: OrderDirection
+}
+
 input EntityOrderField_Steps {
   action: OrderDirection
   id: OrderDirection
   if: OrderDirection
-  input: OrderDirection
+  input: [EntityRawOrderField!]
   name: OrderDirection
 }
 
@@ -366,23 +390,32 @@ input EntityRawTextFilter {
   term: String!
 }
 
+type EntityRef {
+  kind: String!
+  name: String!
+  namespace: String!
+}
+
 input EntityTextFilter {
   fields: EntityTextFilterFields
   term: String!
 }
 
 input EntityTextFilterFields {
+  annotations: [String!]
   apiVersion: Boolean
   definition: Boolean
   description: Boolean
   kind: Boolean
+  labels: [String!]
   lifecycle: Boolean
   links: EntityTextFilterFields_Links
   name: Boolean
   namespace: Boolean
-  parameters: Boolean
+  parameters: [String!]
   presence: Boolean
   profile: EntityTextFilterFields_Profile
+  relations: EntityTextFilterFields_Relations
   steps: EntityTextFilterFields_Steps
   tags: Boolean
   target: Boolean
@@ -404,11 +437,16 @@ input EntityTextFilterFields_Profile {
   picture: Boolean
 }
 
+input EntityTextFilterFields_Relations {
+  targetRef: Boolean
+  type: Boolean
+}
+
 input EntityTextFilterFields_Steps {
   action: Boolean
   id: Boolean
   if: Boolean
-  input: Boolean
+  input: [String!]
   name: Boolean
 }
 
@@ -423,6 +461,7 @@ type FileLocation implements Entity & Location & Node {
   name: String!
   namespace: String!
   presence: String
+  relations: [Relation!]
   tags: [String!]
   target: String
   targets: [String!]
@@ -445,6 +484,7 @@ type GRPC implements API & Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -466,6 +506,7 @@ type GraphQL implements API & Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -487,6 +528,7 @@ interface Group implements Entity & Node {
   ownerOf(after: String, before: String, first: Int, last: Int): OwnableConnection
   parent: Group
   profile: GroupProfile
+  relations: [Relation!]
   tags: [String!]
   title: String
   type: String!
@@ -541,6 +583,7 @@ type Library implements Component & Dependency & Entity & Node & Ownable {
   namespace: String!
   owner: Owner!
   providesApis(after: String, before: String, first: Int, last: Int): APIConnection
+  relations: [Relation!]
   subComponentOf: Component
   system: System
   tags: [String!]
@@ -559,6 +602,7 @@ interface Location implements Entity & Node {
   name: String!
   namespace: String!
   presence: String
+  relations: [Relation!]
   tags: [String!]
   target: String
   targets: [String!]
@@ -585,6 +629,7 @@ type OpaqueAPI implements API & Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -608,6 +653,7 @@ type OpaqueComponent implements Component & Dependency & Entity & Node & Ownable
   namespace: String!
   owner: Owner!
   providesApis(after: String, before: String, first: Int, last: Int): APIConnection
+  relations: [Relation!]
   subComponentOf: Component
   system: System
   tags: [String!]
@@ -625,6 +671,7 @@ type OpaqueEntity implements Entity & Node {
   links: [EntityLink!]
   name: String!
   namespace: String!
+  relations: [Relation!]
   tags: [String!]
   title: String
 }
@@ -644,6 +691,7 @@ type OpaqueGroup implements Entity & Group & Node {
   ownerOf(after: String, before: String, first: Int, last: Int): OwnableConnection
   parent: Group
   profile: GroupProfile
+  relations: [Relation!]
   tags: [String!]
   title: String
   type: String!
@@ -660,6 +708,7 @@ type OpaqueLocation implements Entity & Location & Node {
   name: String!
   namespace: String!
   presence: String
+  relations: [Relation!]
   tags: [String!]
   target: String
   targets: [String!]
@@ -680,6 +729,7 @@ type OpaqueResource implements Dependency & Entity & Node & Ownable & Resource {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -698,6 +748,7 @@ type OpaqueTemplate implements Entity & Node & Ownable & Template {
   namespace: String!
   owner: Owner
   parameters: JSONObject
+  relations: [Relation!]
   steps: [Step!]!
   tags: [String!]
   title: String
@@ -719,6 +770,7 @@ type OpenAPI implements API & Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -745,6 +797,7 @@ type Organization implements Entity & Group & Node {
   ownerOf(after: String, before: String, first: Int, last: Int): OwnableConnection
   parent: Group
   profile: GroupProfile
+  relations: [Relation!]
   tags: [String!]
   title: String
   type: String!
@@ -781,6 +834,11 @@ type Query {
   nodes(ids: [ID!]!): [Node]!
 }
 
+type Relation {
+  targetRef: EntityRef
+  type: String!
+}
+
 interface Resource implements Dependency & Entity & Node & Ownable {
   annotations: [KeyValuePair!]
   apiVersion: String!
@@ -794,6 +852,7 @@ interface Resource implements Dependency & Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   system: System
   tags: [String!]
   title: String
@@ -828,6 +887,7 @@ type Service implements Component & Dependency & Entity & Node & Ownable {
   namespace: String!
   owner: Owner!
   providesApis(after: String, before: String, first: Int, last: Int): APIConnection
+  relations: [Relation!]
   subComponentOf: Component
   system: System
   tags: [String!]
@@ -847,6 +907,7 @@ type ServiceTemplate implements Entity & Node & Ownable & Template {
   namespace: String!
   owner: Owner
   parameters: JSONObject
+  relations: [Relation!]
   steps: [Step!]!
   tags: [String!]
   title: String
@@ -876,6 +937,7 @@ type SubDepartment implements Entity & Group & Node {
   ownerOf(after: String, before: String, first: Int, last: Int): OwnableConnection
   parent: Group
   profile: GroupProfile
+  relations: [Relation!]
   tags: [String!]
   title: String
   type: String!
@@ -895,6 +957,7 @@ type System implements Entity & Node & Ownable {
   name: String!
   namespace: String!
   owner: Owner!
+  relations: [Relation!]
   resources(after: String, before: String, first: Int, last: Int): ResourceConnection
   tags: [String!]
   title: String
@@ -926,6 +989,7 @@ type Team implements Entity & Group & Node {
   ownerOf(after: String, before: String, first: Int, last: Int): OwnableConnection
   parent: Group
   profile: GroupProfile
+  relations: [Relation!]
   tags: [String!]
   title: String
   type: String!
@@ -943,6 +1007,7 @@ interface Template implements Entity & Node & Ownable {
   namespace: String!
   owner: Owner
   parameters: JSONObject
+  relations: [Relation!]
   steps: [Step!]!
   tags: [String!]
   title: String
@@ -960,6 +1025,7 @@ type URLLocation implements Entity & Location & Node {
   name: String!
   namespace: String!
   presence: String
+  relations: [Relation!]
   tags: [String!]
   target: String
   targets: [String!]
@@ -980,6 +1046,7 @@ type User implements Entity & Node {
   namespace: String!
   ownerOf(after: String, before: String, first: Int, last: Int): OwnableConnection
   profile: UserProfile
+  relations: [Relation!]
   tags: [String!]
   title: String
 }
@@ -1018,6 +1085,7 @@ type Website implements Component & Dependency & Entity & Node & Ownable {
   namespace: String!
   owner: Owner!
   providesApis(after: String, before: String, first: Int, last: Int): APIConnection
+  relations: [Relation!]
   subComponentOf: Component
   system: System
   tags: [String!]
@@ -1070,6 +1138,7 @@ export type Api = {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -1121,6 +1190,7 @@ export type AsyncApi = Api & Entity & Node & Ownable & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -1160,6 +1230,7 @@ export type Component = {
   namespace: Scalars['String']['output'];
   owner: Owner;
   providesApis?: Maybe<ApiConnection>;
+  relations?: Maybe<Array<Relation>>;
   subComponentOf?: Maybe<Component>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
@@ -1240,6 +1311,7 @@ export type Database = Dependency & Entity & Node & Ownable & Resource & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -1278,6 +1350,7 @@ export type Department = Entity & Group & Node & {
   ownerOf?: Maybe<OwnableConnection>;
   parent?: Maybe<Group>;
   profile?: Maybe<GroupProfile>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   type: Scalars['String']['output'];
@@ -1336,6 +1409,7 @@ export type Domain = Entity & Node & Ownable & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   systems?: Maybe<SystemConnection>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -1364,6 +1438,7 @@ export type Entity = {
   links?: Maybe<Array<EntityLink>>;
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
 };
@@ -1393,6 +1468,7 @@ export type EntityEdge = Edge & {
  *         fields: [{ fieldF: DESC }, { fieldG: ASC }]
  *       }
  *     }
+ *     { annotations: [{ field: "backstage.io/source-location", order: ASC }] }
  *   ]
  *   search: {
  *     term: "substring"
@@ -1425,17 +1501,20 @@ export type EntityFilter = {
 };
 
 export type EntityFilterExpression = {
+  annotations?: InputMaybe<Array<EntityRawFilterField>>;
   apiVersion?: InputMaybe<Array<Scalars['JSON']['input']>>;
   definition?: InputMaybe<Array<Scalars['JSON']['input']>>;
   description?: InputMaybe<Array<Scalars['JSON']['input']>>;
   kind?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  labels?: InputMaybe<Array<EntityRawFilterField>>;
   lifecycle?: InputMaybe<Array<Scalars['JSON']['input']>>;
   links?: InputMaybe<EntityFilterExpression_Links>;
   name?: InputMaybe<Array<Scalars['JSON']['input']>>;
   namespace?: InputMaybe<Array<Scalars['JSON']['input']>>;
-  parameters?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  parameters?: InputMaybe<Array<EntityRawFilterField>>;
   presence?: InputMaybe<Array<Scalars['JSON']['input']>>;
   profile?: InputMaybe<EntityFilterExpression_Profile>;
+  relations?: InputMaybe<EntityFilterExpression_Relations>;
   steps?: InputMaybe<EntityFilterExpression_Steps>;
   tags?: InputMaybe<Array<Scalars['JSON']['input']>>;
   target?: InputMaybe<Array<Scalars['JSON']['input']>>;
@@ -1457,11 +1536,16 @@ export type EntityFilterExpression_Profile = {
   picture?: InputMaybe<Array<Scalars['JSON']['input']>>;
 };
 
+export type EntityFilterExpression_Relations = {
+  targetRef?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  type?: InputMaybe<Array<Scalars['JSON']['input']>>;
+};
+
 export type EntityFilterExpression_Steps = {
   action?: InputMaybe<Array<Scalars['JSON']['input']>>;
   id?: InputMaybe<Array<Scalars['JSON']['input']>>;
   if?: InputMaybe<Array<Scalars['JSON']['input']>>;
-  input?: InputMaybe<Array<Scalars['JSON']['input']>>;
+  input?: InputMaybe<Array<EntityRawFilterField>>;
   name?: InputMaybe<Array<Scalars['JSON']['input']>>;
 };
 
@@ -1474,17 +1558,20 @@ export type EntityLink = {
 };
 
 export type EntityOrderField = {
+  annotations?: InputMaybe<Array<EntityRawOrderField>>;
   apiVersion?: InputMaybe<OrderDirection>;
   definition?: InputMaybe<OrderDirection>;
   description?: InputMaybe<OrderDirection>;
   kind?: InputMaybe<OrderDirection>;
+  labels?: InputMaybe<Array<EntityRawOrderField>>;
   lifecycle?: InputMaybe<OrderDirection>;
   links?: InputMaybe<Array<EntityOrderField_Links>>;
   name?: InputMaybe<OrderDirection>;
   namespace?: InputMaybe<OrderDirection>;
-  parameters?: InputMaybe<OrderDirection>;
+  parameters?: InputMaybe<Array<EntityRawOrderField>>;
   presence?: InputMaybe<OrderDirection>;
   profile?: InputMaybe<Array<EntityOrderField_Profile>>;
+  relations?: InputMaybe<Array<EntityOrderField_Relations>>;
   steps?: InputMaybe<Array<EntityOrderField_Steps>>;
   tags?: InputMaybe<OrderDirection>;
   target?: InputMaybe<OrderDirection>;
@@ -1506,11 +1593,16 @@ export type EntityOrderField_Profile = {
   picture?: InputMaybe<OrderDirection>;
 };
 
+export type EntityOrderField_Relations = {
+  targetRef?: InputMaybe<OrderDirection>;
+  type?: InputMaybe<OrderDirection>;
+};
+
 export type EntityOrderField_Steps = {
   action?: InputMaybe<OrderDirection>;
   id?: InputMaybe<OrderDirection>;
   if?: InputMaybe<OrderDirection>;
-  input?: InputMaybe<OrderDirection>;
+  input?: InputMaybe<Array<EntityRawOrderField>>;
   name?: InputMaybe<OrderDirection>;
 };
 
@@ -1539,23 +1631,33 @@ export type EntityRawTextFilter = {
   term: Scalars['String']['input'];
 };
 
+export type EntityRef = {
+  __typename?: 'EntityRef';
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+};
+
 export type EntityTextFilter = {
   fields?: InputMaybe<EntityTextFilterFields>;
   term: Scalars['String']['input'];
 };
 
 export type EntityTextFilterFields = {
+  annotations?: InputMaybe<Array<Scalars['String']['input']>>;
   apiVersion?: InputMaybe<Scalars['Boolean']['input']>;
   definition?: InputMaybe<Scalars['Boolean']['input']>;
   description?: InputMaybe<Scalars['Boolean']['input']>;
   kind?: InputMaybe<Scalars['Boolean']['input']>;
+  labels?: InputMaybe<Array<Scalars['String']['input']>>;
   lifecycle?: InputMaybe<Scalars['Boolean']['input']>;
   links?: InputMaybe<EntityTextFilterFields_Links>;
   name?: InputMaybe<Scalars['Boolean']['input']>;
   namespace?: InputMaybe<Scalars['Boolean']['input']>;
-  parameters?: InputMaybe<Scalars['Boolean']['input']>;
+  parameters?: InputMaybe<Array<Scalars['String']['input']>>;
   presence?: InputMaybe<Scalars['Boolean']['input']>;
   profile?: InputMaybe<EntityTextFilterFields_Profile>;
+  relations?: InputMaybe<EntityTextFilterFields_Relations>;
   steps?: InputMaybe<EntityTextFilterFields_Steps>;
   tags?: InputMaybe<Scalars['Boolean']['input']>;
   target?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1577,11 +1679,16 @@ export type EntityTextFilterFields_Profile = {
   picture?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type EntityTextFilterFields_Relations = {
+  targetRef?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type EntityTextFilterFields_Steps = {
   action?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['Boolean']['input']>;
   if?: InputMaybe<Scalars['Boolean']['input']>;
-  input?: InputMaybe<Scalars['Boolean']['input']>;
+  input?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -1597,6 +1704,7 @@ export type FileLocation = Entity & Location & Node & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   presence?: Maybe<Scalars['String']['output']>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   target?: Maybe<Scalars['String']['output']>;
   targets?: Maybe<Array<Scalars['String']['output']>>;
@@ -1620,6 +1728,7 @@ export type Grpc = Api & Entity & Node & Ownable & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -1658,6 +1767,7 @@ export type GraphQl = Api & Entity & Node & Ownable & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -1695,6 +1805,7 @@ export type Group = {
   ownerOf?: Maybe<OwnableConnection>;
   parent?: Maybe<Group>;
   profile?: Maybe<GroupProfile>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   type: Scalars['String']['output'];
@@ -1768,6 +1879,7 @@ export type Library = Component & Dependency & Entity & Node & Ownable & {
   namespace: Scalars['String']['output'];
   owner: Owner;
   providesApis?: Maybe<ApiConnection>;
+  relations?: Maybe<Array<Relation>>;
   subComponentOf?: Maybe<Component>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
@@ -1826,6 +1938,7 @@ export type Location = {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   presence?: Maybe<Scalars['String']['output']>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   target?: Maybe<Scalars['String']['output']>;
   targets?: Maybe<Array<Scalars['String']['output']>>;
@@ -1853,6 +1966,7 @@ export type OpaqueApi = Api & Entity & Node & Ownable & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -1893,6 +2007,7 @@ export type OpaqueComponent = Component & Dependency & Entity & Node & Ownable &
   namespace: Scalars['String']['output'];
   owner: Owner;
   providesApis?: Maybe<ApiConnection>;
+  relations?: Maybe<Array<Relation>>;
   subComponentOf?: Maybe<Component>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
@@ -1951,6 +2066,7 @@ export type OpaqueEntity = Entity & Node & {
   links?: Maybe<Array<EntityLink>>;
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
 };
@@ -1971,6 +2087,7 @@ export type OpaqueGroup = Entity & Group & Node & {
   ownerOf?: Maybe<OwnableConnection>;
   parent?: Maybe<Group>;
   profile?: Maybe<GroupProfile>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   type: Scalars['String']['output'];
@@ -2012,6 +2129,7 @@ export type OpaqueLocation = Entity & Location & Node & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   presence?: Maybe<Scalars['String']['output']>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   target?: Maybe<Scalars['String']['output']>;
   targets?: Maybe<Array<Scalars['String']['output']>>;
@@ -2033,6 +2151,7 @@ export type OpaqueResource = Dependency & Entity & Node & Ownable & Resource & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -2068,6 +2187,7 @@ export type OpaqueTemplate = Entity & Node & Ownable & Template & {
   namespace: Scalars['String']['output'];
   owner?: Maybe<Owner>;
   parameters?: Maybe<Scalars['JSONObject']['output']>;
+  relations?: Maybe<Array<Relation>>;
   steps: Array<Step>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -2090,6 +2210,7 @@ export type OpenApi = Api & Entity & Node & Ownable & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -2132,6 +2253,7 @@ export type Organization = Entity & Group & Node & {
   ownerOf?: Maybe<OwnableConnection>;
   parent?: Maybe<Group>;
   profile?: Maybe<GroupProfile>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   type: Scalars['String']['output'];
@@ -2223,6 +2345,12 @@ export type QueryNodesArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
+export type Relation = {
+  __typename?: 'Relation';
+  targetRef?: Maybe<EntityRef>;
+  type: Scalars['String']['output'];
+};
+
 export type Resource = {
   annotations?: Maybe<Array<KeyValuePair>>;
   apiVersion: Scalars['String']['output'];
@@ -2236,6 +2364,7 @@ export type Resource = {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -2289,6 +2418,7 @@ export type Service = Component & Dependency & Entity & Node & Ownable & {
   namespace: Scalars['String']['output'];
   owner: Owner;
   providesApis?: Maybe<ApiConnection>;
+  relations?: Maybe<Array<Relation>>;
   subComponentOf?: Maybe<Component>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
@@ -2349,6 +2479,7 @@ export type ServiceTemplate = Entity & Node & Ownable & Template & {
   namespace: Scalars['String']['output'];
   owner?: Maybe<Owner>;
   parameters?: Maybe<Scalars['JSONObject']['output']>;
+  relations?: Maybe<Array<Relation>>;
   steps: Array<Step>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -2380,6 +2511,7 @@ export type SubDepartment = Entity & Group & Node & {
   ownerOf?: Maybe<OwnableConnection>;
   parent?: Maybe<Group>;
   profile?: Maybe<GroupProfile>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   type: Scalars['String']['output'];
@@ -2424,6 +2556,7 @@ export type System = Entity & Node & Ownable & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   owner: Owner;
+  relations?: Maybe<Array<Relation>>;
   resources?: Maybe<ResourceConnection>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -2482,6 +2615,7 @@ export type Team = Entity & Group & Node & {
   ownerOf?: Maybe<OwnableConnection>;
   parent?: Maybe<Group>;
   profile?: Maybe<GroupProfile>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
   type: Scalars['String']['output'];
@@ -2523,6 +2657,7 @@ export type Template = {
   namespace: Scalars['String']['output'];
   owner?: Maybe<Owner>;
   parameters?: Maybe<Scalars['JSONObject']['output']>;
+  relations?: Maybe<Array<Relation>>;
   steps: Array<Step>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
@@ -2541,6 +2676,7 @@ export type UrlLocation = Entity & Location & Node & {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   presence?: Maybe<Scalars['String']['output']>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   target?: Maybe<Scalars['String']['output']>;
   targets?: Maybe<Array<Scalars['String']['output']>>;
@@ -2562,6 +2698,7 @@ export type User = Entity & Node & {
   namespace: Scalars['String']['output'];
   ownerOf?: Maybe<OwnableConnection>;
   profile?: Maybe<UserProfile>;
+  relations?: Maybe<Array<Relation>>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   title?: Maybe<Scalars['String']['output']>;
 };
@@ -2620,6 +2757,7 @@ export type Website = Component & Dependency & Entity & Node & Ownable & {
   namespace: Scalars['String']['output'];
   owner: Owner;
   providesApis?: Maybe<ApiConnection>;
+  relations?: Maybe<Array<Relation>>;
   subComponentOf?: Maybe<Component>;
   system?: Maybe<System>;
   tags?: Maybe<Array<Scalars['String']['output']>>;
@@ -2780,21 +2918,25 @@ export type ResolversTypes = {
   EntityFilterExpression: EntityFilterExpression;
   EntityFilterExpression_Links: EntityFilterExpression_Links;
   EntityFilterExpression_Profile: EntityFilterExpression_Profile;
+  EntityFilterExpression_Relations: EntityFilterExpression_Relations;
   EntityFilterExpression_Steps: EntityFilterExpression_Steps;
   EntityLink: ResolverTypeWrapper<EntityLink>;
   EntityOrderField: EntityOrderField;
   EntityOrderField_Links: EntityOrderField_Links;
   EntityOrderField_Profile: EntityOrderField_Profile;
+  EntityOrderField_Relations: EntityOrderField_Relations;
   EntityOrderField_Steps: EntityOrderField_Steps;
   EntityRawFilter: EntityRawFilter;
   EntityRawFilterExpression: EntityRawFilterExpression;
   EntityRawFilterField: EntityRawFilterField;
   EntityRawOrderField: EntityRawOrderField;
   EntityRawTextFilter: EntityRawTextFilter;
+  EntityRef: ResolverTypeWrapper<EntityRef>;
   EntityTextFilter: EntityTextFilter;
   EntityTextFilterFields: EntityTextFilterFields;
   EntityTextFilterFields_Links: EntityTextFilterFields_Links;
   EntityTextFilterFields_Profile: EntityTextFilterFields_Profile;
+  EntityTextFilterFields_Relations: EntityTextFilterFields_Relations;
   EntityTextFilterFields_Steps: EntityTextFilterFields_Steps;
   FileLocation: ResolverTypeWrapper<FileLocation>;
   GRPC: ResolverTypeWrapper<Omit<Grpc, 'owner'> & { owner: ResolversTypes['Owner'] }>;
@@ -2827,6 +2969,7 @@ export type ResolversTypes = {
   Owner: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['Owner']>;
   PageInfo: ResolverTypeWrapper<PageInfo>;
   Query: ResolverTypeWrapper<{}>;
+  Relation: ResolverTypeWrapper<Relation>;
   Resource: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['Resource']>;
   ResourceConnection: ResolverTypeWrapper<ResourceConnection>;
   ResourceEdge: ResolverTypeWrapper<ResourceEdge>;
@@ -2874,21 +3017,25 @@ export type ResolversParentTypes = {
   EntityFilterExpression: EntityFilterExpression;
   EntityFilterExpression_Links: EntityFilterExpression_Links;
   EntityFilterExpression_Profile: EntityFilterExpression_Profile;
+  EntityFilterExpression_Relations: EntityFilterExpression_Relations;
   EntityFilterExpression_Steps: EntityFilterExpression_Steps;
   EntityLink: EntityLink;
   EntityOrderField: EntityOrderField;
   EntityOrderField_Links: EntityOrderField_Links;
   EntityOrderField_Profile: EntityOrderField_Profile;
+  EntityOrderField_Relations: EntityOrderField_Relations;
   EntityOrderField_Steps: EntityOrderField_Steps;
   EntityRawFilter: EntityRawFilter;
   EntityRawFilterExpression: EntityRawFilterExpression;
   EntityRawFilterField: EntityRawFilterField;
   EntityRawOrderField: EntityRawOrderField;
   EntityRawTextFilter: EntityRawTextFilter;
+  EntityRef: EntityRef;
   EntityTextFilter: EntityTextFilter;
   EntityTextFilterFields: EntityTextFilterFields;
   EntityTextFilterFields_Links: EntityTextFilterFields_Links;
   EntityTextFilterFields_Profile: EntityTextFilterFields_Profile;
+  EntityTextFilterFields_Relations: EntityTextFilterFields_Relations;
   EntityTextFilterFields_Steps: EntityTextFilterFields_Steps;
   FileLocation: FileLocation;
   GRPC: Omit<Grpc, 'owner'> & { owner: ResolversParentTypes['Owner'] };
@@ -2920,6 +3067,7 @@ export type ResolversParentTypes = {
   Owner: ResolversUnionTypes<ResolversParentTypes>['Owner'];
   PageInfo: PageInfo;
   Query: {};
+  Relation: Relation;
   Resource: ResolversInterfaceTypes<ResolversParentTypes>['Resource'];
   ResourceConnection: ResourceConnection;
   ResourceEdge: ResourceEdge;
@@ -2956,10 +3104,6 @@ export type DiscriminationAliasDirectiveArgs = {
 
 export type DiscriminationAliasDirectiveResolver<Result, Parent, ContextType = any, Args = DiscriminationAliasDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
-export type ExcludeFromFilterDirectiveArgs = { };
-
-export type ExcludeFromFilterDirectiveResolver<Result, Parent, ContextType = any, Args = ExcludeFromFilterDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
-
 export type FieldDirectiveArgs = {
   at?: Maybe<Scalars['_DirectiveArgument_']['input']>;
   default?: Maybe<Scalars['_DirectiveArgument_']['input']>;
@@ -2989,6 +3133,12 @@ export type ResolveDirectiveArgs = {
 
 export type ResolveDirectiveResolver<Result, Parent, ContextType = any, Args = ResolveDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
+export type SourceTypeDirectiveArgs = {
+  name: Scalars['String']['input'];
+};
+
+export type SourceTypeDirectiveResolver<Result, Parent, ContextType = any, Args = SourceTypeDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
 export type ApiResolvers<ContextType = any, ParentType extends ResolversParentTypes['API'] = ResolversParentTypes['API']> = {
   __resolveType: TypeResolveFn<'AsyncAPI' | 'GRPC' | 'GraphQL' | 'OpaqueAPI' | 'OpenAPI', ParentType, ContextType>;
   annotations?: Resolver<Maybe<Array<ResolversTypes['KeyValuePair']>>, ParentType, ContextType>;
@@ -3005,6 +3155,7 @@ export type ApiResolvers<ContextType = any, ParentType extends ResolversParentTy
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3039,6 +3190,7 @@ export type AsyncApiResolvers<ContextType = any, ParentType extends ResolversPar
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3064,6 +3216,7 @@ export type ComponentResolvers<ContextType = any, ParentType extends ResolversPa
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
   providesApis?: Resolver<Maybe<ResolversTypes['APIConnection']>, ParentType, ContextType, Partial<ComponentProvidesApisArgs>>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   subComponentOf?: Resolver<Maybe<ResolversTypes['Component']>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3104,6 +3257,7 @@ export type DatabaseResolvers<ContextType = any, ParentType extends ResolversPar
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3126,6 +3280,7 @@ export type DepartmentResolvers<ContextType = any, ParentType extends ResolversP
   ownerOf?: Resolver<Maybe<ResolversTypes['OwnableConnection']>, ParentType, ContextType, Partial<DepartmentOwnerOfArgs>>;
   parent?: Resolver<Maybe<ResolversTypes['Group']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['GroupProfile']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3161,6 +3316,7 @@ export type DomainResolvers<ContextType = any, ParentType extends ResolversParen
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   systems?: Resolver<Maybe<ResolversTypes['SystemConnection']>, ParentType, ContextType, Partial<DomainSystemsArgs>>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3184,6 +3340,7 @@ export type EntityResolvers<ContextType = any, ParentType extends ResolversParen
   links?: Resolver<Maybe<Array<ResolversTypes['EntityLink']>>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
@@ -3209,6 +3366,13 @@ export type EntityLinkResolvers<ContextType = any, ParentType extends ResolversP
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type EntityRefResolvers<ContextType = any, ParentType extends ResolversParentTypes['EntityRef'] = ResolversParentTypes['EntityRef']> = {
+  kind?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type FileLocationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FileLocation'] = ResolversParentTypes['FileLocation']> = {
   annotations?: Resolver<Maybe<Array<ResolversTypes['KeyValuePair']>>, ParentType, ContextType>;
   apiVersion?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3220,6 +3384,7 @@ export type FileLocationResolvers<ContextType = any, ParentType extends Resolver
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presence?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   target?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   targets?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3243,6 +3408,7 @@ export type GrpcResolvers<ContextType = any, ParentType extends ResolversParentT
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3265,6 +3431,7 @@ export type GraphQlResolvers<ContextType = any, ParentType extends ResolversPare
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3288,6 +3455,7 @@ export type GroupResolvers<ContextType = any, ParentType extends ResolversParent
   ownerOf?: Resolver<Maybe<ResolversTypes['OwnableConnection']>, ParentType, ContextType, Partial<GroupOwnerOfArgs>>;
   parent?: Resolver<Maybe<ResolversTypes['Group']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['GroupProfile']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3344,6 +3512,7 @@ export type LibraryResolvers<ContextType = any, ParentType extends ResolversPare
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
   providesApis?: Resolver<Maybe<ResolversTypes['APIConnection']>, ParentType, ContextType, Partial<LibraryProvidesApisArgs>>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   subComponentOf?: Resolver<Maybe<ResolversTypes['Component']>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3364,6 +3533,7 @@ export type LocationResolvers<ContextType = any, ParentType extends ResolversPar
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presence?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   target?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   targets?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3391,6 +3561,7 @@ export type OpaqueApiResolvers<ContextType = any, ParentType extends ResolversPa
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3415,6 +3586,7 @@ export type OpaqueComponentResolvers<ContextType = any, ParentType extends Resol
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
   providesApis?: Resolver<Maybe<ResolversTypes['APIConnection']>, ParentType, ContextType, Partial<OpaqueComponentProvidesApisArgs>>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   subComponentOf?: Resolver<Maybe<ResolversTypes['Component']>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3433,6 +3605,7 @@ export type OpaqueEntityResolvers<ContextType = any, ParentType extends Resolver
   links?: Resolver<Maybe<Array<ResolversTypes['EntityLink']>>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -3453,6 +3626,7 @@ export type OpaqueGroupResolvers<ContextType = any, ParentType extends Resolvers
   ownerOf?: Resolver<Maybe<ResolversTypes['OwnableConnection']>, ParentType, ContextType, Partial<OpaqueGroupOwnerOfArgs>>;
   parent?: Resolver<Maybe<ResolversTypes['Group']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['GroupProfile']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3470,6 +3644,7 @@ export type OpaqueLocationResolvers<ContextType = any, ParentType extends Resolv
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presence?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   target?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   targets?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3491,6 +3666,7 @@ export type OpaqueResourceResolvers<ContextType = any, ParentType extends Resolv
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3510,6 +3686,7 @@ export type OpaqueTemplateResolvers<ContextType = any, ParentType extends Resolv
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<Maybe<ResolversTypes['Owner']>, ParentType, ContextType>;
   parameters?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   steps?: Resolver<Array<ResolversTypes['Step']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3532,6 +3709,7 @@ export type OpenApiResolvers<ContextType = any, ParentType extends ResolversPare
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3554,6 +3732,7 @@ export type OrganizationResolvers<ContextType = any, ParentType extends Resolver
   ownerOf?: Resolver<Maybe<ResolversTypes['OwnableConnection']>, ParentType, ContextType, Partial<OrganizationOwnerOfArgs>>;
   parent?: Resolver<Maybe<ResolversTypes['Group']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['GroupProfile']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3597,6 +3776,12 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   nodes?: Resolver<Array<Maybe<ResolversTypes['Node']>>, ParentType, ContextType, RequireFields<QueryNodesArgs, 'ids'>>;
 };
 
+export type RelationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Relation'] = ResolversParentTypes['Relation']> = {
+  targetRef?: Resolver<Maybe<ResolversTypes['EntityRef']>, ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type ResourceResolvers<ContextType = any, ParentType extends ResolversParentTypes['Resource'] = ResolversParentTypes['Resource']> = {
   __resolveType: TypeResolveFn<'Database' | 'OpaqueResource', ParentType, ContextType>;
   annotations?: Resolver<Maybe<Array<ResolversTypes['KeyValuePair']>>, ParentType, ContextType>;
@@ -3611,6 +3796,7 @@ export type ResourceResolvers<ContextType = any, ParentType extends ResolversPar
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3647,6 +3833,7 @@ export type ServiceResolvers<ContextType = any, ParentType extends ResolversPare
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
   providesApis?: Resolver<Maybe<ResolversTypes['APIConnection']>, ParentType, ContextType, Partial<ServiceProvidesApisArgs>>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   subComponentOf?: Resolver<Maybe<ResolversTypes['Component']>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3667,6 +3854,7 @@ export type ServiceTemplateResolvers<ContextType = any, ParentType extends Resol
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<Maybe<ResolversTypes['Owner']>, ParentType, ContextType>;
   parameters?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   steps?: Resolver<Array<ResolversTypes['Step']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3698,6 +3886,7 @@ export type SubDepartmentResolvers<ContextType = any, ParentType extends Resolve
   ownerOf?: Resolver<Maybe<ResolversTypes['OwnableConnection']>, ParentType, ContextType, Partial<SubDepartmentOwnerOfArgs>>;
   parent?: Resolver<Maybe<ResolversTypes['Group']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['GroupProfile']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3718,6 +3907,7 @@ export type SystemResolvers<ContextType = any, ParentType extends ResolversParen
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   resources?: Resolver<Maybe<ResolversTypes['ResourceConnection']>, ParentType, ContextType, Partial<SystemResourcesArgs>>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3752,6 +3942,7 @@ export type TeamResolvers<ContextType = any, ParentType extends ResolversParentT
   ownerOf?: Resolver<Maybe<ResolversTypes['OwnableConnection']>, ParentType, ContextType, Partial<TeamOwnerOfArgs>>;
   parent?: Resolver<Maybe<ResolversTypes['Group']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['GroupProfile']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3771,6 +3962,7 @@ export type TemplateResolvers<ContextType = any, ParentType extends ResolversPar
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<Maybe<ResolversTypes['Owner']>, ParentType, ContextType>;
   parameters?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   steps?: Resolver<Array<ResolversTypes['Step']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3788,6 +3980,7 @@ export type UrlLocationResolvers<ContextType = any, ParentType extends Resolvers
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presence?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   target?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   targets?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3809,6 +4002,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   ownerOf?: Resolver<Maybe<ResolversTypes['OwnableConnection']>, ParentType, ContextType, Partial<UserOwnerOfArgs>>;
   profile?: Resolver<Maybe<ResolversTypes['UserProfile']>, ParentType, ContextType>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -3851,6 +4045,7 @@ export type WebsiteResolvers<ContextType = any, ParentType extends ResolversPare
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   owner?: Resolver<ResolversTypes['Owner'], ParentType, ContextType>;
   providesApis?: Resolver<Maybe<ResolversTypes['APIConnection']>, ParentType, ContextType, Partial<WebsiteProvidesApisArgs>>;
+  relations?: Resolver<Maybe<Array<ResolversTypes['Relation']>>, ParentType, ContextType>;
   subComponentOf?: Resolver<Maybe<ResolversTypes['Component']>, ParentType, ContextType>;
   system?: Resolver<Maybe<ResolversTypes['System']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
@@ -3883,6 +4078,7 @@ export type Resolvers<ContextType = any> = {
   EntityConnection?: EntityConnectionResolvers<ContextType>;
   EntityEdge?: EntityEdgeResolvers<ContextType>;
   EntityLink?: EntityLinkResolvers<ContextType>;
+  EntityRef?: EntityRefResolvers<ContextType>;
   FileLocation?: FileLocationResolvers<ContextType>;
   GRPC?: GrpcResolvers<ContextType>;
   GraphQL?: GraphQlResolvers<ContextType>;
@@ -3911,6 +4107,7 @@ export type Resolvers<ContextType = any> = {
   Owner?: OwnerResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  Relation?: RelationResolvers<ContextType>;
   Resource?: ResourceResolvers<ContextType>;
   ResourceConnection?: ResourceConnectionResolvers<ContextType>;
   ResourceEdge?: ResourceEdgeResolvers<ContextType>;
@@ -3935,11 +4132,11 @@ export type Resolvers<ContextType = any> = {
 export type DirectiveResolvers<ContextType = any> = {
   discriminates?: DiscriminatesDirectiveResolver<any, any, ContextType>;
   discriminationAlias?: DiscriminationAliasDirectiveResolver<any, any, ContextType>;
-  excludeFromFilter?: ExcludeFromFilterDirectiveResolver<any, any, ContextType>;
   field?: FieldDirectiveResolver<any, any, ContextType>;
   implements?: ImplementsDirectiveResolver<any, any, ContextType>;
   relation?: RelationDirectiveResolver<any, any, ContextType>;
   resolve?: ResolveDirectiveResolver<any, any, ContextType>;
+  sourceType?: SourceTypeDirectiveResolver<any, any, ContextType>;
 };
 
 export type Json = Scalars["JSON"];

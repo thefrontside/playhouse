@@ -3,6 +3,7 @@ import { loadFilesSync } from '@graphql-tools/load-files';
 import { resolvePackagePath } from '@backstage/backend-common';
 import { Relation } from '../relation';
 import { GraphQLModule } from '@frontside/hydraphql';
+import { EntityRelation, parseEntityRef } from '@backstage/catalog-model';
 
 const catalogSchemaPath = resolvePackagePath(
   '@frontside/backstage-plugin-graphql-backend-module-catalog',
@@ -15,7 +16,10 @@ export const Catalog = (): GraphQLModule => ({
   postTransform: Relation().postTransform,
   module: createModule({
     id: 'catalog-entities',
-    typeDefs: [...Relation().module.typeDefs, ...loadFilesSync(catalogSchemaPath)],
+    typeDefs: [
+      ...Relation().module.typeDefs,
+      ...loadFilesSync(catalogSchemaPath),
+    ],
     resolvers: {
       ...Relation().module.config.resolvers,
       Entity: {
@@ -31,6 +35,9 @@ export const Catalog = (): GraphQLModule => ({
               }))
             : null,
       },
+      Relation: {
+        targetRef: (relation: EntityRelation) => parseEntityRef(relation.targetRef),
+      },
     },
-  })
+  }),
 });

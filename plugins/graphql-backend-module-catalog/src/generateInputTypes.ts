@@ -12,31 +12,84 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLInputType,
-  GraphQLType,
   isLeafType,
-  isWrappingType,
   isCompositeType,
+  GraphQLInputFieldConfig,
+  GraphQLString,
+  GraphQLNamedType,
 } from 'graphql';
 import { addTypes, getDirective } from '@graphql-tools/utils';
 import GraphQLJSON from 'graphql-type-json';
 
-export function isWrappingLeafType(type: GraphQLType): boolean {
-  if (isLeafType(type)) return true
-  if (isWrappingType(type)) return isWrappingLeafType(type.ofType)
-  return false
+interface TypeParams {
+  isLeaf?: boolean;
+  isComposite?: boolean;
+  isJsonObject?: boolean;
 }
 
-export function isWrappingCompositeType(type: GraphQLType): boolean {
-  if (isCompositeType(type)) return true
-  if (isWrappingType(type)) return isWrappingCompositeType(type.ofType)
-  return false
+function isJsonObject(type: GraphQLNamedType) {
+  return type.name === 'JSONObject';
+}
+
+function createCompositeOrderFieldsType(
+  fieldName: string,
+  orderFieldTypeName: string,
+  compositeOrderFieldType: GraphQLInputType,
+) {
+  return {
+    type: new GraphQLList(
+      new GraphQLNonNull(
+        new GraphQLInputObjectType({
+          ...(
+            getNamedType(compositeOrderFieldType) as GraphQLInputObjectType
+          ).toConfig(),
+          name: `${orderFieldTypeName}__${fieldName[0].toUpperCase()}${fieldName.slice(
+            1,
+          )}`,
+        }),
+      ),
+    ),
+  };
+}
+
+function createCompositeTextFilterFieldsType(
+  fieldName: string,
+  textFilterFieldsTypeName: string,
+  compositeTextFilterFieldsType: GraphQLInputType,
+) {
+  return {
+    type: new GraphQLInputObjectType({
+      ...(
+        getNamedType(compositeTextFilterFieldsType) as GraphQLInputObjectType
+      ).toConfig(),
+      name: `${textFilterFieldsTypeName}__${fieldName[0].toUpperCase()}${fieldName.slice(
+        1,
+      )}`,
+    }),
+  };
+}
+
+function createCompositeFilterExpressionType(
+  fieldName: string,
+  filterExpressionTypeName: string,
+  compositeFilterExpressionType: GraphQLInputType,
+) {
+  return {
+    type: new GraphQLInputObjectType({
+      ...(
+        getNamedType(compositeFilterExpressionType) as GraphQLInputObjectType
+      ).toConfig(),
+      name: `${filterExpressionTypeName}__${fieldName[0].toUpperCase()}${fieldName.slice(
+        1,
+      )}`,
+    }),
+  };
 }
 
 function mergeLeafAndCompositeOrderFieldTypes(
   fieldName: string,
   orderFieldTypeName: string,
-  compositeOrderFieldType: GraphQLInputType,
-  orderType: GraphQLEnumType,
+  fields: Record<string, GraphQLInputFieldConfig>,
 ) {
   // NOTE: Should we check if the type is already in the schema?
   return {
@@ -44,25 +97,7 @@ function mergeLeafAndCompositeOrderFieldTypes(
       name: `${orderFieldTypeName}_${fieldName[0].toUpperCase()}${fieldName.slice(
         1,
       )}`,
-      fields: {
-        order: { type: orderType },
-        fields: {
-          type: new GraphQLList(
-            new GraphQLNonNull(
-              new GraphQLInputObjectType({
-                ...(
-                  getNamedType(
-                    compositeOrderFieldType,
-                  ) as GraphQLInputObjectType
-                ).toConfig(),
-                name: `${orderFieldTypeName}__${fieldName[0].toUpperCase()}${fieldName.slice(
-                  1,
-                )}`,
-              }),
-            ),
-          ),
-        },
-      },
+      fields,
     }),
   };
 }
@@ -70,28 +105,14 @@ function mergeLeafAndCompositeOrderFieldTypes(
 function mergeLeafAndCompositeTextFilterFieldsTypes(
   fieldName: string,
   textFilterFieldsTypeName: string,
-  compositeTextFilterFieldsType: GraphQLInputType,
+  fields: Record<string, GraphQLInputFieldConfig>,
 ) {
   return {
     type: new GraphQLInputObjectType({
       name: `${textFilterFieldsTypeName}_${fieldName[0].toUpperCase()}${fieldName.slice(
         1,
       )}`,
-      fields: {
-        include: { type: GraphQLBoolean },
-        fields: {
-          type: new GraphQLInputObjectType({
-            ...(
-              getNamedType(
-                compositeTextFilterFieldsType,
-              ) as GraphQLInputObjectType
-            ).toConfig(),
-            name: `${textFilterFieldsTypeName}__${fieldName[0].toUpperCase()}${fieldName.slice(
-              1,
-            )}`,
-          }),
-        },
-      },
+      fields,
     }),
   };
 }
@@ -99,35 +120,21 @@ function mergeLeafAndCompositeTextFilterFieldsTypes(
 function mergeLeafAndCompositeFilterExpressionTypes(
   fieldName: string,
   filterExpressionTypeName: string,
-  compositeFilterExpressionType: GraphQLInputType,
+  fields: Record<string, GraphQLInputFieldConfig>,
 ) {
   return {
     type: new GraphQLInputObjectType({
       name: `${filterExpressionTypeName}_${fieldName[0].toUpperCase()}${fieldName.slice(
         1,
       )}`,
-      fields: {
-        values: { type: new GraphQLList(new GraphQLNonNull(GraphQLJSON)) },
-        fields: {
-          type: new GraphQLInputObjectType({
-            ...(
-              getNamedType(
-                compositeFilterExpressionType,
-              ) as GraphQLInputObjectType
-            ).toConfig(),
-            name: `${filterExpressionTypeName}__${fieldName[0].toUpperCase()}${fieldName.slice(
-              1,
-            )}`,
-          }),
-        },
-      },
+      fields,
     }),
   };
 }
 
 function getTypeConfigs(
   fieldName: string,
-  fieldTypes: Map<string, { isLeaf?: boolean; isComposite?: boolean }>,
+  fieldTypes: Map<string, TypeParams>,
   orderFieldTypeConfig: ReturnType<GraphQLInputObjectType['toConfig']>,
   textFilterFieldsTypeConfig: ReturnType<GraphQLInputObjectType['toConfig']>,
   filterExpressionTypeConfig: ReturnType<GraphQLInputObjectType['toConfig']>,
@@ -222,18 +229,19 @@ function processTypes(
     orderFieldTypeConfig,
     textFilterFieldsTypeConfig,
     filterExpressionTypeConfig,
+    entityRawOrderFieldType,
+    entityRawFilterFieldType,
   }: {
     isNested?: boolean;
     orderDirectionType: GraphQLEnumType;
     orderFieldTypeConfig: ReturnType<GraphQLInputObjectType['toConfig']>;
     textFilterFieldsTypeConfig: ReturnType<GraphQLInputObjectType['toConfig']>;
     filterExpressionTypeConfig: ReturnType<GraphQLInputObjectType['toConfig']>;
+    entityRawOrderFieldType: GraphQLInputObjectType;
+    entityRawFilterFieldType: GraphQLInputObjectType;
   },
 ) {
-  const fieldTypes = new Map<
-    string,
-    { isLeaf?: boolean; isComposite?: boolean }
-  >();
+  const fieldTypes = new Map<string, TypeParams>();
 
   types.forEach(type => {
     if (isUnionType(type)) {
@@ -243,27 +251,168 @@ function processTypes(
         orderFieldTypeConfig,
         textFilterFieldsTypeConfig,
         filterExpressionTypeConfig,
+        entityRawOrderFieldType,
+        entityRawFilterFieldType,
       });
       return;
     }
     if (isInterfaceType(type)) {
-      processTypes(schema, [...schema.getImplementations(type).interfaces, ...schema.getImplementations(type).objects], {
-        isNested,
-        orderDirectionType,
-        orderFieldTypeConfig,
-        textFilterFieldsTypeConfig,
-        filterExpressionTypeConfig,
-      });
+      processTypes(
+        schema,
+        [
+          ...schema.getImplementations(type).interfaces,
+          ...schema.getImplementations(type).objects,
+        ],
+        {
+          isNested,
+          orderDirectionType,
+          orderFieldTypeConfig,
+          textFilterFieldsTypeConfig,
+          filterExpressionTypeConfig,
+          entityRawOrderFieldType,
+          entityRawFilterFieldType,
+        },
+      );
     }
     Object.entries(type.getFields()).forEach(([fieldName, field]) => {
       const [fieldDirective] = getDirective(schema, field, 'field') ?? [];
-      const [excludeFromFilter] = getDirective(schema, field, 'excludeFromFilter') ?? []
-      if (!fieldDirective && !isNested || excludeFromFilter) return;
+      const [resolveDirective] = getDirective(schema, field, 'resolve') ?? []
+      const [sourceTypeDirective] =
+        getDirective(schema, field, 'sourceType') ?? [];
+      if (!fieldDirective && !isNested || resolveDirective) return;
 
-      // const sourceFieldName = fieldDirective.at ?? fieldName
+      const fieldType = sourceTypeDirective
+        ? schema.getType(sourceTypeDirective.name)
+        : field.type;
+
+      if (!fieldType)
+        throw new Error(
+          `Can't find "${sourceTypeDirective.name}" type described in @sourceType(name: "${sourceTypeDirective.name}") directive for "${field.name}" field of "${type.name}" type/interface`,
+        );
+      const fieldNamedType = getNamedType(fieldType);
+      const order = { type: orderDirectionType };
+      const include = { type: GraphQLBoolean };
+      // NOTE: Should we handle enums differently?
+      const values = { type: new GraphQLList(new GraphQLNonNull(GraphQLJSON)) };
+      const orderRawFields = {
+        type: new GraphQLList(new GraphQLNonNull(entityRawOrderFieldType)),
+      };
+      const includeRawFields = {
+        type: new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      };
+      const valuesRawFields = {
+        type: new GraphQLList(new GraphQLNonNull(entityRawFilterFieldType)),
+      };
 
       if (
-        isWrappingLeafType(field.type) &&
+        isJsonObject(fieldNamedType) &&
+        !fieldTypes.get(fieldName)?.isJsonObject
+      ) {
+        if (fieldTypes.get(fieldName)?.isComposite) {
+          const {
+            compositeOrderFieldTypeConfig,
+            compositeTextFilterFieldsTypeConfig,
+            compositeFilterExpressionTypeConfig,
+          } = getTypeConfigs(
+            fieldName,
+            fieldTypes,
+            orderFieldTypeConfig,
+            textFilterFieldsTypeConfig,
+            filterExpressionTypeConfig,
+          );
+
+          orderFieldTypeConfig.fields[fieldName] =
+            mergeLeafAndCompositeOrderFieldTypes(
+              fieldName,
+              orderFieldTypeConfig.name,
+              {
+                ...(fieldTypes.get(fieldName)?.isLeaf ? { order } : {}),
+                rawFields: orderRawFields,
+                fields: createCompositeOrderFieldsType(
+                  fieldName,
+                  orderFieldTypeConfig.name,
+                  new GraphQLInputObjectType(compositeOrderFieldTypeConfig),
+                ),
+              },
+            );
+
+          textFilterFieldsTypeConfig.fields[fieldName] =
+            mergeLeafAndCompositeTextFilterFieldsTypes(
+              fieldName,
+              textFilterFieldsTypeConfig.name,
+              {
+                ...(fieldTypes.get(fieldName)?.isLeaf ? { include } : {}),
+                rawFields: includeRawFields,
+                fields: createCompositeTextFilterFieldsType(
+                  fieldName,
+                  textFilterFieldsTypeConfig.name,
+                  new GraphQLInputObjectType(
+                    compositeTextFilterFieldsTypeConfig,
+                  ),
+                ),
+              },
+            );
+
+          filterExpressionTypeConfig.fields[fieldName] =
+            mergeLeafAndCompositeFilterExpressionTypes(
+              fieldName,
+              filterExpressionTypeConfig.name,
+              {
+                ...(fieldTypes.get(fieldName)?.isLeaf ? { values } : {}),
+                rawFields: valuesRawFields,
+                fields: createCompositeFilterExpressionType(
+                  fieldName,
+                  filterExpressionTypeConfig.name,
+                  new GraphQLInputObjectType(
+                    compositeFilterExpressionTypeConfig,
+                  ),
+                ),
+              },
+            );
+        } else {
+          if (fieldTypes.get(fieldName)?.isLeaf) {
+            orderFieldTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeOrderFieldTypes(
+                fieldName,
+                orderFieldTypeConfig.name,
+                {
+                  order,
+                  rawFields: orderRawFields,
+                },
+              );
+            textFilterFieldsTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeTextFilterFieldsTypes(
+                fieldName,
+                textFilterFieldsTypeConfig.name,
+                {
+                  include,
+                  rawFields: includeRawFields,
+                },
+              );
+            filterExpressionTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeFilterExpressionTypes(
+                fieldName,
+                filterExpressionTypeConfig.name,
+                {
+                  values,
+                  rawFields: valuesRawFields,
+                },
+              );
+          } else {
+            orderFieldTypeConfig.fields[fieldName] = orderRawFields;
+            textFilterFieldsTypeConfig.fields[fieldName] = includeRawFields;
+            filterExpressionTypeConfig.fields[fieldName] = valuesRawFields;
+          }
+        }
+        fieldTypes.set(fieldName, {
+          ...fieldTypes.get(fieldName),
+          isJsonObject: true,
+        });
+      }
+
+      if (
+        !isJsonObject(fieldNamedType) &&
+        isLeafType(fieldNamedType) &&
         !fieldTypes.get(fieldName)?.isLeaf
       ) {
         if (fieldTypes.get(fieldName)?.isComposite) {
@@ -272,40 +421,95 @@ function processTypes(
             mergeLeafAndCompositeOrderFieldTypes(
               fieldName,
               orderFieldTypeConfig.name,
-              orderFieldTypeConfig.fields[fieldName].type,
-              orderDirectionType,
+              {
+                order,
+                ...(fieldTypes.get(fieldName)?.isJsonObject
+                  ? { rawFields: orderRawFields }
+                  : {}),
+                fields: createCompositeOrderFieldsType(
+                  fieldName,
+                  orderFieldTypeConfig.name,
+                  orderFieldTypeConfig.fields[fieldName].type,
+                ),
+              },
             );
 
           textFilterFieldsTypeConfig.fields[fieldName] =
             mergeLeafAndCompositeTextFilterFieldsTypes(
               fieldName,
               textFilterFieldsTypeConfig.name,
-              textFilterFieldsTypeConfig.fields[fieldName].type,
+              {
+                include,
+                ...(fieldTypes.get(fieldName)?.isJsonObject
+                  ? { rawFields: includeRawFields }
+                  : {}),
+                fields: createCompositeTextFilterFieldsType(
+                  fieldName,
+                  textFilterFieldsTypeConfig.name,
+                  textFilterFieldsTypeConfig.fields[fieldName].type,
+                ),
+              },
             );
 
           filterExpressionTypeConfig.fields[fieldName] =
             mergeLeafAndCompositeFilterExpressionTypes(
               fieldName,
               filterExpressionTypeConfig.name,
-              filterExpressionTypeConfig.fields[fieldName].type,
+              {
+                values,
+                ...(fieldTypes.get(fieldName)?.isJsonObject
+                  ? { rawFields: valuesRawFields }
+                  : {}),
+                fields: createCompositeFilterExpressionType(
+                  fieldName,
+                  filterExpressionTypeConfig.name,
+                  filterExpressionTypeConfig.fields[fieldName].type,
+                ),
+              },
             );
         } else {
-          orderFieldTypeConfig.fields[fieldName] = { type: orderDirectionType };
-          textFilterFieldsTypeConfig.fields[fieldName] = {
-            type: GraphQLBoolean,
-          };
-          // NOTE: Should we handle enums differently?
-          filterExpressionTypeConfig.fields[fieldName] = {
-            type: new GraphQLList(new GraphQLNonNull(GraphQLJSON)),
-          };
+          if (fieldTypes.get(fieldName)?.isJsonObject) {
+            orderFieldTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeOrderFieldTypes(
+                fieldName,
+                orderFieldTypeConfig.name,
+                {
+                  order,
+                  rawFields: orderRawFields,
+                },
+              );
+            textFilterFieldsTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeTextFilterFieldsTypes(
+                fieldName,
+                textFilterFieldsTypeConfig.name,
+                {
+                  include,
+                  rawFields: includeRawFields,
+                },
+              );
+            filterExpressionTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeFilterExpressionTypes(
+                fieldName,
+                filterExpressionTypeConfig.name,
+                {
+                  values,
+                  rawFields: valuesRawFields,
+                },
+              );
+          } else {
+            orderFieldTypeConfig.fields[fieldName] = order;
+            textFilterFieldsTypeConfig.fields[fieldName] = include;
+            filterExpressionTypeConfig.fields[fieldName] = values;
+          }
         }
 
-        fieldTypes.set(fieldName, { isLeaf: true });
+        fieldTypes.set(fieldName, {
+          ...fieldTypes.get(fieldName),
+          isLeaf: true,
+        });
       }
 
-      if (isWrappingCompositeType(field.type)) {
-        const fieldType = getNamedType(field.type) as GraphQLCompositeType;
-
+      if (isCompositeType(fieldNamedType)) {
         const {
           compositeOrderFieldTypeConfig,
           compositeTextFilterFieldsTypeConfig,
@@ -318,12 +522,14 @@ function processTypes(
           filterExpressionTypeConfig,
         );
 
-        processTypes(schema, [fieldType], {
+        processTypes(schema, [fieldNamedType], {
           isNested: true,
           orderDirectionType,
           orderFieldTypeConfig: compositeOrderFieldTypeConfig,
           textFilterFieldsTypeConfig: compositeTextFilterFieldsTypeConfig,
           filterExpressionTypeConfig: compositeFilterExpressionTypeConfig,
+          entityRawOrderFieldType,
+          entityRawFilterFieldType,
         });
 
         if (fieldTypes.get(fieldName)?.isLeaf) {
@@ -331,48 +537,131 @@ function processTypes(
             mergeLeafAndCompositeOrderFieldTypes(
               fieldName,
               orderFieldTypeConfig.name,
-              new GraphQLInputObjectType(compositeOrderFieldTypeConfig),
-              orderDirectionType,
+              {
+                order,
+                ...(fieldTypes.get(fieldName)?.isJsonObject
+                  ? { rawFields: orderRawFields }
+                  : {}),
+                fields: createCompositeOrderFieldsType(
+                  fieldName,
+                  orderFieldTypeConfig.name,
+                  new GraphQLInputObjectType(compositeOrderFieldTypeConfig),
+                ),
+              },
             );
 
           textFilterFieldsTypeConfig.fields[fieldName] =
             mergeLeafAndCompositeTextFilterFieldsTypes(
               fieldName,
               textFilterFieldsTypeConfig.name,
-              new GraphQLInputObjectType(compositeTextFilterFieldsTypeConfig),
+              {
+                include,
+                ...(fieldTypes.get(fieldName)?.isJsonObject
+                  ? { rawFields: includeRawFields }
+                  : {}),
+                fields: createCompositeTextFilterFieldsType(
+                  fieldName,
+                  textFilterFieldsTypeConfig.name,
+                  new GraphQLInputObjectType(
+                    compositeTextFilterFieldsTypeConfig,
+                  ),
+                ),
+              },
             );
 
           filterExpressionTypeConfig.fields[fieldName] =
             mergeLeafAndCompositeFilterExpressionTypes(
               fieldName,
               filterExpressionTypeConfig.name,
-              new GraphQLInputObjectType(compositeFilterExpressionTypeConfig),
+              {
+                values,
+                ...(fieldTypes.get(fieldName)?.isJsonObject
+                  ? { rawFields: valuesRawFields }
+                  : {}),
+                fields: createCompositeFilterExpressionType(
+                  fieldName,
+                  filterExpressionTypeConfig.name,
+                  new GraphQLInputObjectType(
+                    compositeFilterExpressionTypeConfig,
+                  ),
+                ),
+              },
             );
         } else {
-          orderFieldTypeConfig.fields[fieldName] = {
-            type: new GraphQLList(
-              new GraphQLNonNull(
-                new GraphQLInputObjectType(compositeOrderFieldTypeConfig),
+          if (fieldTypes.get(fieldName)?.isJsonObject) {
+            orderFieldTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeOrderFieldTypes(
+                fieldName,
+                orderFieldTypeConfig.name,
+                {
+                  rawFields: orderRawFields,
+                  fields: createCompositeOrderFieldsType(
+                    fieldName,
+                    orderFieldTypeConfig.name,
+                    new GraphQLInputObjectType(compositeOrderFieldTypeConfig),
+                  ),
+                },
+              );
+            textFilterFieldsTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeTextFilterFieldsTypes(
+                fieldName,
+                textFilterFieldsTypeConfig.name,
+                {
+                  rawFields: includeRawFields,
+                  fields: createCompositeTextFilterFieldsType(
+                    fieldName,
+                    textFilterFieldsTypeConfig.name,
+                    new GraphQLInputObjectType(
+                      compositeTextFilterFieldsTypeConfig,
+                    ),
+                  ),
+                },
+              );
+            filterExpressionTypeConfig.fields[fieldName] =
+              mergeLeafAndCompositeFilterExpressionTypes(
+                fieldName,
+                filterExpressionTypeConfig.name,
+                {
+                  rawFields: valuesRawFields,
+                  fields: createCompositeFilterExpressionType(
+                    fieldName,
+                    filterExpressionTypeConfig.name,
+                    new GraphQLInputObjectType(
+                      compositeFilterExpressionTypeConfig,
+                    ),
+                  ),
+                },
+              );
+          } else {
+            orderFieldTypeConfig.fields[fieldName] = {
+              type: new GraphQLList(
+                new GraphQLNonNull(
+                  new GraphQLInputObjectType(compositeOrderFieldTypeConfig),
+                ),
               ),
-            ),
-          };
-          textFilterFieldsTypeConfig.fields[fieldName] = {
-            type: new GraphQLInputObjectType(
-              compositeTextFilterFieldsTypeConfig,
-            ),
-          };
-          filterExpressionTypeConfig.fields[fieldName] = {
-            type: new GraphQLInputObjectType(compositeFilterExpressionTypeConfig),
-          };
+            };
+            textFilterFieldsTypeConfig.fields[fieldName] = {
+              type: new GraphQLInputObjectType(
+                compositeTextFilterFieldsTypeConfig,
+              ),
+            };
+            filterExpressionTypeConfig.fields[fieldName] = {
+              type: new GraphQLInputObjectType(
+                compositeFilterExpressionTypeConfig,
+              ),
+            };
+          }
         }
 
-        fieldTypes.set(fieldName, { isComposite: true });
+        fieldTypes.set(fieldName, {
+          ...fieldTypes.get(fieldName),
+          isComposite: true,
+        });
       }
     });
   });
 }
 
-// TODO Handle `JSONObject` type
 export function generateEntitiesQueryInputTypes(
   schema: GraphQLSchema,
 ): GraphQLSchema {
@@ -410,29 +699,48 @@ export function generateEntitiesQueryInputTypes(
   const filterExpressionTypeConfig = filterExpressionType.toConfig();
   filterExpressionTypeConfig.fields = {};
 
+  const entityRawOrderFieldType = schema.getType('EntityRawOrderField');
+  if (!entityRawOrderFieldType || !isInputObjectType(entityRawOrderFieldType)) {
+    throw new Error(
+      '"EntityRawOrderField" type not found or isn\'t input type',
+    );
+  }
+
+  const entityRawFilterFieldType = schema.getType('EntityRawFilterField');
+  if (
+    !entityRawFilterFieldType ||
+    !isInputObjectType(entityRawFilterFieldType)
+  ) {
+    throw new Error(
+      '"EntityRawFilterField" type not found or isn\'t input type',
+    );
+  }
+
   processTypes(schema, [entityType], {
     orderDirectionType,
     orderFieldTypeConfig,
     textFilterFieldsTypeConfig,
     filterExpressionTypeConfig,
+    entityRawOrderFieldType,
+    entityRawFilterFieldType,
   });
 
   if (!Object.keys(orderFieldTypeConfig.fields).length) {
     orderFieldTypeConfig.fields = {
       _dummy: { type: orderDirectionType },
-    }
+    };
   }
 
   if (!Object.keys(textFilterFieldsTypeConfig.fields).length) {
     textFilterFieldsTypeConfig.fields = {
       _dummy: { type: GraphQLBoolean },
-    }
+    };
   }
 
   if (!Object.keys(filterExpressionTypeConfig.fields).length) {
     filterExpressionTypeConfig.fields = {
       _dummy: { type: new GraphQLList(new GraphQLNonNull(GraphQLJSON)) },
-    }
+    };
   }
 
   return addTypes(schema, [

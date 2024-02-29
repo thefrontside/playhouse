@@ -3,7 +3,9 @@ directive @relation(
   nodeType: String
   kind: String
 ) on FIELD_DEFINITION
-directive @excludeFromFilter on FIELD_DEFINITION
+directive @sourceType(
+  name: String!
+) on FIELD_DEFINITION
 
 scalar JSON
 scalar JSONObject
@@ -65,6 +67,7 @@ input EntityFilterExpression {
         fields: [{ fieldF: DESC }, { fieldG: ASC }]
       }
     }
+    { annotations: [{ field: "backstage.io/source-location", order: ASC }] }
   ]
   search: {
     term: "substring"

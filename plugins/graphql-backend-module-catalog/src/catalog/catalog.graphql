@@ -15,10 +15,11 @@ extend interface Entity
   apiVersion: String! @field(at: "apiVersion")
   title: String @field(at: "metadata.title")
   description: String @field(at: "metadata.description")
-  labels: [KeyValuePair!] @field(at: "metadata.labels") @excludeFromFilter
-  annotations: [KeyValuePair!] @field(at: "metadata.annotations") @excludeFromFilter
+  labels: [KeyValuePair!] @field(at: "metadata.labels") @sourceType(name: "JSONObject")
+  annotations: [KeyValuePair!] @field(at: "metadata.annotations") @sourceType(name: "JSONObject")
   tags: [String!] @field(at: "metadata.tags")
   links: [EntityLink!] @field(at: "metadata.links")
+  relations: [Relation!] @field(at: "relations")
 }
 
 type EntityLink {
@@ -26,6 +27,19 @@ type EntityLink {
   title: String
   icon: String
   type: String
+}
+
+type Relation {
+  type: String!
+  # FIXME: @resolve/@field directives work only on top level of node object
+  # target: Entity @resolve(at: "targetRef")
+  targetRef: EntityRef @sourceType(name: "String")
+}
+
+type EntityRef {
+  kind: String!
+  namespace: String!
+  name: String!
 }
 
 interface Location

@@ -73,9 +73,15 @@ function traverseFieldDirectives(
     }
     Object.entries(type.getFields()).forEach(([fieldName, field]) => {
       const [fieldDirective] = getDirective(schema, field, 'field') ?? [];
-      if (!fieldDirective && !isNested) return;
+      const [resolveDirective] = getDirective(schema, field, 'resolve') ?? [];
+      const [sourceTypeDirective] =
+        getDirective(schema, field, 'sourceType') ?? [];
+      if (!fieldDirective && !isNested || resolveDirective) return;
 
-      const unwrappedType = getNamedType(field.type);
+      const fieldType = sourceTypeDirective
+        ? schema.getType(sourceTypeDirective.name)
+        : field.type;
+      const unwrappedType = getNamedType(fieldType);
 
       const mappedFieldName = fieldDirective?.at ?? fieldName;
       const fields = (fieldMap.get(fieldName)?.fields ?? new Set()).add(
@@ -114,7 +120,7 @@ function traverseFieldDirectives(
 }
 
 function mapMatchFilterToQueryFilter(
-  match: Record<string, unknown[] | Record<string, unknown[]>>,
+  match: Record<string, unknown[] | { key: string; values: unknown[] }[] | Record<string, unknown[]>>,
   fieldMap: Map<string, { isLeaf: boolean; fields: Set<string> }>,
   parentKey?: string,
 ): (
@@ -122,17 +128,27 @@ function mapMatchFilterToQueryFilter(
   | { anyOf: { key: string; values: unknown[] }[] }
 )[] {
   if (parentKey && fieldMap.get(parentKey)?.isLeaf) {
-    const { values, fields } = match;
-    const fieldKeys = [...(fieldMap.get(parentKey)?.fields ?? [])];
+    const { values, rawFields, fields } = match;
+    const sourceFields = [...(fieldMap.get(parentKey)?.fields ?? [])];
     return [
       ...(Array.isArray(values)
         ? [
             {
               anyOf: [
-                ...fieldKeys.map(fieldKey => ({ key: fieldKey, values })),
+                ...sourceFields.map(fieldKey => ({ key: fieldKey, values })),
               ],
             },
           ]
+        : []),
+      ...(rawFields
+        ? (rawFields as { key: string; values: unknown[] }[]).map(rawField => ({
+            anyOf: [
+              ...sourceFields.map(fieldKey => ({
+                key: `${fieldKey}.${rawField.key}`,
+                values: rawField.values,
+              })),
+            ],
+          }))
         : []),
       ...(fields
         ? mapMatchFilterToQueryFilter(
@@ -145,17 +161,27 @@ function mapMatchFilterToQueryFilter(
   }
   return Object.entries(match).reduce((filters, [fieldName, fieldValues]) => {
     const matchKey = parentKey ? `${parentKey}.${fieldName}` : fieldName;
+    const sourceFields = [...(fieldMap.get(matchKey)?.fields ?? [])]
     if (Array.isArray(fieldValues)) {
-      const fieldKeys = [...(fieldMap.get(matchKey)?.fields ?? [])];
+      const [firstValue] = fieldValues
+      if (firstValue && typeof firstValue === 'object' && 'key' in firstValue && typeof firstValue?.key === 'string') {
+        return [
+          ...filters,
+          ...(fieldValues as { key: string; values: unknown[] }[]).map((rawField) => ({
+            anyOf: sourceFields.map(fieldKey => ({
+              key: `${fieldKey}.${rawField.key}`,
+              values: rawField.values
+            }))
+          }))
+        ]
+      }
       return [
         ...filters,
         {
-          anyOf: [
-            ...fieldKeys.map(fieldKey => ({
+          anyOf: sourceFields.map(fieldKey => ({
               key: fieldKey,
-              values: fieldValues,
+              values: fieldValues as unknown[],
             })),
-          ],
         },
       ];
     }
@@ -171,7 +197,12 @@ function mapOrderFieldsToQueryOrder(
   orders: Record<
     string,
     | OrderDirection
-    | { order?: OrderDirection; fields: Record<string, OrderDirection>[] }
+    | { field: string; order: OrderDirection }[]
+    | {
+        order?: OrderDirection;
+        rawFields?: { field: string; order: OrderDirection }[];
+        fields?: Record<string, OrderDirection>[];
+      }
     | Record<string, OrderDirection>[]
   >[],
   fieldMap: Map<string, { isLeaf: boolean; fields: Set<string> }>,
@@ -183,22 +214,52 @@ function mapOrderFieldsToQueryOrder(
     }
     const [[fieldName, directionOrChild]] = Object.entries(fieldOrder);
     const orderKey = parentKey ? `${parentKey}.${fieldName}` : fieldName;
+    const sourceFields = [...(fieldMap.get(orderKey)?.fields ?? [])];
     if (typeof directionOrChild === 'string') {
-      return [...(fieldMap.get(orderKey)?.fields ?? [])].map(fieldKey => ({
+      return sourceFields.map(fieldKey => ({
         field: fieldKey,
         order: directionOrChild.toLowerCase(),
       }));
     }
     if (Array.isArray(directionOrChild)) {
+      const [firstChild] = directionOrChild;
+      if (
+        // NOTE: isRawFields
+        typeof firstChild.field === 'string' &&
+        ['ASC', 'DESC'].includes(firstChild.order)
+      ) {
+        return [
+          ...directionOrChild.flatMap(({ field, order }) =>
+            sourceFields.map(fieldKey => ({
+              field: `${fieldKey}.${field}`,
+              order: order.toLowerCase(),
+            })),
+          ),
+        ];
+      }
       return [
-        ...mapOrderFieldsToQueryOrder(directionOrChild, fieldMap, orderKey),
+        ...mapOrderFieldsToQueryOrder(
+          directionOrChild as Record<string, OrderDirection>[],
+          fieldMap,
+          orderKey,
+        ),
       ];
     }
-    const { fields, order } = directionOrChild;
-    if (fields && order) {
+    const { fields, rawFields, order } = directionOrChild;
+    if (Object.keys(directionOrChild).length > 1) {
       throw new Error(
-        'Cannot have both "fields" and "order" in order field object',
+        'Only one of "fields", "rawFields" and "order" is allowed in order field object',
       );
+    }
+    if (rawFields) {
+      return [
+        ...rawFields.flatMap(rawField =>
+          sourceFields.map(fieldKey => ({
+            field: `${fieldKey}.${rawField.field}`,
+            order: rawField.order.toLowerCase(),
+          })),
+        ),
+      ];
     }
     if (fields) {
       return mapOrderFieldsToQueryOrder(fields, fieldMap, orderKey);
@@ -214,14 +275,31 @@ function mapOrderFieldsToQueryOrder(
 }
 
 function mapSearchFilterToTextSearch(
-  search: Record<string, boolean | Record<string, boolean>>,
+  search: Record<
+    string,
+    | boolean
+    | string[]
+    | Record<
+        string,
+        {
+          include?: boolean;
+          rawFields?: string[];
+          fields?: Record<string, boolean>;
+        }
+      >
+    | Record<string, boolean>
+  >,
   fieldMap: Map<string, { isLeaf: boolean; fields: Set<string> }>,
   parentKey?: string,
 ): string[] {
   if (parentKey && fieldMap.get(parentKey)?.isLeaf) {
-    const { include, fields } = search;
+    const { include, rawFields, fields } = search;
+    const sourceFields = [...(fieldMap.get(parentKey)?.fields ?? [])];
     return [
-      ...(include ? fieldMap.get(parentKey)?.fields ?? [] : []),
+      ...(include ? sourceFields : []),
+      ...((rawFields ?? []) as string[]).flatMap(rawField =>
+        sourceFields.map(fieldKey => `${fieldKey}.${rawField}`),
+      ),
       ...(fields
         ? mapSearchFilterToTextSearch(
             fields as Record<string, boolean>,
@@ -233,17 +311,28 @@ function mapSearchFilterToTextSearch(
   }
   return Object.entries(search).flatMap(([fieldName, value]) => {
     const searchKey = parentKey ? `${parentKey}.${fieldName}` : fieldName;
+    const sourceFields = [...(fieldMap.get(fieldName)?.fields ?? [])];
     if (value === true) {
-      return [...(fieldMap.get(fieldName)?.fields ?? [])];
+      return sourceFields;
+    }
+    if (Array.isArray(value)) {
+      return value.flatMap(rawField =>
+        sourceFields.map(fieldKey => `${fieldKey}.${rawField}`),
+      );
     }
     if (typeof value === 'object') {
-      return [...mapSearchFilterToTextSearch(value, fieldMap, searchKey)];
+      return [
+        ...mapSearchFilterToTextSearch(
+          value as Record<string, boolean>,
+          fieldMap,
+          searchKey,
+        ),
+      ];
     }
     return [];
   });
 }
 
-// TODO Handle labels and annotations separately
 export const queryResolvers: () => Resolvers = () => {
   let fieldMap: Map<string, { isLeaf: boolean; fields: Set<string> }> | null =
     null;
@@ -276,18 +365,18 @@ export const queryResolvers: () => Resolvers = () => {
         first?: number;
         after?: string;
         last?: number;
-        before: string;
-        filter: {
+        before?: string;
+        filter?: {
           match?: Record<string, unknown>[];
           order?: Record<string, unknown>[];
           search?: { term: string; fields: Record<string, unknown> };
         };
-        rawFilter: {
+        rawFilter?: {
           filter?: { fields: unknown[] }[];
           orderFields?: { field: string; order: OrderDirection }[];
           fullTextFilter?: { term: string; fields?: string[] };
         };
-      },
+      } = {},
       { catalog }: { catalog: CatalogApi },
       { schema }: { schema: GraphQLSchema },
     ): Promise<Connection<{ id: string }>> => {
@@ -404,7 +493,7 @@ export const queryResolvers: () => Resolvers = () => {
         limit,
       });
 
-      // TODO Reuse field's resolvers
+      // TODO Reuse field's resolvers https://github.com/thefrontside/HydraphQL/pull/22
       return {
         edges: items.map(item => ({
           cursor: Buffer.from(

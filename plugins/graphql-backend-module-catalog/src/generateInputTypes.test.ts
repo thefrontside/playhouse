@@ -1,6 +1,4 @@
-import {
-  transformSchema,
-} from '@frontside/hydraphql';
+import { transformSchema } from '@frontside/hydraphql';
 import { DocumentNode, GraphQLNamedType, printType } from 'graphql';
 import { Module, createModule, gql } from 'graphql-modules';
 import { Relation } from './relation/relation';
@@ -23,22 +21,22 @@ describe('generateEntitiesQueryInputTypes', () => {
       }
     `);
 
-    expect(printType(schema.getType('EntityOrderField') as GraphQLNamedType).split('\n')).toEqual([
-      'input EntityOrderField {',
-      '  _dummy: OrderDirection',
-      '}',
-    ]);
-    expect(printType(schema.getType('EntityTextFilterFields') as GraphQLNamedType).split('\n')).toEqual([
-      'input EntityTextFilterFields {',
-      '  _dummy: Boolean',
-      '}',
-    ]);
-    expect(printType(schema.getType('EntityFilterExpression') as GraphQLNamedType).split('\n')).toEqual([
-      'input EntityFilterExpression {',
-      '  _dummy: [JSON!]',
-      '}',
-    ]);
-  })
+    expect(
+      printType(schema.getType('EntityOrderField') as GraphQLNamedType).split(
+        '\n',
+      ),
+    ).toEqual(['input EntityOrderField {', '  _dummy: OrderDirection', '}']);
+    expect(
+      printType(
+        schema.getType('EntityTextFilterFields') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual(['input EntityTextFilterFields {', '  _dummy: Boolean', '}']);
+    expect(
+      printType(
+        schema.getType('EntityFilterExpression') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual(['input EntityFilterExpression {', '  _dummy: [JSON!]', '}']);
+  });
 
   it('should generate plain input types for primitive fields', () => {
     const schema = transform(gql`
@@ -52,7 +50,11 @@ describe('generateEntitiesQueryInputTypes', () => {
       }
     `);
 
-    expect(printType(schema.getType('EntityOrderField') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(schema.getType('EntityOrderField') as GraphQLNamedType).split(
+        '\n',
+      ),
+    ).toEqual([
       'input EntityOrderField {',
       '  name: OrderDirection',
       '  kind: OrderDirection',
@@ -62,7 +64,11 @@ describe('generateEntitiesQueryInputTypes', () => {
       '  description: OrderDirection',
       '}',
     ]);
-    expect(printType(schema.getType('EntityTextFilterFields') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityTextFilterFields') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityTextFilterFields {',
       '  name: Boolean',
       '  kind: Boolean',
@@ -72,7 +78,11 @@ describe('generateEntitiesQueryInputTypes', () => {
       '  description: Boolean',
       '}',
     ]);
-    expect(printType(schema.getType('EntityFilterExpression') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityFilterExpression') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityFilterExpression {',
       '  name: [JSON!]',
       '  kind: [JSON!]',
@@ -82,7 +92,7 @@ describe('generateEntitiesQueryInputTypes', () => {
       '  description: [JSON!]',
       '}',
     ]);
-  })
+  });
 
   it('should generate input types for composite fields', () => {
     const schema = transform(gql`
@@ -96,42 +106,66 @@ describe('generateEntitiesQueryInputTypes', () => {
       }
     `);
 
-    expect(printType(schema.getType('EntityOrderField') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(schema.getType('EntityOrderField') as GraphQLNamedType).split(
+        '\n',
+      ),
+    ).toEqual([
       'input EntityOrderField {',
       '  metadata: [EntityOrderField_Metadata!]',
       '}',
     ]);
-    expect(printType(schema.getType('EntityOrderField_Metadata') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityOrderField_Metadata') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityOrderField_Metadata {',
       '  name: OrderDirection',
       '  namespace: OrderDirection',
       '}',
     ]);
 
-    expect(printType(schema.getType('EntityTextFilterFields') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityTextFilterFields') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityTextFilterFields {',
       '  metadata: EntityTextFilterFields_Metadata',
       '}',
     ]);
-    expect(printType(schema.getType('EntityTextFilterFields_Metadata') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityTextFilterFields_Metadata') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityTextFilterFields_Metadata {',
       '  name: Boolean',
       '  namespace: Boolean',
       '}',
     ]);
 
-    expect(printType(schema.getType('EntityFilterExpression') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityFilterExpression') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityFilterExpression {',
       '  metadata: EntityFilterExpression_Metadata',
       '}',
     ]);
-    expect(printType(schema.getType('EntityFilterExpression_Metadata') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityFilterExpression_Metadata') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityFilterExpression_Metadata {',
       '  name: [JSON!]',
       '  namespace: [JSON!]',
       '}',
     ]);
-  })
+  });
 
   it('should generate input types for mixed fields (plain and composite)', () => {
     const schema = transform(gql`
@@ -153,61 +187,97 @@ describe('generateEntitiesQueryInputTypes', () => {
       }
     `);
 
-    expect(printType(schema.getType('EntityOrderField') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(schema.getType('EntityOrderField') as GraphQLNamedType).split(
+        '\n',
+      ),
+    ).toEqual([
       'input EntityOrderField {',
       '  kind: OrderDirection',
       '  target: EntityOrderField_Target',
       '}',
     ]);
-    expect(printType(schema.getType('EntityOrderField_Target') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityOrderField_Target') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityOrderField_Target {',
       '  order: OrderDirection',
       '  fields: [EntityOrderField__Target!]',
       '}',
     ]);
-    expect(printType(schema.getType('EntityOrderField__Target') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityOrderField__Target') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityOrderField__Target {',
       '  host: OrderDirection',
       '  port: OrderDirection',
       '}',
     ]);
 
-    expect(printType(schema.getType('EntityTextFilterFields') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityTextFilterFields') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityTextFilterFields {',
       '  kind: Boolean',
       '  target: EntityTextFilterFields_Target',
       '}',
     ]);
-    expect(printType(schema.getType('EntityTextFilterFields_Target') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityTextFilterFields_Target') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityTextFilterFields_Target {',
       '  include: Boolean',
       '  fields: EntityTextFilterFields__Target',
       '}',
     ]);
-    expect(printType(schema.getType('EntityTextFilterFields__Target') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityTextFilterFields__Target') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityTextFilterFields__Target {',
       '  host: Boolean',
       '  port: Boolean',
       '}',
     ]);
 
-    expect(printType(schema.getType('EntityFilterExpression') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityFilterExpression') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityFilterExpression {',
       '  kind: [JSON!]',
       '  target: EntityFilterExpression_Target',
       '}',
     ]);
-    expect(printType(schema.getType('EntityFilterExpression_Target') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityFilterExpression_Target') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityFilterExpression_Target {',
       '  values: [JSON!]',
       '  fields: EntityFilterExpression__Target',
       '}',
     ]);
-    expect(printType(schema.getType('EntityFilterExpression__Target') as GraphQLNamedType).split('\n')).toEqual([
+    expect(
+      printType(
+        schema.getType('EntityFilterExpression__Target') as GraphQLNamedType,
+      ).split('\n'),
+    ).toEqual([
       'input EntityFilterExpression__Target {',
       '  host: [JSON!]',
       '  port: [JSON!]',
       '}',
     ]);
-  })
-})
+  });
+});
