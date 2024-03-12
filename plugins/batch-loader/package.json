@@ -23,13 +23,13 @@
     "clean": "backstage-cli clean"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.19.9",
+    "@backstage/backend-common": "^0.21.3",
     "@backstage/catalog-model": "^1.4.3",
     "knex": "^3.0.1",
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.24.0",
+    "@backstage/cli": "^0.25.2",
     "@backstage/config": "^1.1.1",
     "@backstage/integration": "^1.7.2",
     "@backstage/plugin-catalog-backend": "^1.15.0",
