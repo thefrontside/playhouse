@@ -21,9 +21,9 @@
     "role": "common-library"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.19.9",
+    "@backstage/backend-common": "^0.21.3",
     "@backstage/catalog-client": "^1.4.6",
-    "@backstage/cli": "^0.24.0",
+    "@backstage/cli": "^0.25.2",
     "@backstage/config": "^1.1.1",
     "@backstage/integration": "^1.7.2",
     "@effection/process": "^2.0.4",
