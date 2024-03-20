@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.5.1
+
+### Patch Changes
+
+- f9b16e1: Update backstage dependencies
+
 ## 0.5.0
 
 ### Minor Changes

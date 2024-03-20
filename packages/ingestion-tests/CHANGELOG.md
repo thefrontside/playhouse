@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.7.1
+
+### Patch Changes
+
+- f9b16e1: Update backstage dependencies
+
 ## 0.7.0
 
 ### Minor Changes

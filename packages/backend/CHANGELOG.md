@@ -1,5 +1,21 @@
 # backend
 
+## 0.1.2
+
+### Patch Changes
+
+- f9b16e1: Update backstage dependencies
+- Updated dependencies [f9b16e1]
+  - @frontside/backstage-plugin-graphql-backend-module-catalog@0.2.6
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.5.1
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.12
+  - @frontside/scaffolder-yaml-actions@0.3.1
+  - @frontside/backstage-plugin-humanitec-backend@0.3.17
+  - @frontside/backstage-plugin-graphql-backend@0.1.7
+  - @frontside/backstage-plugin-batch-loader@0.4.1
+  - @internal/plugin-healthcheck@0.1.11
+  - app@0.2.2
+
 ## 0.1.1
 
 ### Patch Changes

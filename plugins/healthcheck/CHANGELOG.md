@@ -1,5 +1,11 @@
 # @internal/plugin-healthcheck
 
+## 0.1.11
+
+### Patch Changes
+
+- f9b16e1: Update backstage dependencies
+
 ## 0.1.10
 
 ### Patch Changes
