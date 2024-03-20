@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.10.1
+
+### Patch Changes
+
+- f9b16e1: Update backstage dependencies
+
 ## 0.10.0
 
 ### Minor Changes

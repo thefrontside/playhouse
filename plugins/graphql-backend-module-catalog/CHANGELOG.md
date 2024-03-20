@@ -1,5 +1,13 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.2.6
+
+### Patch Changes
+
+- f9b16e1: Update backstage dependencies
+- Updated dependencies [f9b16e1]
+  - @frontside/backstage-plugin-graphql-backend@0.1.7
+
 ## 0.2.5
 
 ### Patch Changes

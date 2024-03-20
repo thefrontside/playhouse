@@ -1,5 +1,15 @@
 # app
 
+## 0.2.2
+
+### Patch Changes
+
+- f9b16e1: Update backstage dependencies
+- Updated dependencies [f9b16e1]
+  - @frontside/backstage-plugin-scaffolder-workflow@0.10.1
+  - @frontside/backstage-plugin-effection-inspector@0.1.12
+  - @frontside/backstage-plugin-humanitec@0.3.15
+
 ## 0.2.1
 
 ### Patch Changes
