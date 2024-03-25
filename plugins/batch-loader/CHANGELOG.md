@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-batch-loader
 
+## 0.4.1
+
+### Patch Changes
+
+- f9b16e1: Update backstage dependencies
+
 ## 0.4.0
 
 ### Minor Changes
