@@ -1,5 +1,16 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.3.0
+
+### Minor Changes
+
+- 830318d: Add GraphQL `entities` query with generated filter input types
+
+### Patch Changes
+
+- Updated dependencies [830318d]
+  - @frontside/backstage-plugin-graphql-backend@0.1.8
+
 ## 0.2.6
 
 ### Patch Changes
