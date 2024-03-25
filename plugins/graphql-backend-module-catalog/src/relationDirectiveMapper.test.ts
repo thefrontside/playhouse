@@ -5,27 +5,29 @@ import {
 } from '@frontside/hydraphql';
 import DataLoader from 'dataloader';
 import { DocumentNode, GraphQLNamedType, printType } from 'graphql';
-import { createModule, gql } from 'graphql-modules';
+import { Module, createModule, gql } from 'graphql-modules';
 import { createGraphQLAPI } from './__testUtils__';
 import { Relation } from './relation/relation';
+import { Common } from './common';
 
 describe('mapRelationDirective', () => {
-  const transform = (source: DocumentNode) =>
+  const transform = (source: DocumentNode, anotherModule?: Module) =>
     transformSchema([
+      Common(),
       Relation(),
       createModule({
         id: 'mapRelationDirective',
         typeDefs: source,
       }),
+      ...(anotherModule ? [anotherModule] : []),
     ]);
 
   it('should add subtypes to a union type', () => {
     const schema = transform(gql`
       union Ownable = Entity
 
-      interface Entity
-        @discriminates(with: "kind")
-        @implements(interface: "Node") {
+      extend interface Entity
+        @discriminates(with: "kind") {
         name: String!
       }
       interface Resource
@@ -74,9 +76,8 @@ describe('mapRelationDirective', () => {
     const schema = transform(gql`
       union Ownable = Entity
 
-      interface Entity
-        @discriminates(with: "kind")
-        @implements(interface: "Node") {
+      extend interface Entity
+        @discriminates(with: "kind") {
         name: String!
       }
       type Resource @implements(interface: "Entity") {
@@ -131,7 +132,7 @@ describe('mapRelationDirective', () => {
   it("should fail if @relation interface doesn't exist", () => {
     expect(() =>
       transform(gql`
-        interface Entity {
+        extend interface Entity {
           owners: Connection @relation(name: "ownedBy", nodeType: "Owner")
         }
       `),
@@ -143,7 +144,7 @@ describe('mapRelationDirective', () => {
   it('should fail if @relation interface is input type', () => {
     expect(() =>
       transform(gql`
-        interface Entity {
+        extend interface Entity {
           owners: Connection @relation(name: "ownedBy", nodeType: "OwnerInput")
         }
         input OwnerInput {
@@ -158,7 +159,7 @@ describe('mapRelationDirective', () => {
   it('should fail if Connection type is in a list', () => {
     expect(() =>
       transform(gql`
-        interface Entity {
+        extend interface Entity {
           owners: [Connection] @relation(name: "ownedBy", nodeType: "Owner")
         }
         interface Owner {
@@ -173,7 +174,7 @@ describe('mapRelationDirective', () => {
   it('should fail if Connection has arguments are not valid types', () => {
     expect(() =>
       transform(gql`
-        interface Entity {
+        extend interface Entity {
           owners(first: String!, after: Int!): Connection
             @relation(name: "ownedBy", nodeType: "Owner")
         }
@@ -189,7 +190,7 @@ describe('mapRelationDirective', () => {
   it('should fail if @relation and @field are used on the same field', () => {
     expect(() =>
       transform(gql`
-        interface Entity {
+        extend interface Entity {
           owners: Connection
             @relation(name: "ownedBy", nodeType: "Owner")
             @field(at: "name")

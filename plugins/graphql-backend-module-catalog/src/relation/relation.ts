@@ -1,8 +1,8 @@
 import { createModule } from 'graphql-modules';
-import { relationDirectiveMapper } from '../relationDirectiveMapper';
-import { GraphQLModule } from '@frontside/hydraphql';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { resolvePackagePath } from '@backstage/backend-common';
+import { GraphQLModule } from '@frontside/hydraphql';
+import { Common } from '../common';
 
 const relationSchemaPath = resolvePackagePath(
   '@frontside/backstage-plugin-graphql-backend-module-catalog',
@@ -11,9 +11,13 @@ const relationSchemaPath = resolvePackagePath(
 
 /** @public */
 export const Relation = (): GraphQLModule => ({
-  mappers: { relation: relationDirectiveMapper },
+  mappers: { ...Common().mappers },
+  postTransform: Common().postTransform,
   module: createModule({
-    id: 'relation',
-    typeDefs: loadFilesSync(relationSchemaPath),
+    id: 'catalog-relation',
+    typeDefs: [...Common().module.typeDefs, ...loadFilesSync(relationSchemaPath)],
+    resolvers: {
+      ...Common().module.config.resolvers,
+    }
   })
 });

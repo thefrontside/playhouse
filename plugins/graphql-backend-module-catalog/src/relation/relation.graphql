@@ -1,5 +1,1 @@
-directive @relation(
-  name: String
-  nodeType: String
-  kind: String
-) on FIELD_DEFINITION
+interface Entity @implements(interface: "Node")
