@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.3.1
+
+### Patch Changes
+
+- f55145f: Pass Backstage Auth token to `catalog.queryEntities`
+
 ## 0.3.0
 
 ### Minor Changes
