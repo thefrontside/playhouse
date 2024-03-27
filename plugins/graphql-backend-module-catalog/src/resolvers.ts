@@ -2,9 +2,11 @@ import _ from 'lodash';
 import { encodeId } from '@frontside/hydraphql';
 import { Resolvers } from 'graphql-modules';
 import { CATALOG_SOURCE } from './constants';
+import { getBearerTokenFromAuthorizationHeader } from '@backstage/plugin-auth-node';
 import { stringifyEntityRef } from '@backstage/catalog-model';
 import { CatalogApi } from '@backstage/catalog-client';
 import { Connection } from 'graphql-relay';
+import type { Request } from 'node-fetch';
 import { encodeEntityId } from './helpers';
 import { getDirective } from '@graphql-tools/utils';
 import {
@@ -377,7 +379,7 @@ export const queryResolvers: () => Resolvers = () => {
           fullTextFilter?: { term: string; fields?: string[] };
         };
       } = {},
-      { catalog }: { catalog: CatalogApi },
+      { catalog, request }: { catalog: CatalogApi, request?: Request },
       { schema }: { schema: GraphQLSchema },
     ): Promise<Connection<{ id: string }>> => {
       if (filter && rawFilter) {
@@ -385,6 +387,8 @@ export const queryResolvers: () => Resolvers = () => {
           'Both "filter" and "rawFilter" arguments cannot be used together',
         );
       }
+
+      const token = getBearerTokenFromAuthorizationHeader(request?.headers.get('authorization'));
 
       if (!fieldMap) {
         fieldMap = traverseFieldDirectives(
@@ -491,7 +495,7 @@ export const queryResolvers: () => Resolvers = () => {
         ],
         cursor,
         limit,
-      });
+      }, { token });
 
       // TODO Reuse field's resolvers https://github.com/thefrontside/HydraphQL/pull/22
       return {
