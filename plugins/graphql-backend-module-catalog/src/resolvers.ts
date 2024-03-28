@@ -26,7 +26,7 @@ interface CatalogCursor {
   totalItems?: number;
   isPrevious: boolean;
   orderFields?: Array<{ field: string; order: 'asc' | 'desc' }>;
-  fullTextSearch?: { term: string; fields?: string[] };
+  fullTextFilter?: { term: string; fields?: string[] };
   filter?: { anyOf: Array<{ allOf: { key: string; values: string[] }[] }> };
 }
 
@@ -425,8 +425,7 @@ export const queryResolvers: () => Resolvers = () => {
           }
           return [{ field: 'metadata.uid', order: 'asc' }];
         })();
-
-        const fullTextSearch = (() => {
+        const fullTextFilter = (() => {
           if (rawFilter?.fullTextFilter) {
             return {
               term: rawFilter.fullTextFilter.term,
@@ -466,7 +465,7 @@ export const queryResolvers: () => Resolvers = () => {
 
         Object.assign(cursorObject, {
           orderFields,
-          fullTextSearch,
+          fullTextFilter,
           filter: queryFilter,
         });
       }
