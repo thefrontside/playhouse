@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.3.2
+
+### Patch Changes
+
+- 80cc44b: Fix text search property name for a cursor
+
 ## 0.3.1
 
 ### Patch Changes
