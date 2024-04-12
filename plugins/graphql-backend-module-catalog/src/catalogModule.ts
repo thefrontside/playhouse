@@ -21,7 +21,7 @@ export const graphqlModuleCatalog = createBackendModule({
         context: graphqlContextExtensionPoint,
       },
       async init({ catalog, modules, loaders, context }) {
-        modules.addModules([Catalog]);
+        modules.addModules([Catalog()]);
         loaders.addLoaders(createCatalogLoader(catalog));
         context.setContext(ctx => ({ ...ctx, catalog }));
       },
