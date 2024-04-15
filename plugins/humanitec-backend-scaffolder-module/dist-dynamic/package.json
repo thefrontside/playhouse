@@ -1,0 +1,50 @@
+{
+  "name": "@frontside/backstage-plugin-humanitec-scaffolder-backend-module-dynamic",
+  "version": "0.3.16",
+  "main": "dist/index.cjs.js",
+  "types": "dist/index.d.ts",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.cjs.js",
+    "types": "dist/index.d.ts"
+  },
+  "backstage": {
+    "role": "backend-plugin-module"
+  },
+  "scripts": {},
+  "dependencies": {
+    "@frontside/backstage-plugin-humanitec-backend": "^0.3.16",
+    "@frontside/backstage-plugin-humanitec-common": "^0.3.12",
+    "@types/express": "*",
+    "cross-fetch": "3.1.5",
+    "express": "^4.17.1",
+    "express-promise-router": "^4.1.0",
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^2.6.7",
+    "winston": "^3.2.1",
+    "yn": "^4.0.0"
+  },
+  "devDependencies": {},
+  "files": [
+    "dist"
+  ],
+  "bundleDependencies": true,
+  "peerDependencies": {
+    "@backstage/backend-common": "^0.21.3",
+    "@backstage/backend-plugin-api": "^0.6.13",
+    "@backstage/config": "^1.1.1",
+    "@backstage/plugin-scaffolder-backend": "^1.19.1",
+    "@backstage/plugin-scaffolder-node": "^0.3.3"
+  },
+  "overrides": {
+    "@aws-sdk/util-utf8-browser": {
+      "@smithy/util-utf8": "^2.0.0"
+    }
+  },
+  "resolutions": {
+    "@aws-sdk/util-utf8-browser": "npm:@smithy/util-utf8@~2",
+    "@frontside/backstage-plugin-humanitec-backend": "file:./embedded/frontside-backstage-plugin-humanitec-backend",
+    "@frontside/backstage-plugin-humanitec-common": "file:./embedded/frontside-backstage-plugin-humanitec-common"
+  }
+}

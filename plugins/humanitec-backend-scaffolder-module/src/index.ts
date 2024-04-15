@@ -14,6 +14,5 @@
  * limitations under the License.
  */
 
-export * from './service/router';
-export * from './actions/create-app';
-export { humanitecPlugin as default } from './plugin';
+export { createHumanitecApp } from '@frontside/backstage-plugin-humanitec-backend';
+export { humanitecModule as default } from './module';

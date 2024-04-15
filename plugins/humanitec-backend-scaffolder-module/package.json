@@ -1,6 +1,6 @@
 {
-  "name": "@frontside/backstage-plugin-humanitec-backend",
-  "version": "0.3.17",
+  "name": "@frontside/backstage-plugin-humanitec-scaffolder-backend-module",
+  "version": "0.3.16",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "license": "Apache-2.0",
@@ -10,7 +10,7 @@
     "types": "dist/index.d.ts"
   },
   "backstage": {
-    "role": "backend-plugin"
+    "role": "backend-plugin-module"
   },
   "scripts": {
     "start": "backstage-cli package start",
@@ -22,11 +22,13 @@
     "postpack": "backstage-cli package postpack"
   },
   "dependencies": {
-    "@backstage/backend-plugin-api": "^0.6.13",
     "@backstage/backend-common": "^0.21.3",
+    "@backstage/backend-plugin-api": "^0.6.13",
     "@backstage/config": "^1.1.1",
     "@backstage/plugin-scaffolder-backend": "^1.19.1",
-    "@frontside/backstage-plugin-humanitec-common": "^0.3.13",
+    "@backstage/plugin-scaffolder-node": "^0.3.3",
+    "@frontside/backstage-plugin-humanitec-backend": "^0.3.16",
+    "@frontside/backstage-plugin-humanitec-common": "^0.3.12",
     "@types/express": "*",
     "cross-fetch": "3.1.5",
     "express": "^4.17.1",
