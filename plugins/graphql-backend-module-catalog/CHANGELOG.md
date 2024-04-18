@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql-backend-module-catalog
 
+## 0.3.3
+
+### Patch Changes
+
+- d4fe95d: Add ability to override Catalog GraphQL module schema
+
 ## 0.3.2
 
 ### Patch Changes
