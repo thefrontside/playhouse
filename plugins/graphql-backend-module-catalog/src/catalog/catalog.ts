@@ -1,4 +1,4 @@
-import { createModule } from 'graphql-modules';
+import { TypeDefs, createModule } from 'graphql-modules';
 import { loadFilesSync } from '@graphql-tools/load-files';
 import { resolvePackagePath } from '@backstage/backend-common';
 import { Relation } from '../relation';
@@ -11,14 +11,14 @@ const catalogSchemaPath = resolvePackagePath(
 );
 
 /** @public */
-export const Catalog = (): GraphQLModule => ({
+export const Catalog = ({ typeDefs }: { typeDefs?: TypeDefs } = {}): GraphQLModule => ({
   mappers: { ...Relation().mappers },
   postTransform: Relation().postTransform,
   module: createModule({
     id: 'catalog-entities',
     typeDefs: [
       ...Relation().module.typeDefs,
-      ...loadFilesSync(catalogSchemaPath),
+      ...typeDefs ? [typeDefs].flat() : loadFilesSync(catalogSchemaPath),
     ],
     resolvers: {
       ...Relation().module.config.resolvers,
