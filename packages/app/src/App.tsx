@@ -13,7 +13,7 @@ import {
 import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
 import { ScaffolderPage } from '@backstage/plugin-scaffolder';
 import { SearchPage } from '@backstage/plugin-search';
-import { TechRadarPage } from '@backstage/plugin-tech-radar';
+import { TechRadarPage } from '@backstage-community/plugin-tech-radar';
 import {
   DefaultTechDocsHome,
   TechDocsIndexPage,
@@ -36,7 +36,7 @@ import { createApp } from '@backstage/app-defaults';
 import { AppRouter, FlatRoutes } from '@backstage/core-app-api';
 import { orgPlugin } from '@backstage/plugin-org';
 import { InspectorPage } from '@frontside/backstage-plugin-effection-inspector';
-import { GraphiQLPage } from '@backstage/plugin-graphiql';
+import { GraphiQLPage } from '@backstage-community/plugin-graphiql';
 
 import { SignInPage } from '@backstage/core-components';
 import { auth0AuthApiRef } from './internal';

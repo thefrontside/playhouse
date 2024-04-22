@@ -45,7 +45,7 @@ import { EntityCatalogGraphCard } from '@backstage/plugin-catalog-graph';
 import {
   isGithubActionsAvailable,
   EntityGithubActionsContent,
-} from '@backstage/plugin-github-actions';
+} from '@backstage-community/plugin-github-actions';
 import {
   EntityUserProfileCard,
   EntityGroupProfileCard,
