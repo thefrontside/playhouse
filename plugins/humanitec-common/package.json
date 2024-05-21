@@ -1,5 +1,6 @@
 {
   "name": "@frontside/backstage-plugin-humanitec-common",
+  "deprecate": "Deprecated in favor of @humanitec/backstage-plugin-common",
   "description": "Humanitec API Client",
   "version": "0.3.13",
   "main": "src/index.ts",
