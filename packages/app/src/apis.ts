@@ -15,7 +15,7 @@ import {
 import {
   graphQlBrowseApiRef,
   GraphQLEndpoints,
-} from '@backstage/plugin-graphiql';
+} from '@backstage-community/plugin-graphiql';
 import { OAuth2 } from '@backstage/core-app-api';
 import { auth0AuthApiRef } from './internal';
 

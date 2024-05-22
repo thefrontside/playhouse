@@ -8,6 +8,8 @@ import { PluginEnvironment } from '../types';
 export default async function createPlugin(
   env: PluginEnvironment,
 ): Promise<Router> {
+  const { discovery, permissions } = env;
+
   const builder = CatalogBuilder.create(env);
 
   // incremental builder receives builder because it'll register
@@ -25,10 +27,12 @@ export default async function createPlugin(
   // before incremental builder migrations are executed
   await incrementalBuilder.build();
 
-  const unprocessed = new UnprocessedEntitiesModule(
-    await env.database.getClient(),
+  const unprocessed = UnprocessedEntitiesModule.create({
+    database: await env.database.getClient(),
     router,
-  );
+    discovery,
+    permissions,
+  });
 
   unprocessed.registerRoutes();
 

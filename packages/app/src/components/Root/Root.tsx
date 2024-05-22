@@ -27,7 +27,7 @@ import { NavLink } from 'react-router-dom';
 import { Settings as SidebarSettings } from '@backstage/plugin-user-settings';
 import { SidebarSearchModal } from '@backstage/plugin-search'
 import { SearchContextProvider } from '@backstage/plugin-search-react';
-import { GraphiQLIcon } from '@backstage/plugin-graphiql';
+import { GraphiQLIcon } from '@backstage-community/plugin-graphiql';
 import {
   Sidebar,
   SidebarPage,
