@@ -1,5 +1,6 @@
 {
   "name": "@frontside/backstage-plugin-humanitec-backend",
+  "deprecate": "Deprecated in favor of @humanitec/backstage-plugin-backend",
   "version": "0.3.17",
   "main": "src/index.ts",
   "types": "src/index.ts",
