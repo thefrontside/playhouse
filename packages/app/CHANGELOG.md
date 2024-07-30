@@ -1,5 +1,15 @@
 # app
 
+## 0.2.3
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+- Updated dependencies [870b26c]
+  - @frontside/backstage-plugin-scaffolder-workflow@0.10.2
+  - @frontside/backstage-plugin-effection-inspector@0.1.13
+  - @frontside/backstage-plugin-humanitec@0.3.16
+
 ## 0.2.2
 
 ### Patch Changes

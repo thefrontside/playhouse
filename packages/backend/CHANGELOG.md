@@ -1,5 +1,21 @@
 # backend
 
+## 0.1.4
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+- Updated dependencies [870b26c]
+  - @frontside/backstage-plugin-graphql-backend-module-catalog@0.3.4
+  - @frontside/backstage-plugin-incremental-ingestion-backend@0.5.2
+  - @frontside/backstage-plugin-effection-inspector-backend@0.1.13
+  - @frontside/scaffolder-yaml-actions@0.3.2
+  - @frontside/backstage-plugin-humanitec-backend@0.3.18
+  - @frontside/backstage-plugin-graphql-backend@0.1.9
+  - @frontside/backstage-plugin-batch-loader@0.4.2
+  - @internal/plugin-healthcheck@0.1.12
+  - app@0.2.3
+
 ## 0.1.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-humanitec
 
+## 0.3.16
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.3.15
 
 ### Patch Changes

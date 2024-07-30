@@ -1,5 +1,11 @@
 # @frontside/scaffolder-yaml-actions
 
+## 0.3.2
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.3.1
 
 ### Patch Changes

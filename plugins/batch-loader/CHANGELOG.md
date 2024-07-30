@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-batch-loader
 
+## 0.4.2
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.4.1
 
 ### Patch Changes
