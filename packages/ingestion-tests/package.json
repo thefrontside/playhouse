@@ -1,6 +1,7 @@
 {
   "name": "@frontside/backstage-ingestion-tests",
   "version": "0.7.1",
+  "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
     "build": "backstage-cli package build",
@@ -21,11 +22,11 @@
     "role": "common-library"
   },
   "dependencies": {
-    "@backstage/backend-common": "^0.21.3",
-    "@backstage/catalog-client": "^1.4.6",
-    "@backstage/cli": "^0.25.2",
-    "@backstage/config": "^1.1.1",
-    "@backstage/integration": "^1.7.2",
+    "@backstage/backend-common": "^0.23.3",
+    "@backstage/catalog-client": "^1.6.5",
+    "@backstage/cli": "^0.26.11",
+    "@backstage/config": "^1.2.0",
+    "@backstage/integration": "^1.13.0",
     "@effection/process": "^2.0.4",
     "@effection/vitest": "^2.1.0",
     "@frontside/graphgen": "^1.6.0",

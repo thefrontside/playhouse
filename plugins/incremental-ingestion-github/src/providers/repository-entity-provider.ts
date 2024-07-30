@@ -1,6 +1,6 @@
 import { ANNOTATION_LOCATION, ANNOTATION_ORIGIN_LOCATION, DEFAULT_NAMESPACE, stringifyEntityRef } from "@backstage/catalog-model";
 import { Config } from "@backstage/config";
-import { DefaultGithubCredentialsProvider, GitHubIntegration, ScmIntegrations } from '@backstage/integration';
+import { DefaultGithubCredentialsProvider, GithubIntegration, ScmIntegrations } from '@backstage/integration';
 import type { EntityIteratorResult, IncrementalEntityProvider } from "@frontside/backstage-plugin-incremental-ingestion-backend";
 import { graphql } from '@octokit/graphql';
 import assert from 'assert-ts';
@@ -78,17 +78,17 @@ interface Cursor {
   cursor: string | null;
 }
 
-interface GithubRepositoryEntityProviderConstructorOptions { 
-  credentialsProvider: DefaultGithubCredentialsProvider; 
-  host: string; 
-  integration: GitHubIntegration; 
-  searchQuery: string; 
+interface GithubRepositoryEntityProviderConstructorOptions {
+  credentialsProvider: DefaultGithubCredentialsProvider;
+  host: string;
+  integration: GithubIntegration;
+  searchQuery: string;
 }
 
 export class GithubRepositoryEntityProvider implements IncrementalEntityProvider<Cursor, Context> {
   private host: string;
   private credentialsProvider: DefaultGithubCredentialsProvider;
-  private integration: GitHubIntegration;
+  private integration: GithubIntegration;
   private searchQuery: string;
 
   static create({ host, config, searchQuery = "created:>1970-01-01" }: GithubRepositoryEntityProviderOptions) {
