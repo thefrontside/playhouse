@@ -1,5 +1,11 @@
 # @internal/plugin-healthcheck
 
+## 0.1.12
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.1.11
 
 ### Patch Changes

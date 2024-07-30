@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-effection-inspector
 
+## 0.1.13
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.1.12
 
 ### Patch Changes

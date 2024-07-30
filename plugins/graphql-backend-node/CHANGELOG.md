@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql-backend-node
 
+## 0.1.7
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.1.6
 
 ### Patch Changes

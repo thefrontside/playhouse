@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-scaffolder-workflow
 
+## 0.10.2
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.10.1
 
 ### Patch Changes

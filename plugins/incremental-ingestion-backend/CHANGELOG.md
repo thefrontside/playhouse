@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-incremental-ingestion-backend
 
+## 0.5.2
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.5.1
 
 ### Patch Changes
