@@ -11,7 +11,11 @@
     "types": "dist/index.d.ts"
   },
   "backstage": {
-    "role": "backend-plugin-module"
+    "role": "node-library",
+    "pluginId": "scaffolder",
+    "pluginPackages": [
+      "@frontside/scaffolder-yaml-actions"
+    ]
   },
   "scripts": {
     "start": "backstage-cli package start",

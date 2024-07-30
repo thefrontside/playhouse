@@ -11,7 +11,12 @@
     "types": "dist/index.d.ts"
   },
   "backstage": {
-    "role": "backend-plugin"
+    "role": "backend-plugin",
+    "pluginId": "incremental-ingestion",
+    "pluginPackages": [
+      "@frontside/backstage-plugin-incremental-ingestion-backend",
+      "@frontside/backstage-plugin-incremental-ingestion-github"
+    ]
   },
   "scripts": {
     "start": "backstage-cli package start",

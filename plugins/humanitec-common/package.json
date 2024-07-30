@@ -13,8 +13,15 @@
     "types": "dist/index.d.ts"
   },
   "backstage": {
-    "role": "common-library"
+    "role": "common-library",
+    "pluginId": "humanitec",
+    "pluginPackages": [
+      "@frontside/backstage-plugin-humanitec",
+      "@frontside/backstage-plugin-humanitec-backend",
+      "@frontside/backstage-plugin-humanitec-common"
+    ]
   },
+  "sideEffects": false,
   "scripts": {
     "build": "backstage-cli package build",
     "lint": "backstage-cli package lint",

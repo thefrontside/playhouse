@@ -11,8 +11,15 @@
     "types": "dist/index.d.ts"
   },
   "backstage": {
-    "role": "frontend-plugin"
+    "role": "frontend-plugin",
+    "pluginId": "humanitec",
+    "pluginPackages": [
+      "@frontside/backstage-plugin-humanitec",
+      "@frontside/backstage-plugin-humanitec-backend",
+      "@frontside/backstage-plugin-humanitec-common"
+    ]
   },
+  "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
     "build": "backstage-cli package build",

@@ -10,8 +10,14 @@
     "types": "dist/index.d.ts"
   },
   "backstage": {
-    "role": "frontend-plugin"
+    "role": "frontend-plugin",
+    "pluginId": "effection-inspector",
+    "pluginPackages": [
+      "@frontside/backstage-plugin-effection-inspector",
+      "@frontside/backstage-plugin-effection-inspector-backend"
+    ]
   },
+  "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
     "build": "backstage-cli package build",
