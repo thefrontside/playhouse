@@ -14,6 +14,7 @@ import {
   type ScaffolderApi,
 } from '@backstage/plugin-scaffolder-react';
 import { analyticsApiRef } from '@backstage/core-plugin-api';
+import { catalogApiRef, CatalogApi } from '@backstage/plugin-catalog-react';
 import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
 
 const scaffolderApiMock: jest.Mocked<ScaffolderApi> = {
@@ -27,8 +28,24 @@ const scaffolderApiMock: jest.Mocked<ScaffolderApi> = {
   cancelTask: jest.fn()
 };
 
-const analyticsMock = new MockAnalyticsApi();
+const catalogMock: jest.Mocked<CatalogApi> = {
+  getEntities: jest.fn(),
+  getEntitiesByRefs: jest.fn(),
+  queryEntities: jest.fn(),
+  getEntityAncestors: jest.fn(),
+  getEntityByRef: jest.fn(),
+  removeEntityByUid: jest.fn(),
+  refreshEntity: jest.fn(),
+  getEntityFacets: jest.fn(),
+  getLocationById: jest.fn(),
+  getLocationByRef: jest.fn(),
+  addLocation: jest.fn(),
+  removeLocationById: jest.fn(),
+  getLocationByEntity: jest.fn(),
+  validateEntity: jest.fn(),
+}
 
+const analyticsMock = new MockAnalyticsApi();
 
 describe('<EmbeddedScaffolderWorkflow />', () => {
   it('should embed workflow inside another component', async () => {
@@ -55,7 +72,8 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     const { getByRole, getByText } = await renderInTestApp(
       <TestApiProvider apis={[
         [scaffolderApiRef, scaffolderApiMock],
-        [analyticsApiRef, analyticsMock]
+        [analyticsApiRef, analyticsMock],
+        [catalogApiRef, catalogMock]
         ]}>
         <SecretsContextProvider>
           <EmbeddedScaffolderWorkflow
@@ -179,7 +197,8 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     const {getByRole} = await renderInTestApp(
       <TestApiProvider apis={[
         [scaffolderApiRef, scaffolderApiMock],
-        [analyticsApiRef, analyticsMock]
+        [analyticsApiRef, analyticsMock],
+        [catalogApiRef, catalogMock]
         ]}>
         <SecretsContextProvider>
           <EmbeddedScaffolderWorkflow
@@ -207,5 +226,3 @@ describe('<EmbeddedScaffolderWorkflow />', () => {
     );
   });
 });
-
-
