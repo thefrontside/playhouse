@@ -1,5 +1,11 @@
 # @frontside/backstage-ingestion-tests
 
+## 0.7.2
+
+### Patch Changes
+
+- 870b26c: Update backstage deps
+
 ## 0.7.1
 
 ### Patch Changes
