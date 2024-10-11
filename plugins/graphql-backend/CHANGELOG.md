@@ -1,5 +1,11 @@
 # @frontside/backstage-plugin-graphql-backend
 
+## 0.1.10
+
+### Patch Changes
+
+- ad5158d: Add CSRF prevention plugin for graphql-yoga
+
 ## 0.1.9
 
 ### Patch Changes
