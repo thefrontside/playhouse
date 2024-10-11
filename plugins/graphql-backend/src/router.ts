@@ -10,6 +10,7 @@ import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useDataLoader } from '@envelop/dataloader';
 import { printSchema } from 'graphql';
 import { GraphQLAppOptions } from '@frontside/backstage-plugin-graphql-backend-node';
+import { useCSRFPrevention } from '@graphql-yoga/plugin-csrf-prevention';
 import {
   createLoader,
   createGraphQLApp,
@@ -78,6 +79,7 @@ export async function createRouter({
     if (!yoga) {
       yoga = createYoga({
         plugins: [
+          useCSRFPrevention(),
           useGraphQLModules(application),
           useDataLoader(
             'loader',
