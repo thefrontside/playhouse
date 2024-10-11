@@ -1,0 +1,85 @@
+apiVersion: score.sh/v1b1
+
+metadata:
+  name: playhouse
+
+containers:
+  backstage:
+    image: backstage
+    command: ["node"]
+    args: 
+      - packages/backend
+      - '--config'
+      - app-config.yaml
+      - '--config'
+      - app-config.production.yaml
+    variables:
+      APP_CONFIG_app_baseUrl: ${resources.ingress.url}
+      APP_CONFIG_backend_baseUrl: ${resources.ingress.url}
+      APP_CONFIG_backend_cors_origin: ${resources.ingress.host}
+      AUTH_AUTH0_AUDIENCE: ${resources.env.AUTH_AUTH0_AUDIENCE}
+      AUTH_AUTH0_CLIENT_ID: ${resources.env.AUTH_AUTH0_CLIENT_ID}
+      AUTH_AUTH0_CLIENT_SECRET: ${resources.env.AUTH_AUTH0_CLIENT_SECRET}
+      AUTH_AUTH0_DOMAIN: ${resources.env.AUTH_AUTH0_DOMAIN}
+      AUTH_BACKEND_SECRET: ${resources.env.AUTH_BACKEND_SECRET}
+      AUTH_GITHUB_CLIENT_ID: ${resources.env.AUTH_GITHUB_CLIENT_ID}
+      AUTH_GITHUB_CLIENT_SECRET: ${resources.env.AUTH_GITHUB_CLIENT_SECRET}
+      AUTH_SESSION_CLIENT_SECRET: ${resources.env.AUTH_SESSION_CLIENT_SECRET}
+      HUMANITEC_TOKEN: ${resources.env.HUMANITEC_TOKEN}
+      POSTGRES_SERVICE_HOST: ${resources.db.host}
+      POSTGRES_SERVICE_PORT: ${resources.db.port}
+      POSTGRES_USER: ${resources.db.username}
+      POSTGRES_PASSWORD: ${resources.db.password}
+      TECHDOCS_GCLOUD_PROJECT: ${resources.env.TECHDOCS_GCLOUD_PROJECT}
+      TECHDOCS_STORAGE_BUCKET: ${resouces.env.TECHDOCS_STORAGE_BUCKET}
+
+resources:
+  ingress:
+    type: ingress
+    properties:
+      host:
+        default: localhost
+      url:
+        default: http://localhost
+  env:
+    type: environment
+    properties:
+      TECHDOCS_GCLOUD_PROJECT:
+        default: frontside-humanitec
+      TECHDOCS_STORAGE_BUCKET:
+        default: frontside-techdocs
+      HUMANITEC_TOKEN:
+        required: true
+        secret: true
+      AUTH_SESSION_CLIENT_SECRET:
+        required: true
+        secret: true
+      AUTH_AUTH0_AUDIENCE: 
+        required: true
+      AUTH_AUTH0_CLIENT_ID:
+        required: true
+      AUTH_AUTH0_CLIENT_SECRET:
+        required: true
+        secret: true
+      AUTH_AUTH0_DOMAIN:
+        required: true
+      AUTH_BACKEND_SECRET:
+        required: true
+        secret: true
+      AUTH_GITHUB_CLIENT_ID:
+        required: true
+      AUTH_GITHUB_CLIENT_SECRET:
+        required: true
+        secret: true
+  db:
+    type: postgres
+    properties:
+      port:
+        default: 5432
+      name:
+        default: postgres
+      username:
+        secret: true
+      password:
+        secret: true
+
